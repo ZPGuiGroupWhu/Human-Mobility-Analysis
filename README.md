@@ -30,3 +30,19 @@ Folder structure: <br />
   &nbsp;-Next Location Prediction <br />
   &nbsp;-Travel Feature Analysis <br />
 </pre>
+
+<pre>
+Folder structure:
+  -Driver Personality Analysis
+  -Location Sequence Prediction
+    --Code
+      ---Model_1
+      ...
+      ---Model_n
+    --Sample Data <br />
+    --Documents
+    --Publications
+    --Web Visualization Components
+  -Next Location Prediction
+  -Travel Feature Analysis
+</pre>

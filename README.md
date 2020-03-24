@@ -14,3 +14,19 @@ Folder structure: <br />
     &nbsp;&nbsp;--Web Visualization Components <br />
   &nbsp;-Next Location Prediction <br />
   &nbsp;-Travel Feature Analysis <br />
+
+<pre>
+Folder structure: <br />
+  &nbsp;-Driver Personality Analysis <br />
+  &nbsp;-Location Sequence Prediction <br />
+    &nbsp;&nbsp;--Code <br />
+      &nbsp;&nbsp;&nbsp;---Model_1 <br />
+      &nbsp;&nbsp;&nbsp;... <br />
+      &nbsp;&nbsp;&nbsp;---Model_n <br />
+    &nbsp;&nbsp;--Sample Data <br />
+    &nbsp;&nbsp;--Documents <br />
+    &nbsp;&nbsp;--Publications <br />
+    &nbsp;&nbsp;--Web Visualization Components <br />
+  &nbsp;-Next Location Prediction <br />
+  &nbsp;-Travel Feature Analysis <br />
+</pre>

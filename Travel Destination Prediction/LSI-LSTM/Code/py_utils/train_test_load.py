@@ -9,7 +9,7 @@ def train_test_load(file_path, Cut_set=0.03333, K_fold=False):
     lines = file.readlines()
     # the key of line_dict
     traj_key = ["lngs", "lats", "travel_dis", "spd", "azimuth", "sem_pt"]
-    attr_key = ["weekday", "destination", "dis_total", "start_time", "sem_O", "sem_D", "norm_dict"]
+    attr_key = ["weekday", "destination", "dis_total", "start_time", "sem_O", "norm_dict"]
     dataset = []
     for line in lines:
         raw_dict = json.loads(line)

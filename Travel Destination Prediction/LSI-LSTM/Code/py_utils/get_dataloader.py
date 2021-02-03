@@ -61,7 +61,7 @@ def collate_fn(batch_data):
 
     traj_key = ["lngs", "lats", "travel_dis", "spd", "azimuth", "sem_pt"]
     info_key = ["weekday", "start_time"]
-    attr_key = ["cur_pt", "destination", "dis_total", "sem_D", "norm_dict", "sem_O"]
+    attr_key = ["cur_pt", "destination", "dis_total", "norm_dict", "sem_O"]
     attr = {}
     traj = {}
 

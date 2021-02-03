@@ -90,7 +90,7 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
             if not K_fold and epoch >= 90 or epoch == epochs:
                 print(eval_info)
 
-            if True:
+            if epoch == epochs and nor K_fold:
                 # save checkpoint every epoch_gap
                 model_set = {'epochs': config['epochs'],
                              'lr': config['lr'],

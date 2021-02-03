@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     # one test
     if not k_fold:
-        deep_stc = LSI_LSTM(hidden_size=hidden_size)
+        lsi_lstm = LSI_LSTM(hidden_size=hidden_size)
         [train_part, eval_part], data_length = train_test_load(filepath, K_fold=False)
         train_loader = get_dataloader(data=train_part, batch_size=BATCH_SIZE)
         eval_loader = get_dataloader(data=eval_part, batch_size=EVAL_BATCH_SIZE)
@@ -34,20 +34,20 @@ if __name__ == '__main__':
         print('\n-----------------------------------------------------------\n')
         print(tips1 + tips2 + tips3)
 
-        train(model=deep_stc, train_loader=train_loader, eval_loader=eval_loader, config=config,
+        train(model=lsi_lstm, train_loader=train_loader, eval_loader=eval_loader, config=config,
               K_fold=False)
 
     # k fold cross validation
     else:
-        print(": Five cross validation:\n")
+        print("Five cross validation:\n")
         result = {"MAE": [], "RMSE": [], "MRE": []}
         data_set, data_length = train_test_load(filepath, K_fold=True)
         for train_index, test_index in KFold(n_splits=5).split(data_set):
-            deep_stc = LSI_LSTM(hidden_size=hidden_size)
+            lsi_lstm = LSI_LSTM(hidden_size=hidden_size)
             train_part, eval_part = data_set[train_index], data_set[test_index]
             train_loader = get_dataloader(data=train_part, batch_size=BATCH_SIZE)
             eval_loader = get_dataloader(data=eval_part, batch_size=EVAL_BATCH_SIZE)
-            train(model=deep_stc, train_loader=train_loader, eval_loader=eval_loader,
+            train(model=lsi_lstm, train_loader=train_loader, eval_loader=eval_loader,
                   config=config, K_fold=True, result=result)
         info = '\nThe result of five cross validation:\n' \
                'MAE: ' + str(np.mean(result["MAE"])) + '(' + str(np.std(result["MAE"])) + ')\n' \

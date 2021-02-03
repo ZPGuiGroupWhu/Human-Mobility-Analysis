@@ -71,3 +71,7 @@ The format of the sample data is a JSON string, one line of the data represents 
 - start_time: the departure time slot, from 0 to 47
 - norm_dict: the dictionary to transform the normalized lngs and lats to the form of original record, \[lngs_medium, lngs_std, lats_medium, lats_std\]
 - sem_pt: the location semantics sequence of trajectory points, using the most importance POI type, from 0 to 8, 0 means unknown
+
+The GPS points in a trajectory should be resampled with nearly equal distance.
+
+Furthermore, replace the config file according to your own data, including the lngs_medium, lngs_std, lats_medium, lats_std, etc.

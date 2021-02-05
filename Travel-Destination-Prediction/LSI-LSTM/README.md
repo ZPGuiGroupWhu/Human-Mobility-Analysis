@@ -1,8 +1,56 @@
+# Project Introduction
+
 This project (in *Code/*) is the code of Neurocomputing 2021 paper ***LSI-LSTM: An Attention-aware LSTM for Real-time Driving Destination Prediction by Considering Location Semantics and Location Importance of Trajectory Points***. 
 
 We provide the complete version of code and part of sample data used in the paper. You can easily replace it with your own data in the same format. See the samples in *Code/data/* for more details.
 
-# Usage:
+The directory structure of the project is as follows：
+
+|-- LSI-LSTM
+    |-- README.md
+    |-- Code
+    |   |-- hyper_params_config.py
+    |   |-- main.py
+    |   |-- __init__.py
+    |   |-- data
+    |   |   |-- Driver_1.txt
+    |   |-- model
+    |   |   |-- LSI_LSTM.py
+    |   |   |-- __init__.py
+    |   |   |-- modules
+    |   |       |-- __init__.py
+    |   |       |-- destination_prediction_module
+    |   |       |   |-- destination_prediction.py
+    |   |       |   |-- residual_net.py
+    |   |       |   |-- __init__.py
+    |   |       |-- input_module
+    |   |       |   |-- Input.py
+    |   |       |   |-- __init__.py
+    |   |       |-- travel_pattern_module
+    |   |           |-- spatial_attention.py
+    |   |           |-- travel_pattern_learning.py
+    |   |           |-- __init__.py
+    |   |-- model_save
+    |   |-- py_utils
+    |       |-- get_dataloader.py
+    |       |-- loss.py
+    |       |-- to_var.py
+    |       |-- train.py
+    |       |-- train_test_load.py
+    |       |-- __init__.py
+    |-- Publications
+
+- README.md: the introduction document
+- Code/hyper_params_config.py: the hyperparameter setting of LSI-LSTM
+- Code/main.py: the entry of the model Training & evaluation
+- Code/data: the storage directory of sample data
+- Code/model: the source code of LSI-LSTM
+- Code/model/modules: the three modules of LSI-LSTM
+- Code/mode_save: the directory to save the trained model
+- Code/py_utils: some python scripts used to assist model training
+- Publications: the source file of the paper
+
+# Usage
 
 ## Model Training & Evaluation
 

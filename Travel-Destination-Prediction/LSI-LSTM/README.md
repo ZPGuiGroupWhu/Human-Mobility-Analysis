@@ -19,15 +19,15 @@ The directory structure of the project is as follows：
     |   |   |-- modules
     |   |       |-- __init__.py
     |   |       |-- destination_prediction_module
-    |   |       |   |-- destination_prediction.py
-    |   |       |   |-- residual_net.py
+    |   |       |   |-- Destination_Prediction.py
+    |   |       |   |-- Residual_Net.py
     |   |       |   |-- __init__.py
     |   |       |-- input_module
     |   |       |   |-- Input.py
     |   |       |   |-- __init__.py
     |   |       |-- travel_pattern_module
-    |   |           |-- spatial_attention.py
-    |   |           |-- travel_pattern_learning.py
+    |   |           |-- Spatial_Attention.py
+    |   |           |-- Travel_Pattern_Learning.py
     |   |           |-- __init__.py
     |   |-- model_save
     |   |-- py_utils

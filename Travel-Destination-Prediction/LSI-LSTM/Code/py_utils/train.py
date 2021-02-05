@@ -56,7 +56,7 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
                                                                   time=datetime.datetime.now(),
                                                                   time_consume=time.time() - start_time)
 
-        if not K_fold and epoch >= 90 or epoch == epochs:
+        if not K_fold or epoch == epochs:
             print(train_info)
 
         with torch.no_grad():
@@ -87,10 +87,10 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
                 result["MRE"].append(float(dis_loss["eval_MRE"][-1]))
                 result["RMSE"].append(float(dis_loss["eval_RMSE"][-1]))
 
-            if not K_fold and epoch >= 90 or epoch == epochs:
+            if not K_fold or epoch == epochs:
                 print(eval_info)
 
-            if epoch == epochs and nor K_fold:
+            if epoch == epochs and not K_fold:
                 # save checkpoint every epoch_gap
                 model_set = {'epochs': config['epochs'],
                              'lr': config['lr'],

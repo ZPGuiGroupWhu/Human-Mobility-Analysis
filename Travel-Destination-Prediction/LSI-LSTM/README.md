@@ -6,7 +6,6 @@ We provide the complete version of code and part of sample data used in the pape
 
 The directory structure of the project is as follows：
 
-|-- LSI-LSTM
     |-- README.md
     |-- Code
     |   |-- hyper_params_config.py

@@ -1,6 +1,6 @@
 # Project Introduction
 
-This project (in *Code/*) is the code of Neurocomputing 2021 paper ***LSI-LSTM: An Attention-aware LSTM for Real-time Driving Destination Prediction by Considering Location Semantics and Location Importance of Trajectory Points***. 
+This project (in *Code/*) is the code of Neurocomputing 2021 paper ***LSI-LSTM: An Attention-aware LSTM for Real-time Driving Destination Prediction by Considering Location Semantics and Location Importance of Trajectory Points***. [https://doi.org/10.1016/j.neucom.2021.01.067](https://doi.org/10.1016/j.neucom.2021.01.067)
 
 We provide the complete version of code and part of sample data used in the paper. You can easily replace it with your own data in the same format. See the samples in *Code/data/* for more details.
 

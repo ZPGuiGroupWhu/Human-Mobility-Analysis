@@ -1,0 +1,14 @@
+$siderWidth: 15rem;
+
+.sider-left {
+  width: $siderWidth;
+  left: -$siderWidth;
+
+  .sider-btn-left {
+    left: $siderWidth + 1.5rem;
+  }
+}
+
+.sider-left-active {
+  left: 0;
+}

@@ -1,0 +1,18 @@
+// antd UI 组件库基础样式文件
+@import '~antd/dist/antd.css';
+
+// 清除浏览器默认设置
+* {
+  margin: 0;
+  padding: 0;
+}
+
+// 获取浏览器视口高度
+body, html {
+  height: 100%;
+}
+
+// rem 布局参照值
+html {
+  font-size: 1vw;
+}

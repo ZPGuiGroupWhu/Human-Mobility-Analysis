@@ -1,0 +1,12 @@
+.bmap-container {
+  .BMap_cpyCtrl {
+    display: none;
+  }
+  .anchorBL {
+    display: none;
+  }
+  width: 100%;
+  height: 100%;
+  // bmap 默认 position 定位，容器需要定义 relative 确保 bmap 不脱离父容器
+  position: relative;
+}

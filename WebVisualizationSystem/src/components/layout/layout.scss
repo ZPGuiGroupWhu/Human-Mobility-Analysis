@@ -1,0 +1,68 @@
+// 1rem = 19.2px [if (1920 * 937) && (font-size = 1vw)]
+$headerHeight: 70px;
+
+:export {
+  headerHeight: $headerHeight;
+}
+
+.geo-container {
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    width: 100%;
+    flex: 0 0 $headerHeight;
+    background-color: rgb(33, 47, 61);
+
+    .img-title {
+      float: left;
+      margin-left: 2.5rem;
+      height: 100%;
+      // 垂直居中
+      display: flex;
+      align-items: center;
+
+      img {
+        // 默认高度 + 右边距
+        height: 100%;
+        // 限制图片大小小于等于 header 高度
+        max-height: $headerHeight;
+        margin-right: 1rem;
+      }
+
+      h1 {
+        margin: auto;
+        color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+        font-family: Helvetica, "Hiragino Sans GB", "Microsoft Yahei", "微软雅黑", Arial, sans-serif;
+      }
+    }
+    ::after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+
+    // 预留功能栏
+    .func-bar {
+      float: right;
+      margin-right: 1.5rem;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .main {
+    position: relative;
+    width: 100%;
+    flex: 1 1;
+    padding: 5px;
+    background-color: rgb(86, 101, 115);
+    // overflow: hidden;
+  }
+}

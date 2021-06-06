@@ -1,5 +1,5 @@
 // 第三方库
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
@@ -27,6 +27,9 @@ export default function PagePredict(props) {
   const { data: dest, isComplete: destSuccess } = useReqData(getDestDemo);
   // 容器 ref 对象
   const ref = useRef(null);
+  // 历史 option 配置记录
+  const [histOption, setHistOption] = useState(null);
+
   // 静态配置项
   const option = {
     bmap: {
@@ -37,6 +40,36 @@ export default function PagePredict(props) {
       roam: true,
       mapStyle: {},
     },
+    // legend
+    legend: [{
+      // 轨迹图例
+      // 图例相对容器距离
+      left: 'auto',
+      right: '20rem',
+      top: 'auto',
+      bottom: '5rem',
+      // 图例布局方向
+      orient: 'vertical',
+      // 文本样式
+      textStyle: {
+        color: '#fff',
+      },
+      data: [],
+    },{
+      // OD 图例
+      // 图例相对容器距离
+      left: 'auto',
+      right: '100rem',
+      top: 'auto',
+      bottom: '5rem',
+      // 图例布局方向
+      orient: 'vertical',
+      // 文本样式
+      textStyle: {
+        color: '#fff',
+      },
+      data: [],
+    }],
     // visualMap: [{
     //   type: 'piecewise',
     //   // 自动分段 - 段数
@@ -103,6 +136,8 @@ export default function PagePredict(props) {
   // 全局OD
   useEffect(() => {
     if (orgSuccess) {
+      // 取消 loading
+      chart.hideLoading();
       chart.setOption({
         series: [{
           name: '起点',
@@ -124,6 +159,27 @@ export default function PagePredict(props) {
     }
   }, [dest, destSuccess])
 
+  // 全局静态轨迹图例
+  useEffect(()=>{
+    const data = trajColorBar.map(item => ({
+      name: item.static,
+      itemStyle: {
+        color: item.color,
+      }
+    }))
+    chart.setOption({
+      legend: [{
+        data,
+      },{
+        data: [{
+          name: '起点'
+        },{
+          name: '终点'
+        }],
+      }]
+    })
+  })
+
 
 
 
@@ -132,12 +188,12 @@ export default function PagePredict(props) {
   return (
     <>
       <div
-        key={3}
+        key={'3-1'}
         ref={ref}
         className='bmap-container'
       ></div>
-      <Sider key={3} floatType='left'>PagePredict</Sider>
-      <Sider key={3} floatType='right'>PagePredict</Sider>
+      <Sider key={'3-2'} floatType='left'>PagePredict</Sider>
+      <Sider key={'3-3'} floatType='right'>PagePredict</Sider>
     </>
   )
 }

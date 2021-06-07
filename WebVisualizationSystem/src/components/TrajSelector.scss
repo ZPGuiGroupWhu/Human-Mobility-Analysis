@@ -1,0 +1,17 @@
+.traj-selector-container {
+  width: 100%;
+
+  .date-selector {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .date-selector-title {
+    flex: 0 0 40px;
+  }
+
+  .date-selector-picker {
+    flex: 1 1;
+  }
+}

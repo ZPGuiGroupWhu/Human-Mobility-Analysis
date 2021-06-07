@@ -1,13 +1,16 @@
 // 第三方库
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
 import Sider from '@/components/sider/Sider';
+import TrajSelector from '@/components/TrajSelector'
 // 自定义
 import { getOrgDemo, getDestDemo } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
 import { useStaticTraj } from '@/common/hooks/useStaticTraj';
+import { useExceptFirst } from '@/common/hooks/useExceptFirst';
+import { useTime } from '@/common/hooks/useTime';
 import { globalStaticTraj, globalDynamicTraj } from '@/common/options/globalTraj';
 import { trajColorBar } from '@/common/options/trajColorBar';
 // 样式
@@ -25,10 +28,13 @@ export default function PagePredict(props) {
   // 数据
   const { data: org, isComplete: orgSuccess } = useReqData(getOrgDemo);
   const { data: dest, isComplete: destSuccess } = useReqData(getDestDemo);
+  const [byDate, setByDate] = useState(null); // 依据日期筛选的轨迹
+  const [byHour, setByHour] = useState(null); // 依据时间戳筛选的轨迹
+  const [byTime, setByTime] = useState(null); // 依据时间筛选轨迹
+
+
   // 容器 ref 对象
   const ref = useRef(null);
-  // 历史 option 配置记录
-  const [histOption, setHistOption] = useState(null);
 
   // 静态配置项
   const option = {
@@ -55,7 +61,7 @@ export default function PagePredict(props) {
         color: '#fff',
       },
       data: [],
-    },{
+    }, {
       // OD 图例
       // 图例相对容器距离
       left: 'auto',
@@ -70,6 +76,7 @@ export default function PagePredict(props) {
       },
       data: [],
     }],
+    animation: false,
     // visualMap: [{
     //   type: 'piecewise',
     //   // 自动分段 - 段数
@@ -106,6 +113,21 @@ export default function PagePredict(props) {
     },
     ...globalStaticTraj,
     ...globalDynamicTraj,
+    {
+      name: '轨迹时间筛选',
+      type: "lines",
+      coordinateSystem: "bmap",
+      polyline: true,
+      data: [],
+      silent: true,
+      lineStyle: {
+        color: '#D4AC0D',
+        opacity: 0.2,
+        width: 1,
+      },
+      progressiveThreshold: 200,
+      progressive: 200,
+    },
     ]
   }
 
@@ -127,11 +149,11 @@ export default function PagePredict(props) {
 
   // 全局静态轨迹
   const t0 = useStaticTraj(chart, { ...trajColorBar[0] });
-  const t1 = useStaticTraj(chart, { ...trajColorBar[1] });
-  const t2 = useStaticTraj(chart, { ...trajColorBar[2] });
-  const t3 = useStaticTraj(chart, { ...trajColorBar[3] });
-  const t4 = useStaticTraj(chart, { ...trajColorBar[4] });
-  const t5 = useStaticTraj(chart, { ...trajColorBar[5] });
+  // const t1 = useStaticTraj(chart, { ...trajColorBar[1] });
+  // const t2 = useStaticTraj(chart, { ...trajColorBar[2] });
+  // const t3 = useStaticTraj(chart, { ...trajColorBar[3] });
+  // const t4 = useStaticTraj(chart, { ...trajColorBar[4] });
+  // const t5 = useStaticTraj(chart, { ...trajColorBar[5] });
 
   // 全局OD
   useEffect(() => {
@@ -160,7 +182,7 @@ export default function PagePredict(props) {
   }, [dest, destSuccess])
 
   // 全局静态轨迹图例
-  useEffect(()=>{
+  useEffect(() => {
     const data = trajColorBar.map(item => ({
       name: item.static,
       itemStyle: {
@@ -170,16 +192,36 @@ export default function PagePredict(props) {
     chart.setOption({
       legend: [{
         data,
-      },{
+      }, {
         data: [{
           name: '起点'
-        },{
+        }, {
           name: '终点'
         }],
       }]
     })
   })
 
+
+  // 时间筛选静态轨迹 & 绘制
+  useExceptFirst((data) => {
+    chart.setOption({
+      series: [{
+        name: '轨迹时间筛选',
+        data: data.map(item => item.data),
+      }]
+    })
+  }, byTime)
+
+
+  // 存储时间信息
+  /**timer:
+   * dateStart
+   * dateEnd
+   * hourStart
+   * hourEnd
+   */
+  const [timer, timerDispatch] = useTime();
 
 
 
@@ -192,7 +234,15 @@ export default function PagePredict(props) {
         ref={ref}
         className='bmap-container'
       ></div>
-      <Sider key={'3-2'} floatType='left'>PagePredict</Sider>
+      <Sider key={'3-2'} floatType='left'>
+        <div style={{ width: '100%' }}>
+          <TrajSelector
+            setByTime={setByTime}
+            timer={timer}
+            timerDispatch={timerDispatch}
+          />
+        </div>
+      </Sider>
       <Sider key={'3-3'} floatType='right'>PagePredict</Sider>
     </>
   )

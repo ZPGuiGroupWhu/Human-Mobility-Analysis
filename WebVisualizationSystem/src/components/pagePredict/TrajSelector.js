@@ -28,7 +28,7 @@ export default function TrajSelector(props) {
             selectByTime(timeStr[0], timeStr[1], props.timer.hourStart, props.timer.hourEnd).then(
               res => {
                 // 将接收到的数据更新到 PagePredict 页面 state 中管理
-                props.setByTime(res)
+                props.setByTime(res || [])
               }
             ).catch(
               err => console.log(err)
@@ -54,7 +54,7 @@ export default function TrajSelector(props) {
             // 依据筛选条件发送请求
             selectByTime(props.timer.dateStart, props.timer.dateEnd, timeStr[0], timeStr[1]).then(
               res => {
-                props.setByTime(res)
+                props.setByTime(res || [])
               }
             ).catch(
               err => console.log(err)

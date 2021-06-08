@@ -4,7 +4,8 @@ import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
 import Sider from '@/components/sider/Sider';
-import TrajSelector from '@/components/TrajSelector'
+import TrajSelector from '@/components/pagePredict/TrajSelector';
+import TransferSelector from '@/components/pagePredict/TransferSelector';
 // 自定义
 import { getOrgDemo, getDestDemo } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
@@ -28,9 +29,8 @@ export default function PagePredict(props) {
   // 数据
   const { data: org, isComplete: orgSuccess } = useReqData(getOrgDemo);
   const { data: dest, isComplete: destSuccess } = useReqData(getDestDemo);
-  const [byDate, setByDate] = useState(null); // 依据日期筛选的轨迹
-  const [byHour, setByHour] = useState(null); // 依据时间戳筛选的轨迹
-  const [byTime, setByTime] = useState(null); // 依据时间筛选轨迹
+  const [byTime, setByTime] = useState([]); // 依据时间筛选轨迹
+  const [bySelect, setBySelect] = useState(byTime); // 进一步筛选
 
 
   // 容器 ref 对象
@@ -200,18 +200,7 @@ export default function PagePredict(props) {
         }],
       }]
     })
-  })
-
-
-  // 时间筛选静态轨迹 & 绘制
-  useExceptFirst((data) => {
-    chart.setOption({
-      series: [{
-        name: '轨迹时间筛选',
-        data: data.map(item => item.data),
-      }]
-    })
-  }, byTime)
+  }, [])
 
 
   // 存储时间信息
@@ -223,6 +212,20 @@ export default function PagePredict(props) {
    */
   const [timer, timerDispatch] = useTime();
 
+  // bySelect 相当于 byTime 的副本，需保持同步
+  useEffect(() => {
+    setBySelect(byTime);
+  }, [byTime])
+
+  // 时间筛选静态轨迹 & 绘制
+  useExceptFirst((data) => {
+    chart.setOption({
+      series: [{
+        name: '轨迹时间筛选',
+        data: data.map(item => item.data),
+      }]
+    })
+  }, bySelect)
 
 
 
@@ -235,13 +238,15 @@ export default function PagePredict(props) {
         className='bmap-container'
       ></div>
       <Sider key={'3-2'} floatType='left'>
-        <div style={{ width: '100%' }}>
-          <TrajSelector
-            setByTime={setByTime}
-            timer={timer}
-            timerDispatch={timerDispatch}
-          />
-        </div>
+        <TrajSelector
+          setByTime={setByTime}
+          timer={timer}
+          timerDispatch={timerDispatch}
+        />
+        <TransferSelector
+          data={byTime}
+          setData={setBySelect}
+        />
       </Sider>
       <Sider key={'3-3'} floatType='right'>PagePredict</Sider>
     </>

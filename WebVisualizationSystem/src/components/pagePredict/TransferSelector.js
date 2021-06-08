@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Transfer } from 'antd';
 
 
@@ -25,10 +25,10 @@ function formatter(data) {
 
 export default function TransferSelector(props) {
   const { data, setData } = props;
-  const formatData = formatter(data);
-  const orgTargetKeys = formatData.map(item => item.key);
+  // const formatData = formatter(data);
+  const formatData = useMemo(() => {return formatter(data)}, [data]);
 
-  const [targetKeys, setTargetKeys] = useState(orgTargetKeys);
+  const [targetKeys, setTargetKeys] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState([]);
 
   function handleChange(nextTargetKeys, direction, moveKeys) {
@@ -40,7 +40,12 @@ export default function TransferSelector(props) {
   }
 
   useEffect(() => {
-    console.log(data.filter(item => (targetKeys.includes(item.id.toString()))));
+    // 每次 formatData 都是新生成的数组，内存地址不同，因此依赖项若设置为 formatData 会死循环, 此处设置为 data。
+    // 或者将 formatData 用 useMemo 设为不可变对象。
+    setTargetKeys(() => (formatData.map(item => item.key)));
+  }, [formatData])
+
+  useEffect(() => {
     setData(data.filter(item => (targetKeys.includes(item.id.toString()))))
   }, [targetKeys])
 

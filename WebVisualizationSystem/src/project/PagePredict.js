@@ -7,7 +7,7 @@ import { Drawer } from 'antd';
 import TrajSelector from '@/components/pagePredict/TrajSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
 // 自定义
-import { getOrgDemo, getDestDemo } from '@/network';
+import { getOrgDemo, getDestDemo, getClusterO, getClusterD } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
 import { useStaticTraj } from '@/common/hooks/useStaticTraj';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
@@ -15,7 +15,7 @@ import { useTime } from '@/common/hooks/useTime';
 import { globalStaticTraj, globalDynamicTraj } from '@/common/options/globalTraj';
 import { trajColorBar } from '@/common/options/trajColorBar';
 // Context 对象导入
-import { drawerVisibility} from '@/context/mainContext'
+import { drawerVisibility } from '@/context/mainContext'
 // 样式
 import './bmap.scss';
 
@@ -29,10 +29,13 @@ let bmap = null;
 let chart = null;
 export default function PagePredict(props) {
   // Context 对象
-  const drawerVisibleObj =useContext(drawerVisibility);
+  const drawerVisibleObj = useContext(drawerVisibility);
   // 数据
   const { data: org, isComplete: orgSuccess } = useReqData(getOrgDemo);
   const { data: dest, isComplete: destSuccess } = useReqData(getDestDemo);
+  // OD 聚类结果：[lng,lat,count]
+  const { data: orgCluster, isComplete: orgClusterSuccess } = useReqData(getClusterO);
+  const { data: destCluster, isComplete: destClusterSuccess } = useReqData(getClusterD);
   const [byTime, setByTime] = useState([]); // 依据时间筛选轨迹
   const [bySelect, setBySelect] = useState(byTime); // 进一步筛选
 
@@ -81,17 +84,30 @@ export default function PagePredict(props) {
       data: [],
     }],
     animation: false,
-    // visualMap: [{
-    //   type: 'piecewise',
-    //   // 自动分段 - 段数
-    //   splitNumber: 10,
-    //   // 定义域颜色范围
-    //   inRange: ['#fff59d', '#c5e1a5', '#80deea', '#90caf9', '#ce93d8', '#ef9a9a'],
-    //   // 作用的数据索引
-    //   seriesIndex: [2, 3], // 全局轨迹 + 全局轨迹动画
-    //   // 作用的数据维度
-    //   dimension: 2,
-    // }],
+    visualMap: [
+      // OD Cluster Heatmap
+      {
+        // https://echarts.apache.org/zh/option.html#visualMap
+        type: 'continuous',
+        // 视觉映射定义域
+        min: 0,
+        max: 300,
+        // 不显示 visualMap 组件
+        show: true,
+        left: 20,
+        bottom: 10,
+        // 映射维度
+        dimension: 2,
+        seriesIndex: [2,3], // OD聚类热力图
+        // 定义域颜色范围
+        inRange: {
+          color: ['blue', 'blue', 'green', 'yellow', 'red'],
+        },
+        textStyle: {
+          color: "#fff",
+        }
+      },
+    ],
     series: [{
       // org
       name: '起点',
@@ -114,6 +130,34 @@ export default function PagePredict(props) {
       itemStyle: {
         color: '#E74C3C',
       }
+    }, {
+      id: 'o-heatmap',
+      name: 'O聚类热力图',
+      // https://echarts.apache.org/zh/option.html#series-heatmap
+      type: 'heatmap',
+      coordinateSystem: 'bmap',
+      pointSize: 20,
+      blurSize: 20,
+      // 高亮状态图形样式
+      emphasis: {
+        // 高亮效果
+        focus: 'series',
+      },
+      data: [],
+    },{
+      id: 'd-heatmap',
+      name: 'D聚类热力图',
+      // https://echarts.apache.org/zh/option.html#series-heatmap
+      type: 'heatmap',
+      coordinateSystem: 'bmap',
+      pointSize: 20,
+      blurSize: 20,
+      // 高亮状态图形样式
+      emphasis: {
+        // 高亮效果
+        focus: 'series',
+      },
+      data: [],
     },
     ...globalStaticTraj,
     ...globalDynamicTraj,
@@ -184,6 +228,29 @@ export default function PagePredict(props) {
       })
     }
   }, [dest, destSuccess])
+  useEffect(() => {
+    if (orgClusterSuccess) {
+      chart.hideLoading();
+      chart.setOption({
+        series: [{
+          name: 'O聚类热力图',
+          data: orgCluster,
+        }]
+      })
+    }
+  }, [orgCluster, orgClusterSuccess])
+  useEffect(() => {
+    if (destClusterSuccess) {
+      chart.hideLoading();
+      chart.setOption({
+        series: [{
+          name: 'D聚类热力图',
+          data: destCluster,
+        }]
+      })
+    }
+  }, [destCluster, destClusterSuccess])
+
 
   // 全局静态轨迹图例
   useEffect(() => {
@@ -256,12 +323,12 @@ export default function PagePredict(props) {
         // 指定 Drawer 挂载的 HTML 节点, false 为挂载在当前 dom
         getContainer={ref.current}
         // 宽度
-        width={'20rem'}
+        width={'24rem'}
         // 是否显示遮罩层
         mask={false}
         // 点击蒙版是否允许关闭
         maskClosable={false}
-        style={{ 
+        style={{
           position: 'absolute',
         }}
       >
@@ -295,7 +362,7 @@ export default function PagePredict(props) {
         mask={false}
         // 点击蒙版是否允许关闭
         maskClosable={false}
-        style={{ 
+        style={{
           position: 'absolute',
         }}
       >

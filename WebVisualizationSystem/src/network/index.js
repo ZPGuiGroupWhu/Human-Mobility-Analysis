@@ -47,3 +47,16 @@ export const selectByTime = (dateStart, dateEnd, hourStart, hourEnd) => {
     url,
   })
 }
+
+
+export const getClusterO = () => {
+  return baseRequest({
+    url: `/org-cluster`
+  })
+}
+
+export const getClusterD = () => {
+  return baseRequest({
+    url: `/dest-cluster`
+  })
+}

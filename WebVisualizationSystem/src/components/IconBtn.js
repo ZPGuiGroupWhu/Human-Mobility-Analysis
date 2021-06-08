@@ -14,8 +14,9 @@ export default function IconBtn(props) {
     alignItems: 'center',
   }
   return (
-      <div style={{...style, marginLeft: '5px'}}>
-        <a href='javascript:;' onClick={clickCallback} style={style}> 
+      <div style={{...style, marginLeft: '20px'}}>
+        {/* e.preventDefault 禁用原生标签默认事件 */}
+        <a onClick={(e) => {clickCallback(); e.preventDefault()}} style={style}> 
           <img src={imgSrc} alt='' style={{height, maxHeight}} />
         </a>
       </div>

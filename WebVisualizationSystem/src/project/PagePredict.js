@@ -1,9 +1,9 @@
 // 第三方库
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import Sider from '@/components/sider/Sider';
+import { Drawer } from 'antd';
 import TrajSelector from '@/components/pagePredict/TrajSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
 // 自定义
@@ -14,6 +14,8 @@ import { useExceptFirst } from '@/common/hooks/useExceptFirst';
 import { useTime } from '@/common/hooks/useTime';
 import { globalStaticTraj, globalDynamicTraj } from '@/common/options/globalTraj';
 import { trajColorBar } from '@/common/options/trajColorBar';
+// Context 对象导入
+import { drawerVisibility} from '@/context/mainContext'
 // 样式
 import './bmap.scss';
 
@@ -26,6 +28,8 @@ let bmap = null;
 // chart 实例
 let chart = null;
 export default function PagePredict(props) {
+  // Context 对象
+  const drawerVisibleObj =useContext(drawerVisibility);
   // 数据
   const { data: org, isComplete: orgSuccess } = useReqData(getOrgDemo);
   const { data: dest, isComplete: destSuccess } = useReqData(getDestDemo);
@@ -237,7 +241,30 @@ export default function PagePredict(props) {
         ref={ref}
         className='bmap-container'
       ></div>
-      <Sider key={'3-2'} floatType='left'>
+      {/* 左侧 Drawer */}
+      <Drawer
+        // Drawer 标题
+        title="功能栏"
+        // 弹出位置
+        placement="left"
+        // 是否显示右上角的关闭按钮
+        closable={true}
+        // 点击遮罩层或右上角叉或取消按钮的回调
+        onClose={() => drawerVisibleObj.setLeftDrawerVisible(false)}
+        // Drawer 是否可见
+        visible={drawerVisibleObj.leftDrawerVisible}
+        // 指定 Drawer 挂载的 HTML 节点, false 为挂载在当前 dom
+        getContainer={ref.current}
+        // 宽度
+        width={'20rem'}
+        // 是否显示遮罩层
+        mask={false}
+        // 点击蒙版是否允许关闭
+        maskClosable={false}
+        style={{ 
+          position: 'absolute',
+        }}
+      >
         <TrajSelector
           setByTime={setByTime}
           timer={timer}
@@ -247,8 +274,33 @@ export default function PagePredict(props) {
           data={byTime}
           setData={setBySelect}
         />
-      </Sider>
-      <Sider key={'3-3'} floatType='right'>PagePredict</Sider>
+      </Drawer>
+      {/* 右侧 Drawer */}
+      <Drawer
+        // Drawer 标题
+        title="功能栏"
+        // 弹出位置
+        placement="right"
+        // 是否显示右上角的关闭按钮
+        closable={true}
+        // 点击遮罩层或右上角叉或取消按钮的回调
+        onClose={() => drawerVisibleObj.setRightDrawerVisible(false)}
+        // Drawer 是否可见
+        visible={drawerVisibleObj.rightDrawerVisible}
+        // 指定 Drawer 挂载的 HTML 节点, false 为挂载在当前 dom
+        getContainer={ref.current}
+        // 宽度
+        width={'15rem'}
+        // 是否显示遮罩层
+        mask={false}
+        // 点击蒙版是否允许关闭
+        maskClosable={false}
+        style={{ 
+          position: 'absolute',
+        }}
+      >
+        <p>put something...</p>
+      </Drawer>
     </>
   )
 }

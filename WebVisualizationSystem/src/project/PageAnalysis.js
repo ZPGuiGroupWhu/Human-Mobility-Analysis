@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
-import Sider from '@/components/sider/Sider';
 import 'echarts/extension/bmap/bmap';
+import {Drawer} from 'antd';
+// Context 对象导入
+import {drawerVisibility} from '@/context/mainContext'
 // 样式
 import './bmap.scss';
 
@@ -47,6 +49,8 @@ class PageAnalysis extends Component {
     })
   }
 
+  static contextType = drawerVisibility;
+
   render() {
     return (
       <>
@@ -55,8 +59,58 @@ class PageAnalysis extends Component {
           ref={this.ref}
           className='bmap-container'
         ></div>
-        <Sider key={2} floatType='left'>PageAnalysis</Sider>
-        <Sider key={2} floatType='right'>PageAnalysis</Sider>
+        {/* 左侧 Drawer */}
+        <Drawer
+          // Drawer 标题
+          title="功能栏"
+          // 弹出位置
+          placement="left"
+          // 是否显示右上角的关闭按钮
+          closable={true}
+          // 点击遮罩层或右上角叉或取消按钮的回调
+          onClose={() => this.context.setLeftDrawerVisible(false)}
+          // Drawer 是否可见
+          visible={this.context.leftDrawerVisible}
+          // 指定 Drawer 挂载的 HTML 节点, false 为挂载在当前 dom
+          getContainer={this.ref.current}
+          // 宽度
+          width={'20rem'}
+          // 是否显示遮罩层
+          mask={false}
+          // 点击蒙版是否允许关闭
+          maskClosable={false}
+          style={{
+            position: 'absolute',
+          }}
+        >
+          <p>put something...</p>
+        </Drawer>
+        {/* 右侧 Drawer */}
+        <Drawer
+          // Drawer 标题
+          title="功能栏"
+          // 弹出位置
+          placement="right"
+          // 是否显示右上角的关闭按钮
+          closable={true}
+          // 点击遮罩层或右上角叉或取消按钮的回调
+          onClose={() => this.context.setRightDrawerVisible(false)}
+          // Drawer 是否可见
+          visible={this.context.rightDrawerVisible}
+          // 指定 Drawer 挂载的 HTML 节点, false 为挂载在当前 dom
+          getContainer={this.ref.current}
+          // 宽度
+          width={'15rem'}
+          // 是否显示遮罩层
+          mask={false}
+          // 点击蒙版是否允许关闭
+          maskClosable={false}
+          style={{
+            position: 'absolute',
+          }}
+        >
+          <p>put something...</p>
+        </Drawer>
       </>
     )
   }

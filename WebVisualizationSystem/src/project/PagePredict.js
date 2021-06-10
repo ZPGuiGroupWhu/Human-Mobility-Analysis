@@ -4,11 +4,12 @@ import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
 import { Drawer } from 'antd';
-import TrajSelector from '@/components/pagePredict/TrajSelector';
+import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
+import TimeSelector from '@/components/pagePredict/TimeSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
 import BrushBar from '@/components/bmapBrush/BrushBar';
 // 自定义
-import { getOrgDemo, getDestDemo, getClusterO, getClusterD } from '@/network';
+import { getOrg, getDest } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
 import { useStaticTraj } from '@/common/hooks/useStaticTraj';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
@@ -30,16 +31,22 @@ let chart = null;
 export default function PagePredict(props) {
   // Context 对象
   const drawerVisibleObj = useContext(drawerVisibility);
-  // 数据
-  const { data: org, isComplete: orgSuccess } = useReqData(getOrgDemo);
-  const { data: dest, isComplete: destSuccess } = useReqData(getDestDemo);
-  // OD 聚类结果：[lng,lat,count]
-  const { data: orgCluster, isComplete: orgClusterSuccess } = useReqData(getClusterO);
-  const { data: destCluster, isComplete: destClusterSuccess } = useReqData(getClusterD);
-  const [byTime, setByTime] = useState([]); // 依据时间筛选轨迹
+
+  // org / dest color
+  const orgColor = '#00FFFF';
+  const destColor = '#FF0033';
+  // org / dest: { {id: number, coord: number[], count: number}[] }
+  const { data: org, isComplete: orgSuccess } = useReqData(getOrg);
+  const { data: dest, isComplete: destSuccess } = useReqData(getDest);
+  // org / dest selected res: {{org: number[], dest: number[]}}
+  const [selected, setSelected] = useState({});
+
+  // select by time
+  const [byTime, setByTime] = useState([]);
+  // select specific one deeply
   const [bySelect, setBySelect] = useState(byTime); // 进一步筛选
 
-  const [selected, setSelected] = useState({});
+
 
 
   // 容器 ref 对象
@@ -85,23 +92,6 @@ export default function PagePredict(props) {
       },
       data: [],
     }],
-    // // https://echarts.apache.org/zh/option.html#brush
-    // brush: {
-    //   // toolbox 相关按钮
-    //   toolbox: ['rect', 'polygon', 'keep', 'clear'],
-    //   // 数据关联
-    //   brushLink: [0, 1],
-    //   brushType: 'rect',
-    //   brushMode: 'single',
-    //   brushStyle: {
-    //     borderWidth: 1,
-    //     color: 'rgba(120,140,180,0.3)',
-    //     borderColor: 'rgba(120,140,180,0.8)'
-    //   },
-    //   // 防抖
-    //   throttleType: 'debounce',
-    //   throttleDelay: 500,
-    // },
     animation: false,
     visualMap: [
       // OD Cluster Heatmap
@@ -110,7 +100,7 @@ export default function PagePredict(props) {
         type: 'continuous',
         // 视觉映射定义域
         min: 0,
-        max: 300,
+        max: 10,
         // 不显示 visualMap 组件
         show: true,
         left: 20,
@@ -120,7 +110,7 @@ export default function PagePredict(props) {
         seriesIndex: [2, 3], // OD聚类热力图
         // 定义域颜色范围
         inRange: {
-          color: ['blue', 'blue', 'green', 'yellow', 'red'],
+          color: ['#00FFFF', '#33CC99', '#FFFF99', '#FF0033'],
         },
         textStyle: {
           color: "#fff",
@@ -128,7 +118,7 @@ export default function PagePredict(props) {
       },
     ],
     series: [{
-      // org
+      // 0. org
       name: '起点',
       type: 'scatter',
       coordinateSystem: 'bmap',
@@ -136,27 +126,27 @@ export default function PagePredict(props) {
       symbol: 'circle',
       data: [],
       itemStyle: {
-        color: '#3498DB',
+        color: orgColor,
       }
     }, {
-      // dest
+      // 1. dest
       name: '终点',
       type: 'scatter',
       coordinateSystem: 'bmap',
       symbolSize: 5,
-      symbol: 'triangle',
+      symbol: 'circle',
       data: [],
       itemStyle: {
-        color: '#E74C3C',
+        color: destColor,
       }
     }, {
-      id: 'o-heatmap',
+      // 2. org-heatmap
       name: 'O聚类热力图',
       // https://echarts.apache.org/zh/option.html#series-heatmap
       type: 'heatmap',
       coordinateSystem: 'bmap',
-      pointSize: 20,
-      blurSize: 20,
+      pointSize: 10,
+      blurSize: 10,
       // 高亮状态图形样式
       emphasis: {
         // 高亮效果
@@ -164,13 +154,13 @@ export default function PagePredict(props) {
       },
       data: [],
     }, {
-      id: 'd-heatmap',
+      // 3. dest-heatmap
       name: 'D聚类热力图',
       // https://echarts.apache.org/zh/option.html#series-heatmap
       type: 'heatmap',
       coordinateSystem: 'bmap',
-      pointSize: 20,
-      blurSize: 20,
+      pointSize: 10,
+      blurSize: 10,
       // 高亮状态图形样式
       emphasis: {
         // 高亮效果
@@ -200,7 +190,7 @@ export default function PagePredict(props) {
       symbol: 'circle',
       data: [],
       itemStyle: {
-        color: '#3498DB',
+        color: orgColor,
       }
     }, {
       // selected dest
@@ -208,10 +198,10 @@ export default function PagePredict(props) {
       type: 'scatter',
       coordinateSystem: 'bmap',
       symbolSize: 5,
-      symbol: 'triangle',
+      symbol: 'circle',
       data: [],
       itemStyle: {
-        color: '#E74C3C',
+        color: destColor,
       }
     },
     ...globalStaticTraj,
@@ -224,8 +214,6 @@ export default function PagePredict(props) {
     // 实例化 chart
     chart = echarts.init(ref.current);
     chart.setOption(option);
-    // 显示 loading
-    chart.showLoading();
 
     // 获取地图实例, 初始化
     bmap = chart.getModel().getComponent('bmap').getBMap();
@@ -243,53 +231,50 @@ export default function PagePredict(props) {
   // const t4 = useStaticTraj(chart, { ...trajColorBar[4] });
   // const t5 = useStaticTraj(chart, { ...trajColorBar[5] });
 
-  // 全局OD
+  // paint Origin Points
   useEffect(() => {
-    if (orgSuccess) {
-      // 取消 loading
-      chart.hideLoading();
-      chart.setOption({
-        series: [{
-          name: '起点',
-          data: org,
-        }]
-      })
-    }
+    if (!orgSuccess) return () => { };
+    const data = org.map(item => item.coord)
+    chart.setOption({
+      series: [{
+        name: '起点',
+        data,
+      }]
+    })
   }, [org, orgSuccess])
+  // paint Destination Points
   useEffect(() => {
-    if (destSuccess) {
-      // 取消 loading
-      chart.hideLoading();
-      chart.setOption({
-        series: [{
-          name: '终点',
-          data: dest,
-        }]
-      })
-    }
+    if (!destSuccess) return () => { };
+    const data = dest.map(item => item.coord)
+    chart.setOption({
+      series: [{
+        name: '终点',
+        data,
+      }]
+    })
   }, [dest, destSuccess])
+  // paint Origin Heatmap
   useEffect(() => {
-    if (orgClusterSuccess) {
-      chart.hideLoading();
-      chart.setOption({
-        series: [{
-          name: 'O聚类热力图',
-          data: orgCluster,
-        }]
-      })
-    }
-  }, [orgCluster, orgClusterSuccess])
+    if (!orgSuccess) return () => { };
+    const data = org.map(item => [...item.coord, item.count])
+    chart.setOption({
+      series: [{
+        name: 'O聚类热力图',
+        data,
+      }]
+    })
+  }, [org, orgSuccess])
+  // paint Destination Heatmap
   useEffect(() => {
-    if (destClusterSuccess) {
-      chart.hideLoading();
-      chart.setOption({
-        series: [{
-          name: 'D聚类热力图',
-          data: destCluster,
-        }]
-      })
-    }
-  }, [destCluster, destClusterSuccess])
+    if (!destSuccess) return () => { };
+    const data = dest.map(item => [...item.coord, item.count])
+    chart.setOption({
+      series: [{
+        name: 'O聚类热力图',
+        data,
+      }]
+    })
+  }, [dest, destSuccess])
   // 根据筛选结果更新样式
   useEffect(() => {
     console.log(selected);
@@ -315,15 +300,45 @@ export default function PagePredict(props) {
         }, {
           // selected org
           name: '筛选起点',
-          data: org.filter((item, idx) => sorg.includes(idx.toString()))
+          data: org.filter(
+            item => [...new Set([...sorg, ...sdest])].includes(item.id)
+          ).map(item => item.coord)
         }, {
           // selected dest
           name: '筛选终点',
-          data: dest.filter((item, idx) => sdest.includes(idx.toString()))
+          data: dest.filter(
+            item => [...new Set([...sorg, ...sdest])].includes(item.id)
+          ).map(item => item.coord)
         }]
       })
     }
   }, [selected, org, dest])
+  // 取消框选时恢复样式
+  function onClear() {
+    chart && chart.setOption({
+      series: [{
+        // org
+        name: '起点',
+        itemStyle: {
+          color: orgColor,
+        }
+      }, {
+        // dest
+        name: '终点',
+        itemStyle: {
+          color: destColor,
+        }
+      }, {
+        // selected org
+        name: '筛选起点',
+        data: []
+      }, {
+        // selected dest
+        name: '筛选终点',
+        data: []
+      }]
+    })
+  }
 
 
   // 全局静态轨迹图例
@@ -392,33 +407,6 @@ export default function PagePredict(props) {
     })
   }, [chart])
 
-
-  function onClear () {
-    chart && chart.setOption({
-      series: [{
-        // org
-        name: '起点',
-        itemStyle: {
-          color: '#3498DB',
-        }
-      }, {
-        // dest
-        name: '终点',
-        itemStyle: {
-          color: '#E74C3C',
-        }
-      },{
-        // selected org
-        name: '筛选起点',
-        data: []
-      }, {
-        // selected dest
-        name: '筛选终点',
-        data: []
-      }]
-    })
-  }
-
   return (
     <>
       <div
@@ -457,14 +445,19 @@ export default function PagePredict(props) {
           position: 'absolute',
         }}
       >
-        <TrajSelector
+        <TimeSelector
           setByTime={setByTime}
           timer={timer}
           timerDispatch={timerDispatch}
         />
-        <TransferSelector
+        {/* <TransferSelector
           data={byTime}
           setData={setBySelect}
+        /> */}
+        <SingleTrajSelector
+          data={byTime}
+          onSelect={(val) => setBySelect(val)}
+          onClear={() => setBySelect(byTime)}
         />
       </Drawer>
       {/* 右侧 Drawer */}

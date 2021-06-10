@@ -4,7 +4,7 @@ import { selectByTime } from '@/network'
 import moment from 'moment';
 import './TrajSelector.scss';
 
-export default function TrajSelector(props) {
+export default function TimeSelector(props) {
 
   return (
     <div className='traj-selector-container'>

@@ -1,13 +1,13 @@
 import { baseRequest } from './base';
 import { isEmptyString } from '@/common/func/isEmptyString'
 
-export const getOrgDemo = () => {
+export const getOrg = () => {
   return baseRequest({
     url: '/org'
   })
 }
 
-export const getDestDemo = () => {
+export const getDest = () => {
   return baseRequest({
     url: '/dest'
   })
@@ -45,18 +45,5 @@ export const selectByTime = (dateStart, dateEnd, hourStart, hourEnd) => {
   console.log(url);
   return baseRequest({
     url,
-  })
-}
-
-
-export const getClusterO = () => {
-  return baseRequest({
-    url: `/org-cluster`
-  })
-}
-
-export const getClusterD = () => {
-  return baseRequest({
-    url: `/dest-cluster`
   })
 }

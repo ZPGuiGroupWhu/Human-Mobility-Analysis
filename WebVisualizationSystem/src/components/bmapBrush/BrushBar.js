@@ -11,6 +11,13 @@ import BMap from 'BMap';
 import BMapLib from 'BMapLib';
 
 
+
+/**
+ * @param {object} map - 百度地图实例
+ * @param {{ org:{id: number, coord: number[], count: number}[], dest:{id: number, coord: number[], count: number}[]}} data - 坐标数组
+ * @param {function} getSelected - 提供了 Brush 向外暴露框选数据的接口
+ * @param {function} onClear - 清除选框时额外的操作
+ */
 let drawingManager = null;
 export default function BrushBar(props) {
   const { map, data, getSelected, onClear = null } = props;
@@ -56,23 +63,28 @@ export default function BrushBar(props) {
       const ptLeftTop = new BMap.Point(leftTop.lng, leftTop.lat);
       const ptRightBottom = new BMap.Point(rightBottom.lng, rightBottom.lat);
       const bound = new BMap.Bounds(ptLeftTop, ptRightBottom);
+      // 临时存储对象
+      const obj = {}
       for (let [key, value] of Object.entries(data)) {
-        for (let [idx, [lng, lat]] of Object.entries(value)) {
+        for (let {id, coord: [lng, lat]} of Object.values(value)) {
           let pt = new BMap.Point(lng, lat);
           if (BMapLib.GeoUtils.isPointInRect(pt, bound)) {
             // 存储对应索引，方便查找
             // 此处返回一个新数组，触发 Object.is() 浅比较
-            setSelected(prev => ({
-              ...prev,
-              [key]: prev.hasOwnProperty(key) ? [...prev[key], idx] : [idx]
-            }))
+            obj[key] = [...(obj.hasOwnProperty(key) ? obj[key] : []), id];
           }
         }
+        setSelected(prev => ({
+          ...prev,
+          [key]: prev.hasOwnProperty(key) ? [...prev[key], ...obj[key]] : obj[key]
+        }))
       }
     })
   }, [map, data])
 
+
   useEffect(() => {
+    // 向外暴露结果: 更像是外界通过一个方法从中取出结果
     getSelected(selected);
   }, [selected])
 
@@ -91,7 +103,6 @@ export default function BrushBar(props) {
       <IconBtn
         imgSrc={brushWhite}
         clickCallback={() => setState(prev => {
-          console.log(prev);
           if (prev) {
             // 若当前为开启状态，则后续操作将其关闭
             // 只关闭一次没效果，原因不明

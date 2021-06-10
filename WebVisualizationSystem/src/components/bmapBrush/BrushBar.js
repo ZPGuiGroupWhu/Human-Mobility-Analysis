@@ -66,12 +66,14 @@ export default function BrushBar(props) {
       // 临时存储对象
       const obj = {}
       for (let [key, value] of Object.entries(data)) {
+        // 设置默认值 []
+        Reflect.set(obj, key, []);
         for (let {id, coord: [lng, lat]} of Object.values(value)) {
           let pt = new BMap.Point(lng, lat);
           if (BMapLib.GeoUtils.isPointInRect(pt, bound)) {
             // 存储对应索引，方便查找
             // 此处返回一个新数组，触发 Object.is() 浅比较
-            obj[key] = [...(obj.hasOwnProperty(key) ? obj[key] : []), id];
+            obj[key] = [...obj[key], id];
           }
         }
         setSelected(prev => ({

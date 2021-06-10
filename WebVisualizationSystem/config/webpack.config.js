@@ -159,6 +159,11 @@ module.exports = function (webpackEnv) {
   };
 
   return {
+    // 外部 lib 依赖
+    externals: {
+      BMapLib: 'BMapLib',
+      BMap: 'BMap',
+    },
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
     // Stop compilation early in production
     bail: isEnvProduction,

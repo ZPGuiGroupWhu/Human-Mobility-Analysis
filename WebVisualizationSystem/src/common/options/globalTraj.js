@@ -33,5 +33,5 @@ const dynamicOptions = {
 const staticNames = trajColorBar.map(item => item.static);
 const dynamicNames = trajColorBar.map(item => item.dynamic);
 
-export const globalStaticTraj = staticNames.map(name => ({ name, ...staticOptions }));
+export const globalStaticTraj = staticNames.map((name, idx) => ({ name, ...staticOptions, zlevel: 90 + idx }));
 export const globalDynamicTraj = dynamicNames.map((name, idx) => ({ name, ...dynamicOptions, zlevel: idx + 1 }));

@@ -6,6 +6,7 @@ import 'echarts/extension/bmap/bmap';
 import { Drawer } from 'antd';
 import TrajSelector from '@/components/pagePredict/TrajSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
+import BrushBar from '@/components/bmapBrush/BrushBar';
 // 自定义
 import { getOrgDemo, getDestDemo, getClusterO, getClusterD } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
@@ -18,7 +19,6 @@ import { trajColorBar } from '@/common/options/trajColorBar';
 import { drawerVisibility } from '@/context/mainContext'
 // 样式
 import './bmap.scss';
-
 
 
 
@@ -39,6 +39,8 @@ export default function PagePredict(props) {
   const [byTime, setByTime] = useState([]); // 依据时间筛选轨迹
   const [bySelect, setBySelect] = useState(byTime); // 进一步筛选
 
+  const [selected, setSelected] = useState({});
+
 
   // 容器 ref 对象
   const ref = useRef(null);
@@ -50,7 +52,7 @@ export default function PagePredict(props) {
       zoom: 12,
       minZoom: 0,
       maxZoom: 20,
-      roam: true,
+      roam: true, // 若设为 false，则地图底图不可移动或缩放
       mapStyle: {},
     },
     // legend
@@ -83,6 +85,23 @@ export default function PagePredict(props) {
       },
       data: [],
     }],
+    // // https://echarts.apache.org/zh/option.html#brush
+    // brush: {
+    //   // toolbox 相关按钮
+    //   toolbox: ['rect', 'polygon', 'keep', 'clear'],
+    //   // 数据关联
+    //   brushLink: [0, 1],
+    //   brushType: 'rect',
+    //   brushMode: 'single',
+    //   brushStyle: {
+    //     borderWidth: 1,
+    //     color: 'rgba(120,140,180,0.3)',
+    //     borderColor: 'rgba(120,140,180,0.8)'
+    //   },
+    //   // 防抖
+    //   throttleType: 'debounce',
+    //   throttleDelay: 500,
+    // },
     animation: false,
     visualMap: [
       // OD Cluster Heatmap
@@ -98,7 +117,7 @@ export default function PagePredict(props) {
         bottom: 10,
         // 映射维度
         dimension: 2,
-        seriesIndex: [2,3], // OD聚类热力图
+        seriesIndex: [2, 3], // OD聚类热力图
         // 定义域颜色范围
         inRange: {
           color: ['blue', 'blue', 'green', 'yellow', 'red'],
@@ -144,7 +163,7 @@ export default function PagePredict(props) {
         focus: 'series',
       },
       data: [],
-    },{
+    }, {
       id: 'd-heatmap',
       name: 'D聚类热力图',
       // https://echarts.apache.org/zh/option.html#series-heatmap
@@ -158,10 +177,7 @@ export default function PagePredict(props) {
         focus: 'series',
       },
       data: [],
-    },
-    ...globalStaticTraj,
-    ...globalDynamicTraj,
-    {
+    }, {
       name: '轨迹时间筛选',
       type: "lines",
       coordinateSystem: "bmap",
@@ -175,7 +191,31 @@ export default function PagePredict(props) {
       },
       progressiveThreshold: 200,
       progressive: 200,
+    }, {
+      // selected org
+      name: '筛选起点',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      symbolSize: 5,
+      symbol: 'circle',
+      data: [],
+      itemStyle: {
+        color: '#3498DB',
+      }
+    }, {
+      // selected dest
+      name: '筛选终点',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      symbolSize: 5,
+      symbol: 'triangle',
+      data: [],
+      itemStyle: {
+        color: '#E74C3C',
+      }
     },
+    ...globalStaticTraj,
+    ...globalDynamicTraj,
     ]
   }
 
@@ -192,7 +232,7 @@ export default function PagePredict(props) {
     bmap.centerAndZoom(props.initCenter, props.initZoom);
     bmap.setMapStyleV2({
       styleId: 'f65bcb0423e47fe3d00cd5e77e943e84'
-    })
+    });
   }, [])
 
   // 全局静态轨迹
@@ -250,6 +290,40 @@ export default function PagePredict(props) {
       })
     }
   }, [destCluster, destClusterSuccess])
+  // 根据筛选结果更新样式
+  useEffect(() => {
+    console.log(selected);
+    const { org: sorg = [], dest: sdest = [] } = selected;
+    const arr = [org, dest, sorg, sdest];
+    if (arr.reduce((prev, cur) => {
+      let res = !prev ? false : prev && (cur.length !== 0)
+      return res;
+    }, true)) {
+      chart.setOption({
+        series: [{
+          // org
+          name: '起点',
+          itemStyle: {
+            color: '#fff',
+          }
+        }, {
+          // dest
+          name: '终点',
+          itemStyle: {
+            color: '#fff',
+          }
+        }, {
+          // selected org
+          name: '筛选起点',
+          data: org.filter((item, idx) => sorg.includes(idx.toString()))
+        }, {
+          // selected dest
+          name: '筛选终点',
+          data: dest.filter((item, idx) => sdest.includes(idx.toString()))
+        }]
+      })
+    }
+  }, [selected, org, dest])
 
 
   // 全局静态轨迹图例
@@ -299,7 +373,51 @@ export default function PagePredict(props) {
   }, bySelect)
 
 
+  // 框选事件
+  useEffect(() => {
+    chart.on('brush', () => {
+      chart.setOption({
+        bmap: {
+          roam: false,
+        }
+      })
+    })
 
+    chart.on('brushEnd', () => {
+      chart.setOption({
+        bmap: {
+          roam: true,
+        }
+      })
+    })
+  }, [chart])
+
+
+  function onClear () {
+    chart && chart.setOption({
+      series: [{
+        // org
+        name: '起点',
+        itemStyle: {
+          color: '#3498DB',
+        }
+      }, {
+        // dest
+        name: '终点',
+        itemStyle: {
+          color: '#E74C3C',
+        }
+      },{
+        // selected org
+        name: '筛选起点',
+        data: []
+      }, {
+        // selected dest
+        name: '筛选终点',
+        data: []
+      }]
+    })
+  }
 
   return (
     <>
@@ -308,6 +426,13 @@ export default function PagePredict(props) {
         ref={ref}
         className='bmap-container'
       ></div>
+      {/* Brush 框选功能栏 */}
+      <BrushBar
+        map={bmap}
+        data={{ org, dest }}
+        getSelected={(value) => { setSelected(value) }}
+        onClear={onClear}
+      />
       {/* 左侧 Drawer */}
       <Drawer
         // Drawer 标题

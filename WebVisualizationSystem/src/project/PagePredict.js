@@ -81,7 +81,21 @@ export default function PagePredict(props) {
       // OD 图例
       // 图例相对容器距离
       left: 'auto',
-      right: '100rem',
+      right: '105rem',
+      top: 'auto',
+      bottom: '5rem',
+      // 图例布局方向
+      orient: 'vertical',
+      // 文本样式
+      textStyle: {
+        color: '#fff',
+      },
+      data: [],
+    }, {
+      // OD 热力图图例
+      // 图例相对容器距离
+      left: 'auto',
+      right: '170rem',
       top: 'auto',
       bottom: '5rem',
       // 图例布局方向
@@ -365,7 +379,7 @@ export default function PagePredict(props) {
     const data = dest.map(item => [...item.coord, item.count])
     chart.setOption({
       series: [{
-        name: 'O聚类热力图',
+        name: 'D聚类热力图',
         data,
       }]
     })
@@ -436,7 +450,7 @@ export default function PagePredict(props) {
   }
 
 
-  // 全局静态轨迹图例
+  // 图例
   useEffect(() => {
     const data = trajColorBar.map(item => ({
       name: item.static,
@@ -452,6 +466,12 @@ export default function PagePredict(props) {
           name: '起点'
         }, {
           name: '终点'
+        }],
+      },{
+        data: [{
+          name: 'O聚类热力图'
+        }, {
+          name: 'D聚类热力图'
         }],
       }]
     })

@@ -16,14 +16,13 @@ export default function SingleTrajSelector(props) {
       allowClear
       onSelect={(val) => onSelect && onSelect(val)}
       onClear={onClear}
-      // Option 排序规则
-      filterSort={(op1, op2) => (op1.distance - op2.distance)}
     >
       {
-        data.map((item, idx) => {
+        data.sort((a, b) => a.distance - b.distance).map(item => {
           return item ? (
             <Option
-              title={item.distance.toString()}
+              key={item.id}
+              title={item.distance}
               value={item.id}
             >{`${item.distance.toString()} km`}</Option>
           ) : null;

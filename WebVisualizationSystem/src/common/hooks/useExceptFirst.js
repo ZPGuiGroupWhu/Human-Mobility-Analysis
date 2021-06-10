@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 
 // 跳过首次渲染
-export const useExceptFirst = (setFunc, data) => {
+export const useExceptFirst = (setFunc, ...data) => {
   const first = useRef(false);
   useEffect(() => {
     if (!first.current) {
@@ -9,5 +9,5 @@ export const useExceptFirst = (setFunc, data) => {
     } else {
       setFunc(data)
     }
-  }, [data])
+  }, [...data])
 }

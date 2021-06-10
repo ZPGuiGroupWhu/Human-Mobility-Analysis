@@ -44,7 +44,7 @@ export default function PagePredict(props) {
   // select by time
   const [byTime, setByTime] = useState([]);
   // select specific one deeply
-  const [bySelect, setBySelect] = useState(byTime); // 进一步筛选
+  const [bySelect, setBySelect] = useState(-1); // 进一步筛选
 
 
 
@@ -168,6 +168,29 @@ export default function PagePredict(props) {
       },
       data: [],
     }, {
+      // 4. selected org
+      name: '筛选起点',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      symbolSize: 5,
+      symbol: 'circle',
+      data: [],
+      itemStyle: {
+        color: orgColor,
+      }
+    }, {
+      // 5. selected dest
+      name: '筛选终点',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      symbolSize: 5,
+      symbol: 'circle',
+      data: [],
+      itemStyle: {
+        color: destColor,
+      }
+    }, {
+      // 6. select by time
       name: '轨迹时间筛选',
       type: "lines",
       coordinateSystem: "bmap",
@@ -182,28 +205,100 @@ export default function PagePredict(props) {
       progressiveThreshold: 200,
       progressive: 200,
     }, {
-      // selected org
-      name: '筛选起点',
-      type: 'scatter',
+      // 7. paint single static traj
+      name: '静态单轨迹',
+      type: 'lines',
       coordinateSystem: 'bmap',
-      symbolSize: 5,
-      symbol: 'circle',
+      polyline: true,
       data: [],
-      itemStyle: {
-        color: orgColor,
-      }
+      silent: true,
+      lineStyle: {
+        color: '#E0F7FA',
+        opacity: 0.8,
+        width: 3,
+      },
     }, {
-      // selected dest
-      name: '筛选终点',
-      type: 'scatter',
-      coordinateSystem: 'bmap',
-      symbolSize: 5,
-      symbol: 'circle',
+      // 8. paint single dynamic traj
+      name: '动态单轨迹',
+      type: "lines",
+      coordinateSystem: "bmap",
+      polyline: true,
       data: [],
-      itemStyle: {
-        color: destColor,
-      }
+      lineStyle: {
+        width: 0,
+        color: '#FB8C00'
+      },
+      effect: {
+        constantSpeed: 40,
+        show: true,
+        trailLength: 0.8,
+        symbolSize: 5,
+      },
+      zlevel: 80,
+    }, {
+      // 9. paint single dynamic scatter - origin point
+      name: '出发地',
+      type: 'effectScatter',
+      // 何时显示动效：render - 绘制完成后，emphasis - 高亮显示
+      showEffectOn: 'render',
+      rippleEffect: {
+        // 动效周期
+        period: 4,
+        // 波纹缩放比例
+        scale: 3,
+      },
+      coordinateSystem: 'bmap',
+      symbolSize: 8,
+      // 文本标签
+      label: {
+        show: true,
+        position: 'top',
+        distance: 5,
+        formatter: '{a}',
+        color: '#fff',
+      },
+      // 标签视觉引导线
+      labelLine: {
+        show: false,
+        showAbove: true,
+        smooth: .5,
+      },
+      // 若存在多个点，请在 data 传参时传入 color
+      data: [],
+      zlevel: 81,
+    }, {
+      // 10. paint single dynamic scatter - destnation point
+      name: '目的地',
+      type: 'effectScatter',
+      // 何时显示动效：render - 绘制完成后，emphasis - 高亮显示
+      showEffectOn: 'render',
+      rippleEffect: {
+        // 动效周期
+        period: 4,
+        // 波纹缩放比例
+        scale: 3,
+      },
+      coordinateSystem: 'bmap',
+      symbolSize: 8,
+      // 文本标签
+      label: {
+        show: true,
+        position: 'top',
+        distance: 5,
+        formatter: '{a}',
+        color: '#fff',
+      },
+      // 标签视觉引导线
+      labelLine: {
+        show: false,
+        showAbove: true,
+        smooth: .5,
+      },
+      // 若存在多个点，请在 data 传参时传入 color
+      data: [],
+      zlevel: 82,
     },
+    // global static trajectories
     ...globalStaticTraj,
     ...globalDynamicTraj,
     ]
@@ -372,40 +467,72 @@ export default function PagePredict(props) {
    */
   const [timer, timerDispatch] = useTime();
 
-  // bySelect 相当于 byTime 的副本，需保持同步
-  useEffect(() => {
-    setBySelect(byTime);
-  }, [byTime])
-
   // 时间筛选静态轨迹 & 绘制
-  useExceptFirst((data) => {
+  useEffect(() => {
     chart.setOption({
       series: [{
         name: '轨迹时间筛选',
-        data: data.map(item => item.data),
+        data: (bySelect === -1) ? byTime.map(item => item.data) : [],
       }]
     })
-  }, bySelect)
+  }, [byTime, bySelect])
 
+  // 选择单条轨迹并绘制
+  // bySelect - 选择轨迹对应的索引
+  useExceptFirst(([bySelect, byTime]) => {
+    let res = byTime.find(item => item.id === bySelect);
+    res = res ? res.data : undefined;
 
-  // 框选事件
-  useEffect(() => {
-    chart.on('brush', () => {
+    console.log(byTime);
+    // res === undefined 表示没有找到数据
+    if (!res) {
       chart.setOption({
-        bmap: {
-          roam: false,
-        }
+        series: [{
+          name: '静态单轨迹',
+          data: [],
+        }, {
+          name: '动态单轨迹',
+          data: [],
+        }, {
+          name: '出发地',
+          data: [],
+        }, {
+          name: '目的地',
+          data: [],
+        }]
       })
-    })
-
-    chart.on('brushEnd', () => {
+    } else {
       chart.setOption({
-        bmap: {
-          roam: true,
-        }
+        series: [{
+          name: '静态单轨迹',
+          data: [{
+            coords: res,
+          }],
+        }, {
+          name: '动态单轨迹',
+          data: [{
+            coords: res,
+          }],
+        }, {
+          name: '出发地',
+          data: [{
+            value: res[0],
+            itemStyle: {
+              color: '#F5F5F5'
+            }
+          }],
+        }, {
+          name: '目的地',
+          data: [{
+            value: res.slice(-1)[0],
+            itemStyle: {
+              color: '#00CC33'
+            }
+          }],
+        }]
       })
-    })
-  }, [chart])
+    }
+  }, bySelect, byTime)
 
   return (
     <>
@@ -436,7 +563,7 @@ export default function PagePredict(props) {
         // 指定 Drawer 挂载的 HTML 节点, false 为挂载在当前 dom
         getContainer={ref.current}
         // 宽度
-        width={'24rem'}
+        width={'16rem'}
         // 是否显示遮罩层
         mask={false}
         // 点击蒙版是否允许关闭
@@ -457,7 +584,7 @@ export default function PagePredict(props) {
         <SingleTrajSelector
           data={byTime}
           onSelect={(val) => setBySelect(val)}
-          onClear={() => setBySelect(byTime)}
+          onClear={() => setBySelect(-1)}
         />
       </Drawer>
       {/* 右侧 Drawer */}

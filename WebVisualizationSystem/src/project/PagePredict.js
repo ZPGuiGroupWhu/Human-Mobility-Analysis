@@ -9,7 +9,7 @@ import TimeSelector from '@/components/pagePredict/TimeSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
 import BrushBar from '@/components/bmapBrush/BrushBar';
 // 自定义
-import { getOrg, getDest } from '@/network';
+import { getOrg, getDest, getTraj } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
 import { useStaticTraj } from '@/common/hooks/useStaticTraj';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
@@ -38,6 +38,7 @@ export default function PagePredict(props) {
   // org / dest: { {id: number, coord: number[], count: number}[] }
   const { data: org, isComplete: orgSuccess } = useReqData(getOrg);
   const { data: dest, isComplete: destSuccess } = useReqData(getDest);
+  const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
   // org / dest selected res: {{org: number[], dest: number[]}}
   const [selected, setSelected] = useState({});
 
@@ -311,6 +312,19 @@ export default function PagePredict(props) {
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
       zlevel: 82,
+    }, {
+      // 11. paint select static traj
+      name: '筛选轨迹',
+      type: 'lines',
+      coordinateSystem: 'bmap',
+      polyline: true,
+      data: [],
+      silent: true,
+      lineStyle: {
+        color: '#E0F7FA',
+        opacity: 0.8,
+        width: 1.5,
+      },
     },
     // global static trajectories
     ...globalStaticTraj,
@@ -387,12 +401,16 @@ export default function PagePredict(props) {
   // 根据筛选结果更新样式
   useEffect(() => {
     console.log(selected);
+    // 解构出被选中的 OD 点
     const { org: sorg = [], dest: sdest = [] } = selected;
-    const arr = [org, dest, sorg, sdest];
-    if (arr.reduce((prev, cur) => {
+    // 此处逻辑判断是否加载完毕原始数据
+    const arr = [org, dest];
+    const hasData = arr.reduce((prev, cur) => {
       let res = !prev ? false : prev && (cur.length !== 0)
       return res;
-    }, true)) {
+    }, true)
+    // 只有当有 O（或 D）被选中，且存在原始数据时才发生渲染
+    if (hasData && (sorg.length || sdest.length)) {
       chart.setOption({
         series: [{
           // org
@@ -418,10 +436,16 @@ export default function PagePredict(props) {
           data: dest.filter(
             item => [...new Set([...sorg, ...sdest])].includes(item.id)
           ).map(item => item.coord)
+        }, {
+          // selected dest
+          name: '筛选轨迹',
+          data: traj.filter(
+            item => [...new Set([...sorg, ...sdest])].includes(item.id)
+          ).map(item => item.data)
         }]
       })
     }
-  }, [selected, org, dest])
+  }, [selected, org, dest, traj])
   // 取消框选时恢复样式
   function onClear() {
     chart && chart.setOption({
@@ -445,6 +469,10 @@ export default function PagePredict(props) {
         // selected dest
         name: '筛选终点',
         data: []
+      }, {
+        // selected dest
+        name: '筛选轨迹',
+        data: []
       }]
     })
   }
@@ -467,7 +495,7 @@ export default function PagePredict(props) {
         }, {
           name: '终点'
         }],
-      },{
+      }, {
         data: [{
           name: 'O聚类热力图'
         }, {

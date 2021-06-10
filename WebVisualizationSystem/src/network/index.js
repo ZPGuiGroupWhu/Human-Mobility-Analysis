@@ -13,7 +13,7 @@ export const getDest = () => {
   })
 }
 
-export const getTrajDemo = ({ min, max }) => {
+export const getTraj = ({ min, max }) => {
   return baseRequest({
     url: `/traj?min=${min}&&max=${max}`
   })

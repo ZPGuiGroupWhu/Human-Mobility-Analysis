@@ -337,6 +337,8 @@ export default function PagePredict(props) {
     // 实例化 chart
     chart = echarts.init(ref.current);
     chart.setOption(option);
+    // 加载 Loading
+    chart.showLoading();
 
     // 获取地图实例, 初始化
     bmap = chart.getModel().getComponent('bmap').getBMap();
@@ -345,6 +347,11 @@ export default function PagePredict(props) {
       styleId: 'f65bcb0423e47fe3d00cd5e77e943e84'
     });
   }, [])
+
+  // 当所有数据请求完毕后，再取消 Loading 动画展示
+  useEffect(()=>{
+    orgSuccess && destSuccess && trajSuccess && chart.hideLoading();
+  }, [orgSuccess, destSuccess, trajSuccess])
 
   // 全局静态轨迹
   const t0 = useStaticTraj(chart, { ...trajColorBar[0] });

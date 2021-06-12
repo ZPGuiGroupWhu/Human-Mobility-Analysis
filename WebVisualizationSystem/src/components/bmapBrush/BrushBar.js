@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import IconBtn from '@/components/IconBtn.js';
 import {
   brushBlack,
@@ -63,10 +63,11 @@ export default function BrushBar(props) {
   }
 
 
-
+  // 实例化鼠标绘制工具
+  // Demo See https://lbsyun.baidu.com/jsdemo.htm#f0_7
+  // BMapLib.DrawingManager API See http://api.map.baidu.com/library/DrawingManager/1.4/docs/symbols/BMapLib.DrawingManager.html
   useEffect(() => {
-    const arr = [map, data];
-    if (arr.includes(null) || arr.includes(undefined)) return () => { };
+    if (!map) return () => { }
     // 样式
     const styleOptions = {
       strokeColor: "#00FFFF",    //边线颜色。
@@ -76,9 +77,7 @@ export default function BrushBar(props) {
       fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
       strokeStyle: 'solid' //边线的样式，solid或dashed。
     }
-    // 实例化鼠标绘制工具
-    // Demo See https://lbsyun.baidu.com/jsdemo.htm#f0_7
-    // BMapLib.DrawingManager API See http://api.map.baidu.com/library/DrawingManager/1.4/docs/symbols/BMapLib.DrawingManager.html
+
     drawingManager = new BMapLib.DrawingManager(map, {
       isOpen: false, //是否开启绘制模式
       enableDrawingTool: false, //是否显示工具栏
@@ -88,7 +87,14 @@ export default function BrushBar(props) {
       rectangleOptions: styleOptions //矩形的样式
     });
 
-    drawingManager.addEventListener('overlaycomplete', (e) => {
+
+  }, [map])
+
+  // 添加选框绘制的监听事件
+  useEffect(() => {
+    if (!drawingManager) return () => { }
+
+    function overlaycomplete(e) {
       // 记录覆盖物
       setOverLayers(prev => ([...prev, e.overlay]));
       // 获取选框内点信息
@@ -123,8 +129,50 @@ export default function BrushBar(props) {
           [key]: prev.hasOwnProperty(key) ? [...prev[key], ...obj[key]] : obj[key]
         }))
       }
-    })
-  }, [map, data])
+    }
+
+    drawingManager.addEventListener('overlaycomplete', overlaycomplete)
+
+    return () => {
+      drawingManager.removeEventListener('overlaycomplete', overlaycomplete);
+    }
+  }, [data, drawingManager, state])
+
+
+
+  // 给每个覆盖物添加事件
+  useEffect(() => {
+    if (!(overLayers.length !== 0)) return () => { }
+
+    // 鼠标移入筛选框时，关闭框选功能，避免多重框选。
+    // 该条件需要在筛选框开关打开时触发
+    if (drawingManager && state) {
+      // 难点：
+      // 添加的事件与删除的事件内存地址总存在不一致的情况，因此无法正确删除旧的事件。
+      // 导致关闭开关后，事件添加仍起作用。
+      function mouseover() {
+        drawingManager.close()
+      }
+      function mouseout() {
+        drawingManager.open()
+      }
+
+      overLayers.forEach((item) => {
+        item.addEventListener('mouseover', mouseover);
+        item.addEventListener('mouseout', mouseout);
+        console.log(item);
+      })
+      return () => {
+        // 解决方案：
+        // console.log() 打印后发现事件均被放在 Li 属性中, 因此直接将该属性置空
+        overLayers.forEach(item => {
+          item.Li = {} // 清空绑定的事件
+        })
+      }
+    }
+
+
+  }, [overLayers, state, drawingManager])
 
 
   useEffect(() => {

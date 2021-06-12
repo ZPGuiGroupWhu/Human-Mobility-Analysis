@@ -271,12 +271,14 @@ export default function PagePredict(props) {
         distance: 5,
         formatter: '{a}',
         color: '#fff',
+        offset: [20, -10],
       },
       // 标签视觉引导线
       labelLine: {
-        show: false,
+        show: true,
         showAbove: true,
-        smooth: .5,
+        smooth: .1,
+        length2: 20,
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
@@ -302,12 +304,14 @@ export default function PagePredict(props) {
         distance: 5,
         formatter: '{a}',
         color: '#fff',
+        offset: [20, -10],
       },
       // 标签视觉引导线
       labelLine: {
-        show: false,
+        show: true,
         showAbove: true,
-        smooth: .5,
+        smooth: .1,
+        length2: 20,
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
@@ -321,10 +325,11 @@ export default function PagePredict(props) {
       data: [],
       silent: true,
       lineStyle: {
-        color: '#E0F7FA',
+        color: '#FFF59D',
         opacity: 0.8,
         width: 1.5,
       },
+      zlevel: 110
     },
     // global static trajectories
     ...globalStaticTraj,

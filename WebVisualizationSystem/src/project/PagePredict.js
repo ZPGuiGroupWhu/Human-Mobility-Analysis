@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useContext } from 'react';
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import { Drawer } from 'antd';
+import { Drawer, Select } from 'antd';
 import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
 import TimeSelector from '@/components/pagePredict/TimeSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
@@ -49,6 +49,8 @@ export default function PagePredict(props) {
   const [byTime, setByTime] = useState([]);
   // select specific one deeply
   const [bySelect, setBySelect] = useState(-1); // 进一步筛选
+  // select by brush
+  const [byBrush, setByBrush] = useState({});
 
 
 
@@ -235,6 +237,7 @@ export default function PagePredict(props) {
         opacity: 0.8,
         width: 3,
       },
+      zlevel: 998,
     }, {
       // 8. paint single dynamic traj
       name: '动态单轨迹',
@@ -252,7 +255,7 @@ export default function PagePredict(props) {
         trailLength: 0.8,
         symbolSize: 5,
       },
-      zlevel: 80,
+      zlevel: 999,
     }, {
       // 9. paint single dynamic scatter - origin point
       name: '出发地',
@@ -338,6 +341,60 @@ export default function PagePredict(props) {
     ...globalStaticTraj,
     ...globalDynamicTraj,
     ]
+  }
+
+
+  // 依据 byBrush 筛选结果进行单轨迹动效绘制
+  function singleTrajByBrush(val) {
+    const res = byBrush[val]?.data;
+    console.log(val);
+    chart.setOption({
+      series: [{
+        name: '静态单轨迹',
+        data: [{
+          coords: res,
+        }],
+      }, {
+        name: '动态单轨迹',
+        data: [{
+          coords: res,
+        }],
+      }, {
+        name: '出发地',
+        data: [{
+          value: res[0],
+          itemStyle: {
+            color: '#F5F5F5'
+          }
+        }],
+      }, {
+        name: '目的地',
+        data: [{
+          value: res.slice(-1)[0],
+          itemStyle: {
+            color: '#00CC33'
+          }
+        }],
+      }]
+    })
+  }
+  // 清除 byBrush 单轨迹动效绘制
+  function clearTrajByBrush() {
+    chart.setOption({
+      series: [{
+        name: '静态单轨迹',
+        data: [],
+      }, {
+        name: '动态单轨迹',
+        data: [],
+      }, {
+        name: '出发地',
+        data: [],
+      }, {
+        name: '目的地',
+        data: [],
+      }]
+    })
   }
 
 
@@ -430,6 +487,20 @@ export default function PagePredict(props) {
     }, true)
     // 只有当有 O（或 D）被选中，且存在原始数据时才发生渲染
     if (hasData && (sorg.length || sdest.length)) {
+      // 筛选得到的起点
+      const selectedOrg = org.filter(
+        item => [...new Set([...sorg, ...sdest])].includes(item.id)
+      ).map(item => item.coord);
+      // 筛选得到的终点
+      const selectedDest = dest.filter(
+        item => [...new Set([...sorg, ...sdest])].includes(item.id)
+      ).map(item => item.coord);
+      // 筛选得到的轨迹
+      const selectedTraj = traj.filter(
+        item => [...new Set([...sorg, ...sdest])].includes(item.id)
+      ).map(item => item.data);
+
+      // 渲染筛选的数据
       chart.setOption({
         series: [{
           // org
@@ -446,23 +517,28 @@ export default function PagePredict(props) {
         }, {
           // selected org
           name: '筛选起点',
-          data: org.filter(
-            item => [...new Set([...sorg, ...sdest])].includes(item.id)
-          ).map(item => item.coord)
+          data: selectedOrg
         }, {
           // selected dest
           name: '筛选终点',
-          data: dest.filter(
-            item => [...new Set([...sorg, ...sdest])].includes(item.id)
-          ).map(item => item.coord)
+          data: selectedDest
         }, {
           // selected dest
           name: '筛选轨迹',
-          data: traj.filter(
-            item => [...new Set([...sorg, ...sdest])].includes(item.id)
-          ).map(item => item.data)
+          data: selectedTraj
         }]
       })
+
+      // 将筛选轨迹的结果存储
+      const target = traj
+        .filter(
+          item => [...new Set([...sorg, ...sdest])].includes(item.id)
+        )
+        .reduce((prev, cur) => {
+          prev[cur.info] = cur;
+          return prev
+        }, {})
+      setByBrush(target)
     }
   }, [selected, org, dest, traj])
   // 取消框选时恢复样式
@@ -640,13 +716,13 @@ export default function PagePredict(props) {
           'array': () => (item.length !== 0),
           'object': () => (Object.keys(item).length !== 0),
         }
-        
+
         let type = Object.prototype.toString.call(item).toString().slice(8, -1).toLowerCase()
         // console.log(type);
         return obj[type]();
       })
 
-      return res.length ? {org, dest} : prev
+      return res.length ? { org, dest } : prev
     })
 
     // 添加事件
@@ -711,6 +787,19 @@ export default function PagePredict(props) {
           onSelect={(val) => setBySelect(val)}
           onClear={() => setBySelect(-1)}
         />
+        <Select
+          style={{ width: '100%' }}
+          onChange={(val) => singleTrajByBrush(val)}
+          onClear={clearTrajByBrush}
+          allowClear
+        >
+          {Object.entries(byBrush).map(item => (
+            <Select.Option
+              key={item[1].id}
+              value={item[1].info}
+            >{item[1].info}</Select.Option>
+          ))}
+        </Select>
       </Drawer>
       {/* 右侧 Drawer */}
       <Drawer

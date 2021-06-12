@@ -346,8 +346,8 @@ export default function PagePredict(props) {
 
   // 依据 byBrush 筛选结果进行单轨迹动效绘制
   function singleTrajByBrush(val) {
+    if (!val) return; 
     const res = byBrush[val]?.data;
-    console.log(val);
     chart.setOption({
       series: [{
         name: '静态单轨迹',

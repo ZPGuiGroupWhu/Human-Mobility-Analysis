@@ -26,9 +26,10 @@ import './bmap.scss';
 
 // 地图实例
 let bmap = null;
-// chart 实例
-let chart = null;
 export default function PagePredict(props) {
+  // echarts 实例对象
+  const [chart, setChart] = useState(null);
+
   // Context 对象
   const drawerVisibleObj = useContext(drawerVisibility);
 
@@ -39,6 +40,8 @@ export default function PagePredict(props) {
   const { data: org, isComplete: orgSuccess } = useReqData(getOrg);
   const { data: dest, isComplete: destSuccess } = useReqData(getDest);
   const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
+  // org / dest State: 起终点是否被选中
+  const [brushData, setBrushData] = useState({});
   // org / dest selected res: {{org: number[], dest: number[]}}
   const [selected, setSelected] = useState({});
 
@@ -340,7 +343,11 @@ export default function PagePredict(props) {
 
   useEffect(() => {
     // 实例化 chart
-    chart = echarts.init(ref.current);
+    setChart(echarts.init(ref.current));
+  }, [])
+
+  useEffect(() => {
+    if (!chart) return () => { }
     chart.setOption(option);
     // 加载 Loading
     chart.showLoading();
@@ -351,10 +358,10 @@ export default function PagePredict(props) {
     bmap.setMapStyleV2({
       styleId: 'f65bcb0423e47fe3d00cd5e77e943e84'
     });
-  }, [])
+  }, [chart])
 
   // 当所有数据请求完毕后，再取消 Loading 动画展示
-  useEffect(()=>{
+  useEffect(() => {
     orgSuccess && destSuccess && trajSuccess && chart.hideLoading();
   }, [orgSuccess, destSuccess, trajSuccess])
 
@@ -492,6 +499,7 @@ export default function PagePredict(props) {
 
   // 图例
   useEffect(() => {
+    if (!chart) return () => { }
     const data = trajColorBar.map(item => ({
       name: item.static,
       itemStyle: {
@@ -515,7 +523,7 @@ export default function PagePredict(props) {
         }],
       }]
     })
-  }, [])
+  }, [chart])
 
 
   // 存储时间信息
@@ -526,16 +534,16 @@ export default function PagePredict(props) {
    * hourEnd
    */
   const [timer, timerDispatch] = useTime();
-
   // 时间筛选静态轨迹 & 绘制
   useEffect(() => {
+    if (!chart) return () => { }
     chart.setOption({
       series: [{
         name: '轨迹时间筛选',
         data: (bySelect === -1) ? byTime.map(item => item.data) : [],
       }]
     })
-  }, [byTime, bySelect])
+  }, [chart, byTime, bySelect])
 
   // 选择单条轨迹并绘制
   // bySelect - 选择轨迹对应的索引
@@ -594,6 +602,62 @@ export default function PagePredict(props) {
     }
   }, bySelect, byTime)
 
+
+  // 根据图例向 brush 组件传入选中的数据
+  useEffect(() => {
+    function legendselectchanged(e) {
+      let obj = {
+        '起点': (state) => {
+          console.log(state);
+          if (state) {
+            setBrushData(prev => ({ ...prev, org }));
+          } else {
+            setBrushData(prev => {
+              Reflect.deleteProperty(prev, 'org');
+              return prev
+            });
+          }
+        },
+        '终点': (state) => {
+          if (state) {
+            setBrushData(prev => ({ ...prev, dest }));
+          } else {
+            setBrushData(prev => {
+              Reflect.deleteProperty(prev, 'dest')
+              return prev;
+            });
+          }
+        },
+      }
+      // console.log(e);
+      obj?.[e.name]?.(e.selected[e.name])
+    }
+
+    setBrushData(prev => {
+      const arr = [org, dest, prev]
+      const res = arr.filter(item => {
+        const obj = {
+          'array': () => (item.length !== 0),
+          'object': () => (Object.keys(item).length !== 0),
+        }
+        
+        let type = Object.prototype.toString.call(item).toString().slice(8, -1).toLowerCase()
+        // console.log(type);
+        return obj[type]();
+      })
+
+      return res.length ? {org, dest} : prev
+    })
+
+    // 添加事件
+    // 可选链对象判空的应用
+    chart?.on('legendselectchanged', legendselectchanged);
+
+    return () => {
+      chart?.off('legendselectchanged', legendselectchanged);
+    }
+  }, [chart, org, dest])
+
   return (
     <>
       <div
@@ -604,7 +668,8 @@ export default function PagePredict(props) {
       {/* Brush 框选功能栏 */}
       <BrushBar
         map={bmap}
-        data={{ org, dest }}
+        // data={{org, dest}}
+        data={brushData}
         getSelected={(value) => { setSelected(value) }}
         onClear={onClear}
       />

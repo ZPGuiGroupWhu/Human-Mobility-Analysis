@@ -1,5 +1,5 @@
 // 第三方库
-import React, { useRef, useEffect, useState, useContext } from 'react';
+import React, { useRef, useEffect, useState, useContext, useReducer } from 'react';
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
@@ -8,6 +8,7 @@ import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
 import TimeSelector from '@/components/pagePredict/TimeSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
 import BrushBar from '@/components/bmapBrush/BrushBar';
+import ModelCard from '@/components/pagePredict/ModelCard';
 // 自定义
 import { getOrg, getDest, getTraj } from '@/network';
 import { useReqData } from '@/common/hooks/useReqData';
@@ -52,6 +53,33 @@ export default function PagePredict(props) {
   // select by brush
   const [byBrush, setByBrush] = useState({});
 
+  
+  // MODEL SETTING
+  function modelReducer(state, action) {
+    switch (action.type) {
+      case 'model1':
+        return (
+          <div>model1</div>
+        )
+      case 'model2':
+        return (
+          <div>model2</div>
+        )
+      case 'model3':
+        return (
+          <div>model3</div>
+        )
+      case 'model4':
+        return (
+          <div>model4</div>
+        )
+      default:
+        return null;
+    }
+  }
+  const [modelComp, modelDispatch] = useReducer(modelReducer, null)
+  // 模型是否已经选择
+  const [modelSelected, setModelSelected] = useState(true);
 
 
 
@@ -346,7 +374,7 @@ export default function PagePredict(props) {
 
   // 依据 byBrush 筛选结果进行单轨迹动效绘制
   function singleTrajByBrush(val) {
-    if (!val) return; 
+    if (!val) return;
     const res = byBrush[val]?.data;
     chart.setOption({
       series: [{
@@ -772,6 +800,8 @@ export default function PagePredict(props) {
         style={{
           position: 'absolute',
         }}
+        // 多层 Drawer 嵌套的推动行为，默认会水平推动180px
+        push={false}
       >
         <TimeSelector
           setByTime={setByTime}
@@ -800,6 +830,35 @@ export default function PagePredict(props) {
             >{item[1].info}</Select.Option>
           ))}
         </Select>
+        {/* 模型选择面板 */}
+        <ModelCard
+          width='100%'
+          imgUrl='http://placehold.jp/150x150.png'
+          // meta options
+          avatarUrl='https://avatars.githubusercontent.com/u/42670632?v=4'
+          title='Model Name'
+          description='Model Description'
+          isSelected={modelSelected}
+        >
+          {
+            <Select
+              defaultValue="model1"
+              style={{ width: '100%' }}
+              allowClear
+              onSelect={val => {
+                modelDispatch({type: val});
+                setModelSelected(true);
+              }}
+              onClear={() => setModelSelected(false)}
+            >
+              <Select.Option value="model1">Model 1</Select.Option>
+              <Select.Option value="model2">Model 2</Select.Option>
+              <Select.Option value="model3">Model 3</Select.Option>
+              <Select.Option value="model4">Model 4</Select.Option>
+            </Select>
+          }
+          {modelComp}
+        </ModelCard>
       </Drawer>
       {/* 右侧 Drawer */}
       <Drawer

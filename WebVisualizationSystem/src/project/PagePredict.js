@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from 'reac
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import { Drawer, Select } from 'antd';
+import { Drawer, Select, message } from 'antd';
 import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
 import TimeSelector from '@/components/pagePredict/TimeSelector';
 import TransferSelector from '@/components/pagePredict/TransferSelector';
@@ -27,6 +27,8 @@ import './bmap.scss';
 
 // 地图实例
 let bmap = null;
+// 预测计时器
+let predictTimer = null;
 export default function PagePredict(props) {
   // echarts 实例对象
   const [chart, setChart] = useState(null);
@@ -52,35 +54,39 @@ export default function PagePredict(props) {
   const [bySelect, setBySelect] = useState(-1); // 进一步筛选
   // select by brush
   const [byBrush, setByBrush] = useState({});
+  // 存储用于预测的单条轨迹
+  const [usedForPredict, setUsedForPredict] = useState({});
+  // 存储当前轨迹坐标片段
+  const [trajPart, setTrajPart] = useState({ idx: 0, coords: [] });
 
-  
-  // MODEL SETTING
-  function modelReducer(state, action) {
+
+  // 模型面板的预测功能函数
+  function predictReducer(state, action) {
+    const keys = Object.keys(state);
+    keys.forEach(item => state[item] = false)
     switch (action.type) {
-      case 'model1':
-        return (
-          <div>model1</div>
-        )
-      case 'model2':
-        return (
-          <div>model2</div>
-        )
-      case 'model3':
-        return (
-          <div>model3</div>
-        )
-      case 'model4':
-        return (
-          <div>model4</div>
-        )
-      default:
-        return null;
+      case 'startPredict':
+        return {
+          ...state,
+          startPredict: true
+        }
+      case 'stopPredict':
+        return {
+          ...state,
+          stopPredict: true
+        }
+      case 'clearPredict':
+        return {
+          ...state,
+          clearPredict: true
+        }
     }
   }
-  const [modelComp, modelDispatch] = useReducer(modelReducer, null)
-  // 模型是否已经选择
-  const [modelSelected, setModelSelected] = useState(true);
-
+  const [predict, predictDispatch] = useReducer(predictReducer, {
+    startPredict: false,
+    stopPredict: false,
+    clearPredict: false,
+  })
 
 
   // 容器 ref 对象
@@ -278,7 +284,8 @@ export default function PagePredict(props) {
         color: '#FB8C00'
       },
       effect: {
-        constantSpeed: 40,
+        constantSpeed: 100,
+        // period: 1,
         show: true,
         trailLength: 0.8,
         symbolSize: 5,
@@ -372,10 +379,8 @@ export default function PagePredict(props) {
   }
 
 
-  // 依据 byBrush 筛选结果进行单轨迹动效绘制
-  function singleTrajByBrush(val) {
-    if (!val) return;
-    const res = byBrush[val]?.data;
+  // 单轨迹动效绘制
+  function singleTraj(res) {
     chart.setOption({
       series: [{
         name: '静态单轨迹',
@@ -387,7 +392,13 @@ export default function PagePredict(props) {
         data: [{
           coords: res,
         }],
-      }, {
+      }, ]
+    })
+  }
+  // 单轨迹始发点与目的地绘制
+  function singleOD(res) {
+    chart.setOption({
+      series: [{
         name: '出发地',
         data: [{
           value: res[0],
@@ -406,8 +417,8 @@ export default function PagePredict(props) {
       }]
     })
   }
-  // 清除 byBrush 单轨迹动效绘制
-  function clearTrajByBrush() {
+  // 清除单轨迹动效绘制
+  function clearSingleTraj() {
     chart.setOption({
       series: [{
         name: '静态单轨迹',
@@ -424,6 +435,77 @@ export default function PagePredict(props) {
       }]
     })
   }
+  // 依据 byBrush 筛选结果进行单轨迹动效绘制
+  function singleTrajByBrush(val) {
+    if (!val) return;
+    const res = byBrush[val]?.data;
+    // 记录轨迹
+    setUsedForPredict(byBrush[val] || {});
+    singleTraj(res)
+    singleOD(res);
+  }
+
+  // 轨迹切分
+  function trajSeparation(data, partnum) {
+    if (data) {
+      const partlens = Math.ceil(data.length / partnum);
+      let start = partlens;
+      let res = []
+      while (start <= data.length + partlens) {
+        res.push(data.slice(0, start));
+        start += partlens
+      }
+      return res;
+    } else {
+      return [];
+    }
+  }
+
+  useEffect(() => {
+    // console.log(predict);
+    // 生成切分轨迹段
+    const separationRes = trajSeparation(usedForPredict?.data, 30);
+
+    if (separationRes.length === 0) return () => { }
+    // 开始预测
+    // !predictTimer 避免重复点击
+    if (predict.startPredict && !predictTimer) {
+      singleOD(usedForPredict?.data);
+      predictTimer = setInterval(() => {
+        setTrajPart(({ idx, coords }) => {
+          if (coords.length !== 0) {
+            // 必须采用零延时，否则多个 setOption 会冲突
+            setTimeout(() => {
+              singleTraj(coords)
+            }, 0)
+          }
+
+          return idx === separationRes.length ? {
+            idx: 1,
+            coords: separationRes[0],
+          } : {
+            idx: idx + 1,
+            coords: separationRes[idx],
+          }
+        })
+      }, 1000)
+    }
+    // 暂停预测
+    if (predict.stopPredict) {
+      clearInterval(predictTimer);
+      predictTimer = null;
+    }
+    // 清除预测
+    if (predict.clearPredict) {
+      clearInterval(predictTimer);
+      predictTimer = null;
+      singleTraj(usedForPredict.data);
+      setTrajPart({
+        idx: 0,
+        coords: [],
+      })
+    }
+  }, [predict, usedForPredict])
 
 
   useEffect(() => {
@@ -653,56 +735,16 @@ export default function PagePredict(props) {
   // bySelect - 选择轨迹对应的索引
   useExceptFirst(([bySelect, byTime]) => {
     let res = byTime.find(item => item.id === bySelect);
-    res = res ? res.data : undefined;
+    // 记录轨迹
+    setUsedForPredict(res || {});
 
-    console.log(byTime);
+    res = res ? res.data : undefined;
     // res === undefined 表示没有找到数据
     if (!res) {
-      chart.setOption({
-        series: [{
-          name: '静态单轨迹',
-          data: [],
-        }, {
-          name: '动态单轨迹',
-          data: [],
-        }, {
-          name: '出发地',
-          data: [],
-        }, {
-          name: '目的地',
-          data: [],
-        }]
-      })
+      clearSingleTraj();
     } else {
-      chart.setOption({
-        series: [{
-          name: '静态单轨迹',
-          data: [{
-            coords: res,
-          }],
-        }, {
-          name: '动态单轨迹',
-          data: [{
-            coords: res,
-          }],
-        }, {
-          name: '出发地',
-          data: [{
-            value: res[0],
-            itemStyle: {
-              color: '#F5F5F5'
-            }
-          }],
-        }, {
-          name: '目的地',
-          data: [{
-            value: res.slice(-1)[0],
-            itemStyle: {
-              color: '#00CC33'
-            }
-          }],
-        }]
-      })
+      singleTraj(res)
+      singleOD(res)
     }
   }, bySelect, byTime)
 
@@ -815,12 +857,15 @@ export default function PagePredict(props) {
         <SingleTrajSelector
           data={byTime}
           onSelect={(val) => setBySelect(val)}
-          onClear={() => setBySelect(-1)}
+          onClear={() => {
+            setBySelect(-1); // 清空选择项
+            setUsedForPredict({}); // 清空存储
+          }}
         />
         <Select
           style={{ width: '100%' }}
           onChange={(val) => singleTrajByBrush(val)}
-          onClear={clearTrajByBrush}
+          onClear={clearSingleTraj}
           allowClear
         >
           {Object.entries(byBrush).map(item => (
@@ -838,27 +883,28 @@ export default function PagePredict(props) {
           avatarUrl='https://avatars.githubusercontent.com/u/42670632?v=4'
           title='Model Name'
           description='Model Description'
-          isSelected={modelSelected}
-        >
-          {
-            <Select
-              defaultValue="model1"
-              style={{ width: '100%' }}
-              allowClear
-              onSelect={val => {
-                modelDispatch({type: val});
-                setModelSelected(true);
-              }}
-              onClear={() => setModelSelected(false)}
-            >
-              <Select.Option value="model1">Model 1</Select.Option>
-              <Select.Option value="model2">Model 2</Select.Option>
-              <Select.Option value="model3">Model 3</Select.Option>
-              <Select.Option value="model4">Model 4</Select.Option>
-            </Select>
-          }
-          {modelComp}
-        </ModelCard>
+          startPredict={() => {
+            if (Object.keys(usedForPredict).length === 0) {
+              message.error('请选择有效的数据格式！', 1);
+            } else {
+              predictDispatch({ type: 'startPredict' });
+            }
+          }}
+          stopPredict={() => {
+            if (Object.keys(usedForPredict).length === 0) {
+              message.error('请选择有效的数据格式！', 1);
+            } else {
+              predictDispatch({ type: 'stopPredict' });
+            }
+          }}
+          clearPredict={() => {
+            if (Object.keys(usedForPredict).length === 0) {
+              message.error('请选择有效的数据格式！', 1);
+            } else {
+              predictDispatch({ type: 'clearPredict' });
+            }
+          }}
+        ></ModelCard>
       </Drawer>
       {/* 右侧 Drawer */}
       <Drawer

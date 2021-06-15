@@ -1,5 +1,5 @@
 import React, { useReducer, useState } from 'react';
-import { Card, Avatar, Drawer, Tooltip } from 'antd';
+import { Card, Avatar, Drawer, Tooltip, Select } from 'antd';
 import { EllipsisOutlined, SettingOutlined, PlayCircleOutlined, PauseCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import './ModelCard.scss';
 
@@ -14,8 +14,9 @@ export default function ModelCard(props) {
     title = 'Model Name',
     description = 'Model Description',
     drawerHeight = '350px',
-    // model isSelected?
-    isSelected = false,
+    startPredict,
+    stopPredict,
+    clearPredict,
   } = props
 
   const keys = ['参数配置', '模型选择', '开始预测', '暂停预测', '清除']
@@ -27,11 +28,38 @@ export default function ModelCard(props) {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [settingVisible, setSettingVisible] = useState(false);
   const [tooltip, setTooltips] = useState('');
+  // MODEL SETTING
+  function modelReducer(state, action) {
+    switch (action.type) {
+      case 'model1':
+        return (
+          <div>model1</div>
+        )
+      case 'model2':
+        return (
+          <div>model2</div>
+        )
+      case 'model3':
+        return (
+          <div>model3</div>
+        )
+      case 'model4':
+        return (
+          <div>model4</div>
+        )
+      default:
+        return null;
+    }
+  }
+  const [modelComp, modelDispatch] = useReducer(modelReducer, null)
+  // 模型是否已经选择
+  const [modelSelected, setModelSelected] = useState(false);
 
   // function
 
 
-  const children = React.Children.toArray(props.children)
+
+  
   return (
     <div
       style={{ width }}
@@ -48,11 +76,11 @@ export default function ModelCard(props) {
         actions={[
           <a
             onClick={(e) => {
-              e.preventDefault(); isSelected && setSettingVisible(true)
+              e.preventDefault(); modelSelected && setSettingVisible(true)
             }}
-            onMouseOver={(e) => {setTooltips(keys[0])}}
-            onMouseLeave={()=>{setTooltips('')}}
-            style={{ cursor: isSelected ? 'pointer' : 'not-allowed' }}
+            onMouseOver={(e) => { setTooltips(keys[0]) }}
+            onMouseLeave={() => { setTooltips('') }}
+            style={{ cursor: modelSelected ? 'pointer' : 'not-allowed' }}
           >
             <Tooltip placement='top' title={keys[0]} visible={tooltip === keys[0]}>
               <SettingOutlined key={keys[0]} />
@@ -70,27 +98,39 @@ export default function ModelCard(props) {
             </Tooltip>
           </a>,
           <a
-            onClick={(e) => {e.preventDefault();}}
+            onClick={(e) => { 
+              e.preventDefault();
+              modelSelected && startPredict();
+            }}
             onMouseOver={() => setTooltips(keys[2])}
             onMouseLeave={() => setTooltips('')}
+            style={{ cursor: modelSelected ? 'pointer' : 'not-allowed' }}
           >
             <Tooltip placement='top' title={keys[2]} visible={tooltip === keys[2]}>
               <PlayCircleOutlined key={keys[2]} />
             </Tooltip>
           </a>,
           <a
-            onClick={(e) => {e.preventDefault();}}
+            onClick={(e) => { 
+              e.preventDefault(); 
+              modelSelected && stopPredict();
+            }}
             onMouseOver={() => setTooltips(keys[3])}
             onMouseLeave={() => setTooltips('')}
+            style={{ cursor: modelSelected ? 'pointer' : 'not-allowed' }}
           >
             <Tooltip placement='top' title={keys[3]} visible={tooltip === keys[3]}>
               <PauseCircleOutlined key={keys[3]} />
             </Tooltip>
           </a>,
           <a
-            onClick={(e) => {e.preventDefault();}}
+            onClick={(e) => { 
+              e.preventDefault();
+              modelSelected && clearPredict(); 
+            }}
             onMouseOver={() => setTooltips(keys[4])}
             onMouseLeave={() => setTooltips('')}
+            style={{ cursor: modelSelected ? 'pointer' : 'not-allowed' }}
           >
             <Tooltip placement='top' title={keys[4]} visible={tooltip === keys[4]}>
               <CloseCircleOutlined key={keys[4]} />
@@ -116,7 +156,23 @@ export default function ModelCard(props) {
         width='100%'
         height={drawerHeight}
       >
-        {children[0]}
+        <Select
+          style={{ width: '100%' }}
+          allowClear
+          onSelect={val => {
+            modelDispatch({ type: val });
+            setModelSelected(true);
+            setTimeout(() => {
+              setOptionsVisible(false);
+            }, 200)
+          }}
+          onClear={() => setModelSelected(false)}
+        >
+          <Select.Option value="model1">Model 1</Select.Option>
+          <Select.Option value="model2">Model 2</Select.Option>
+          <Select.Option value="model3">Model 3</Select.Option>
+          <Select.Option value="model4">Model 4</Select.Option>
+        </Select>
       </Drawer>
       {/* 模型设置弹窗 */}
       <Drawer
@@ -130,7 +186,7 @@ export default function ModelCard(props) {
         width='100%'
         height={drawerHeight}
       >
-        {children[1]}
+        {modelComp}
       </Drawer>
     </div>
   )

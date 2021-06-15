@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select } from 'antd';
+import { Select, Empty } from 'antd';
 
 /**
  * @param {{id: number, distance: number, coords: number[][]}[]} data - 轨迹数组
@@ -16,6 +16,7 @@ export default function SingleTrajSelector(props) {
       allowClear
       onSelect={(val) => onSelect && onSelect(val)}
       onClear={onClear}
+      notFoundContent={<Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
     >
       {
         data.sort((a, b) => a.distance - b.distance).map(item => {

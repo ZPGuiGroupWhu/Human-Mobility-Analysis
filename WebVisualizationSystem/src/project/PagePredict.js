@@ -27,22 +27,33 @@ import './bmap.scss';
 
 // 地图实例
 let bmap = null;
-// 预测计时器
+// 目的地预测动效 - 计时器
 let predictTimer = null;
+
 export default function PagePredict(props) {
   // echarts 实例对象
   const [chart, setChart] = useState(null);
-
   // Context 对象
   const drawerVisibleObj = useContext(drawerVisibility);
 
-  // org / dest color
-  const orgColor = '#00FFFF';
-  const destColor = '#FF0033';
-  // org / dest: { {id: number, coord: number[], count: number}[] }
+
+  // scatter style: org / dest color
+  const orgColor = '#00FFFF'; // 起点颜色
+  const destColor = '#FF0033'; // 终点颜色
+  const curColor = '#E53935'; // 当前点颜色
+
+  /**
+   * @param {function} requestMethod - 数据请求方法
+   * org / dest
+   * @returns {{id: number, coord: number[], count: number}[]} - id 数据唯一标识; coord 点坐标; count 默认1，用于热力图权重
+   * traj
+   * @returns {{id: number, data: number[][], distance: number, info: string}[]} - id 数据唯一标识; data 轨迹坐标集; distance 出行距离; info 轨迹描述信息(时间 / 距离 / ...)
+   */
   const { data: org, isComplete: orgSuccess } = useReqData(getOrg);
   const { data: dest, isComplete: destSuccess } = useReqData(getDest);
   const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
+
+
   // org / dest State: 起终点是否被选中
   const [brushData, setBrushData] = useState({});
   // org / dest selected res: {{org: number[], dest: number[]}}
@@ -323,7 +334,7 @@ export default function PagePredict(props) {
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
-      zlevel: 81,
+      zlevel: 1000,
     }, {
       // 10. paint single dynamic scatter - destnation point
       name: '目的地',
@@ -356,7 +367,7 @@ export default function PagePredict(props) {
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
-      zlevel: 82,
+      zlevel: 1000,
     }, {
       // 11. paint select static traj
       name: '筛选轨迹',
@@ -371,6 +382,23 @@ export default function PagePredict(props) {
         width: 1.5,
       },
       zlevel: 110
+    }, {
+      // 12. paint single dynamic scatter - current point
+      name: '当前点',
+      type: 'effectScatter',
+      // 何时显示动效：render - 绘制完成后，emphasis - 高亮显示
+      showEffectOn: 'render',
+      rippleEffect: {
+        // 动效周期
+        period: 4,
+        // 波纹缩放比例
+        scale: 3,
+      },
+      coordinateSystem: 'bmap',
+      symbolSize: 8,
+      // 若存在多个点，请在 data 传参时传入 color
+      data: [],
+      zlevel: 1000,
     },
     // global static trajectories
     ...globalStaticTraj,
@@ -379,7 +407,10 @@ export default function PagePredict(props) {
   }
 
 
-  // 单轨迹动效绘制
+  /**
+   * 单轨迹动效绘制
+   * @param {number[][]} res - 轨迹经纬度坐标 [[lng, lat], ...]
+   */
   function singleTraj(res) {
     chart.setOption({
       series: [{
@@ -392,10 +423,13 @@ export default function PagePredict(props) {
         data: [{
           coords: res,
         }],
-      }, ]
+      },]
     })
   }
-  // 单轨迹始发点与目的地绘制
+  /**
+   * 单轨迹始发点与目的地绘制
+   * @param {number[][]} res - 轨迹经纬度坐标 [[lng, lat], ...]
+   */
   function singleOD(res) {
     chart.setOption({
       series: [{
@@ -417,6 +451,25 @@ export default function PagePredict(props) {
       }]
     })
   }
+  /**
+   * 单轨迹当前点绘制
+   * @param {number[][]} res - 轨迹经纬度坐标 [[lng, lat], ...]
+   */
+  function singleCurpt(res) {
+    // 绘制当前轨迹末尾坐标
+    chart.setOption({
+      series: [{
+        name: '当前点',
+        data: [{
+          value: res.slice(-1)[0],
+          itemStyle: {
+            color: curColor,
+          }
+        }],
+      }]
+    })
+  }
+
   // 清除单轨迹动效绘制
   function clearSingleTraj() {
     chart.setOption({
@@ -432,6 +485,9 @@ export default function PagePredict(props) {
       }, {
         name: '目的地',
         data: [],
+      }, {
+        name: '当前点',
+        data: [],
       }]
     })
   }
@@ -443,6 +499,8 @@ export default function PagePredict(props) {
     setUsedForPredict(byBrush[val] || {});
     singleTraj(res)
     singleOD(res);
+    // 取消全局图例选择
+    glbUnSelectLegend(chart);
   }
 
   // 轨迹切分
@@ -466,17 +524,25 @@ export default function PagePredict(props) {
     // 生成切分轨迹段
     const separationRes = trajSeparation(usedForPredict?.data, 30);
 
-    if (separationRes.length === 0) return () => { }
+    if (separationRes.length === 0 && !chart) return () => { }
     // 开始预测
     // !predictTimer 避免重复点击
     if (predict.startPredict && !predictTimer) {
+      // 加载 Loading 模拟数据预测
+      chart.showLoading();
+
       singleOD(usedForPredict?.data);
       predictTimer = setInterval(() => {
         setTrajPart(({ idx, coords }) => {
+
           if (coords.length !== 0) {
+            // 取消 Loading
+            chart.hideLoading();
+
             // 必须采用零延时，否则多个 setOption 会冲突
             setTimeout(() => {
-              singleTraj(coords)
+              singleTraj(coords);
+              singleCurpt(coords);
             }, 0)
           }
 
@@ -488,7 +554,7 @@ export default function PagePredict(props) {
             coords: separationRes[idx],
           }
         })
-      }, 1000)
+      }, 2000)
     }
     // 暂停预测
     if (predict.stopPredict) {
@@ -499,13 +565,15 @@ export default function PagePredict(props) {
     if (predict.clearPredict) {
       clearInterval(predictTimer);
       predictTimer = null;
+      clearSingleTraj();
       singleTraj(usedForPredict.data);
+      singleOD(usedForPredict.data)
       setTrajPart({
         idx: 0,
         coords: [],
       })
     }
-  }, [predict, usedForPredict])
+  }, [predict, usedForPredict, chart])
 
 
   useEffect(() => {
@@ -683,33 +751,80 @@ export default function PagePredict(props) {
   }
 
 
+  function mapToObj(strMap) {
+    let obj = {};
+    for (let [k,v] of strMap) {
+      obj[k] = v;
+    }
+    return obj;
+  }
   // 图例
   useEffect(() => {
     if (!chart) return () => { }
+    // 按距离划分的轨迹图例
     const data = trajColorBar.map(item => ({
       name: item.static,
       itemStyle: {
         color: item.color,
       }
     }))
+    const selectedMap = new Map(trajColorBar.map(item => ([item.static.toString(), true])));
+    const selected = mapToObj(selectedMap);
     chart.setOption({
       legend: [{
         data,
+        selected,
       }, {
         data: [{
           name: '起点'
         }, {
           name: '终点'
         }],
+        selected: {
+          '起点': true,
+          '终点': true,
+        }
       }, {
         data: [{
           name: 'O聚类热力图'
         }, {
           name: 'D聚类热力图'
         }],
+        selected: {
+          'O聚类热力图': true,
+          'D聚类热力图': true,
+        }
       }]
     })
   }, [chart])
+
+
+  // 全局图例 name
+  const glbLegends = [...(trajColorBar.map(item => item.static)), '起点', '终点', 'O聚类热力图', 'D聚类热力图']
+  // 取消图例选择
+  function unSelectLegend(chart, name) {
+    chart?.dispatchAction({
+      type: 'legendUnSelect',
+      name,
+    })
+  }
+  // 图例选择
+  function selectLegend(chart, name) {
+    chart?.dispatchAction({
+      type: 'legendSelect',
+      name,
+    })
+  }
+  // 全局图例取消选择
+  function glbUnSelectLegend(chart) {
+    glbLegends.forEach(item => unSelectLegend(chart, item));
+  }
+  // 全局图例选择
+  function glbSelectLegend(chart) {
+    glbLegends.forEach(item => selectLegend(chart, item));
+  }
+
+
 
 
   // 存储时间信息
@@ -733,7 +848,7 @@ export default function PagePredict(props) {
 
   // 选择单条轨迹并绘制
   // bySelect - 选择轨迹对应的索引
-  useExceptFirst(([bySelect, byTime]) => {
+  useExceptFirst(([bySelect, byTime, chart]) => {
     let res = byTime.find(item => item.id === bySelect);
     // 记录轨迹
     setUsedForPredict(res || {});
@@ -743,10 +858,14 @@ export default function PagePredict(props) {
     if (!res) {
       clearSingleTraj();
     } else {
+      // 绘制轨迹
       singleTraj(res)
+      // 绘制 OD
       singleOD(res)
+      // 取消全局图例选择
+      glbUnSelectLegend(chart);
     }
-  }, bySelect, byTime)
+  }, bySelect, byTime, chart)
 
 
   // 根据图例向 brush 组件传入选中的数据
@@ -803,6 +922,7 @@ export default function PagePredict(props) {
       chart?.off('legendselectchanged', legendselectchanged);
     }
   }, [chart, org, dest])
+
 
   return (
     <>

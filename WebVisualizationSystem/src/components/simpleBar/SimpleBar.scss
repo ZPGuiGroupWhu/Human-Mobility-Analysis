@@ -1,0 +1,56 @@
+$bgColor: rgba(255, 255, 255, 1);
+$time: 0.25s;
+$height: 30px;
+$borderStyle: 1px solid #808080;
+
+.simple-bar {
+  position: absolute;
+
+  .head {
+    position: absolute;
+    background-color: $bgColor;
+    border-radius: 50%;
+    width: $height;
+    height: $height;
+    z-index: 2;
+    border: $borderStyle;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: ($height - 10px);
+  }
+
+  .content {
+    position: absolute;
+    left: $height / 2;
+    background-color: $bgColor;
+    height: $height;
+    transition: width $time ease-in;
+    z-index: 1;
+    border-top: $borderStyle;
+    border-bottom: $borderStyle;
+
+    .main {
+      position: absolute;
+      left: $height / 2;
+      height: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0);
+      z-index: 3;
+    }
+  }
+
+  .end {
+    position: absolute;
+    background-color: $bgColor;
+    border-radius: 50%;
+    width: $height;
+    height: $height;
+    transition: left $time ease-in;
+    z-index: 0;
+    border: $borderStyle;
+  }
+}

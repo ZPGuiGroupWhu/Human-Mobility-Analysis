@@ -4,21 +4,30 @@ import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
 import { Drawer, Select, message } from 'antd';
-import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
-import TimeSelector from '@/components/pagePredict/TimeSelector';
-import TransferSelector from '@/components/pagePredict/TransferSelector';
-import BrushBar from '@/components/bmapBrush/BrushBar';
-import ModelCard from '@/components/pagePredict/ModelCard';
-// 自定义
-import { getOrg, getDest, getTraj } from '@/network';
+// 通用函数
+import { setCenterAndZoom } from '@/common/func/setCenterAndZoom';
+import { eventEmitter } from '@/common/func/EventEmitter';
+// 通用 Hooks
 import { useReqData } from '@/common/hooks/useReqData';
-import { useStaticTraj } from '@/common/hooks/useStaticTraj';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
 import { useTime } from '@/common/hooks/useTime';
+// 通用配置
 import { globalStaticTraj, globalDynamicTraj } from '@/common/options/globalTraj';
 import { trajColorBar } from '@/common/options/trajColorBar';
+// 网络请求
+import { getOrg, getDest, getTraj } from '@/network';
+// 自定义组件
+import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
+import TimeSelector from '@/components/pagePredict/TimeSelector';
+import BrushBar from '@/components/bmapBrush/BrushBar';
+import ModelCard from '@/components/pagePredict/ModelCard';
+import MyDrawer from '@/components/drawer/MyDrawer';
+import Calendar from '@/components/pagePredict/Calendar';
+import SimpleBar from '@/components/simpleBar/SimpleBar';
+import ModelBar from '@/components/pagePredict/ModelBar';
+import LegendBar from '@/components/pagePredict/LegendBar';
 // Context 对象导入
-import { drawerVisibility } from '@/context/mainContext'
+import { drawerVisibility } from '@/context/mainContext';
 // 样式
 import './bmap.scss';
 
@@ -29,6 +38,8 @@ import './bmap.scss';
 let bmap = null;
 // 目的地预测动效 - 计时器
 let predictTimer = null;
+// iconfont Symbol 在线 url
+const iconScriptUrl = '//at.alicdn.com/t/font_2577661_icgx16h0r9d.js';
 
 export default function PagePredict(props) {
   // echarts 实例对象
@@ -44,14 +55,21 @@ export default function PagePredict(props) {
 
   /**
    * @param {function} requestMethod - 数据请求方法
-   * org / dest
-   * @returns {{id: number, coord: number[], count: number}[]} - id 数据唯一标识; coord 点坐标; count 默认1，用于热力图权重
    * traj
    * @returns {{id: number, data: number[][], distance: number, info: string}[]} - id 数据唯一标识; data 轨迹坐标集; distance 出行距离; info 轨迹描述信息(时间 / 距离 / ...)
    */
-  const { data: org, isComplete: orgSuccess } = useReqData(getOrg);
-  const { data: dest, isComplete: destSuccess } = useReqData(getDest);
   const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
+
+
+
+  /**
+   * org / dest
+   * @returns {{id: number, coord: number[], count: number}[]} - id 数据唯一标识; coord 点坐标; count 默认1，用于热力图权重
+   */
+  // (所有)起点数据
+  const [org, setOrg] = useState([]);
+  // (所有)终点数据
+  const [dest, setDest] = useState([]);
 
 
   // org / dest State: 起终点是否被选中
@@ -69,6 +87,9 @@ export default function PagePredict(props) {
   const [usedForPredict, setUsedForPredict] = useState({});
   // 存储当前轨迹坐标片段
   const [trajPart, setTrajPart] = useState({ idx: 0, coords: [] });
+
+  // 日历面板显示状态
+  const [calendar, setCalendar] = useState(false);
 
 
   // 模型面板的预测功能函数
@@ -114,49 +135,51 @@ export default function PagePredict(props) {
       mapStyle: {},
     },
     // legend
-    legend: [{
-      // 轨迹图例
-      // 图例相对容器距离
-      left: 'auto',
-      right: '20rem',
-      top: 'auto',
-      bottom: '5rem',
-      // 图例布局方向
-      orient: 'vertical',
-      // 文本样式
-      textStyle: {
-        color: '#fff',
-      },
-      data: [],
-    }, {
-      // OD 图例
-      // 图例相对容器距离
-      left: 'auto',
-      right: '105rem',
-      top: 'auto',
-      bottom: '5rem',
-      // 图例布局方向
-      orient: 'vertical',
-      // 文本样式
-      textStyle: {
-        color: '#fff',
-      },
-      data: [],
-    }, {
-      // OD 热力图图例
-      // 图例相对容器距离
-      left: 'auto',
-      right: '170rem',
-      top: 'auto',
-      bottom: '5rem',
-      // 图例布局方向
-      orient: 'vertical',
-      // 文本样式
-      textStyle: {
-        color: '#fff',
-      },
-      data: [],
-    }],
+    legend: [
+      //   {
+      //   // 轨迹图例
+      //   // 图例相对容器距离
+      //   left: '10px',
+      //   right: 'auto',
+      //   top: 'auto',
+      //   bottom: '10px',
+      //   // 图例布局方向
+      //   orient: 'vertical',
+      //   // 文本样式
+      //   textStyle: {
+      //     color: '#fff',
+      //   },
+      //   data: [],
+      // }, 
+      {
+        // OD 图例
+        // 图例相对容器距离
+        left: '10px',
+        right: 'auto',
+        top: 'auto',
+        bottom: '60px',
+        // 图例布局方向
+        orient: 'vertical',
+        // 文本样式
+        textStyle: {
+          color: '#fff',
+        },
+        data: [],
+      }, {
+        // OD 热力图图例
+        // 图例相对容器距离
+        left: '10px',
+        right: 'auto',
+        top: 'auto',
+        bottom: '10px',
+        // 图例布局方向
+        orient: 'vertical',
+        // 文本样式
+        textStyle: {
+          color: '#fff',
+        },
+        data: [],
+      }],
     animation: false,
     visualMap: [
       // OD Cluster Heatmap
@@ -167,7 +190,7 @@ export default function PagePredict(props) {
         min: 0,
         max: 10,
         // 不显示 visualMap 组件
-        show: true,
+        show: false,
         left: 20,
         bottom: 10,
         // 映射维度
@@ -263,8 +286,9 @@ export default function PagePredict(props) {
       data: [],
       silent: true,
       lineStyle: {
-        color: '#D4AC0D',
-        opacity: 0.2,
+        // color: '#D4AC0D',
+        color: '#FDFEFE',
+        opacity: 0.4,
         width: 1,
       },
       progressiveThreshold: 200,
@@ -407,6 +431,46 @@ export default function PagePredict(props) {
   }
 
 
+  // --------------------- 自定义函数 ---------------------
+  // 获取 bmap 实例
+  function getBMapInstance(chart = null) {
+    try {
+      if (!chart) throw new Error('echarts实例不存在');
+      // 获取地图实例, 初始化
+      let bmap = chart.getModel().getComponent('bmap').getBMap();
+      bmap.setMapStyleV2({
+        styleId: 'f65bcb0423e47fe3d00cd5e77e943e84'
+      });
+      return bmap;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  // 请求 OD 数据
+  async function getOD(reqMethod, params = null) {
+    let data;
+    try {
+      // 数据请求
+      data = await reqMethod(params);
+    } catch (err) {
+      console.log(err);
+    }
+    return (data || [])
+  }
+
+  async function saveOD() {
+    // 若未缓存数据，则请求数据
+    if (!org.length) {
+      const data = await getOD(getOrg);
+      setOrg(data);
+    }
+    if (!dest.length) {
+      const data = await getOD(getDest);
+      setDest(data);
+    }
+  }
+
   /**
    * 单轨迹动效绘制
    * @param {number[][]} res - 轨迹经纬度坐标 [[lng, lat], ...]
@@ -519,6 +583,7 @@ export default function PagePredict(props) {
     }
   }
 
+  // --------------------- Hooks ---------------------
   useEffect(() => {
     // console.log(predict);
     // 生成切分轨迹段
@@ -575,86 +640,139 @@ export default function PagePredict(props) {
     }
   }, [predict, usedForPredict, chart])
 
-
+  // 首次进入页面，创建 echarts 实例
   useEffect(() => {
     // 实例化 chart
-    setChart(echarts.init(ref.current));
+    setChart(() => {
+      const chart = echarts.init(ref.current);
+      chart.setOption(option);
+      bmap = getBMapInstance(chart);
+      bmap.centerAndZoom(props.initCenter, props.initZoom);
+      return chart;
+    });
   }, [])
 
-  useEffect(() => {
-    if (!chart) return () => { }
-    chart.setOption(option);
-    // 加载 Loading
-    chart.showLoading();
-
-    // 获取地图实例, 初始化
-    bmap = chart.getModel().getComponent('bmap').getBMap();
-    bmap.centerAndZoom(props.initCenter, props.initZoom);
-    bmap.setMapStyleV2({
-      styleId: 'f65bcb0423e47fe3d00cd5e77e943e84'
-    });
-  }, [chart])
-
-  // 当所有数据请求完毕后，再取消 Loading 动画展示
-  useEffect(() => {
-    orgSuccess && destSuccess && trajSuccess && chart.hideLoading();
-  }, [orgSuccess, destSuccess, trajSuccess])
 
   // 全局静态轨迹
-  const t0 = useStaticTraj(chart, { ...trajColorBar[0] });
+  // const t0 = useStaticTraj(chart, { ...trajColorBar[0] });
   // const t1 = useStaticTraj(chart, { ...trajColorBar[1] });
   // const t2 = useStaticTraj(chart, { ...trajColorBar[2] });
   // const t3 = useStaticTraj(chart, { ...trajColorBar[3] });
   // const t4 = useStaticTraj(chart, { ...trajColorBar[4] });
   // const t5 = useStaticTraj(chart, { ...trajColorBar[5] });
 
-  // paint Origin Points
+
+  // OD 显示
+  const [odShow, setodShow] = useState(false);
   useEffect(() => {
-    if (!orgSuccess) return () => { };
-    const data = org.map(item => item.coord)
-    chart.setOption({
-      series: [{
-        name: '起点',
-        data,
-      }]
-    })
-  }, [org, orgSuccess])
-  // paint Destination Points
+    if (!org.length || !dest.length) return () => { };
+
+    function showOD(chart, { org, dest, odShow }) {
+      if (!odShow) {
+        chart.setOption({
+          series: [{
+            name: '起点',
+            data: [],
+          }, {
+            name: '终点',
+            data: [],
+          }]
+        })
+      } else {
+        const orgData = org.map(item => item.coord);
+        const destData = dest.map(item => item.coord);
+        setCenterAndZoom(bmap, [...orgData, ...destData]);
+        chart.setOption({
+          series: [{
+            name: '起点',
+            data: orgData,
+          }, {
+            name: '终点',
+            data: destData,
+          }]
+        })
+      }
+    }
+
+    showOD(chart, { org, dest, odShow })
+  }, [org, dest, odShow])
+
+  // OD-heatmap 显示
+  const [heatmapShow, setHeatmapShow] = useState(false);
   useEffect(() => {
-    if (!destSuccess) return () => { };
-    const data = dest.map(item => item.coord)
-    chart.setOption({
-      series: [{
-        name: '终点',
-        data,
-      }]
-    })
-  }, [dest, destSuccess])
-  // paint Origin Heatmap
+    if (!org.length || !dest.length) return () => { };
+    if (!heatmapShow) {
+      chart.setOption({
+        series: [{
+          name: 'O聚类热力图',
+          data: [],
+        }, {
+          name: 'D聚类热力图',
+          data: [],
+        }]
+      })
+    } else {
+      const orgData = org.map(item => [...item.coord, item.count])
+      const destData = org.map(item => [...item.coord, item.count])
+      setCenterAndZoom(bmap, [...orgData, ...destData]);
+      chart.setOption({
+        series: [{
+          name: 'O聚类热力图',
+          data: orgData,
+        }, {
+          name: 'D聚类热力图',
+          data: destData,
+        }]
+      })
+    }
+  }, [org, dest, heatmapShow])
+
+
+  // 图例
   useEffect(() => {
-    if (!orgSuccess) return () => { };
-    const data = org.map(item => [...item.coord, item.count])
+    if (!chart) return () => { }
+    // 按距离划分的轨迹图例
+    // const data = trajColorBar.map(item => ({
+    //   name: item.static,
+    //   itemStyle: {
+    //     color: item.color,
+    //   }
+    // }))
+    // const selectedMap = new Map(trajColorBar.map(item => ([item.static.toString(), true])));
+    // const selected = mapToObj(selectedMap);
     chart.setOption({
-      series: [{
-        name: 'O聚类热力图',
-        data,
-      }]
+      legend: [
+        // {
+        //   data,
+        //   selected,
+        // },
+        {
+          data: [{
+            name: '起点'
+          }, {
+            name: '终点'
+          }],
+          selected: {
+            '起点': true,
+            '终点': true,
+          }
+        }, {
+          data: [{
+            name: 'O聚类热力图'
+          }, {
+            name: 'D聚类热力图'
+          }],
+          selected: {
+            'O聚类热力图': true,
+            'D聚类热力图': true,
+          }
+        }]
     })
-  }, [org, orgSuccess])
-  // paint Destination Heatmap
-  useEffect(() => {
-    if (!destSuccess) return () => { };
-    const data = dest.map(item => [...item.coord, item.count])
-    chart.setOption({
-      series: [{
-        name: 'D聚类热力图',
-        data,
-      }]
-    })
-  }, [dest, destSuccess])
+  }, [chart])
+
+
   // 根据筛选结果更新样式
   useEffect(() => {
-    console.log(selected);
     // 解构出被选中的 OD 点
     const { org: sorg = [], dest: sdest = [] } = selected;
     // 此处逻辑判断是否加载完毕原始数据
@@ -751,53 +869,6 @@ export default function PagePredict(props) {
   }
 
 
-  function mapToObj(strMap) {
-    let obj = {};
-    for (let [k,v] of strMap) {
-      obj[k] = v;
-    }
-    return obj;
-  }
-  // 图例
-  useEffect(() => {
-    if (!chart) return () => { }
-    // 按距离划分的轨迹图例
-    const data = trajColorBar.map(item => ({
-      name: item.static,
-      itemStyle: {
-        color: item.color,
-      }
-    }))
-    const selectedMap = new Map(trajColorBar.map(item => ([item.static.toString(), true])));
-    const selected = mapToObj(selectedMap);
-    chart.setOption({
-      legend: [{
-        data,
-        selected,
-      }, {
-        data: [{
-          name: '起点'
-        }, {
-          name: '终点'
-        }],
-        selected: {
-          '起点': true,
-          '终点': true,
-        }
-      }, {
-        data: [{
-          name: 'O聚类热力图'
-        }, {
-          name: 'D聚类热力图'
-        }],
-        selected: {
-          'O聚类热力图': true,
-          'D聚类热力图': true,
-        }
-      }]
-    })
-  }, [chart])
-
 
   // 全局图例 name
   const glbLegends = [...(trajColorBar.map(item => item.static)), '起点', '终点', 'O聚类热力图', 'D聚类热力图']
@@ -835,13 +906,24 @@ export default function PagePredict(props) {
    * hourEnd
    */
   const [timer, timerDispatch] = useTime();
+  // 轨迹粗细 & 轨迹数量 联动
+  const getTrajWidth = (count) => ((-0.002) * count + 3.02);
   // 时间筛选静态轨迹 & 绘制
   useEffect(() => {
-    if (!chart) return () => { }
+    if (!chart) return () => { };
+    // 轨迹数据
+    let data = byTime.map(item => item.data);
+    // 数据为请求成功时
+    if (!data.length) return () => { };
+
+    setCenterAndZoom(bmap, data.flat(1));
     chart.setOption({
       series: [{
         name: '轨迹时间筛选',
-        data: (bySelect === -1) ? byTime.map(item => item.data) : [],
+        data: (bySelect === -1) ? data : [],
+        lineStyle: {
+          width: getTrajWidth(data.length),
+        }
       }]
     })
   }, [chart, byTime, bySelect])
@@ -931,22 +1013,12 @@ export default function PagePredict(props) {
         ref={ref}
         className='bmap-container'
       ></div>
-      {/* Brush 框选功能栏 */}
-      <BrushBar
-        map={bmap}
-        // data={{org, dest}}
-        data={brushData}
-        getSelected={(value) => { setSelected(value) }}
-        onClear={onClear}
-      />
       {/* 左侧 Drawer */}
       <Drawer
-        // Drawer 标题
-        title="功能栏"
         // 弹出位置
         placement="left"
         // 是否显示右上角的关闭按钮
-        closable={true}
+        closable={false}
         // 点击遮罩层或右上角叉或取消按钮的回调
         onClose={() => drawerVisibleObj.setLeftDrawerVisible(false)}
         // Drawer 是否可见
@@ -970,10 +1042,6 @@ export default function PagePredict(props) {
           timer={timer}
           timerDispatch={timerDispatch}
         />
-        {/* <TransferSelector
-          data={byTime}
-          setData={setBySelect}
-        /> */}
         <SingleTrajSelector
           data={byTime}
           onSelect={(val) => setBySelect(val)}
@@ -1028,12 +1096,10 @@ export default function PagePredict(props) {
       </Drawer>
       {/* 右侧 Drawer */}
       <Drawer
-        // Drawer 标题
-        title="功能栏"
         // 弹出位置
         placement="right"
         // 是否显示右上角的关闭按钮
-        closable={true}
+        closable={false}
         // 点击遮罩层或右上角叉或取消按钮的回调
         onClose={() => drawerVisibleObj.setRightDrawerVisible(false)}
         // Drawer 是否可见
@@ -1052,6 +1118,98 @@ export default function PagePredict(props) {
       >
         <p>put something...</p>
       </Drawer>
+      {/* 日历热力图容器 */}
+      <MyDrawer
+        mode='bottom'
+        modeStyle={{
+          boxHeight: '200px',
+          left: '10rem',
+          right: '2rem',
+        }}
+      >
+        {/* 日历热力图 */}
+        <Calendar
+          callback={{
+            setByTime,
+          }}
+        />
+      </MyDrawer>
+      {/* 左侧功能栏 */}
+      <MyDrawer
+        mode='left'
+        modeStyle={{
+          boxWidth: '70px',
+          top: '5px',
+          bottom: '200px',
+          backgroundColor: 'rgba(255, 255, 255, 0)',
+        }}
+      >
+        {/* 空间查询 */}
+        <SimpleBar
+          width={80}
+          iconScriptUrl={iconScriptUrl}
+          iconType='icon-kongjianchaxun'
+          title='空间查询'
+        >
+          {/* Brush 框选功能栏 */}
+          <BrushBar
+            map={bmap}
+            // data={{org, dest}}
+            data={brushData}
+            getSelected={(value) => { setSelected(value) }}
+            onClear={onClear}
+          />
+        </SimpleBar>
+        {/* 模型面板 */}
+        <SimpleBar
+          width={180}
+          iconScriptUrl={iconScriptUrl}
+          iconType='icon-moxingguanli'
+          title='模型面板'
+        >
+          {/* 模型面板功能栏 */}
+          <ModelBar />
+        </SimpleBar>
+        {/* 日历面板 */}
+        <SimpleBar
+          width={80}
+          iconScriptUrl={iconScriptUrl}
+          iconType='icon-rili'
+          title='日历面板'
+          callback={() => {
+            eventEmitter.emit('showCalendar')
+          }}
+        >
+          {/* Brush 框选功能栏 */}
+          <BrushBar
+            map={bmap}
+            // data={{org, dest}}
+            data={brushData}
+            getSelected={(value) => { setSelected(value) }}
+            onClear={onClear}
+          />
+        </SimpleBar>
+        {/* 图例面板 */}
+        <SimpleBar
+          width={80}
+          iconScriptUrl={iconScriptUrl}
+          iconType='icon-tuli'
+          title='图例面板'
+        >
+          <LegendBar
+            fnList={[
+              () => {
+                saveOD();
+                setodShow(prev => !prev);
+              },
+              () => {
+                saveOD();
+                setHeatmapShow(prev => !prev);
+              }
+            ]}
+          />
+        </SimpleBar>
+      </MyDrawer>
     </>
   )
 }

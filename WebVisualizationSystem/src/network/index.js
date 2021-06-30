@@ -27,13 +27,14 @@ export const getTraj = ({ min, max }) => {
  * @param {string} hourEnd - 时终点
  * @returns 发起请求
  */
-export const selectByTime = (dateStart, dateEnd, hourStart, hourEnd) => {
+export const selectByTime = (dateStart='', dateEnd='', hourStart='', hourEnd='') => {
   let url = '/select?';
   switch (true) {
     case isEmptyString(dateStart, dateEnd, hourStart, hourEnd):
       url += `dateStart=${dateStart}&&dateEnd=${dateEnd}&&hourStart=${hourStart}&&hourEnd=${hourEnd}`;
       break;
     case isEmptyString(dateStart, dateEnd):
+      console.log(1);
       url += `dateStart=${dateStart}&&dateEnd=${dateEnd}`;
       break;
     case isEmptyString(hourStart, hourEnd):
@@ -42,8 +43,13 @@ export const selectByTime = (dateStart, dateEnd, hourStart, hourEnd) => {
     default:
       break;
   }
-  console.log(url);
   return baseRequest({
     url,
+  })
+}
+
+export const getCalendarByCount = () => {
+  return baseRequest({
+    url: `/calendar`,
   })
 }

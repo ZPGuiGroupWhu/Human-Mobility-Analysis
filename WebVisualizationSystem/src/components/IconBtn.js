@@ -1,4 +1,5 @@
 import React from 'react';
+import { Tooltip } from 'antd';
 
 export default function IconBtn(props) {
   const {
@@ -14,11 +15,13 @@ export default function IconBtn(props) {
     alignItems: 'center',
   }
   return (
-      <div style={{...style, marginLeft: '20px'}}>
+    <Tooltip title={props.title}>
+      <div style={{ ...style }}>
         {/* e.preventDefault 禁用原生标签默认事件 */}
-        <a onClick={(e) => {clickCallback(); e.preventDefault()}} style={style}> 
-          <img src={imgSrc} alt='' style={{height, maxHeight}} />
+        <a onClick={(e) => { clickCallback?.(); e.preventDefault() }} style={style}>
+          <img src={imgSrc} alt='' style={{ height, maxHeight }} />
         </a>
       </div>
+    </Tooltip>
   )
 }

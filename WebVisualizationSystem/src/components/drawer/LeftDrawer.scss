@@ -1,0 +1,11 @@
+.left-drawer {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  transition: left 0.5s ease-out;
+
+  .main {
+    height: 100%;
+  }
+}

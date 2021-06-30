@@ -95,39 +95,43 @@ export default function BrushBar(props) {
     if (!drawingManager) return () => { }
 
     function overlaycomplete(e) {
-      // 记录覆盖物
-      setOverLayers(prev => ([...prev, e.overlay]));
-      // 获取选框内点信息
-      // See https://www.cnblogs.com/zdd2017/p/13495908.html
-      // getPath 返回的边框角: 从起点开始顺时针排布
-      const pts = e.overlay.getPath();
-      // console.log(pts);
-      // 判断筛选框绘制方向
-      const directionType = paintDirection(pts);
-      // 获取左下角与右上角
-      const [leftBottom, rightTop] = getLBandRT(pts, directionType);
-      const ptLeftBottom = new BMap.Point(leftBottom.lng, leftBottom.lat);
-      const ptRightTop = new BMap.Point(rightTop.lng, rightTop.lat);
-      // 创建 bound 需要边界的西南角和东北角
-      // See https://mapopen-pub-jsapi.bj.bcebos.com/jsapi/reference/jsapi_reference.html#a1b2
-      const bound = new BMap.Bounds(ptLeftBottom, ptRightTop);
-      // 临时存储对象
-      const obj = {}
-      for (let [key, value] of Object.entries(data)) {
-        // 设置默认值 []
-        Reflect.set(obj, key, []);
-        for (let { id, coord: [lng, lat] } of Object.values(value)) {
-          let pt = new BMap.Point(lng, lat);
-          if (BMapLib.GeoUtils.isPointInRect(pt, bound)) {
-            // 存储对应索引，方便查找
-            // 此处返回一个新数组，触发 Object.is() 浅比较
-            obj[key] = [...obj[key], id];
+      try {
+        // 记录覆盖物
+        setOverLayers(prev => ([...prev, e.overlay]));
+        // 获取选框内点信息
+        // See https://www.cnblogs.com/zdd2017/p/13495908.html
+        // getPath 返回的边框角: 从起点开始顺时针排布
+        const pts = e.overlay.getPath();
+        // console.log(pts);
+        // 判断筛选框绘制方向
+        const directionType = paintDirection(pts);
+        // 获取左下角与右上角
+        const [leftBottom, rightTop] = getLBandRT(pts, directionType);
+        const ptLeftBottom = new BMap.Point(leftBottom.lng, leftBottom.lat);
+        const ptRightTop = new BMap.Point(rightTop.lng, rightTop.lat);
+        // 创建 bound 需要边界的西南角和东北角
+        // See https://mapopen-pub-jsapi.bj.bcebos.com/jsapi/reference/jsapi_reference.html#a1b2
+        const bound = new BMap.Bounds(ptLeftBottom, ptRightTop);
+        // 临时存储对象
+        const obj = {}
+        for (let [key, value] of Object.entries(data)) {
+          // 设置默认值 []
+          Reflect.set(obj, key, []);
+          for (let { id, coord: [lng, lat] } of Object.values(value)) {
+            let pt = new BMap.Point(lng, lat);
+            if (BMapLib.GeoUtils.isPointInRect(pt, bound)) {
+              // 存储对应索引，方便查找
+              // 此处返回一个新数组，触发 Object.is() 浅比较
+              obj[key] = [...obj[key], id];
+            }
           }
+          setSelected(prev => ({
+            ...prev,
+            [key]: prev.hasOwnProperty(key) ? [...prev[key], ...obj[key]] : obj[key]
+          }))
         }
-        setSelected(prev => ({
-          ...prev,
-          [key]: prev.hasOwnProperty(key) ? [...prev[key], ...obj[key]] : obj[key]
-        }))
+      } catch (err) {
+        console.log(err);
       }
     }
 
@@ -191,9 +195,10 @@ export default function BrushBar(props) {
   }
 
   return (
-    <div className='brush-bar-container'>
+    <>
       <IconBtn
-        imgSrc={brushWhite}
+        title='框选'
+        imgSrc={brushBlack}
         clickCallback={() => setState(prev => {
           if (prev) {
             // 若当前为开启状态，则后续操作将其关闭
@@ -209,13 +214,14 @@ export default function BrushBar(props) {
         })}
       />
       <IconBtn
-        imgSrc={clearWhite}
+        title='清除框选'
+        imgSrc={clearBlack}
         clickCallback={() => {
           // 清除覆盖物
           clearOverLayers();
           onClear && onClear();
         }}
       />
-    </div>
+    </>
   )
 }

@@ -10,7 +10,6 @@ export const useReqData = (reqMethod, params = null) => {
   // 请求数据
   useEffect(() => {
     async function getData() {
-      // console.time();
       try {
         // 数据请求
         let data = await reqMethod(params);
@@ -20,7 +19,6 @@ export const useReqData = (reqMethod, params = null) => {
       } catch (err) {
         console.log(err);
       }
-      // console.timeEnd();
     }
     getData();
   }, [])

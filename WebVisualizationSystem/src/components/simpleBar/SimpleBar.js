@@ -1,4 +1,4 @@
-import expStyle from './SimpleBar.scss';
+import './SimpleBar.scss';
 import React, { PureComponent } from 'react';
 import { createFromIconfontCN } from '@ant-design/icons';
 import { Tooltip } from 'antd';
@@ -10,8 +10,10 @@ export default class SimpleBar extends PureComponent {
     super(props);
     this.state = {
       timer: null, // 计时器
+      histState: false, // 上一时刻展开状态
       isUnfold: false, // 是否展开
       tooltipVisible: false, // 文本提示框显示状态
+
     }
     // ref 对象
     this.mainRef = React.createRef();
@@ -23,7 +25,7 @@ export default class SimpleBar extends PureComponent {
     this.delay = 250
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     const mainNode = this.mainRef.current;
     if (this.state.isUnfold) {
       this.timer = setTimeout(() => {
@@ -35,11 +37,23 @@ export default class SimpleBar extends PureComponent {
       Array.from(mainNode.childNodes).map(item => item.style.display = 'none');
     }
 
+    // 跟随侧栏调整当前展开状态，侧栏收缩，则全部折叠；侧栏展开，则恢复历史展开状态
     this.setState((prev, props) => {
       if (props.isShow === false) {
         Array.from(mainNode.childNodes).map(item => item.style.display = 'none');
         return {
+          histState: prevState.isUnfold,
           isUnfold: false
+        }
+      }
+      if (!Object.is(prevProps.isShow, props.isShow)) {
+        if (prev.histState) {
+          this.timer = setTimeout(() => {
+            Array.from(mainNode.childNodes).map(item => item.style.display = '')
+          }, this.delay)
+        }
+        return {
+          isUnfold: prevState.histState
         }
       }
     })
@@ -66,9 +80,10 @@ export default class SimpleBar extends PureComponent {
             })
             // 更新展开状态
             this.setState({
-              isUnfold: !this.state.isUnfold,
+              histState: this.state.isUnfold,
+              isUnfold: !this.state.isUnfold
             });
-            this.props.callback?.();
+            this.props.callback?.(); // 控制其他组件的联动展开
           }}
           onMouseEnter={() => {
             this.setState({

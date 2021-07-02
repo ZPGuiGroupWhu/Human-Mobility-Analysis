@@ -9,7 +9,9 @@ import PagePredict from '@/project/PagePredict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';
 // Context 对象导入
-import { windowResize, drawerVisibility } from '@/context/mainContext'
+import { windowResize, drawerVisibility } from '@/context/mainContext';
+// 图片
+import { logo } from '@/icon'
 
 
 
@@ -38,16 +40,16 @@ function Main() {
       >
         <Router>
           <Layout
-            src='https://picsum.photos/170'
-            title='中文xxxxxxxxxxx'
-            imgHeight='80%'
+            src={logo}
+            title='轨迹目的地预测平台'
+            imgHeight='60%'
           >
-            {
+            {/* {
               <FunctionBar
                 setLeftDrawerVisible={setLeftDrawerVisible}
                 setRightDrawerVisible={setRightDrawerVisible}
               />
-            }
+            } */}
             {
               <Switch>
                 <Route exact path='/select'>

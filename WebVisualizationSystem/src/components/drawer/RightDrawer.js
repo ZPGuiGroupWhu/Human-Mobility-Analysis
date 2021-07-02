@@ -3,18 +3,24 @@ import { Button, Space } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import './RightDrawer.scss';
 import { eventEmitter } from '@/common/func/EventEmitter';
+import { createFromIconfontCN } from '@ant-design/icons';
+
+const IconFont = createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2648021_r6kr8s162g.js',
+});
 
 export default function RightDrawer(props) {
   const {
     // 建议自定义更改
     boxWidth = '80px', // 组件整体宽度
+    boxHeight = '300px', // 组件高度
     top = 0, // 相对偏移(上)
     bottom = 0, // 相对偏移(下)
     backgroundColor = 'rgba(255, 255, 255, 1)',
 
     space = 40, // 内容间距
     btnOpenForbidden = false, // 是否禁用展开按钮
-    borderRadius = '0 0 5 5',
+    borderRadius = '0 0 0 0',
     unfoldEventName = 'showRightDrawer',
 
     // 无需更改
@@ -27,6 +33,7 @@ export default function RightDrawer(props) {
     top,
     bottom,
     width: boxWidth,
+    height: boxHeight,
   }
 
   const [isShow, setShow] = useState(false); // 主体显示
@@ -68,7 +75,7 @@ export default function RightDrawer(props) {
           size='small'
           type='ghost'
           shape='circle'
-          icon={isShow ? <RightOutlined /> : <LeftOutlined />}
+          icon={isShow ? <IconFont type='icon-right-arrow-copy' /> : <IconFont type='icon-left-arrow-copy' />}
           onClick={(e) => { setShow(prev => !prev); setBtnShow(false) }}
           style={{ visibility: btnShow ? 'visible' : 'hidden' }}
         ></Button>

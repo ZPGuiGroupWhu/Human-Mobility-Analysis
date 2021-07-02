@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from 'reac
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import { Drawer, Select, message } from 'antd';
+import { Drawer, Select, message, Space } from 'antd';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom';
 import { eventEmitter } from '@/common/func/EventEmitter';
@@ -15,17 +15,19 @@ import { useTime } from '@/common/hooks/useTime';
 import { globalStaticTraj, globalDynamicTraj } from '@/common/options/globalTraj';
 import { trajColorBar } from '@/common/options/trajColorBar';
 // 网络请求
-import { getOrg, getDest, getTraj } from '@/network';
+import { getOrg, getDest, getTraj, selectByTime } from '@/network';
 // 自定义组件
 import SingleTrajSelector from '@/components/pagePredict/SingleTrajSelector'
 import TimeSelector from '@/components/pagePredict/TimeSelector';
-import BrushBar from '@/components/bmapBrush/BrushBar';
+import BrushBar from '@/components/bmapBrush/BrushBar'; // 框选功能条
 import ModelCard from '@/components/pagePredict/ModelCard';
 import MyDrawer from '@/components/drawer/MyDrawer';
-import Calendar from '@/components/pagePredict/Calendar';
-import SimpleBar from '@/components/simpleBar/SimpleBar';
-import ModelBar from '@/components/pagePredict/ModelBar';
-import LegendBar from '@/components/pagePredict/LegendBar';
+import CardRightSelectedTraj from '@/components/pagePredict/CardRightSelectedTraj'; // 轨迹筛选结果展示卡片
+import Calendar from '@/components/pagePredict/Calendar'; // 日历组件
+import SimpleBar from '@/components/simpleBar/SimpleBar'; // 小型抽屉栏
+import ModelBar from '@/components/pagePredict/ModelBar'; // 模型功能条
+import LegendBar from '@/components/pagePredict/LegendBar'; // 图例功能条
+import TrajBar from '@/components/pagePredict/TrajBar'; // 轨迹功能条
 // Context 对象导入
 import { drawerVisibility } from '@/context/mainContext';
 // 样式
@@ -58,10 +60,10 @@ export default function PagePredict(props) {
    * traj
    * @returns {{id: number, data: number[][], distance: number, info: string}[]} - id 数据唯一标识; data 轨迹坐标集; distance 出行距离; info 轨迹描述信息(时间 / 距离 / ...)
    */
-  const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
+  // const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
 
 
-
+  // --------------------- useState ---------------------
   /**
    * org / dest
    * @returns {{id: number, coord: number[], count: number}[]} - id 数据唯一标识; coord 点坐标; count 默认1，用于热力图权重
@@ -70,26 +72,25 @@ export default function PagePredict(props) {
   const [org, setOrg] = useState([]);
   // (所有)终点数据
   const [dest, setDest] = useState([]);
+  // (所有)轨迹数据：用于框选
+  const [traj, setTraj] = useState([]);
 
-
+  // 获取当前年份
+  const [curYear, setCurYear] = useState(null);
   // org / dest State: 起终点是否被选中
   const [brushData, setBrushData] = useState({});
   // org / dest selected res: {{org: number[], dest: number[]}}
   const [selected, setSelected] = useState({});
-
   // select by time
   const [byTime, setByTime] = useState([]);
+  // select by brush
+  const [byBrush, setByBrush] = useState([]);
   // select specific one deeply
   const [bySelect, setBySelect] = useState(-1); // 进一步筛选
-  // select by brush
-  const [byBrush, setByBrush] = useState({});
   // 存储用于预测的单条轨迹
   const [usedForPredict, setUsedForPredict] = useState({});
   // 存储当前轨迹坐标片段
   const [trajPart, setTrajPart] = useState({ idx: 0, coords: [] });
-
-  // 日历面板显示状态
-  const [calendar, setCalendar] = useState(false);
 
 
   // 模型面板的预测功能函数
@@ -136,21 +137,6 @@ export default function PagePredict(props) {
     },
     // legend
     legend: [
-      //   {
-      //   // 轨迹图例
-      //   // 图例相对容器距离
-      //   left: '10px',
-      //   right: 'auto',
-      //   top: 'auto',
-      //   bottom: '10px',
-      //   // 图例布局方向
-      //   orient: 'vertical',
-      //   // 文本样式
-      //   textStyle: {
-      //     color: '#fff',
-      //   },
-      //   data: [],
-      // }, 
       {
         // OD 图例
         // 图例相对容器距离
@@ -288,8 +274,18 @@ export default function PagePredict(props) {
       lineStyle: {
         // color: '#D4AC0D',
         color: '#FDFEFE',
-        opacity: 0.4,
+        opacity: .4,
         width: 1,
+        cap: 'round',
+        join: 'round',
+      },
+      // 高亮样式
+      emphasis: {
+        focus: 'series',
+        blurScope: 'series',
+        lineStyle: {
+          opacity: 1,
+        },
       },
       progressiveThreshold: 200,
       progressive: 200,
@@ -305,6 +301,8 @@ export default function PagePredict(props) {
         color: '#E0F7FA',
         opacity: 0.8,
         width: 3,
+        cap: 'round',
+        join: 'round',
       },
       zlevel: 998,
     }, {
@@ -316,7 +314,9 @@ export default function PagePredict(props) {
       data: [],
       lineStyle: {
         width: 0,
-        color: '#FB8C00'
+        color: '#FB8C00',
+        cap: 'round',
+        join: 'round',
       },
       effect: {
         constantSpeed: 100,
@@ -402,8 +402,18 @@ export default function PagePredict(props) {
       silent: true,
       lineStyle: {
         color: '#FFF59D',
-        opacity: 0.8,
+        opacity: 0.6,
         width: 1.5,
+        cap: 'round',
+        join: 'round',
+      },
+      // 高亮样式
+      emphasis: {
+        lineStyle: {
+          color: '#FF0000',
+          width: 2,
+          opacity: 1,
+        },
       },
       zlevel: 110
     }, {
@@ -424,9 +434,6 @@ export default function PagePredict(props) {
       data: [],
       zlevel: 1000,
     },
-    // global static trajectories
-    ...globalStaticTraj,
-    ...globalDynamicTraj,
     ]
   }
 
@@ -468,6 +475,64 @@ export default function PagePredict(props) {
     if (!dest.length) {
       const data = await getOD(getDest);
       setDest(data);
+    }
+  }
+
+  // 请求所有轨迹
+  function getalltraj(curYear) {
+    return function (setFunc) {
+      if (!curYear) return;
+      const dayTime = 3600 * 60 * 1000
+      let start = curYear + '-01-01'
+      let end = +echarts.number.parseDate((+curYear + 1) + '-01-01') - dayTime;
+      end = echarts.format.formatTime('yyyy-MM-dd', end);
+      selectByTime(start, end).then(
+        res => {
+          // 将接收到的数据更新到 PagePredict 页面 state 中管理
+          // setByTime(res || [])
+          setFunc(res || []);
+        }
+      ).catch(
+        err => console.log(err)
+      );
+    }
+  }
+  // 制定
+  const getAllTraj = getalltraj(curYear);
+
+  // 清除渲染项
+  function clearOption(chart) {
+    return function (name) {
+      chart?.setOption({
+        series: [{
+          name,
+          data: [],
+        }]
+      })
+    }
+  }
+
+  // 颜色条 - 依据距离筛选
+  function colorSelectByDistance(dis) {
+    try {
+      switch (true) {
+        case dis < 5:
+          return '#FDFD00';
+        case dis < 10:
+          return '#9DFD00';
+        case dis < 20:
+          return '#00FDDB';
+        case dis < 30:
+          return '#8600FD';
+        case dis < 40:
+          return '#FD008A';
+        case dis < Infinity:
+          return '#F8F9F9';
+        default:
+          throw new Error('something wrong')
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -556,11 +621,10 @@ export default function PagePredict(props) {
     })
   }
   // 依据 byBrush 筛选结果进行单轨迹动效绘制
-  function singleTrajByBrush(val) {
-    if (!val) return;
-    const res = byBrush[val]?.data;
+  function singleTrajByBrush(idx) {
+    const res = byBrush[idx].data;
     // 记录轨迹
-    setUsedForPredict(byBrush[val] || {});
+    setUsedForPredict(byBrush[idx] || {});
     singleTraj(res)
     singleOD(res);
     // 取消全局图例选择
@@ -652,16 +716,6 @@ export default function PagePredict(props) {
     });
   }, [])
 
-
-  // 全局静态轨迹
-  // const t0 = useStaticTraj(chart, { ...trajColorBar[0] });
-  // const t1 = useStaticTraj(chart, { ...trajColorBar[1] });
-  // const t2 = useStaticTraj(chart, { ...trajColorBar[2] });
-  // const t3 = useStaticTraj(chart, { ...trajColorBar[3] });
-  // const t4 = useStaticTraj(chart, { ...trajColorBar[4] });
-  // const t5 = useStaticTraj(chart, { ...trajColorBar[5] });
-
-
   // OD 显示
   const [odShow, setodShow] = useState(false);
   useEffect(() => {
@@ -731,15 +785,6 @@ export default function PagePredict(props) {
   // 图例
   useEffect(() => {
     if (!chart) return () => { }
-    // 按距离划分的轨迹图例
-    // const data = trajColorBar.map(item => ({
-    //   name: item.static,
-    //   itemStyle: {
-    //     color: item.color,
-    //   }
-    // }))
-    // const selectedMap = new Map(trajColorBar.map(item => ([item.static.toString(), true])));
-    // const selected = mapToObj(selectedMap);
     chart.setOption({
       legend: [
         // {
@@ -792,9 +837,10 @@ export default function PagePredict(props) {
         item => [...new Set([...sorg, ...sdest])].includes(item.id)
       ).map(item => item.coord);
       // 筛选得到的轨迹
-      const selectedTraj = traj.filter(
+      const filterData = traj.filter(
         item => [...new Set([...sorg, ...sdest])].includes(item.id)
-      ).map(item => item.data);
+      )
+      const selectedTraj = filterData.map(item => item.data);
 
       // 渲染筛选的数据
       chart.setOption({
@@ -826,15 +872,8 @@ export default function PagePredict(props) {
       })
 
       // 将筛选轨迹的结果存储
-      const target = traj
-        .filter(
-          item => [...new Set([...sorg, ...sdest])].includes(item.id)
-        )
-        .reduce((prev, cur) => {
-          prev[cur.info] = cur;
-          return prev
-        }, {})
-      setByBrush(target)
+      // console.log(filterData);
+      setByBrush(filterData)
     }
   }, [selected, org, dest, traj])
   // 取消框选时恢复样式
@@ -907,16 +946,33 @@ export default function PagePredict(props) {
    */
   const [timer, timerDispatch] = useTime();
   // 轨迹粗细 & 轨迹数量 联动
-  const getTrajWidth = (count) => ((-0.002) * count + 3.02);
+  const getTrajWidth = (count) => {
+    const min = .5;
+    const max = 4;
+    const width = (-0.002) * count + 3.02
+    switch (true) {
+      case (width < min):
+        return min;
+      case (width > max):
+        return max;
+      default:
+        return width;
+    }
+  };
   // 时间筛选静态轨迹 & 绘制
   useEffect(() => {
     if (!chart) return () => { };
     // 轨迹数据
-    let data = byTime.map(item => item.data);
+    let data = byTime.map(item => ({
+      coords: item.data,
+      lineStyle: {
+        color: colorSelectByDistance(item.distance)
+      }
+    }));
     // 数据为请求成功时
     if (!data.length) return () => { };
 
-    setCenterAndZoom(bmap, data.flat(1));
+    setCenterAndZoom(bmap, byTime.map(item => item.data).flat(1));
     chart.setOption({
       series: [{
         name: '轨迹时间筛选',
@@ -1005,6 +1061,10 @@ export default function PagePredict(props) {
     }
   }, [chart, org, dest])
 
+  useEffect(() => {
+    if (Object.keys(byBrush).length === 0) return () => { }
+    eventEmitter.emit('showTrajSelectByTime');
+  }, [byBrush])
 
   return (
     <>
@@ -1123,14 +1183,17 @@ export default function PagePredict(props) {
         mode='bottom'
         modeStyle={{
           boxHeight: '200px',
-          left: '10rem',
+          left: '180px',
           right: '2rem',
+          btnOpenForbidden: true,
         }}
       >
         {/* 日历热力图 */}
         <Calendar
+          byTime={byTime}
           callback={{
             setByTime,
+            setCurYear,
           }}
         />
       </MyDrawer>
@@ -1177,16 +1240,15 @@ export default function PagePredict(props) {
           iconType='icon-rili'
           title='日历面板'
           callback={() => {
-            eventEmitter.emit('showCalendar')
+            eventEmitter.emit('showCalendar');
           }}
         >
-          {/* Brush 框选功能栏 */}
-          <BrushBar
-            map={bmap}
-            // data={{org, dest}}
-            data={brushData}
-            getSelected={(value) => { setSelected(value) }}
-            onClear={onClear}
+          <TrajBar
+            showAllTraj={() => { getAllTraj(setByTime) }}
+            clearTraj={() => {
+              clearOption(chart)('轨迹时间筛选');
+              setByTime([]);
+            }}
           />
         </SimpleBar>
         {/* 图例面板 */}
@@ -1200,6 +1262,7 @@ export default function PagePredict(props) {
             fnList={[
               () => {
                 saveOD();
+                getAllTraj(setTraj);
                 setodShow(prev => !prev);
               },
               () => {
@@ -1210,6 +1273,14 @@ export default function PagePredict(props) {
           />
         </SimpleBar>
       </MyDrawer>
+      {/* 展示轨迹筛选结果的卡片 */}
+      <CardRightSelectedTraj
+        chart={chart}
+        byTime={byTime}
+        byBrush={byBrush}
+        setBySelect={setBySelect}
+        singleTrajByBrush={singleTrajByBrush}
+      />
     </>
   )
 }

@@ -15,3 +15,6 @@ export {default as stopBlack} from  './stop-black.png';
 export {default as cancelBlack} from  './cancel-black.png';
 export {default as odPoints} from './od-points.png';
 export {default as heatmap} from './heatmap.png';
+export {default as trajBlue} from './traj-blue.png';
+export {default as trajBlack} from './traj-black.png';
+export {default as logo} from './logo.png';

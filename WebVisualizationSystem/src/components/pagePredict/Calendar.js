@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { getCalendarByCount, selectByTime } from '@/network';
 import { debounce } from '@/common/func/debounce';
+import { eventEmitter } from '@/common/func/EventEmitter';
 
 let myChart = null;
 export default function Calendar(props) {
-  const { callback: { setByTime } } = props;
+  const { byTime, callback: { setByTime, setCurYear } } = props;
   const ref = useRef(null);
 
   // 伪数据
@@ -37,6 +38,7 @@ export default function Calendar(props) {
   // 数据格式中，必须包含 'yyy-MM-dd' 与额外数据
   function formatData(obj) {
     const year = str2date(Object.keys(obj)[0]).getFullYear();
+    setCurYear(year);
     let start = +echarts.number.parseDate(year + '-01-01');
     let end = +echarts.number.parseDate((+year + 1) + '-01-01');
     let dayTime = 3600 * 24 * 1000;
@@ -51,13 +53,37 @@ export default function Calendar(props) {
     return data;
   }
 
+  // 根据筛选的起始日期与终止日期，高亮数据
+  function highLightData(obj, startDate, endDate) {
+    let start = +echarts.number.parseDate(startDate);
+    let end = +echarts.number.parseDate(endDate);
+    let dayTime = 3600 * 24 * 1000;
+    let data = [];
+    for (let time = start; time <= end; time += dayTime) {
+      const date = echarts.format.formatTime('yyyy-MM-dd', time);
+      data.push({
+        value: [date, Reflect.get(obj, date) || 0],
+        symbol: 'rect',
+        itemStyle: {
+          color: '#81D0F1'
+        }
+      });
+    }
+    return data;
+  }
+
+  const cellSize = [16, 16]; // 日历单元格大小
   const option = {
     // title: {
     //   top: 10,
     //   left: 'center',
     //   text: year + '年用户出行统计',
     // },
-    tooltip: {},
+    tooltip: {
+      formatter: function (params) {
+        return '日期: ' + params.value[0] + '<br />' + '轨迹数目: ' + params.value[1];
+      }
+    },
     visualMap: {
       min: minValue,
       max: maxValue,
@@ -79,7 +105,7 @@ export default function Calendar(props) {
       bottom: 10,
       left: 30,
       right: 80,
-      cellSize: ['auto', 16],
+      cellSize: cellSize,
       range: year, // 日历图坐标范围(某一年)
       itemStyle: {
         borderWidth: 0.5
@@ -94,11 +120,19 @@ export default function Calendar(props) {
       },
       yearLabel: { show: false }
     },
-    series: {
+    series: [{
       type: 'heatmap',
       coordinateSystem: 'calendar',
-      data: []
-    }
+      data: [],
+      zlevel: 1,
+    }, {
+      type: 'scatter',
+      name: '高亮',
+      coordinateSystem: 'calendar',
+      symbolSize: cellSize,
+      data: [],
+      zlevel: 2,
+    }]
   }
 
   const [data, setData] = useState(null);
@@ -149,12 +183,18 @@ export default function Calendar(props) {
   }
   const [date, setDate] = useState({ start: '', end: '' });
   const [action, setAction] = useState(initAction);
+  // 确保函数只执行一次
+  const isdown = useRef(false);
   useEffect(() => {
     const wait = 100;
 
     if (!myChart) return () => { };
     // 鼠标按下事件
     myChart.on('mousedown', (params) => {
+      if (isdown.current) return;
+      // console.log(params.data);
+      // 已触发，添加标记
+      isdown.current = true;
       // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]
       setAction(prev => {
         return {
@@ -163,14 +203,15 @@ export default function Calendar(props) {
         }
       })
       setDate({
-        start: params.data[0],
-        end: params.data[0],
+        start: params.data[0] || params.data.value[0],
+        end: params.data[0] || params.data.value[0],
       })
     })
 
     // 鼠标移动事件
     const selectDate = debounce(
       (params) => {
+        if (date.end === params.data[0]) return;
         // 记录鼠标状态
         setAction(prev => (
           {
@@ -181,7 +222,7 @@ export default function Calendar(props) {
         setDate(prev => (
           {
             ...prev,
-            end: params.data[0]
+            end: params.data[0] || params.data.value[0],
           }
         ))
       },
@@ -197,6 +238,8 @@ export default function Calendar(props) {
     const mouseUp = (params) => {
       // 重置鼠标状态
       setAction(initAction);
+      // 清除标记
+      isdown.current = false;
 
       let start = date.start, end = date.end;
       let startDate = str2date(start), endDate = str2date(end);
@@ -215,6 +258,8 @@ export default function Calendar(props) {
       ).catch(
         err => console.log(err)
       );
+
+      eventEmitter.emit('showTrajSelectByTime');
     }
     myChart.on('mouseup', mouseUp)
 
@@ -223,6 +268,29 @@ export default function Calendar(props) {
       myChart.off('mouseup', mouseUp);
     }
   }, [myChart, date, action])
+
+
+  // 高亮筛选部分
+  useEffect(() => {
+    myChart?.setOption({
+      series: [{
+        name: '高亮',
+        data: highLightData(data, date.start, date.end),
+      }]
+    })
+  }, [data, date])
+
+  // 清除高亮
+  useEffect(() => {
+    if (byTime.length === 0) {
+      myChart?.setOption({
+        series: [{
+          name: '高亮',
+          data: [],
+        }]
+      })
+    }
+  }, [byTime])
 
   return (
     <div

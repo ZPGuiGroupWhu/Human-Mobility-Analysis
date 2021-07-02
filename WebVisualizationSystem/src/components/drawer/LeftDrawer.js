@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Space } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import './LeftDrawer.scss';
+import { createFromIconfontCN } from '@ant-design/icons';
+
+const IconFont = createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2648021_r6kr8s162g.js',
+});
 
 export default function LeftDrawer(props) {
   const {
@@ -65,7 +70,7 @@ export default function LeftDrawer(props) {
           size='small'
           type='ghost'
           shape='circle'
-          icon={isShow ? <LeftOutlined /> : <RightOutlined />}
+          icon={isShow ? <IconFont type='icon-left-arrow-copy' /> : <IconFont type='icon-right-arrow-copy' />}
           onClick={(e) => { setShow(prev => !prev); setBtnShow(false) }}
           style={{ visibility: btnShow ? 'visible' : 'hidden' }}
         ></Button>

@@ -2,7 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'antd';
 import { UpOutlined, DownOutlined } from '@ant-design/icons';
 import './BottomDrawer.scss';
-import {eventEmitter} from '@/common/func/EventEmitter';
+import { eventEmitter } from '@/common/func/EventEmitter';
+import { createFromIconfontCN } from '@ant-design/icons';
+
+const IconFont = createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2648021_r6kr8s162g.js',
+});
 
 
 export default function BottomDrawer(props) {
@@ -11,6 +16,7 @@ export default function BottomDrawer(props) {
     boxHeight = '200px', // 组件整体高度
     left = 0, // 相对偏移(左)
     right = 0, // 相对偏移(右)
+    btnOpenForbidden = false, // 是否禁用展开按钮
 
     // 无需更改
     buttonWidth = '30px', // 按钮宽度 + 空白间距
@@ -31,13 +37,22 @@ export default function BottomDrawer(props) {
 
   useEffect(() => {
     const doc = document.current;
-    if (!doc) return ()=>{};
-    doc.addEventListener('mouseover', () => {setBtnShow(true);})
-    doc.addEventListener('mouseout', () => setBtnShow(false))
-  }, [document])
+    if (!doc) return () => { };
 
-  useEffect(()=>{
-    eventEmitter.on('showCalendar', () => {setShow(true)});
+    const mouseover = () => { (btnOpenForbidden) || setBtnShow(true); }
+    const mouseout = () => { setBtnShow(false) }
+
+    doc.addEventListener('mouseover', mouseover);
+    doc.addEventListener('mouseout', mouseout);
+
+    return () => {
+      doc.removeEventListener('mouseover', mouseover);
+      doc.removeEventListener('mouseout', mouseout);
+    }
+  }, [document, isShow])
+
+  useEffect(() => {
+    eventEmitter.on('showCalendar', () => { setShow(prev => !prev) });
   }, [])
 
   return (
@@ -55,9 +70,9 @@ export default function BottomDrawer(props) {
           size='small'
           type='ghost'
           shape='circle'
-          icon={isShow ? <DownOutlined /> : <UpOutlined />}
+          icon={isShow ? <IconFont type='icon-down-arrow-copy' /> : <IconFont type='icon-up-arrow-copy' />}
           onClick={(e) => { setShow(prev => !prev); setBtnShow(false) }}
-          style={{visibility: btnShow ? 'visible' : 'hidden'}}
+          style={{ visibility: btnShow ? 'visible' : 'hidden' }}
         ></Button>
       </div>
       <div

@@ -30,13 +30,13 @@ $headerHeight: 70px;
         height: 100%;
         // 限制图片大小小于等于 header 高度
         max-height: $headerHeight;
-        margin-right: 1rem;
+        margin-right: .1rem;
       }
 
       h1 {
         margin: auto;
         color: #fff;
-        font-size: 18px;
+        font-size: 23px;
         font-weight: bold;
         font-family: Helvetica, "Hiragino Sans GB", "Microsoft Yahei", "微软雅黑", Arial, sans-serif;
       }

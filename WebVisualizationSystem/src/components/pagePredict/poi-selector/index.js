@@ -39,7 +39,7 @@ export default class SearchPOI {
 
     const pt = new BMap.Point(...point);
     this.circle = new BMap.Circle(pt, radius, curOptions);
-    this.bmap.addOverlay(this.circle);
+    this.bmap.addOverlay?.(this.circle);
   }
 
   addAndSearchInCircle({keyword, center, radius}, circleStyle={}) {
@@ -48,6 +48,6 @@ export default class SearchPOI {
   }
 
   removeOverlay() {
-    this.bmap.removeOverlay(this.circle)
+    this.bmap.removeOverlay?.(this.circle)
   }
 }

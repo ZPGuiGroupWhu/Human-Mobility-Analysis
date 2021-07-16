@@ -3,10 +3,11 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from 'reac
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import { Drawer, Select, message, Switch, Slider, Space } from 'antd';
+import { Drawer, Select, message, Switch, Slider, Space, Input, Checkbox } from 'antd';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom';
 import { eventEmitter } from '@/common/func/EventEmitter';
+import SearchPOI from '@/components/pagePredict/poi-selector';
 // 通用 Hooks
 import { useReqData } from '@/common/hooks/useReqData';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
@@ -40,6 +41,8 @@ import './bmap.scss';
 
 // 地图实例
 let bmap = null;
+// SearchPOI 类实例
+let searchPOI = null;
 // 目的地预测动效 - 计时器
 let predictTimer = null;
 // iconfont Symbol 在线 url
@@ -65,9 +68,10 @@ export default function PagePredict(props) {
   // const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
 
   // ------------------- 自定义 Hooks ---------------------
-  const { poiDisabled, setPoiDisabled, bufferValue, setBufferValue } = usePoi();
+  const { poiDisabled, setPoiDisabled, poiState, poiDispatch } = usePoi();
 
   // ------------------- useReducer ---------------------
+  // 1.
   function controller(state, action) {
     const { type, payload } = action;
     switch (type) {
@@ -152,6 +156,13 @@ export default function PagePredict(props) {
     clearPredict: false,
   })
 
+
+  // POI查询-多选框-选项
+  const checkBoxOptions = [
+    { label: '起点', value: 'start' },
+    { label: '当前点', value: 'current' },
+    { label: '终点', value: 'end' },
+  ]
 
   // 容器 ref 对象
   const ref = useRef(null);
@@ -1189,6 +1200,48 @@ export default function PagePredict(props) {
   }, bySelect, byTime, chart)
 
 
+  // 单条轨迹 + POI 查询
+  useEffect(() => {
+    // 只有单条轨迹时才触发
+    if (bySelect !== -1) {
+      let res = byTime.find(item => item.id === bySelect);
+      res = res ? res.data : undefined;
+      // 是否启用 POI 查询
+      if (poiDisabled) {
+        try {
+          poiState.description.forEach((item) => {
+            let center;
+            switch (item) {
+              case 'start':
+                center = res[0];
+                break;
+              case 'current':
+                center = res[0];
+                break;
+              case 'end':
+                center = res.slice(-1)[0];
+                break;
+              default:
+                throw new Error('没有对应的类型')
+            }
+            searchPOI?.addAndSearchInCircle({
+              keyword: poiState.keyword,
+              center,
+              radius: poiState.radius,
+            })
+          })
+
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }
+    return () => {
+      searchPOI?.removeOverlay();
+    }
+  }, [searchPOI, bySelect, byTime, poiDisabled, poiState])
+
+
   // 根据图例向 brush 组件传入选中的数据
   useEffect(() => {
     function legendselectchanged(e) {
@@ -1248,6 +1301,13 @@ export default function PagePredict(props) {
     if (Object.keys(byBrush).length === 0) return () => { }
     eventEmitter.emit('showTrajSelectByTime');
   }, [byBrush])
+
+
+  // 实例化 SearchPOI 类
+  useEffect(() => {
+    if (!bmap) return () => { };
+    searchPOI = new SearchPOI(bmap);
+  }, [bmap])
 
   return (
     <>
@@ -1488,47 +1548,62 @@ export default function PagePredict(props) {
           />
         </SimpleBar>
         <InfoBar
-          width={180}
-          height={100}
+          width={280}
+          height={180}
           iconScriptUrl={iconScriptUrl}
           iconType='icon-pointofinterest'
           title='POI查询'
         >
           <Space
             align='center'
-            direction='vertical'
+            direction='horizontal'
             size='small'
           >
-            <Space
-              align='center'
-              direction='horizontal'
-              size='small'
-            >
-              <span>{`POI查询(${poiDisabled ? '开' : '关'})`}</span>
-              <Switch
-                size="small"
-                checked={poiDisabled}
-                onChange={setPoiDisabled}
-              />
-            </Space>
-            <Space
-              align='center'
-              direction='vertical'
-              size={1}
-            >
-              <span>{`缓冲区半径(${bufferValue} 米)`}</span>
-              <Slider
-                min={1}
-                max={100}
-                defaultValue={bufferValue}
-                disabled={!poiDisabled}
-                onChange={setBufferValue}
-                tooltipPlacement='left'
-                tooltipVisible={false}
-                style={{ width: '100px' }}
-              />
-            </Space>
+            <span>{`POI查询(${poiDisabled ? '开' : '关'})`}</span>
+            <Switch
+              size="small"
+              checked={poiDisabled}
+              onChange={setPoiDisabled}
+            />
           </Space>
+          <Space
+            align='center'
+            direction='horizontal'
+            size={1}
+          >
+            <div style={{width: '100px'}}>{`半径(${poiState.radius} 米)`}</div>
+            <Slider
+              min={1}
+              max={500}
+              defaultValue={poiState.radius}
+              disabled={!poiDisabled}
+              onChange={(value) => { poiDispatch({ type: 'radius', payload: value }) }}
+              tooltipPlacement='left'
+              tooltipVisible={false}
+              style={{ width: '80px' }}
+            />
+          </Space>
+          <Space
+            align='center'
+            direction='horizontal'
+            size='small'
+          >
+            <span>{`关键词`}</span>
+            <Input
+              placeholder='POI关键词'
+              disabled={!poiDisabled}
+              onChange={(e) => { poiDispatch({ type: 'keyword', payload: e.target.value }) }}
+              allowClear
+              size='middle'
+              style={{ width: '100px' }}
+            />
+          </Space>
+          <Checkbox.Group
+            options={checkBoxOptions}
+            defaultValue={poiState.description}
+            disabled={!poiDisabled}
+            onChange={(val) => { poiDispatch({ type: 'description', payload: val }); }}
+          />
         </InfoBar>
       </MyDrawer>
       {/* 展示轨迹筛选结果的卡片 */}

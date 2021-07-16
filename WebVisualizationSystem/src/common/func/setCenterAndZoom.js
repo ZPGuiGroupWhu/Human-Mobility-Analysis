@@ -20,7 +20,7 @@ function getZoom(map, maxLng, minLng, maxLat, minLat) {
 /**
  * 居中定位
  * @param {object} map - 地图实例
- * @param {number[]} points - 坐标数组
+ * @param {number[][]} points - 坐标数组
  */
 export function setCenterAndZoom(map, points, maxLength = 1000) {
   try {
@@ -33,13 +33,16 @@ export function setCenterAndZoom(map, points, maxLength = 1000) {
         minLng = Infinity,
         maxLat = -Infinity,
         minLat = Infinity;
+
       for (let i = 0; i < chunks; i++) {
         let lngs = [], lats = [];
         let start = i * maxLength, end = (i + 1) * maxLength;
-        for (let i = start; i < end; i++) {
-          if (i >= lens) break;
-          lngs.push(points[i][0]);
-          lats.push(points[i][1]);
+        for (let j = start; j < end; j++) {
+          if (j >= lens) {
+            break;
+          }
+          lngs.push(points[j][0]);
+          lats.push(points[j][1]);
         }
         maxLng = Math.max(...lngs, maxLng);
         minLng = Math.min(...lngs, minLng);

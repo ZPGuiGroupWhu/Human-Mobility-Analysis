@@ -1,0 +1,54 @@
+$bgColor: rgba(255, 255, 255, 1);
+$time: 0.25s;
+$height: 30px;
+$padding: 5px;
+$borderStyle: 1px solid #808080;
+
+export {
+  height: $height,
+}
+
+.info-bar {
+  position: absolute;
+
+  .head {
+    position: absolute;
+    background-color: $bgColor;
+    border-radius: 50%;
+    width: $height;
+    height: $height;
+    z-index: 2;
+    border: $borderStyle;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: ($height - 10px);
+  }
+
+  .background {
+    position: absolute;
+    background-color: $bgColor;
+    border-radius: $height / 2;
+    width: $height;
+    height: $height;
+    z-index: 1;
+    border: $borderStyle;
+
+    transition: width $time ease-in, height $time ease-in;
+
+    .content {
+      padding-top: $padding;
+      padding-bottom: $padding;
+      padding-left: ($height + $padding);
+      padding-right: $padding;
+
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}

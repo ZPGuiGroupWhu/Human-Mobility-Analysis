@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from 'reac
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import { Drawer, Select, message, Space } from 'antd';
+import { Drawer, Select, message, Switch, Slider, Space } from 'antd';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom';
 import { eventEmitter } from '@/common/func/EventEmitter';
@@ -11,6 +11,7 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 import { useReqData } from '@/common/hooks/useReqData';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
 import { useTime } from '@/common/hooks/useTime';
+import { usePoi } from '@/components/pagePredict/hooks/usePoi';
 // 通用配置
 import { globalStaticTraj, globalDynamicTraj } from '@/common/options/globalTraj';
 import { trajColorBar } from '@/common/options/trajColorBar';
@@ -25,6 +26,7 @@ import MyDrawer from '@/components/drawer/MyDrawer';
 import CardRightSelectedTraj from '@/components/pagePredict/CardRightSelectedTraj'; // 轨迹筛选结果展示卡片
 import Calendar from '@/components/pagePredict/Calendar'; // 日历组件
 import SimpleBar from '@/components/simpleBar/SimpleBar'; // 小型抽屉栏
+import InfoBar from '@/components/infoBar/InfoBar'; // 框型小型抽屉栏
 import ModelBar from '@/components/pagePredict/ModelBar'; // 模型功能条
 import LegendBar from '@/components/pagePredict/LegendBar'; // 图例功能条
 import TrajBar from '@/components/pagePredict/TrajBar'; // 轨迹功能条
@@ -41,7 +43,7 @@ let bmap = null;
 // 目的地预测动效 - 计时器
 let predictTimer = null;
 // iconfont Symbol 在线 url
-const iconScriptUrl = '//at.alicdn.com/t/font_2577661_icgx16h0r9d.js';
+const iconScriptUrl = '//at.alicdn.com/t/font_2577661_dmweq4qmkar.js';
 
 export default function PagePredict(props) {
   // echarts 实例对象
@@ -61,6 +63,32 @@ export default function PagePredict(props) {
    * @returns {{id: number, data: number[][], distance: number, info: string}[]} - id 数据唯一标识; data 轨迹坐标集; distance 出行距离; info 轨迹描述信息(时间 / 距离 / ...)
    */
   // const { data: traj, isComplete: trajSuccess } = useReqData(getTraj, { min: 0, max: Infinity });
+
+  // ------------------- 自定义 Hooks ---------------------
+  const { poiDisabled, setPoiDisabled, bufferValue, setBufferValue } = usePoi();
+
+  // ------------------- useReducer ---------------------
+  function controller(state, action) {
+    const { type, payload } = action;
+    switch (type) {
+      case 'legend':
+        return {
+          ...state,
+          legend: !state.legend
+        }
+      case 'spatial':
+        return {
+          ...state,
+          spatial: !state.spatial
+        }
+    }
+  }
+  const initCtrlState = {
+    legend: false, // 图例面板开关
+    spatial: false, // 空间查询开关
+  }
+  const [ctrlState, ctrlDispatch] = useReducer(controller, initCtrlState);
+
 
 
   // --------------------- useState ---------------------
@@ -91,6 +119,8 @@ export default function PagePredict(props) {
   const [usedForPredict, setUsedForPredict] = useState({});
   // 存储当前轨迹坐标片段
   const [trajPart, setTrajPart] = useState({ idx: 0, coords: [] });
+  // 存储历史预测点集合，用于历史预测路径展示
+  const [histPreres, setHistPreres] = useState([]);
 
 
   // 模型面板的预测功能函数
@@ -111,6 +141,7 @@ export default function PagePredict(props) {
       case 'clearPredict':
         return {
           ...state,
+          startPredict: false,
           clearPredict: true
         }
     }
@@ -429,10 +460,66 @@ export default function PagePredict(props) {
         scale: 3,
       },
       coordinateSystem: 'bmap',
-      symbolSize: 8,
+      symbolSize: 5,
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
       zlevel: 1000,
+    }, {
+      // 13. 历史预测点集合
+      name: '历史预测点',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      symbolSize: 8,
+      itemStyle: {
+        color: destColor,
+      },
+      // 若存在多个点，请在 data 传参时传入 color
+      data: [],
+      zlevel: 1001,
+    }, {
+      // 14. 历史预测点集合的路径
+      name: '历史预测轨迹',
+      type: 'lines',
+      coordinateSystem: 'bmap',
+      polyline: true,
+      data: [],
+      silent: true,
+      lineStyle: {
+        color: '#FFF59D',
+        opacity: 0.6,
+        width: 1.5,
+        cap: 'round',
+        join: 'round',
+      },
+      // 高亮样式
+      emphasis: {
+        lineStyle: {
+          color: '#FF0000',
+          width: 2,
+          opacity: 1,
+        },
+      },
+      zlevel: 1002
+    }, {
+      // 15. 当前预测点
+      name: '当前预测点',
+      type: 'effectScatter',
+      // 何时显示动效：render - 绘制完成后，emphasis - 高亮显示
+      showEffectOn: 'render',
+      rippleEffect: {
+        // 动效周期
+        period: 4,
+        // 波纹缩放比例
+        scale: 3,
+      },
+      coordinateSystem: 'bmap',
+      symbolSize: 8,
+      itemStyle: {
+        color: destColor,
+      },
+      // 若存在多个点，请在 data 传参时传入 color
+      data: [],
+      zlevel: 1003,
     },
     ]
   }
@@ -617,6 +704,15 @@ export default function PagePredict(props) {
       }, {
         name: '当前点',
         data: [],
+      }, {
+        name: '历史预测点',
+        data: [],
+      }, {
+        name: '历史预测路径',
+        data: [],
+      }, {
+        name: '当前预测点',
+        data: [],
       }]
     })
   }
@@ -647,51 +743,125 @@ export default function PagePredict(props) {
     }
   }
 
-  // --------------------- Hooks ---------------------
-  useEffect(() => {
-    // console.log(predict);
-    // 生成切分轨迹段
-    const separationRes = trajSeparation(usedForPredict?.data, 30);
 
+  /**
+   * 历史预测路径展示
+   * @param {number[][]} res - 轨迹经纬度坐标 [[lng, lat], ...]
+   */
+  function histPredictTraj(res) {
+    chart.setOption({
+      series: [
+        {
+          name: '历史预测点',
+          data: res,
+        },
+        // {
+        //   name: '历史预测轨迹',
+        //   data: res,
+        // },
+        {
+          name: '当前预测点',
+          data: [{
+            value: res.slice(-1)[0],
+            itemStyle: {
+              color: '#F5F5F5'
+            }
+          }]
+        }
+      ]
+    })
+  }
+
+  // 模拟预测点坐标（后期用真实数据替换）
+  function getMockData(val, min, max) {
+    if (Array.isArray(val)) {
+      return val.map((item, idx) => {
+        return getMockData(item, min, max)
+      })
+    } else {
+      return val + Math.random() * (max - min) + min
+    }
+  }
+
+  // --------------------- Hooks ---------------------
+  // 预测三阶段：开始 / 暂停 / 清除
+  useEffect(() => {
+    // 生成切分轨迹段
+    // --- 后续轨迹切分段可动态设置
+    const separationRes = trajSeparation(usedForPredict?.data, 30);
     if (separationRes.length === 0 && !chart) return () => { }
+
     // 开始预测
     // !predictTimer 避免重复点击
     if (predict.startPredict && !predictTimer) {
-      // 加载 Loading 模拟数据预测
-      chart.showLoading();
+      singleOD(usedForPredict?.data); // 绘制预测轨迹的 OD 点
 
-      singleOD(usedForPredict?.data);
-      predictTimer = setInterval(() => {
-        setTrajPart(({ idx, coords }) => {
 
-          if (coords.length !== 0) {
-            // 取消 Loading
-            chart.hideLoading();
+      // trajPart 用于记录每次历史动效，方便在暂停后恢复
+      if (trajPart.idx < 1) {
+        // id 为 0 表明本次为第一次展示
+        setTimeout(() => {
+          singleTraj(separationRes[0]);
+          singleCurpt(separationRes[0]);
+        }, 0)
 
-            // 必须采用零延时，否则多个 setOption 会冲突
-            setTimeout(() => {
-              singleTraj(coords);
-              singleCurpt(coords);
-            }, 0)
-          }
-
-          return idx === separationRes.length ? {
-            idx: 1,
+        setTrajPart(({ idx }) => {
+          return {
+            idx: idx + 1,
             coords: separationRes[0],
+          }
+        })
+
+        setHistPreres((prev) => {
+          let mock = getMockData(usedForPredict?.data.slice(-1)[0], 0, 1)
+          let data = [...prev, mock];
+          setTimeout(() => {
+            histPredictTraj(data);
+          }, 50);
+          return data;
+        });
+      }
+
+      let i = 0; // 用于生成模拟数据
+
+      predictTimer = setInterval(() => {
+
+        setTrajPart(({ idx, coords }) => {
+          setTimeout(() => {
+            singleTraj(separationRes[idx]);
+            singleCurpt(separationRes[idx]);
+          }, 0)
+
+          return idx === separationRes.length - 1 ? {
+            idx: 0,
+            coords: [],
           } : {
             idx: idx + 1,
             coords: separationRes[idx],
           }
         })
-      }, 2000)
+
+        setHistPreres((prev) => {
+          if (i === separationRes.length - 1) i = 0;
+
+          let mock = getMockData(separationRes[++i].slice(-1)[0], 0, 0.05);
+          let data = [...prev, mock];
+          setTimeout(() => {
+            histPredictTraj(data);
+          }, 50);
+          return (i === separationRes.length - 1) ? [] : data;
+        });
+      }, 1000)
     }
+
     // 暂停预测
     if (predict.stopPredict) {
       clearInterval(predictTimer);
       predictTimer = null;
     }
+
     // 清除预测
-    if (predict.clearPredict) {
+    if (predict.clearPredict && trajPart.idx !== 0) {
       clearInterval(predictTimer);
       predictTimer = null;
       clearSingleTraj();
@@ -701,8 +871,10 @@ export default function PagePredict(props) {
         idx: 0,
         coords: [],
       })
+
+      setHistPreres([])
     }
-  }, [predict, usedForPredict, chart])
+  }, [trajPart, predict, usedForPredict, chart])
 
   // 首次进入页面，创建 echarts 实例
   useEffect(() => {
@@ -785,35 +957,43 @@ export default function PagePredict(props) {
   // 图例
   useEffect(() => {
     if (!chart) return () => { }
-    chart.setOption({
-      legend: [
-        // {
-        //   data,
-        //   selected,
-        // },
-        {
-          data: [{
-            name: '起点'
+    if (ctrlState.legend) {
+      chart.setOption({
+        legend: [
+          {
+            data: [{
+              name: '起点'
+            }, {
+              name: '终点'
+            }],
+            selected: {
+              '起点': true,
+              '终点': true,
+            }
           }, {
-            name: '终点'
-          }],
-          selected: {
-            '起点': true,
-            '终点': true,
-          }
-        }, {
-          data: [{
-            name: 'O聚类热力图'
+            data: [{
+              name: 'O聚类热力图'
+            }, {
+              name: 'D聚类热力图'
+            }],
+            selected: {
+              'O聚类热力图': true,
+              'D聚类热力图': true,
+            }
+          }]
+      })
+    } else {
+      chart.setOption({
+        legend: [
+          {
+            data: []
           }, {
-            name: 'D聚类热力图'
-          }],
-          selected: {
-            'O聚类热力图': true,
-            'D聚类热力图': true,
-          }
-        }]
-    })
-  }, [chart])
+            data: [],
+          }]
+      })
+    }
+
+  }, [chart, ctrlState])
 
 
   // 根据筛选结果更新样式
@@ -972,6 +1152,8 @@ export default function PagePredict(props) {
     // 数据为请求成功时
     if (!data.length) return () => { };
 
+    console.log(data, bySelect);
+
     setCenterAndZoom(bmap, byTime.map(item => item.data).flat(1));
     chart.setOption({
       series: [{
@@ -996,6 +1178,7 @@ export default function PagePredict(props) {
     if (!res) {
       clearSingleTraj();
     } else {
+      setCenterAndZoom(bmap, res)
       // 绘制轨迹
       singleTraj(res)
       // 绘制 OD
@@ -1194,9 +1377,11 @@ export default function PagePredict(props) {
           callback={{
             setByTime,
             setCurYear,
+            setBySelect
           }}
         />
       </MyDrawer>
+
       {/* 左侧功能栏 */}
       <MyDrawer
         mode='left'
@@ -1207,6 +1392,33 @@ export default function PagePredict(props) {
           backgroundColor: 'rgba(255, 255, 255, 0)',
         }}
       >
+
+        {/* 图例面板 */}
+        <SimpleBar
+          width={80}
+          iconScriptUrl={iconScriptUrl}
+          iconType='icon-tuli'
+          title='图例面板'
+          callback={() => {
+            ctrlDispatch({ type: 'legend' }) // 联动显示图例
+            ctrlDispatch({ type: 'spatial' }) // 联动展开空间查询功能栏
+          }}
+        >
+          <LegendBar
+            fnList={[
+              () => {
+                saveOD();
+                getAllTraj(setTraj);
+                setodShow(prev => !prev);
+              },
+              () => {
+                saveOD();
+                setHeatmapShow(prev => !prev);
+              }
+            ]}
+          />
+        </SimpleBar>
+
         {/* 空间查询 */}
         <SimpleBar
           width={80}
@@ -1223,16 +1435,7 @@ export default function PagePredict(props) {
             onClear={onClear}
           />
         </SimpleBar>
-        {/* 模型面板 */}
-        <SimpleBar
-          width={180}
-          iconScriptUrl={iconScriptUrl}
-          iconType='icon-moxingguanli'
-          title='模型面板'
-        >
-          {/* 模型面板功能栏 */}
-          <ModelBar />
-        </SimpleBar>
+
         {/* 日历面板 */}
         <SimpleBar
           width={80}
@@ -1251,27 +1454,82 @@ export default function PagePredict(props) {
             }}
           />
         </SimpleBar>
-        {/* 图例面板 */}
+
+        {/* 模型面板 */}
         <SimpleBar
-          width={80}
+          width={120}
           iconScriptUrl={iconScriptUrl}
-          iconType='icon-tuli'
-          title='图例面板'
+          iconType='icon-moxingguanli'
+          title='模型面板'
         >
-          <LegendBar
-            fnList={[
-              () => {
-                saveOD();
-                getAllTraj(setTraj);
-                setodShow(prev => !prev);
-              },
-              () => {
-                saveOD();
-                setHeatmapShow(prev => !prev);
+          {/* 模型面板功能栏 */}
+          <ModelBar
+            startPredict={() => {
+              if (Object.keys(usedForPredict).length === 0) {
+                message.error('请选择有效的数据格式！', 1);
+              } else {
+                predictDispatch({ type: 'startPredict' });
               }
-            ]}
+            }}
+            stopPredict={() => {
+              if (Object.keys(usedForPredict).length === 0) {
+                message.error('请选择有效的数据格式！', 1);
+              } else {
+                predictDispatch({ type: 'stopPredict' });
+              }
+            }}
+            clearPredict={() => {
+              if (Object.keys(usedForPredict).length === 0) {
+                message.error('请选择有效的数据格式！', 1);
+              } else {
+                predictDispatch({ type: 'clearPredict' });
+              }
+            }}
           />
         </SimpleBar>
+        <InfoBar
+          width={180}
+          height={100}
+          iconScriptUrl={iconScriptUrl}
+          iconType='icon-pointofinterest'
+          title='POI查询'
+        >
+          <Space
+            align='center'
+            direction='vertical'
+            size='small'
+          >
+            <Space
+              align='center'
+              direction='horizontal'
+              size='small'
+            >
+              <span>{`POI查询(${poiDisabled ? '开' : '关'})`}</span>
+              <Switch
+                size="small"
+                checked={poiDisabled}
+                onChange={setPoiDisabled}
+              />
+            </Space>
+            <Space
+              align='center'
+              direction='vertical'
+              size={1}
+            >
+              <span>{`缓冲区半径(${bufferValue} 米)`}</span>
+              <Slider
+                min={1}
+                max={100}
+                defaultValue={bufferValue}
+                disabled={!poiDisabled}
+                onChange={setBufferValue}
+                tooltipPlacement='left'
+                tooltipVisible={false}
+                style={{ width: '100px' }}
+              />
+            </Space>
+          </Space>
+        </InfoBar>
       </MyDrawer>
       {/* 展示轨迹筛选结果的卡片 */}
       <CardRightSelectedTraj

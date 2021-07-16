@@ -10,10 +10,15 @@ import {
 
 
 export default function ModelBar(props) {
+  const {
+    startPredict,
+    stopPredict,
+    clearPredict,
+  } = props;
 
   return (
     <>
-        <IconBtn
+        {/* <IconBtn
           title='模型选择'
           imgSrc={selectBlack}
           clickCallback={null}
@@ -22,21 +27,21 @@ export default function ModelBar(props) {
           title='参数配置'
           imgSrc={settingBlack}
           clickCallback={null}
-        />
+        /> */}
         <IconBtn
           title='开始预测'
           imgSrc={startBlack}
-          clickCallback={null}
+          clickCallback={startPredict}
         />
         <IconBtn
           title='暂停预测'
           imgSrc={stopBlack}
-          clickCallback={null}
+          clickCallback={stopPredict}
         />
         <IconBtn
           title='清除预测效果'
           imgSrc={cancelBlack}
-          clickCallback={null}
+          clickCallback={clearPredict}
         />
     </>
   )

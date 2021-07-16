@@ -1,4 +1,4 @@
-import './SimpleBar.scss';
+import scssStyle from './InfoBar.scss';
 import React, { PureComponent } from 'react';
 import { createFromIconfontCN } from '@ant-design/icons';
 import { Tooltip } from 'antd';
@@ -17,10 +17,12 @@ export default class SimpleBar extends PureComponent {
     }
     // ref 对象
     this.mainRef = React.createRef();
+
     // iconfont 图标
     this.IconFont = createFromIconfontCN({
       scriptUrl: this.props.iconScriptUrl,
     });
+
     // 动画延迟
     this.delay = 250
   }
@@ -61,10 +63,9 @@ export default class SimpleBar extends PureComponent {
 
   render() {
     return (
-      <div className='simple-bar'>
+      <div className='info-bar'>
         <a
           onClick={(e) => {
-            this.props.callback?.(); // 控制其他组件的联动展开
             // 阻止默认事件
             e.preventDefault();
             // 点击时隐藏 Tooltip，之后延迟恢复 Tooltip
@@ -97,34 +98,31 @@ export default class SimpleBar extends PureComponent {
             })
           }}
         >
-          <div className='head'>
-            <this.IconFont
-              type={this.props.iconType}
-            />
-          </div>
+          <Tooltip
+            placement='right'
+            title={this.props.title}
+            visible={!this.state.isUnfold && this.state.tooltipVisible}
+          >
+            <div className='head'>
+              <this.IconFont
+                type={this.props.iconType}
+              />
+            </div>
+          </Tooltip>
+
         </a>
+
         <div
-          className='content'
+          className='background'
           style={{
-            width: this.state.isUnfold ? (this.props.width + 'px') : '0px'
+            width: this.state.isUnfold ? (this.props.width + 'px') : scssStyle.height,
+            height: this.state.isUnfold ? (this.props.height + 'px') : scssStyle.height,
           }}
         >
-          <div
-            className='main'
-            style={{ width: this.props.width + 'px' }}
-            ref={this.mainRef}
-          >
+          <div className='content' ref={this.mainRef} style={{display: this.state.isUnfold ? '' : 'none'}}>
             {this.props.children}
           </div>
         </div>
-        <Tooltip placement='right' title={this.props.title} visible={this.state.tooltipVisible}>
-          <div
-            className='end'
-            style={{
-              left: this.state.isUnfold ? ((this.props.width) + 'px') : '0px'
-            }}
-          ></div>
-        </Tooltip>
       </div>
     )
   }

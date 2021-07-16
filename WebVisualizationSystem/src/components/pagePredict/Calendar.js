@@ -6,7 +6,7 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 
 let myChart = null;
 export default function Calendar(props) {
-  const { byTime, callback: { setByTime, setCurYear } } = props;
+  const { byTime, callback: { setByTime, setCurYear, setBySelect } } = props;
   const ref = useRef(null);
 
   // 伪数据
@@ -206,6 +206,7 @@ export default function Calendar(props) {
         start: params.data[0] || params.data.value[0],
         end: params.data[0] || params.data.value[0],
       })
+      setBySelect(-1); // 清除上一次轨迹单选的记录
     })
 
     // 鼠标移动事件

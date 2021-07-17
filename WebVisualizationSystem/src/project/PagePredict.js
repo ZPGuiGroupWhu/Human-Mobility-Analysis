@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from 'reac
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
 // 组件
-import { Drawer, Select, message, Switch, Slider, Space, Input, Checkbox } from 'antd';
+import { Drawer, Select, message, Switch, Slider, Space, Input, Radio } from 'antd';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom';
 import { eventEmitter } from '@/common/func/EventEmitter';
@@ -158,7 +158,7 @@ export default function PagePredict(props) {
 
 
   // POI查询-多选框-选项
-  const checkBoxOptions = [
+  const radioOptions = [
     { label: '起点', value: 'start' },
     { label: '当前点', value: 'current' },
     { label: '终点', value: 'end' },
@@ -584,8 +584,11 @@ export default function PagePredict(props) {
       let start = curYear + '-01-01'
       let end = +echarts.number.parseDate((+curYear + 1) + '-01-01') - dayTime;
       end = echarts.format.formatTime('yyyy-MM-dd', end);
+      // 请求所有轨迹时，将单选的轨迹记录清除
+      setBySelect(-1);
       selectByTime(start, end).then(
         res => {
+          console.log(res);
           // 将接收到的数据更新到 PagePredict 页面 state 中管理
           // setByTime(res || [])
           setFunc(res || []);
@@ -1195,7 +1198,7 @@ export default function PagePredict(props) {
       // 绘制 OD
       singleOD(res)
       // 取消全局图例选择
-      glbUnSelectLegend(chart);
+      // glbUnSelectLegend(chart);
     }
   }, bySelect, byTime, chart)
 
@@ -1203,34 +1206,32 @@ export default function PagePredict(props) {
   // 单条轨迹 + POI 查询
   useEffect(() => {
     // 只有单条轨迹时才触发
-    if (bySelect !== -1) {
-      let res = byTime.find(item => item.id === bySelect);
+    if (usedForPredict) {
+      let res = usedForPredict;
       res = res ? res.data : undefined;
       // 是否启用 POI 查询
       if (poiDisabled) {
         try {
-          poiState.description.forEach((item) => {
-            let center;
-            switch (item) {
-              case 'start':
-                center = res[0];
-                break;
-              case 'current':
-                center = res[0];
-                break;
-              case 'end':
-                center = res.slice(-1)[0];
-                break;
-              default:
-                throw new Error('没有对应的类型')
-            }
-            searchPOI?.addAndSearchInCircle({
-              keyword: poiState.keyword,
-              center,
-              radius: poiState.radius,
-            })
+          let center;
+          switch (poiState.description) {
+            case 'start':
+              center = res[0];
+              break;
+            case 'current':
+              center = res[0];
+              break;
+            case 'end':
+              center = res.slice(-1)[0];
+              break;
+            default:
+              throw new Error('没有对应的类型')
+          }
+          console.log(poiState);
+          searchPOI?.addAndSearchInCircle({
+            keyword: poiState.keyword,
+            center,
+            radius: poiState.radius,
           })
-
         } catch (err) {
           console.log(err);
         }
@@ -1239,7 +1240,7 @@ export default function PagePredict(props) {
     return () => {
       searchPOI?.removeOverlay();
     }
-  }, [searchPOI, bySelect, byTime, poiDisabled, poiState])
+  }, [searchPOI, bySelect, byTime, poiDisabled, poiState, usedForPredict])
 
 
   // 根据图例向 brush 组件传入选中的数据
@@ -1571,7 +1572,7 @@ export default function PagePredict(props) {
             direction='horizontal'
             size={1}
           >
-            <div style={{width: '100px'}}>{`半径(${poiState.radius} 米)`}</div>
+            <div style={{ width: '100px' }}>{`半径(${poiState.radius} 米)`}</div>
             <Slider
               min={1}
               max={500}
@@ -1598,12 +1599,18 @@ export default function PagePredict(props) {
               style={{ width: '100px' }}
             />
           </Space>
-          <Checkbox.Group
-            options={checkBoxOptions}
+          <Radio.Group
+            name='poiSearch'
             defaultValue={poiState.description}
             disabled={!poiDisabled}
-            onChange={(val) => { poiDispatch({ type: 'description', payload: val }); }}
-          />
+            onChange={(e) => { poiDispatch({ type: 'description', payload: e.target.value }); }}
+          >
+            {radioOptions.map((item, idx) => {
+              return (
+                <Radio value={item.value} key={idx}>{item.label}</Radio>
+              )
+            })}
+          </Radio.Group>
         </InfoBar>
       </MyDrawer>
       {/* 展示轨迹筛选结果的卡片 */}

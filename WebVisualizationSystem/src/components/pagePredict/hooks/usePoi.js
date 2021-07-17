@@ -42,7 +42,7 @@ export const usePoi = () => {
     // 缓冲区半径
     radius: 30,
     // 类型：起点/当前点/终点
-    description: ['end']
+    description: 'end'
   }
 
   const [poiState, poiDispatch] = useReducer(poiReducer, initPoiState);

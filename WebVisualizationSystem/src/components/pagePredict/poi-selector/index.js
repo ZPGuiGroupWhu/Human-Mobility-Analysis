@@ -48,6 +48,7 @@ export default class SearchPOI {
   }
 
   removeOverlay() {
-    this.bmap.removeOverlay?.(this.circle)
+    this.bmap.removeOverlay?.(this.circle);
+    this.search.getResults() && this.search.clearResults();
   }
 }

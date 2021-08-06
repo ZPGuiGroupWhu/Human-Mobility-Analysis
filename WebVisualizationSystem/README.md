@@ -68,3 +68,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+## TASK
+### Origin & Destination
+- [] heatmap layer (3D)：show aggregation density
+- [] origin (circle) / destnation (square) point：the way of mouse interaction
+  - [] od-curve：When the mouse moves to the corresponding point, the curve is highlighted
+  - [] od-trajectory：When the mouse moves to the corresponding point, the track is highlighted
+  - [] click event：After clicking to select the corresponding track, the data will be transferred to predict page

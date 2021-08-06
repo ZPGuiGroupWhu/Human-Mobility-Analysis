@@ -38,7 +38,7 @@ export default class SearchPOI {
     let curOptions = Object.assign(defaultOptions, opts);
 
     const pt = new BMap.Point(...point);
-    this.circle = new BMap.Circle(pt, radius, curOptions);
+    this.circle = new BMap.Circle(pt, radius + 100, curOptions);
     this.bmap.addOverlay?.(this.circle);
   }
 

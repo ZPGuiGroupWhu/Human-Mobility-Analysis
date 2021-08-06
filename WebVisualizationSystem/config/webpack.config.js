@@ -163,6 +163,7 @@ module.exports = function (webpackEnv) {
     externals: {
       BMapLib: 'BMapLib',
       BMap: 'BMap',
+      BMapGL: 'BMapGL',
     },
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
     // Stop compilation early in production

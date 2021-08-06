@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import FunctionBar from '@/project/FunctionBar';
 import PageAnalysis from '@/project/PageAnalysis';
 import PageSelect from '@/project/PageSelect';
-import PagePredict from '@/project/PagePredict';
+import Predict from '@/project/Predict/Predict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';
 // Context 对象导入
@@ -56,7 +56,7 @@ function Main() {
                   <PageSelect {...initParams} />
                 </Route>
                 <Route exact path='/select/analysis' render={() => <PageAnalysis {...initParams} />} />
-                <Route exact path='/select/predict' render={() => <PagePredict {...initParams} />} />
+                <Route path='/select/predict' render={() => <Predict {...initParams} />} />
                 {/* 若均未匹配，重定向至首页 */}
                 <Redirect to='/select' />
               </Switch>

@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import Layout from '@/components/layout/Layout';
-import FunctionBar from '@/project/FunctionBar';
-import PageAnalysis from '@/project/PageAnalysis';
+import PageAnalysis from '@/project/analysis/PageAnalysis';
 import PageSelect from '@/project/PageSelect';
-import Predict from '@/project/Predict/Predict';
+import Predict from '@/project/predict/Predict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';
 // Context 对象导入
@@ -44,12 +43,6 @@ function Main() {
             title='轨迹目的地预测平台'
             imgHeight='60%'
           >
-            {/* {
-              <FunctionBar
-                setLeftDrawerVisible={setLeftDrawerVisible}
-                setRightDrawerVisible={setRightDrawerVisible}
-              />
-            } */}
             {
               <Switch>
                 <Route exact path='/select'>

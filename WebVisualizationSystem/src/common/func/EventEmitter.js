@@ -67,4 +67,4 @@ export const eventEmitter = new class EventEmitter {
       return Array.isArray(val)
     }
   }
-}
+}()

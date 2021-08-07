@@ -1,0 +1,261 @@
+import React, { useState, useEffect, useRef } from 'react';
+import * as echarts from 'echarts';
+import { debounce } from '@/common/func/debounce';
+import { eventEmitter } from '@/common/func/EventEmitter';
+
+
+let myChart = null;
+export default function Calendar(props) {
+  const {
+    year, // 日历年份
+    data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
+    eventName, // 注册事件名
+  } = props;
+
+  // ECharts 容器实例
+  const ref = useRef(null);
+
+  // 根据筛选的起始日期与终止日期，高亮数据
+  function highLightData(obj, startDate, endDate) {
+    let start = +echarts.number.parseDate(startDate);
+    let end = +echarts.number.parseDate(endDate);
+    let dayTime = 3600 * 24 * 1000;
+    let data = [];
+    for (let time = start; time <= end; time += dayTime) {
+      const date = echarts.format.formatTime('yyyy-MM-dd', time);
+      data.push({
+        value: [date, Reflect.get(obj, date) || 0],
+        symbol: 'rect',
+        itemStyle: {
+          color: '#81D0F1'
+        }
+      });
+    }
+    return data;
+  }
+
+  const cellSize = [16, 16]; // 日历单元格大小
+  const option = {
+    // title: {
+    //   top: 10,
+    //   left: 'center',
+    //   text: year + '年用户出行统计',
+    // },
+    tooltip: {
+      formatter: function (params) {
+        return '日期: ' + params.value[0] + '<br />' + '轨迹数目: ' + params.value[1];
+      }
+    },
+    visualMap: {
+      min: 0,
+      max: 100,
+      calculable: true,
+      orient: 'vertical',
+      left: 'right',
+      top: 'top',
+      textStyle: {
+        color: '#fff',
+      },
+      precision: 0,
+      align: 'bottom',
+      formatter: function (value) {
+        return parseInt(value)
+      }
+    },
+    calendar: {
+      top: 20,
+      bottom: 10,
+      left: 30,
+      right: 80,
+      cellSize: cellSize,
+      range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
+      itemStyle: {
+        borderWidth: 0.5
+      },
+      dayLabel: {
+        color: '#fff',
+        nameMap: 'cn',
+      },
+      monthLabel: {
+        color: '#fff',
+        nameMap: 'cn',
+      },
+      yearLabel: { show: false }
+    },
+    series: [{
+      type: 'heatmap',
+      coordinateSystem: 'calendar',
+      data: [],
+      zlevel: 1,
+    }, {
+      type: 'scatter',
+      name: '高亮',
+      coordinateSystem: 'calendar',
+      symbolSize: cellSize,
+      data: [],
+      zlevel: 2,
+    }]
+  }
+
+  // 初始化 ECharts 实例对象
+  useEffect(() => {
+    if (!ref.current) return () => { };
+    myChart = echarts.init(ref.current);
+    myChart.setOption(option);
+  }, [ref])
+
+
+
+  // strDate: yyyy-MM-dd
+  function str2date(strDate) {
+    strDate.replace('-', '/');
+    return new Date(strDate);
+  }
+
+  function formatData(obj) {
+    // const year = str2date(Object.keys(obj)[0]).getFullYear();
+    let start = +echarts.number.parseDate(year + '-01-01');
+    let end = +echarts.number.parseDate((+year + 1) + '-01-01');
+    let dayTime = 3600 * 24 * 1000;
+    let data = [];
+    for (let time = start; time < end; time += dayTime) {
+      const date = echarts.format.formatTime('yyyy-MM-dd', time)
+      data.push([
+        date,
+        Reflect.get(obj, date) || undefined // 没有数据用 undefined 填充
+      ]);
+    }
+    return data;
+  }
+
+  useEffect(() => {
+    const format = formatData(data);
+    myChart.setOption({
+      visualMap: {
+        min: Math.min(...Object.values(data)),
+        max: Math.max(...Object.values(data))
+      },
+      series: {
+        data: format,
+      }
+    })
+  }, [data])
+
+
+  // 记录框选的日期范围
+  const [date, setDate] = useState({ start: '', end: '' });
+  // 记录鼠标状态
+  const [action, setAction] = useState(() => ({ mousedown: false, mousemove: false }));
+  // 确保函数只执行一次
+  const isdown = useRef(false);
+  useEffect(() => {
+    const wait = 100;
+
+    if (!myChart) return () => { };
+    // 鼠标按下事件
+    myChart.on('mousedown', (params) => {
+      if (isdown.current) return;
+      // console.log(params.data);
+      // 已触发，添加标记
+      isdown.current = true;
+      // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]
+      setAction(prev => {
+        return {
+          ...prev,
+          mousedown: true,
+        }
+      })
+      setDate({
+        start: params.data[0] || params.data.value[0],
+        end: params.data[0] || params.data.value[0],
+      })
+    })
+
+    // 鼠标移动事件
+    const selectDate = debounce(
+      (params) => {
+        if (date.end === params.data[0]) return;
+        // 记录鼠标状态
+        setAction(prev => (
+          {
+            ...prev,
+            mousemove: true,
+          }
+        ))
+        setDate(prev => (
+          {
+            ...prev,
+            end: params.data[0] || params.data.value[0],
+          }
+        ))
+      },
+      wait,
+      false
+    )
+    const mouseMove = (params) => {
+      action.mousedown && selectDate(params)
+    }
+    myChart.on('mousemove', mouseMove);
+
+    // 鼠标抬起事件
+    const mouseUp = (params) => {
+      // 重置鼠标状态
+      setAction(() => ({ mousedown: false, mousemove: false }));
+      // 清除标记
+      isdown.current = false;
+
+      let start = date.start, end = date.end;
+      let startDate = str2date(start), endDate = str2date(end);
+      // 校正时间顺序
+      (
+        (startDate.getMonth() > endDate.getMonth()) ||
+        (startDate.getDay() > endDate.getDay())
+      ) && ([start, end] = [end, start])
+
+      // 触发 eventEmitter 中的注册事件，传递选择的日期范围
+      // start: yyyy-MM-dd
+      // end: yyyy-MM-dd
+      eventEmitter.emit(eventName, { start, end });
+    }
+    myChart.on('mouseup', mouseUp)
+
+    return () => {
+      myChart.off('mousemove', mouseMove);
+      myChart.off('mouseup', mouseUp);
+    }
+  }, [myChart, date, action])
+
+
+  // 高亮筛选部分
+  useEffect(() => {
+    myChart?.setOption({
+      series: [{
+        name: '高亮',
+        data: highLightData(data, date.start, date.end),
+      }]
+    })
+  }, [data, date])
+
+  // 清除高亮
+  // 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮
+  useEffect(() => {
+    eventEmitter.on('clearCalendarHighlight', () => {
+      myChart?.setOption({
+        series: [{
+          name: '高亮',
+          data: [],
+        }]
+      })
+    })
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        width: '100%',
+        height: '100%',
+      }}
+    ></div>
+  )
+}

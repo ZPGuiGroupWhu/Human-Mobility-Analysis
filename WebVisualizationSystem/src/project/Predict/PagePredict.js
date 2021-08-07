@@ -11,10 +11,10 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
 import { useTime } from '@/common/hooks/useTime';
 // 逻辑分离
-import { useCreate } from '@/project/Predict/function/useCreate'; // 
-import { usePoiSearch } from '@/project/Predict/function/usePoiSearch'; // poi 查询
-import { useOD } from '@/project/Predict/function/useOD'; // OD 显示 & heatmap 显示 & 图例显示
-import { usePredict } from '@/project/Predict/function/usePredict'; // 轨迹预测
+import { useCreate } from '@/project/predict/function/useCreate'; // 
+import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
+import { useOD } from '@/project/predict/function/useOD'; // OD 显示 & heatmap 显示 & 图例显示
+import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
 // 网络请求
 import { getOrg, getDest, selectByTime } from '@/network';
 // 自定义组件

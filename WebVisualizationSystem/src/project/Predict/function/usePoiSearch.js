@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import SearchPOI from '@/components/pagePredict/poi-selector';
-import { usePoi } from '@/project/Predict/function/usePoi';
+import { usePoi } from '@/project/predict/function/usePoi';
 
 /**
  * poi 查询

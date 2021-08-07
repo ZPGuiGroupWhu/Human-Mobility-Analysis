@@ -70,11 +70,25 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 
-## TASK
-### Origin & Destination
-- [ ] heatmap layer (3D)
-- [ ] origin (circle) / destnation (square) point
-  - [ ] od-curve
-  - [ ] od-trajectory
-  - [ ] click event：
-        - After clicking to select the corresponding track, the data will be transferred to predict page
+## Pages
+### Select Page
+项目的初始页面。该页面包含所有用户的统计信息，以卡片组件的形式展示。用户点击不同的用户卡片，跳转到用户的数据分析页面。
+* 用户卡片 (样式/逻辑)
+* 基于所有用户的数据分析 (哪些维度)
+* 大数据下单个用户的数据分析 (哪些维度)
+
+### Analysis Page
+个体用户数据分析界面。
+原始数据：针对个体的年出行轨迹集合 (出行日期/OD/轨迹点/距离 ; 速度/转向角)
+* 底图 (3D/deck.gl+mapbox)
+* OD 热力分布 (所有OD)
+* OD + OD 弧段 + 轨迹 (单条轨迹/鼠标交互[高亮&数据传递])
+* 时间选取
+* 空间选取
+* 速度 + 路网结构 (需要深圳路网json)
+* 转向角 + 路网结构
+* 雷达图 (缺数据)
+* 词云 (缺数据)
+
+### Predict Page
+接受单条轨迹数据，结合不同模型，输出预测结果

@@ -4,6 +4,8 @@ import { StaticMap } from 'react-map-gl';
 import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
 import { ArcLayer } from '@deck.gl/layers';
 import './DeckGLMap.css'
+import { eventEmitter } from '@/common/func/EventEmitter';
+import _ from 'lodash';
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiMjAxNzMwMjU5MDE1NyIsImEiOiJja3FqM3RjYmIxcjdyMnhsbmR0bHo2ZGVpIn0.wNBmzyxhzCMx9PhIH3rwCA';//MAPBOX密钥
 
@@ -15,24 +17,45 @@ class DeckGLMap extends Component {
       arcLayer: null,
       heatMapLayer: null,
       gridLayer: null,
+      trajCounts: null,
+      // selectDate: {
+      //   start: '',
+      //   end: '',
+      // }
     }
   }
   componentDidMount() {
     this.getLayers();
+    // this.addDateSelectListener();
   }
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (prevProps.userData !== this.props.userData) {
       this.getLayers();
     }
+    // if (!_.isEqual(prevState.selectDate, this.state.selectDate)) {
+    //   // do something here: {start: '...', end: '...'}
+    //   console.log(this.state.selectDate);
+    // }
   }
   getTrajNodes = () => {
-    let Nodes = []
+    let Nodes = []//统计所有节点的坐标
+    let Count = {}//统计每天的轨迹数目
     for (let i = 0; i < this.props.userData.length; i++) {
+      if (Count[this.props.userData[i].date] === undefined) {
+        Count[this.props.userData[i].date] = { 'count': 1 }
+      }
+      else {
+        Count[this.props.userData[i].date] = { 'count': Count[this.props.userData[i].date].count + 1 }
+      }
       for (let j = 0; j < this.props.userData[i].data.length; j++) {
         Nodes.push({ COORDINATES: this.props.userData[i].data[j], WEIGHT: 1 });
       }
     }
     this.trajNodes = Nodes;
+    this.trajCounts = Count;
+  }
+  toParent = () => {//将每天的轨迹数目统计结果反馈给父组件
+    this.props.getTrajCounts(this.trajCounts)
   }
   getArcLayer = () => {
     this.setState({
@@ -78,6 +101,18 @@ class DeckGLMap extends Component {
     this.getArcLayer();
     this.getHeatMapLayer();
     this.getGridLayer();
+    this.toParent()
+  }
+
+  addDateSelectListener() {
+    eventEmitter.on(this.props.eventName, ({ start, end }) => {
+      this.setState({
+        selectDate: {
+          start,
+          end,
+        }
+      })
+    })
   }
 
   render() {

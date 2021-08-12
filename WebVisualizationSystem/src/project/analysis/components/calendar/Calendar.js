@@ -7,10 +7,10 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 let myChart = null;
 export default function Calendar(props) {
   const {
-    year, // 日历年份
     data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     eventName, // 注册事件名
   } = props;
+  const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
 
   // ECharts 容器实例
   const ref = useRef(null);
@@ -122,7 +122,7 @@ export default function Calendar(props) {
       const date = echarts.format.formatTime('yyyy-MM-dd', time)
       data.push([
         date,
-        Reflect.get(obj, date) || undefined // 没有数据用 undefined 填充
+        Reflect.get(obj, date)?.count || 0 // 没有数据用 0 填充
       ]);
     }
     return data;
@@ -130,10 +130,11 @@ export default function Calendar(props) {
 
   useEffect(() => {
     const format = formatData(data);
+    const counts = format.map(item => (item[1]))
     myChart.setOption({
       visualMap: {
-        min: Math.min(...Object.values(data)),
-        max: Math.max(...Object.values(data))
+        min: Math.min(...counts),
+        max: Math.max(...counts)
       },
       series: {
         data: format,
@@ -216,6 +217,7 @@ export default function Calendar(props) {
       // start: yyyy-MM-dd
       // end: yyyy-MM-dd
       eventEmitter.emit(eventName, { start, end });
+      console.log(start, end);
     }
     myChart.on('mouseup', mouseUp)
 
@@ -228,6 +230,7 @@ export default function Calendar(props) {
 
   // 高亮筛选部分
   useEffect(() => {
+    if (!date.start || !date.end) return () => {}
     myChart?.setOption({
       series: [{
         name: '高亮',

@@ -30,6 +30,7 @@ import InfoBar from '@/components/infoBar/InfoBar'; // 框型小型抽屉栏
 import ModelBar from '@/components/pagePredict/ModelBar'; // 模型功能条
 import LegendBar from '@/components/pagePredict/LegendBar'; // 图例功能条
 import TrajBar from '@/components/pagePredict/TrajBar'; // 轨迹功能条
+import Doughnut from '@/components/pagePredict/doughnut/Doughnut'; // Echarts 环形统计图
 // Context 对象导入
 import { drawerVisibility } from '@/context/mainContext';
 // 样式
@@ -537,15 +538,32 @@ export default function PagePredict(props) {
   }, [byBrush])
 
   // poi 查询
-  const { poiDisabled, setPoiDisabled, poiState, poiDispatch } = usePoiSearch(bmap, usedForPredict)
+  const {
+    poiDisabled,
+    setPoiDisabled,
+    poiState,
+    poiDispatch,
+    searchCompleteResult
+  } = usePoiSearch(bmap, usedForPredict);
 
   return (
     <>
+      {/* bmap 容器 */}
       <div
         key={'3-1'}
         ref={ref}
         className='bmap-container'
       ></div>
+      {/* POI检索环形统计图 */}
+      <Doughnut
+        data={searchCompleteResult}
+        style={{
+          position: 'absolute',
+          bottom: '0',
+          left: '0',
+          display: poiDisabled && searchCompleteResult ? '' : 'none',
+        }}
+      />
       {/* 左侧 Drawer */}
       <Drawer
         // 弹出位置

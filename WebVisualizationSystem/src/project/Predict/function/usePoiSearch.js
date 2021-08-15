@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SearchPOI from '@/components/pagePredict/poi-selector';
 import { usePoi } from '@/project/predict/function/usePoi';
 
@@ -11,10 +11,12 @@ export const usePoiSearch = (bmap, traj) => {
   const instance = useRef(null);
   const { poiDisabled, setPoiDisabled, poiState, poiDispatch } = usePoi();
 
+  const [searchCompleteResult, setSearchCompleteResult] = useState(null);
+
   // 实例化 SearchPOI 类
   useEffect(() => {
     if (!bmap) return () => { };
-    instance.current = new SearchPOI(bmap);
+    instance.current = new SearchPOI(bmap, undefined, { setSearchCompleteResult });
   }, [bmap])
 
   // 单条轨迹 + POI 查询
@@ -25,6 +27,7 @@ export const usePoiSearch = (bmap, traj) => {
       // 是否启用 POI 查询
       if (poiDisabled) {
         try {
+          // 获取检索中心
           let center;
           switch (poiState.description) {
             case 'start':
@@ -39,11 +42,21 @@ export const usePoiSearch = (bmap, traj) => {
             default:
               throw new Error('没有对应的类型')
           }
-          instance.current?.addAndSearchInCircle({
-            keyword: poiState.keyword,
-            center,
-            radius: poiState.radius,
-          })
+
+          if (poiState.radius && center) {
+            // 自动检索多关键词 - POI数目
+            const keyword = ['餐厅', '商场', '便利店', '娱乐场所', '影院', '医院', '宾馆',];
+            instance.current?.searchInCircle({ keyword, center, radius: poiState.radius });
+
+            // 手动输入关键词时触发
+            if (poiState.keyword) {
+              instance.current?.addAndSearchInCircle({
+                keyword: poiState.keyword,
+                center,
+                radius: poiState.radius,
+              })
+            }
+          }
         } catch (err) {
           console.log(err);
         }
@@ -55,9 +68,10 @@ export const usePoiSearch = (bmap, traj) => {
   }, [traj, poiDisabled, poiState])
 
   return {
-    poiDisabled, 
-    setPoiDisabled, 
-    poiState, 
+    poiDisabled,
+    setPoiDisabled,
+    poiState,
     poiDispatch,
+    searchCompleteResult,
   }
 }

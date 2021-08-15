@@ -1,7 +1,10 @@
 import BMap from 'BMap';
 
 export default class SearchPOI {
-  constructor(bmap, { panel = '', selectFirstResult = false, autoViewport = false } = {}) {
+  constructor(bmap,
+    { panel = '', selectFirstResult = false, autoViewport = false } = {},
+    { setSearchCompleteResult = undefined } = {}, // 回调函数
+  ) {
     const opts = {
       renderOptions: {
         map: bmap,
@@ -13,11 +16,41 @@ export default class SearchPOI {
     this.bmap = bmap;
     this.circle = null; // 圆形覆盖物
     this.search = new BMap.LocalSearch(bmap, opts);
+    this.init({ setSearchCompleteResult });
   }
 
-  searchInCircle({keyword, center, radius}) {
+  // 实例初始化后，挂载一些回调函数
+  init({ setSearchCompleteResult }) {
+    // 挂载检索结束后的回调函数
+    this.search.setSearchCompleteCallback((results) => {
+      if (setSearchCompleteResult) {
+        // 将检索结果转换格式后存储为 react state
+        let obj = this.getSearchNums(results);
+        setSearchCompleteResult(obj);
+      }
+    })
+  }
+
+  searchInCircle({ keyword, center, radius }) {
     const pt = new BMap.Point(...center);
     this.search.searchNearby(keyword, pt, radius);
+  }
+
+  /**
+   * 获取搜索结果总数
+   * @param {LocalResult | Array<LocalResult>} res - 检索结果
+   * @returns - {value: number, name: string}[]
+   */
+  getSearchNums(res) {
+    let obj;
+    if (Array.isArray(res)) {
+      obj = res?.reduce((prev, item) => {
+        return [...prev, {value: item.getNumPois(), name: item.keyword}]
+      }, [])
+    } else {
+      obj = Reflect.set({}, res.keyword, res.getNumPois());
+    }
+    return obj;
   }
 
   /**
@@ -42,8 +75,8 @@ export default class SearchPOI {
     this.bmap.addOverlay?.(this.circle);
   }
 
-  addAndSearchInCircle({keyword, center, radius}, circleStyle={}) {
-    this.searchInCircle({keyword, center, radius});
+  addAndSearchInCircle({ keyword, center, radius }, circleStyle = {}) {
+    this.searchInCircle({ keyword, center, radius });
     this.addCircleLayer(center, radius, circleStyle);
   }
 

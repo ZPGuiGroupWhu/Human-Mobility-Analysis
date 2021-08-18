@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-d
 import Layout from '@/components/layout/Layout';
 import PageAnalysis from '@/project/analysis/PageAnalysis';
 import PageSelect from '@/project/PageSelect';
-import Predict from '@/project/predict/Predict';
+import Predict from '@/project/Predict/Predict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';
 // Context 对象导入

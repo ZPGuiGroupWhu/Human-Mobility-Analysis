@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import PagePredict from '@/project/predict/PagePredict';
-import Mapgl from '@/project/predict/Mapgl';
+import PagePredict from '@/project/Predict/PagePredict';
+import Mapgl from '@/project/Predict/Mapgl';
 
 export default function Predict(props) {
   return (

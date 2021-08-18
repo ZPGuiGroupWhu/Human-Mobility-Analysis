@@ -3,12 +3,12 @@ import BMapGL from 'BMapGL';
 import { Checkbox } from 'antd';
 import "@/project/bmap.scss";
 // 逻辑分离
-import { useHeatmapvgl } from '@/project/predict/function/useHeatmapvgl'; // 热力图层
-import { useBuildingvgl } from '@/project/predict/function/useBuildingvgl'; // 建筑图层
-import { useCurve } from '@/project/predict/function/useCurve'; // 飞线涂层
-import { useReqod } from '@/project/predict/function/useReqod'; // od 请求
-import { useHoneycombLayer } from '@/project/predict/function/useHoneycombLayer'; // 蜂窝图层
-import { useHeatGridLayer } from '@/project/predict/function/useHeatGridLayer'; // 热力网格图
+import { useHeatmapvgl } from '@/project/Predict/function/useHeatmapvgl'; // 热力图层
+import { useBuildingvgl } from '@/project/Predict/function/useBuildingvgl'; // 建筑图层
+import { useCurve } from '@/project/Predict/function/useCurve'; // 飞线涂层
+import { useReqod } from '@/project/Predict/function/useReqod'; // od 请求
+import { useHoneycombLayer } from '@/project/Predict/function/useHoneycombLayer'; // 蜂窝图层
+import { useHeatGridLayer } from '@/project/Predict/function/useHeatGridLayer'; // 热力网格图
 
 // 多选框样式
 const checkbox = {

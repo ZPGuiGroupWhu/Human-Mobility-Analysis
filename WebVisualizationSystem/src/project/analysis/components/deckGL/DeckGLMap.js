@@ -17,7 +17,7 @@ class DeckGLMap extends Component {
         super(props);
         this.trajNodes=[];//轨迹点集合
         this.speedNodes=[];//速度点集合
-        this.OdNodes = [];
+        this.OdNodes = [];//获取OD集合
         this.arcLayerShow=false;//是否显示OD弧段图层
         this.heatMapLayerShow=false;//是否显示热力图图层
         this.gridLayerShow=false;//是否显示格网图层
@@ -39,11 +39,11 @@ class DeckGLMap extends Component {
                 start: '',
                 end: '',
             },
-            tripsLayer: null,
-            iconLayer: null,
-            dataLength: 0,
-            arcLayerOne: null,
-            tripsLayerOne: null
+            tripsLayer: null,//轨迹图层
+            iconLayer: null,//icon图层
+            dataLength: 0,//判断可视化的轨迹数量
+            arcLayerOne: null,//单条OD弧段图层
+            tripsLayerOne: null//单条高亮轨迹图层
         }
     }
 

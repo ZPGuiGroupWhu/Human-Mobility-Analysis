@@ -48,6 +48,7 @@ class PageAnalysis extends Component {
   };
   static contextType = drawerVisibility;
 
+  // 获取各date下的轨迹数  
   getTrajCounts = (count) => {
     this.setState({
       date: count,

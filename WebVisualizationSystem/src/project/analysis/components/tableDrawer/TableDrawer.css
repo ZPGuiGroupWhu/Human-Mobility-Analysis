@@ -1,0 +1,27 @@
+.ant-drawer-content {
+    border-radius: 2px 2px 30px 30px !important;
+
+}
+/*修改表头文字*、背景颜色*/
+.ant-table-thead > tr >th{
+    color:#696969 !important;
+    font-size: 15px !important;
+    font-family:'Microsoft Yahei' !important;
+    font-weight: bolder!important;
+    background-color: #F5F5F5 !important;
+    padding: 5px 0 5px 0 !important;
+    border-color: white !important;
+    border-width: 3px !important;
+}
+
+/*修改列表文字、背景颜色*/
+.ant-table-tbody > tr >td{
+    background: #F5F5F5 !important;
+    padding: 0 0 !important;
+    padding: 5px 50px 0 45px !important;
+    border-color: white !important;
+    border-width: 3px !important;
+    margin: 0 auto !important;
+}
+
+

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
 import 'echarts/extension/bmap/bmap';
-import {Select} from 'antd';
+import { Select, Button } from 'antd';
+import { withRouter } from 'react-router';
 // Context 对象导入
 import { drawerVisibility } from '@/context/mainContext'
 // 样式
@@ -17,7 +18,7 @@ import TableDrawer from "./components/tableDrawer/TableDrawer";
 import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
-import './PageAnalysis.css'
+// import './PageAnalysis.css'
 
 
 /**
@@ -29,8 +30,8 @@ import './PageAnalysis.css'
 // 小提琴图，初始数据
 const initlabel = '总出行次数';
 const optionData = [];
-for(let i = 1; i < Object.keys(personalityData[0]).length-4; i++){
-  optionData.push({'option':Object.keys(personalityData[0])[i], 'disbale':false})
+for (let i = 1; i < Object.keys(personalityData[0]).length - 4; i++) {
+  optionData.push({ 'option': Object.keys(personalityData[0])[i], 'disbale': false })
 }
 
 class PageAnalysis extends Component {
@@ -65,39 +66,45 @@ class PageAnalysis extends Component {
 
   render() {
     return (
-        <>
-          <DeckGLMap userData={userData} getTrajCounts={this.getTrajCounts} eventName={this.EVENTNAME} />
-          <TableDrawer radar={() => (
-              <div>
-                {/*<p className={'p-label'}>大五人格雷达图</p>*/}
-                <Radar data={personalityData} eventName={this.EVENTNAME} id ={100045440} />
-              </div>)}
-                       wordcloud={()=>(
-                           <div>
-                             {/*<p className={'p-label'}>用户特征词云图</p>*/}
-                             <WordCloud data={personalityData} eventName={this.EVENTNAME} id ={100045440} maskImage={this.maskImage} />
-                           </div>)}
-                       violinplot={()=>(
-                           <div>
-                             {/*<p className={'p-label'}>用户特征小提琴图</p>*/}
-                             <p></p>
-                             <Select showSearch={true}
-                                     style={{ width: 500}}
-                                     defaultValue={initlabel}
-                                     optionFilterProp="children"
-                                     notFoundContent="无法找到"
-                                     onChange={this.optionChange}>
-                               {optionData.map(item => (
-                                   <Select.Option key={item.option}>{item.option}</Select.Option>
-                               ))}
-                             </Select>
-                             <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option}/>
-                           </div>
-                       )} height = {400}/>
-          <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170} />
-        </>
+      <>
+        <DeckGLMap userData={userData} getTrajCounts={this.getTrajCounts} eventName={this.EVENTNAME} />
+        <TableDrawer radar={() => (
+          <div>
+            {/*<p className={'p-label'}>大五人格雷达图</p>*/}
+            <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} />
+          </div>)}
+          wordcloud={() => (
+            <div>
+              {/*<p className={'p-label'}>用户特征词云图</p>*/}
+              <WordCloud data={personalityData} eventName={this.EVENTNAME} id={100045440} maskImage={this.maskImage} />
+            </div>)}
+          violinplot={() => (
+            <div>
+              {/*<p className={'p-label'}>用户特征小提琴图</p>*/}
+              <p></p>
+              <Select showSearch={true}
+                style={{ width: 500 }}
+                defaultValue={initlabel}
+                optionFilterProp="children"
+                notFoundContent="无法找到"
+                onChange={this.optionChange}>
+                {optionData.map(item => (
+                  <Select.Option key={item.option}>{item.option}</Select.Option>
+                ))}
+              </Select>
+              <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option} />
+            </div>
+          )} height={400} />
+        <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170} />
+        <Button
+          onClick={() => { this.props.history.push('/select/predict') }}
+          style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}
+        >
+          预测
+        </Button>
+      </>
     )
   }
 }
 
-export default PageAnalysis
+export default withRouter(PageAnalysis);

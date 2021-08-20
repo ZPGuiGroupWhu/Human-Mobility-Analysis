@@ -11,10 +11,10 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 import { useExceptFirst } from '@/common/hooks/useExceptFirst';
 import { useTime } from '@/common/hooks/useTime';
 // 逻辑分离
-import { useCreate } from '@/project/Predict/function/useCreate'; // 
-import { usePoiSearch } from '@/project/Predict/function/usePoiSearch'; // poi 查询
-import { useOD } from '@/project/Predict/function/useOD'; // OD 显示 & heatmap 显示 & 图例显示
-import { usePredict } from '@/project/Predict/function/usePredict'; // 轨迹预测
+import { useCreate } from '@/project/predict/function/useCreate'; // 
+import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
+import { useOD } from '@/project/predict/function/useOD'; // OD 显示 & heatmap 显示 & 图例显示
+import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
 // 网络请求
 import { getOrg, getDest, selectByTime } from '@/network';
 // 自定义组件
@@ -35,6 +35,8 @@ import Doughnut from '@/components/pagePredict/doughnut/Doughnut'; // Echarts �
 import { drawerVisibility } from '@/context/mainContext';
 // 样式
 import '@/project/bmap.scss';
+// 全局状态管理
+import Store from '@/store';
 
 
 
@@ -44,6 +46,12 @@ import '@/project/bmap.scss';
 const iconScriptUrl = '//at.alicdn.com/t/font_2577661_dmweq4qmkar.js';
 
 export default function PagePredict(props) {
+  // 全局状态管理 Store
+  const value = useContext(Store);
+  useEffect(()=>{
+    console.log(value);
+  }, [])
+
   // Context 对象
   const drawerVisibleObj = useContext(drawerVisibility);
 

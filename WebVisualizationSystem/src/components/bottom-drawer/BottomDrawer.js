@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Drawer, Button } from 'antd';
-import './CalendarDrawer.css';
+import './BottomDrawer.css';
 import { withMouse } from './withMouse';
 import { UpCircleTwoTone, DownCircleTwoTone } from '@ant-design/icons';
 
 const bottomBorder = 40;
-class CalendarDrawer extends Component {
+class BottomDrawer extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -89,4 +89,4 @@ class CalendarDrawer extends Component {
   }
 }
 
-export default withMouse(CalendarDrawer);
+export default withMouse(BottomDrawer);

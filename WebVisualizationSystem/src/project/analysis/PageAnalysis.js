@@ -12,7 +12,7 @@ import userData from './components/deckGL/399313.json'
 import personalityData from './components/tableDrawer/radar/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
-import CalendarDrawer from './components/calendar/CalendarDrawer';
+import BottomDrawer from '@/components/bottom-drawer/BottomDrawer';
 import Calendar from './components/calendar/Calendar';
 import TableDrawer from "./components/tableDrawer/TableDrawer";
 import Radar from "./components/tableDrawer/radar/Radar";
@@ -95,7 +95,7 @@ class PageAnalysis extends Component {
               <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option} />
             </div>
           )} height={400} />
-        <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170} />
+        <BottomDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170} />
         <Button
           onClick={() => { this.props.history.push('/select/predict') }}
           style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}

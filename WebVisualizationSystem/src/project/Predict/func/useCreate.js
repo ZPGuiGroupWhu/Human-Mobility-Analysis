@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts'; // ECharts
 import 'echarts/extension/bmap/bmap'; // ECharts
 // 配置项
-import { option } from '@/project/predict/config/option.js'; // Echarts 静态配置项
+import { option } from '@/project/predict/config/staticOptions.js'; // Echarts 静态配置项
 
 export const useCreate = ({ ref, initCenter, initZoom }) => {
   // echarts 实例对象

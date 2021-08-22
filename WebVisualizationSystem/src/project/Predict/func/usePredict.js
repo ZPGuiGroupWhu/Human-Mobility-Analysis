@@ -16,38 +16,7 @@ function trajSeparation(data, partnum) {
   }
 }
 
-// 清除单轨迹动效绘制
-function clearSingleTraj(chart) {
-  chart.setOption({
-    series: [{
-      name: '静态单轨迹',
-      data: [],
-    }, {
-      name: '动态单轨迹',
-      data: [],
-    }, {
-      name: '出发地',
-      data: [],
-    }, {
-      name: '目的地',
-      data: [],
-    }, {
-      name: '当前点',
-      data: [],
-    }, {
-      name: '历史预测点',
-      data: [],
-    }, {
-      name: '历史预测路径',
-      data: [],
-    }, {
-      name: '当前预测点',
-      data: [],
-    }]
-  })
-}
-
-export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
+export const usePredict = (chart, traj, {singleOD, singleTraj, singleCurpt, clearSingleTraj}) => {
   // 模拟预测点坐标（后期用真实数据替换）
   function getMockData(val, min, max) {
     if (Array.isArray(val)) {
@@ -137,15 +106,15 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
     // 开始预测
     // !timer.current 避免重复点击
     if (predict.startPredict && !timer.current) {
-      drawOD(chart, traj?.data); // 绘制预测轨迹的 OD 点
+      singleOD(traj?.data); // 绘制预测轨迹的 OD 点
 
 
       // trajPart 用于记录每次历史动效，方便在暂停后恢复
       if (trajPart.idx < 1) {
         // id 为 0 表明本次为第一次展示
         setTimeout(() => {
-          drawTraj(chart, separationRes[0]);
-          drawCurpt(chart, separationRes[0]);
+          singleTraj(separationRes[0]);
+          singleCurpt(separationRes[0]);
         }, 0)
 
         setTrajPart(({ idx }) => {
@@ -171,8 +140,8 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
 
         setTrajPart(({ idx, coords }) => {
           setTimeout(() => {
-            drawTraj(chart, separationRes[idx]);
-            drawCurpt(chart, separationRes[idx]);
+            singleTraj(separationRes[idx]);
+            singleCurpt(separationRes[idx]);
           }, 0)
 
           return idx === separationRes.length - 1 ? {
@@ -205,14 +174,11 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
 
     // 清除预测
     if (predict.clearPredict && trajPart.idx !== 0) {
-      // 重置计时器
       clearInterval(timer.current);
       timer.current = null;
-      // 清除轨迹
-      clearSingleTraj(chart);
-      // 重新绘制静态轨迹
-      drawTraj(chart, traj?.data);
-      drawOD(chart, traj?.data);
+      clearSingleTraj();
+      singleTraj(traj.data);
+      singleOD(traj.data)
       setTrajPart({
         idx: 0,
         coords: [],

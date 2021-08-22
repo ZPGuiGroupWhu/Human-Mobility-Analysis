@@ -1,0 +1,14 @@
+.echart-bar-ctn {
+  position: fixed;
+  top: 70px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-top: 5px;
+  right: 5px;
+}
+
+.load-hidden {
+  visibility: hidden;
+}

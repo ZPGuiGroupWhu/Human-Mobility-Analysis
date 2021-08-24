@@ -5,26 +5,36 @@ import _ from "lodash";
 export default class ViolinPlot extends Component{
     constructor(props) {
         super(props);
+        // 用于记录该id的用户在数据集内的序号
+        this.number = 0;
     };
+
     chartRef = createRef();
     unPack(rows, key) {
         return rows.map(function(row) { return row[key]; });
     }
 
     getViolinPlot = () => {
+        const id = this.props.id;
         const data = this.props.data;
         const option = this.props.option;
         const userData = [];
+        let count = 0;
+        let number = 0;
         _.forEach(data, function(item){
-            userData.push(item)
+            if(item['人员编号'] === id){
+                number = count;
+            }
+            userData.push(item);
+            count += 1;
         });
 
         const drawData = [{
             // width:1,
             // height:300,
             type: 'violin',
-            x: this.unPack(userData, option),
-            hoverinfo: 'x',
+            y: this.unPack(userData, option),
+            hoverinfo: 'y',
             hoverlabel:{
                 bgcolor:'#FFC0CB',
                 bordercolor: 'grey',
@@ -37,8 +47,8 @@ export default class ViolinPlot extends Component{
             hoveron: 'violins+kde',
             meanline:{
                 visable: true,
-                width: 2,
-                color:'#000000'
+                width: 3,
+                color:'#FF8C00'
             },
             box: {
                 visible: true,
@@ -52,7 +62,7 @@ export default class ViolinPlot extends Component{
             spanmode: 'soft',
             line: {
                 color: 'black',
-                width: 1
+                width: 1.5
             },
             fillcolor: '#87CEEB',
             opacity: 0.6,
@@ -61,7 +71,7 @@ export default class ViolinPlot extends Component{
             },
             points: 'all',
             pointpos: 0,
-            selectedpoints: [1],
+            selectedpoints: [number],
             selected:{
                 marker:{
                     color: '#FF0000',
@@ -77,18 +87,18 @@ export default class ViolinPlot extends Component{
         }];
 
         const layout = {
-            paper_bgcolor: '#F5F5F5',
-            plot_bgcolor: '#F5F5F5',
+            paper_bgcolor: 'rgba(250,235,215,0.1)',
+            plot_bgcolor: 'rgba(250,235,215,0.1)',
             xaxis: {
                 zeroline: false
             },
-            height:300,
-            width:500,
+            height:380,
+            width:345,
             margin:{
-                b:40,
-                l:80,
-                r:10,
-                t:40
+                b:30,
+                l:40,
+                r:20,
+                t:20
             }
         };
 

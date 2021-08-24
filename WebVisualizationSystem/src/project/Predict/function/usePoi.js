@@ -2,7 +2,7 @@ import { useState, useReducer } from 'react';
 
 export const usePoi = () => {
   // 控制 poi 查询功能是否开启
-  const [poiDisabled, setPoiDisabled] = useState(false);
+  const [poiDisabled, setPoiDisabled] = useState(true);
 
   function poiReducer(state, action) {
     const { type, payload } = action;

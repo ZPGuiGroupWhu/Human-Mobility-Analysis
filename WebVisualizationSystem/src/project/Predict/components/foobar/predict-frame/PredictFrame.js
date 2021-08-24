@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import "./PredictFrame.scss";
+import "../css/common.css";
 import { Button } from 'antd';
 import { PlayCircleOutlined, PauseCircleOutlined, StopOutlined } from '@ant-design/icons';
 
@@ -14,7 +15,7 @@ export default function PredictFrame(props) {
   }
 
   return (
-    <div className="predict-frame-ctn">
+    <div className="predict-frame-ctn universal-frame-style">
       <Button
         onClick={
           () => {

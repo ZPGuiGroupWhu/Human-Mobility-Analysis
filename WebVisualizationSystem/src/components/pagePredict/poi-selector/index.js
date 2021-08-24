@@ -29,6 +29,15 @@ export default class SearchPOI {
         setSearchCompleteResult(obj);
       }
     })
+    // 清除标记
+    // this.search.setMarkersSetCallback((pois) => {
+    //   const vm = this;
+    //   const markerNodes = document.getElementsByClassName("BMap_Marker");
+    //   (Object.prototype.toString.call(markerNodes) === '[object HTMLCollection]') && Array.prototype.forEach.call(markerNodes, item => {
+    //     item.style.setProperty('display', 'none');
+    //     vm.bmap.removeOverlay();
+    //   });
+    // })
   }
 
   searchInCircle({ keyword, center, radius }) {
@@ -45,7 +54,7 @@ export default class SearchPOI {
     let obj;
     if (Array.isArray(res)) {
       obj = res?.reduce((prev, item) => {
-        return [...prev, {value: item.getNumPois(), name: item.keyword}]
+        return [...prev, { value: item.getNumPois(), name: item.keyword }]
       }, [])
     } else {
       obj = Reflect.set({}, res.keyword, res.getNumPois());

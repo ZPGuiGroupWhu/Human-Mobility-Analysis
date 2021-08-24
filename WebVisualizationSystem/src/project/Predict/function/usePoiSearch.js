@@ -44,17 +44,17 @@ export const usePoiSearch = (bmap, traj) => {
           }
 
           if (poiState.radius && center) {
-            // 自动检索多关键词 - POI数目
-            const keyword = ['餐厅', '商场', '便利店', '娱乐场所', '影院', '医院', '宾馆',];
-            instance.current?.searchInCircle({ keyword, center, radius: poiState.radius });
-
             // 手动输入关键词时触发
-            if (poiState.keyword) {
+            if (!!poiState.keyword) {
               instance.current?.addAndSearchInCircle({
                 keyword: poiState.keyword,
                 center,
                 radius: poiState.radius,
               })
+            } else {
+              // 自动检索多关键词 - POI数目
+              const keyword = ['餐厅', '商场', '便利店', '娱乐场所', '影院', '医院', '宾馆',];
+              instance.current?.addAndSearchInCircle({ keyword, center, radius: poiState.radius });
             }
           }
         } catch (err) {

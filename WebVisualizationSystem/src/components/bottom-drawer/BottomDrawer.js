@@ -44,7 +44,7 @@ class BottomDrawer extends Component {
 
   //将按钮状态返回给父组件
   toParent = (btn) => {
-    this.props.setBtnSate(btn);
+    this.props.setBtnSate?.(btn);
   };
 
   componentDidUpdate(prevProps, prevState) {

@@ -34,10 +34,10 @@ const userID = 100045440;
 const initlabel = '总出行次数';
 // 小提琴图，用户数据
 const optionData = [];
-_.forEach(personalityData, function(item){
-  if (item.人员编号 === userID){
-    for(let i = 1; i < Object.keys(item).length-4; i++){
-      optionData.push({'option':Object.keys(item)[i], 'value':Object.values(item)[i], 'disbale':false})
+_.forEach(personalityData, function (item) {
+  if (item.人员编号 === userID) {
+    for (let i = 1; i < Object.keys(item).length - 4; i++) {
+      optionData.push({ 'option': Object.keys(item)[i], 'value': Object.values(item)[i], 'disbale': false })
     }
   }
 });
@@ -53,9 +53,9 @@ class PageAnalysis extends Component {
     this.state = {
       date: null,
       option: initlabel,
-      leftBtnDisabled:false,
-      rightBtnDisabled:false,
-      bottomBtnDisabled:false,
+      leftBtnDisabled: false,
+      rightBtnDisabled: false,
+      bottomBtnDisabled: false,
     }
   };
   static contextType = drawerVisibility;
@@ -66,12 +66,12 @@ class PageAnalysis extends Component {
     })
   };
 
-  setBtnState = (btn) =>{
+  setBtnState = (btn) => {
     this.setState((prevState, props) => {
       return {
-        leftBtnDisabled:(btn==='leftBtn')? prevState.leftBtnDisabled:!prevState.leftBtnDisabled,
-        rightBtnDisabled:(btn==='rightBtn')? prevState.rightBtnDisabled:!prevState.rightBtnDisabled,
-        bottomBtnDisabled:(btn==='bottomBtn')? prevState.bottomBtnDisabled:!prevState.bottomBtnDisabled,
+        leftBtnDisabled: (btn === 'leftBtn') ? prevState.leftBtnDisabled : !prevState.leftBtnDisabled,
+        rightBtnDisabled: (btn === 'rightBtn') ? prevState.rightBtnDisabled : !prevState.rightBtnDisabled,
+        bottomBtnDisabled: (btn === 'bottomBtn') ? prevState.bottomBtnDisabled : !prevState.bottomBtnDisabled,
       };
     });
   };
@@ -86,42 +86,42 @@ class PageAnalysis extends Component {
 
   render() {
     return (
-        <>
-          <DeckGLMap userData={userData} getTrajCounts={this.getTrajCounts} eventName={this.EVENTNAME} />
-          <TableDrawer radar={() => (
-              <div>
-                <Radar data={personalityData} eventName={this.EVENTNAME} id ={100045440} />
-              </div>)}
-                       wordcloud={()=>(
-                           <div>
-                             <WordCloud data={personalityData} eventName={this.EVENTNAME} id ={100045440} maskImage={this.maskImage} />
-                           </div>)}
-                       violinplot={()=>(
-                           <div>
-                             <p></p>
-                             <Select showSearch={true}
-                                     style={{ width: 330 }}
-                                     defaultValue={initlabel}
-                                     optionFilterProp="children"
-                                     notFoundContent="无法找到"
-                                     onChange={this.optionChange}>
-                               {optionData.map(item => (
-                                   <Select.Option key={item.option}>{item.option}</Select.Option>
-                               ))}
-                             </Select>
-                             <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option}/>
-                           </div>
-                       )} leftwidth = {310} rightwidth={370} data={optionData} eventName={this.EVENTNAME}
-                       leftBtnDisabled={this.state.leftBtnDisabled} rightBtnDisabled={this.state.rightBtnDisabled} setBtnSate={this.setBtnState}/>
-          <BottomDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170}
-                        bottomBtnDisabled={this.state.bottomBtnDisabled} setBtnSate={this.setBtnState}/>
-          <Button
-              onClick={() => { this.props.history.push('/select/predict') }}
-              style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}
-          >
-            预测
-          </Button>
-        </>
+      <>
+        <DeckGLMap userData={userData} getTrajCounts={this.getTrajCounts} eventName={this.EVENTNAME} />
+        <TableDrawer radar={() => (
+          <div>
+            <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} />
+          </div>)}
+          wordcloud={() => (
+            <div>
+              <WordCloud data={personalityData} eventName={this.EVENTNAME} id={100045440} maskImage={this.maskImage} />
+            </div>)}
+          violinplot={() => (
+            <div>
+              <p></p>
+              <Select showSearch={true}
+                style={{ width: 330 }}
+                defaultValue={initlabel}
+                optionFilterProp="children"
+                notFoundContent="无法找到"
+                onChange={this.optionChange}>
+                {optionData.map(item => (
+                  <Select.Option key={item.option}>{item.option}</Select.Option>
+                ))}
+              </Select>
+              <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option} />
+            </div>
+          )} leftwidth={310} rightwidth={370} data={optionData} eventName={this.EVENTNAME}
+          leftBtnDisabled={this.state.leftBtnDisabled} rightBtnDisabled={this.state.rightBtnDisabled} setBtnSate={this.setBtnState} />
+        <BottomDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170}
+          bottomBtnDisabled={this.state.bottomBtnDisabled} setBtnSate={this.setBtnState} />
+        <Button
+          onClick={() => { this.props.history.push('/select/predict') }}
+          style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}
+        >
+          预测
+        </Button>
+      </>
     )
   }
 }

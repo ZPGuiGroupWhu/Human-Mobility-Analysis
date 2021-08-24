@@ -33,10 +33,11 @@ export default class Radar extends Component{
             jinZeScore += item.尽责性;
             counts += 1;
         });
-        Average.push(waiXiangScore /= counts);
-        Average.push(kaiFangScore /= counts);
-        Average.push(shenJingScore /= counts);
-        Average.push(jinZeScore /= counts);
+        //保留9位小数
+        Average.push((waiXiangScore /= counts).toFixed(9));
+        Average.push((kaiFangScore /= counts).toFixed(9));
+        Average.push((shenJingScore /= counts).toFixed(9));
+        Average.push((jinZeScore /= counts).toFixed(9));
 
         const lineStyle = {
             normal: {
@@ -45,7 +46,7 @@ export default class Radar extends Component{
             }
         };
         const option = {
-            backgroundColor: '#F5F5F5',
+            backgroundColor: 'rgba(250,235,215,0.2)',
             // title: {
             //     text: '大五人格-雷达图',
             //     left: 'center',
@@ -54,16 +55,24 @@ export default class Radar extends Component{
             //     }
             // },
             legend: {
-                bottom: 0,
-                data: ['User'+id, 'Average'],
+                bottom: 5,
+                data: ['当前用户', '平均水平'],
                 itemGap: 50,
                 textStyle: {
                     color: '#696969',
-                    fontSize: 12
+                    fontSize: 12,
+                    fontWeight:'bold',
                 },
                 // selectedMode: 'single'
             },
-            tooltip: { },
+            tooltip: {
+                position: ['10%', '50%'],
+                textStyle: {
+                    fontSize:5,
+                    fontFamily:'Microsoft Yahei'
+                }
+
+            },
             // visualMap: {
             //     show: true,
             //     min: 0,
@@ -119,7 +128,7 @@ export default class Radar extends Component{
                         }
                     },
                     data:[{
-                        name: 'User' + id,
+                        name: '当前用户',
                         lineStyle: lineStyle,
                         value: Person,
                         itemStyle: {
@@ -129,7 +138,7 @@ export default class Radar extends Component{
                             opacity: 0.3
                         }
                     }, {
-                        name: 'Average',
+                        name: '平均水平',
                         lineStyle: lineStyle,
                         value: Average,
                         itemStyle: {

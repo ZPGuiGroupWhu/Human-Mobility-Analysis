@@ -21,9 +21,26 @@ export default function WordCloud(props){
         }
     });
 
+    const mousePosition = function(e){
+        return [e.pageX, e.pageY]
+    };
+
     const option = {
-        // backgroundColor:'#fff',
-        tooltip: {show: true},
+        backgroundColor:'rgba(250,235,215,0.2)',
+        tooltip: {
+            show: true,
+            position: function (pos, params, dom, rect, size) {
+                // 鼠标在左侧时 tooltip 显示到右侧，鼠标在右侧时 tooltip 显示到左侧。
+                let obj = {};
+                obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 10;
+                obj[['bottom','top'][+(pos[1] < size.viewSize[1] / 2)]] = 5;
+                return obj;
+            },
+            textStyle: {
+                fontSize: 3,
+                fontFamily: 'Microsoft Yahei'
+            }
+        },
         series: [ {
             type: 'wordCloud',
             shape: 'circle',
@@ -34,7 +51,7 @@ export default function WordCloud(props){
             bottom: 'center',
             width: '100%',
             height: '100%',
-            sizeRange: [8, 16],
+            sizeRange: [6, 15],
 
             // Text rotation range and step in degree. Text will be rotated randomly in range [-90, 90] by rotationStep 45
 
@@ -52,7 +69,7 @@ export default function WordCloud(props){
 
             // If perform layout animation.
             // NOTE disable it will lead to UI blocking when there is lots of words.
-            layoutAnimation: false,
+            layoutAnimation: true,
             textStyle: {
                 color: function () {
                     return 'rgb(' + [
@@ -87,7 +104,7 @@ export default function WordCloud(props){
             ref={ref}
             style={{
                 width: 300,
-                height: 300,
+                height: 277,
             }}
         ></div>
     )

@@ -273,6 +273,8 @@ function PagePredict(props) {
         {/* 1. POI检索环形统计图 */}
         <Doughnut
           data={searchCompleteResult}
+          autoplay={true}
+          autoplayInterval={2000}
           style={{
             display: poiDisabled && searchCompleteResult ? '' : 'none',
           }}

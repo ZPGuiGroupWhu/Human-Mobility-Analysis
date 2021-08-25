@@ -42,7 +42,7 @@ export const usePoi = () => {
     // 缓冲区中心坐标
     center: null,
     // 缓冲区半径
-    radius: 30,
+    radius: 100,
     // 类型：起点/当前点/终点
     description: 'end'
   }

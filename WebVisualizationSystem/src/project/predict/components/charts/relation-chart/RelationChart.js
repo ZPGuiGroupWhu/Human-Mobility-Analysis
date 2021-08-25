@@ -34,6 +34,7 @@ function RelationChart(props) {
           right: 15,
           textStyle: {
             color: '#fff',
+            fontSize: 15,
           }
         },
         tooltip: {
@@ -76,7 +77,7 @@ function RelationChart(props) {
         }, {
           left: 40,
           right: 20,
-          top: '60%',
+          top: '58%',
           height: '30%'
         }],
         xAxis: [
@@ -87,6 +88,7 @@ function RelationChart(props) {
             data: xAxisData,
           },
           {
+            show: false,
             gridIndex: 1,
             type: 'category',
             boundaryGap: false,
@@ -148,8 +150,8 @@ function RelationChart(props) {
     <div
       ref={ref}
       style={{
-        width: '400px',
-        height: '350px',
+        width: '320px',
+        height: '320px',
         borderRadius: '5px',
         backgroundColor: 'rgba(0, 0, 0, .7)',
         ...props.style,

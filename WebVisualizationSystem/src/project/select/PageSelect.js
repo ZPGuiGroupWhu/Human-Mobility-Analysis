@@ -36,10 +36,24 @@ class PageSelect extends Component {
           </div>
         </div>
         <div className="left">
-          <Charts></Charts>
+          <Charts.Group>
+            <Charts.Box title="测试">
+              <div style={{ backgroundColor: '#fff', height: '200px' }}></div>
+            </Charts.Box>
+            <Charts.Box title="测试">
+              <div style={{ backgroundColor: '#fff', height: '200px' }}></div>
+            </Charts.Box>
+            <Charts.Box title="测试">
+              <div style={{ backgroundColor: '#fff', height: '200px' }}></div>
+            </Charts.Box>
+            <Charts.Box title="测试">
+              <div style={{ backgroundColor: '#fff', height: '200px' }}></div>
+            </Charts.Box>
+          </Charts.Group>
         </div>
         <div className="right">
-          <Charts></Charts>
+          <Charts.Group>
+          </Charts.Group>
         </div>
       </div>
     )

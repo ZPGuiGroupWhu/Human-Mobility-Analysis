@@ -1,18 +1,9 @@
-import React, { Component } from 'react';
-import "./Charts.scss";
+import Box from './components/chart-box/Box';
+import Group from './components/chart-group/Group';
 
-class Charts extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {}
-  }
-  render() {
-    return (
-      <div className="select-charts-ctn">
-        {this.props.children}
-      </div>
-    );
-  }
-}
+const components = {
+  Box,
+  Group,
+};
 
-export default Charts;
+export default components;

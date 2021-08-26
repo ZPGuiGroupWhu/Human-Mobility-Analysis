@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import Layout from '@/components/layout/Layout';
 import PageAnalysis from '@/project/analysis/PageAnalysis';
-import PageSelect from '@/project/PageSelect';
+import PageSelect from '@/project/select/PageSelect';
 import Predict from '@/project/predict/Predict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';

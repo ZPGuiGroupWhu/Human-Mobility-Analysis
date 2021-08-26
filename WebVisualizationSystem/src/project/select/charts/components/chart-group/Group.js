@@ -9,7 +9,7 @@ class Group extends Component {
   render() {
     return (
       <div className="chart-group-ctn">
-        {this.props.children}
+          {this.props.children}
       </div>
     );
   }

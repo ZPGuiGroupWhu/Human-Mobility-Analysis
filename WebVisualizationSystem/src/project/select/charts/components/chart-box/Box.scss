@@ -4,7 +4,9 @@
   border: 0.7px solid #fff;
   animation: animated-border 1.5s infinite;
   // 背景样式
-  background-color: #111111;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
   width: calc(100% - 10px);
   margin: 5px;
@@ -12,7 +14,7 @@
   overflow: hidden;
   float: left;
   font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif; // 字体样式
-  // transition: all .3s ease-in; // 过渡动画
+  
 
   .title-bar {
     float: left;

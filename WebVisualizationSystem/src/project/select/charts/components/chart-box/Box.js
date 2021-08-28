@@ -76,7 +76,6 @@ class Box extends Component {
     if (!_.isEqual(prevProps.data, this.props.data) ||
       !_.isEqual(prevState.curSelectItem, this.state.curSelectItem)) {
       let res = this.findItem(this.props.data, this.state.curSelectItem);
-      console.log(prevState.data, res.data);
       this.setState({
         data: typeof res.data === 'function' ? res.data() : res.data,
       })

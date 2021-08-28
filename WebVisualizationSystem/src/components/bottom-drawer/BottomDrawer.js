@@ -40,12 +40,8 @@ class BottomDrawer extends Component {
         })
       }
     }
-  }
-
-  //将按钮状态返回给父组件
-  toParent = (btn) => {
-    this.props.setBtnSate?.(btn);
   };
+
 
   componentDidUpdate(prevProps, prevState) {
     this.setBtnVisible(prevProps, prevState);
@@ -60,7 +56,6 @@ class BottomDrawer extends Component {
           keyboard
           mask={false}
           placement='bottom'
-          visible={this.state.drawerVisible}
           bodyStyle={{
             padding: '0 100px',
           }}
@@ -84,7 +79,6 @@ class BottomDrawer extends Component {
             transform: 'translateX(-50%)',
           }}
           onClick={(e) => {
-            this.toParent('bottomBtn');
             this.setState(prev => ({
               drawerVisible: !prev.drawerVisible,
             }))

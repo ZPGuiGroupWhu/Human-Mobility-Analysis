@@ -8,7 +8,9 @@ class Bar extends Component {
     this.yAxisName = props.yAxisName;
     this.height = props.height;
     // state
-    this.state = {}
+    this.state = {
+      brushIdx: [],
+    }
   }
 
   ref = React.createRef(null);
@@ -16,16 +18,34 @@ class Bar extends Component {
 
   option = {
     tooltip: {
-      show:true,
+      show: true,
       trigger: 'axis',
+    },
+    // 工具栏配置
+    toolbox: {
+      iconStyle: {
+        color: '#fff', // icon 图形填充颜色
+        borderColor: '#fff', // icon 图形描边颜色
+      },
+      emphasis: {
+        iconStyle: {
+          color: '#7cd6cf',
+          borderColor: '#7cd6cf',
+        }
+      }
+    },
+    // 框选工具配置
+    brush: {
+      toolbox: ['rect', 'lineX', 'lineY', 'keep', 'clear'],
+      xAxisIndex: 0
     },
     // grid - 定位图表在容器中的位置
     grid: {
       show: true, // 是否显示直角坐标系网格
       left: '40', // 距离容器左侧距离
-      top: '10', // 距离容器上侧距离
-      right: '10',
-      bottom: '10',
+      top: '30', // 距离容器上侧距离
+      right: '40',
+      bottom: '40',
     },
     xAxis: {
       show: false,
@@ -48,7 +68,7 @@ class Bar extends Component {
       axisLine: {
         show: true, // 是否显示坐标轴线
         symbol: ['none', 'arrow'],
-        symbolSize: [5,8],
+        symbolSize: [5, 8],
         lineStyle: {
           color: '#fff',
         }
@@ -67,9 +87,15 @@ class Bar extends Component {
     },
     dataZoom: [
       {
-        type: 'inside',
+        type: 'slider',
         xAxisIndex: 0,
         filterMode: 'filter', // 过滤模式
+        textStyle: {
+          color: '#fff',
+          fontSize: 12,
+        },
+        left: 37,
+        right: 43,
         // --- 百分比 ---
         // start: 0, // 初始起始范围
         // end: 4, // 初始结束范围
@@ -77,15 +103,13 @@ class Bar extends Component {
         // maxSpan: 20, // 最大取值窗口(%)
         // --- 实值 ---
         startValue: 0,
-        endValue: 6,
+        endValue: 20,
         minValueSpan: 6,
         maxValueSpan: 50,
         // -----------
         orient: 'horizontal', // 布局方式
         zoomLock: false, // 是否锁定取值窗口(若锁定，只能平移不能缩放)
-        zoomOnMouseWheel: true, // 触发缩放的条件
-        moveOnMouseMove: true, // 触发平移的条件
-      }, 
+      },
       {
         type: 'slider',
         yAxisIndex: 0,
@@ -94,6 +118,7 @@ class Bar extends Component {
           color: '#fff',
           fontSize: 12,
         },
+        top: 28,
         // --- 百分比 ---
         start: 0, // 初始起始范围
         end: 100, // 初始结束范围
@@ -129,7 +154,7 @@ class Bar extends Component {
           ), // 柱条颜色
           borderColor: '#000', // 描边颜色
           borderWidth: 0, // 描边宽度
-          borderRadius: [5, 5, 0 , 0], // 描边弧度
+          borderRadius: [5, 5, 0, 0], // 描边弧度
         },
         emphasis: {
           focus: 'series', // 聚焦效果
@@ -154,6 +179,13 @@ class Bar extends Component {
 
   componentDidMount() {
     this.chart = echarts.init(this.ref.current);
+    // 添加 brushSelected 事件，存储刷选的数据索引
+    this.chart.on('brushSelected', function (params) {
+      let brushComponent = params.batch[0];
+      this.setState({
+        brushIdx: brushComponent.selected[0],
+      })
+    })
     this.chart.setOption(this.option);
   }
 
@@ -175,6 +207,7 @@ class Bar extends Component {
         style={{
           height: this.height,
         }}
+        draggable={false}
         ref={this.ref}
       ></div>
     );

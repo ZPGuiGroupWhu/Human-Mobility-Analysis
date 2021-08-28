@@ -27,6 +27,7 @@
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
     "echarts": "^5.1.1",
+    "echarts-gl": "^2.0.8",
     "echarts-wordcloud": "^2.0.0",
     "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",

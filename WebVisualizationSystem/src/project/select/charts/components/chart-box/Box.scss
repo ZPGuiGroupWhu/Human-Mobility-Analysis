@@ -27,6 +27,10 @@
     position: relative;
     z-index: 2;
 
+    .ant-select {
+      color: #fff !important;
+    }
+
     .text {
       display: block;
       font-size: 16px;
@@ -55,28 +59,22 @@
   // 图表显示/隐藏动画
   .chart-enter {
     opacity: 0;
-    // transform: translateY(-100%);
   }
   .chart-enter-active {
     opacity: 1;
-    // transform: translateY(0);
     transition: all 300ms;
   }
   .chart-enter-done {
-    // transform: translateY(0);
     opacity: 1;
   }
   .chart-exit {
     opacity: 1;
-    // transform: translateY(0);
   }
   .chart-exit-active {
     opacity: 0;
-    // transform: translateY(-100%);
     transition: all 300ms;
   }
   .chart-exit-done {
-    // transform: translateY(-100%);
     opacity: 0;
   }
 }
@@ -89,3 +87,4 @@
     box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
   }
 }
+

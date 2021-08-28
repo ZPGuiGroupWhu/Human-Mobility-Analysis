@@ -29,6 +29,7 @@ class Layout extends Component {
               src={src}
               alt=''
               style={{ width: imgWidth, height: imgHeight }}
+              draggable={false}
             />
             <h1>{title}</h1>
           </div>

@@ -9,12 +9,12 @@ class ChartRight extends Component {
   render() {
     return (
       <Charts.Group>
-        <Charts.Box title="测试">
+        {/* <Charts.Box title="测试">
           <div style={{ backgroundColor: '#fff', height: '600px' }}></div>
         </Charts.Box>
         <Charts.Box title="测试">
           <div style={{ backgroundColor: '#fff', height: '200px' }}></div>
-        </Charts.Box>
+        </Charts.Box> */}
       </Charts.Group>
     );
   }

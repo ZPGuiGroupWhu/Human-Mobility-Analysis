@@ -7,10 +7,10 @@ import Bar from '../components/chart-bar/Bar';
 class ChartLeft extends Component {
   constructor(props) {
     super(props);
-    this.groupOneKey = ['时间无关熵', '随机熵', '真实熵', '离家距离熵', '旅行熵'];
+    this.groupOneKey = ['时间无关熵', '随机熵', '真实熵', '离家距离熵', '旅行熵']; // 第一组 key 值
     this.state = {
       data: null, // 所有数据
-      groupOne: [], // 数据分组一
+      groupOne: [], // 第一组数据
     }
   }
 
@@ -25,6 +25,7 @@ class ChartLeft extends Component {
     )
   }
 
+  // 数据过滤 & 排序
   filterData = (data, x, y) => {
     let res = [];
     for (let value of Object.values(data)) {
@@ -58,7 +59,7 @@ class ChartLeft extends Component {
     return (
       <Charts.Group>
         <Charts.Box data={this.state.groupOne} dataKey={this.groupOneKey}>
-          {(data) => (<Bar height='200px' yAxisName="熵值" data={data}  />)}
+          {(data) => (<Bar height='250px' yAxisName="熵值" data={data}  />)}
         </Charts.Box>
         {/* <Charts.Box title="测试">
           <div style={{ backgroundColor: '#fff', height: '200px' }}></div>

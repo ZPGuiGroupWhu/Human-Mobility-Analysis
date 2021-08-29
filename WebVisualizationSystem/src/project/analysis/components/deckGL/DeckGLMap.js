@@ -12,13 +12,14 @@ import _ from 'lodash';
 import Store from '@/store';
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiMjAxNzMwMjU5MDE1NyIsImEiOiJja3FqM3RjYmIxcjdyMnhsbmR0bHo2ZGVpIn0.wNBmzyxhzCMx9PhIH3rwCA';//MAPBOX密钥
+const initOpacity = 0.8;
 
 class DeckGLMap extends Component {
   constructor(props){
     super(props);
     this.trajNodes=[];//轨迹点集合
     this.speedNodes=[];//速度点集合
-    this.OdNodes = [];
+    this.OdNodes = [];//OD点集合
     this.arcLayerShow=false;//是否显示OD弧段图层
     this.heatMapLayerShow=false;//是否显示热力图图层
     this.gridLayerShow=false;//是否显示格网图层
@@ -46,7 +47,7 @@ class DeckGLMap extends Component {
       iconLayer: null,//icon图标图层
       arcLayerOne: null,//选中OD图层
       tripsLayerOne: null,//选中轨迹图层
-      Opacity:0.8,
+      Opacity: initOpacity,
     }
   }
 
@@ -129,7 +130,8 @@ class DeckGLMap extends Component {
         getSourcePosition: d => d.O,
         getTargetPosition: d => d.D,
         getSourceColor:  [255,250, 97],
-        getTargetColor:  [30, 20, 255],})
+        getTargetColor:  [30, 20, 255],
+      })
     });
   };
   //构建热力图图层
@@ -210,55 +212,96 @@ class DeckGLMap extends Component {
   clickTraj = (info) =>{
     this.setState({
       Opacity:0.02
-    }, ()=>{
-      let id = info ? info.object.id : "not found";
+    }, ()=> {
+      let id = info.object ? info.object.id : null;
       // 绘制OD弧线
-      const tempOD = [];
-      const tempTraj = [];
-      for (let i = 0; i < this.props.userData.length; i++){
-        if (this.props.userData[i].id === id){
-          tempOD.push({O:this.props.userData[i].O, D:this.props.userData[i].D});
-          for(let j = 0; j < this.props.userData[i].data.length; j++){
-            tempTraj.push(this.props.userData[i].data[j])
+      if (id === null) {
+        console.log('no trajectory!')
+      } else {
+        const tempOD = [];
+        const tempTraj = [];
+        for (let i = 0; i < this.props.userData.length; i++) {
+          if (this.props.userData[i].id === id) {
+            tempOD.push({O: this.props.userData[i].O, D: this.props.userData[i].D});
+            for (let j = 0; j < this.props.userData[i].data.length; j++) {
+              tempTraj.push(this.props.userData[i].data[j])
+            }
+            break
           }
-          break
         }
+        const tempPath = [{path: tempTraj}];
+        this.setState({
+          arcLayerOne: new ArcLayer({
+            id: 'arc-layer-one',
+            data: tempOD,
+            pickable: true,
+            getWidth: 1,
+            getSourcePosition: d => d.O,
+            getTargetPosition: d => d.D,
+            getSourceColor: [175, 255, 255],
+            getTargetColor: [0, 128, 128],
+          })
+        });
+        //轨迹高亮
+        // console.log(tempPath);
+        this.setState({
+          tripsLayerOne: new TripsLayer({
+            id: 'trips-layer-one',
+            data: tempPath,
+            getPath: d => d.path,
+            // deduct start timestamp from each data point to avoid overflow
+            // getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
+            getColor: [256, 0, 0],
+            opacity: 1,
+            widthMinPixels: 3,
+            rounded: true,
+            trailLength: 200,
+            currentTime: 100,
+          })
+        });
+        // 存储轨迹
+        this.context.dispatch({type: 'setSelectedTraj', payload: info.object});
+        // Opacity改变，重新绘制其他轨迹
+        const [selectOdNodes, selectTrajs] = this.getSelectData(this.state.selectDate.start, this.state.selectDate.end);
+        // this.getIconLayer(selectOdNodes);
+        this.getTripsLayer(selectTrajs);
       }
-      const tempPath = [{path: tempTraj}];
-      this.setState({
-        arcLayerOne:new ArcLayer({
-          id: 'arc-layer-one',
-          data: tempOD,
-          pickable: true,
-          getWidth: 1,
-          getSourcePosition: d => d.O,
-          getTargetPosition: d => d.D,
-          getSourceColor: [175, 255, 255],
-          getTargetColor: [0, 128, 128],
-        })
-      });
-      //轨迹高亮
-      // console.log(tempPath);
-      this.setState({
-        tripsLayerOne: new TripsLayer({
-          id: 'trips-layer-one',
-          data: tempPath,
-          getPath: d => d.path,
-          // deduct start timestamp from each data point to avoid overflow
-          // getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
-          getColor: [256, 0, 0],
-          opacity: 1,
-          widthMinPixels: 3,
-          rounded: true,
-          trailLength: 200,
-          currentTime: 100,
-        })
-      });
-      // 存储轨迹
-      this.context.dispatch({ type: 'setSelectedTraj', payload: info.object });
-      this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
-    });
+    })
   };
+
+  // 高亮轨迹
+  // highlightTraj = (info) => {
+  //   let id = info.object ? info.object.id : null;
+  //   console.log(id);
+  //   if (id === null) {
+  //         console.log('no trajectory!')
+  //       } else {
+  //         const tempTraj = [];
+  //         console.log(id);
+  //         for (let i = 0; i < this.props.userData.length; i++) {
+  //           if (this.props.userData[i].id === id) {
+  //             for (let j = 0; j < this.props.userData[i].data.length; j++) {
+  //               tempTraj.push(this.props.userData[i].data[j])
+  //             }
+  //             break
+  //           }
+  //         }
+  //         const tempPath = [{path: tempTraj}];
+  //         this.setState({
+  //           tirpsLayerOneHighlight: new TripsLayer({
+  //             id: 'trips-layer-one-highlight',
+  //             data: tempPath,
+  //             getPath: d => d.path,
+  //             getColor: [256, 0, 0],
+  //             opacity: 1,
+  //             widthMinPixels: 3,
+  //             rounded: true,
+  //             trailLength: 200,
+  //             currentTime: 100,
+  //           })
+  //         })
+  //       }
+  // };
 
   // 绘制轨迹图层
   getTripsLayer = (selectData) =>{
@@ -274,13 +317,15 @@ class DeckGLMap extends Component {
         opacity: this.state.Opacity,
         widthMinPixels: 3,
         rounded: true,
-        fadeTrail: false,
+        fadeTrail: true,
         trailLength: 200,
         currentTime: 100,
         pickable: true,
         autoHighlight: true,
+        shadowEnabled: false,
         highlightColor: [256, 0, 0, 256],
         onClick: info => this.clickTraj(info),
+        // onHover: info => this.highlightTraj(info)
       })
     })
   };
@@ -331,11 +376,12 @@ class DeckGLMap extends Component {
   // 可视化筛选的轨迹
   showSelectTraj = (start, end) =>{
     this.setState({
-      Opacity:0.8
+      Opacity: initOpacity
+    }, ()=>{
+      const [selectOdNodes, selectTrajs] = this.getSelectData(start, end);
+      this.getIconLayer(selectOdNodes);
+      this.getTripsLayer(selectTrajs);
     });
-    const [selectOdNodes, selectTrajs] = this.getSelectData(start, end);
-    this.getIconLayer(selectOdNodes);
-    this.getTripsLayer(selectTrajs);
   };
 
   changeGridLayerShow=()=>{//与开关联动，切换格网图层的显示与否
@@ -370,16 +416,19 @@ class DeckGLMap extends Component {
   changeTripsLayerShow=()=>{//与开关联动，切换轨迹图层和icon图层的显示与否
     // 初始化透明度
     this.setState({
-      Opacity:0.8
+      Opacity: initOpacity
     });
+    // 显示各图层，icon图标、轨迹、单条轨迹、单挑OD弧段
     // this.iconLayerShow=!this.iconLayerShow;
     this.tripsLayerShow=!this.tripsLayerShow;
     this.tripsLayerOneShow=!this.tripsLayerOneShow;
     this.arcLayerOneShow=!this.arcLayerOneShow;
+    // 初始化图层
     this.getTripsLayerOne();
     this.getArcLayerOne();
     // this.getIconLayer(this.OdNodes);
-    this.getTripsLayer(this.props.userData);
+    // this.getTripsLayer(this.props.userData);
+    this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
   };
 
   getLayers = () => {//获取所有图层
@@ -390,10 +439,11 @@ class DeckGLMap extends Component {
     this.getSpeedLayer();//构建速度图层
     this.toParent();//将每天的轨迹数目统计结果反馈给父组件
     this.getAllOdNodes();//获取所有的OD集
-    this.getTripsLayer(this.props.userData);//构建轨迹图层
-    this.getIconLayer(this.OdNodes);//构建icon图标图层
+    // this.getTripsLayer(this.props.userData);//构建轨迹图层
+    // this.getIconLayer(this.OdNodes);//构建icon图标图层
     this.getTripsLayerOne();//初始化单挑高亮轨迹图层
     this.getArcLayerOne();//初始化单挑OD图层
+    this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
   };
   // 根据日期选择轨迹，监听函数
   addDateSelectListener() {
@@ -436,8 +486,8 @@ class DeckGLMap extends Component {
                 this.arcLayerOneShow?this.state.arcLayerOne:null,
                 this.tripsLayerOneShow?this.state.tripsLayerOne:null,
               ]}>
-            <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'}/>
-            { this._renderTooltip() }
+                <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'}/>
+              { this._renderTooltip() }
           </DeckGL>
           <div className={`moudle`}>
             GridLayer   <Switch onChange={this.changeGridLayerShow}/><br />
@@ -457,5 +507,4 @@ class DeckGLMap extends Component {
 }
 
 DeckGLMap.contextType = Store;
-
 export default DeckGLMap

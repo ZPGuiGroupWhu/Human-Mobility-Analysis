@@ -5,7 +5,7 @@
 
   .moudle {
     display: inline-block;
-    width: 160px;
+    width: auto;
     position: relative;
     border: 0px solid white;
     border-radius: 10px;

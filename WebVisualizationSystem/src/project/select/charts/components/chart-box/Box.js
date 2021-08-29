@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './Box.scss';
-import { CompressOutlined, ExpandOutlined, RiseOutlined } from '@ant-design/icons';
+import { CompressOutlined, ExpandOutlined, RiseOutlined, SnippetsOutlined } from '@ant-design/icons';
 import { Space, Select } from 'antd';
 import { CSSTransition } from 'react-transition-group';
 import _ from 'lodash';
@@ -48,7 +48,10 @@ class Box extends Component {
     this.state = {
       chartVisible: true, // 是否可视图表
       data: null, // 数据源
+      sortedData: null, // 排序后的数据源
       curSelectItem: this.defaultSelectItem, // 当前选择项(多源数据时生效)
+      isSorted: {}, // 是否开启
+      withFilter: false, // 是否开启过滤功能
     };
   }
 
@@ -75,13 +78,12 @@ class Box extends Component {
 
   // 数据排序(按照 dim 维度)
   setSortableData = (data, dim) => {
-    console.log(data);
     try {
       if (!Array.isArray(data)) throw new Error('data should be Array Type');
       if (!dim || (dim >= data.length)) throw new Error('dim Error');
       data.sort((a, b) => (a[dim] - b[dim]));
       this.setState({
-        data: _.cloneDeep(data), // 深拷贝，确保数据更新能被监听
+        sortedData: _.cloneDeep(data), // 深拷贝，确保数据更新能被监听
       })
     } catch (e) {
       console.log(e);
@@ -111,7 +113,11 @@ class Box extends Component {
             <Space>
               <RiseOutlined
                 style={{ ...this.iconStyle, display: this.props.sortable ? '' : 'none' }}
-                onClick={() => { this.setSortableData(this.state.data, 1) }}
+                onClick={() => { this.setState({isSorted: {}}) }}
+              />
+              <SnippetsOutlined
+                style={{ ...this.iconStyle, display: this.props.filterable ? '' : 'none' }}
+                onClick={() => { this.setState(prev => ({ withFilter: !prev.withFilter })) }}
               />
               {
                 this.state.chartVisible ?
@@ -131,7 +137,15 @@ class Box extends Component {
           <div
             className="chart-content"
           >
-            {this.props.children(this.state.data)}
+            {this.props.children(
+              this.state.data,
+              {
+                withFilter: this.state.withFilter,
+                isSorted: this.state.isSorted,
+                sortedData: this.state.sortedData,
+                setSortableData: this.setSortableData,
+              }
+            )}
           </div>
         </CSSTransition>
       </div>
@@ -141,10 +155,12 @@ class Box extends Component {
 
 Box.propTypes = {
   sortable: PropTypes.bool,
+  filterable: PropTypes.bool,
 }
 
 Box.defaultProps = {
-  sortable: true,
+  sortable: false,
+  filterable: false,
 }
 
 export default Box;

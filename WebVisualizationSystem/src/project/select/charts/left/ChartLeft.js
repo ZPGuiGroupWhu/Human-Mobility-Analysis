@@ -46,7 +46,7 @@ class ChartLeft extends Component {
       ))
     } catch (err) {
       console.log(err);
-    }  
+    }
   }
 
   componentDidMount() {
@@ -54,21 +54,25 @@ class ChartLeft extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {state} = this.context;
+    const { state } = this.context;
     // 请求到数据后的业务逻辑
     if (prevState.reqSuccess !== this.state.reqSuccess) {
       this.setState({
         groupOne: this.generateDataByYAxis(state.allData, this.groupOneKey, '人员编号'),
       })
     }
-    console.log(state);
   }
 
   render() {
     return (
       <Charts.Group>
-        <Charts.Box data={this.state.groupOne} dataKey={this.groupOneKey}>
-          {(data) => (<Bar height='250px' yAxisName="熵值" data={data} />)}
+        <Charts.Box
+          data={this.state.groupOne} // 数据
+          dataKey={this.groupOneKey} // 数据 key 值
+          sortable={true} // 是否启用排列按钮
+          filterable={true} // 是否启用数据递进过滤按钮
+        >
+          {(data, props = {}) => (<Bar height='250px' yAxisName="熵值" data={data} {...props} />)}
         </Charts.Box>
       </Charts.Group>
     );

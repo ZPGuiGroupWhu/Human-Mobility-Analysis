@@ -11,7 +11,9 @@ class Bar extends Component {
     this.yAxisName = props.yAxisName;
     this.height = props.height;
     // state
-    this.state = {}
+    this.state = {
+      selectedData: [],
+    }
   }
 
   ref = React.createRef(null);
@@ -178,26 +180,63 @@ class Bar extends Component {
     ]
   };
 
-  
+  setSelectedData = (selectedId) => {
+    return selectedId.map(val => (this.props.data.find(item => (item[0] === val))))
+  }
+
+  // 数据驱动更新视图
+  reSetOption = (data) => {
+    this.option.series[0].data = data
+    this.chart.setOption(this.option)
+  }
+
+  // 存储刷选的数据索引映射
+  onBrushSelected = (params) => {
+    let brushComponent = params.batch[0];
+
+    if (this.props.withFilter && !brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
+    this.context.dispatch({
+      type: 'setSelectedUsers',
+      payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][0]), // 刷选索引映射到数据维度
+    });
+  }
 
   componentDidMount() {
     this.chart = echarts.init(this.ref.current); // 初始化容器
-    // 添加 brushSelected 事件，存储刷选的数据索引映射
-    this.chart.on('brushSelected', (params) => {
-      let brushComponent = params.batch[0];
-      this.context.dispatch({
-        type: 'setSelectedUsers', 
-        payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][0]), // 刷选索引映射到数据维度
-      });
-    })
+    // 添加 brushSelected 事件
+    this.chart.on('brushSelected', this.onBrushSelected);
     this.chart.setOption(this.option); // 初始化视图
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.data !== this.props.data) {
-      // 数据驱动更新视图
-      this.option.series[0].data = this.props.data
-      this.chart.setOption(this.option)
+      // 判断是否开启过滤模式
+      if (this.props.withFilter) {
+        // 若开启，则当存在选中用户时，切换类型加载选中数据；若不开启，或当前没有选中用户时，加载数据源
+        const data = this.context.state.selectedUsers;
+        const res = this.setSelectedData(data);
+        this.reSetOption(
+          !!data.length ? res : this.props.data
+        );
+        this.setState({
+          selectedData: res,
+        })
+        this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
+      } else {
+        this.reSetOption(this.props.data);
+      }
+    }
+
+    if (prevProps.sortedData !== this.props.sortedData) {
+      this.reSetOption(this.props.sortedData);
+    }
+
+    if (prevProps.isSorted !== this.props.isSorted) {
+      if (this.props.withFilter) {
+        this.props.setSortableData(this.state.selectedData, 1);
+      } else {
+        this.props.setSortableData(this.props.data, 1);
+      }
     }
   }
 

@@ -66,7 +66,6 @@ class BottomDrawer extends Component {
         <Button
           ghost
           shape="circle"
-          disabled={this.props.bottomBtnDisabled}
           icon={
             this.state.drawerVisible ?
               <DownCircleTwoTone twoToneColor="#fff" /> :

@@ -4,7 +4,7 @@ import {StaticMap} from 'react-map-gl';
 import {HeatmapLayer,GPUGridLayer} from '@deck.gl/aggregation-layers';
 import {ArcLayer, IconLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
-import {Switch,Slider} from 'antd';
+import {Switch,Slider,Radio} from 'antd';
 import './DeckGLMap.css'
 import getFlatternDistance from './distanceCalculater.js'
 import { eventEmitter } from '@/common/func/EventEmitter';
@@ -22,10 +22,10 @@ class DeckGLMap extends Component {
     this.OdNodes = [];//OD点集合
     this.arcLayerShow=false;//是否显示OD弧段图层
     this.heatMapLayerShow=false;//是否显示热力图图层
-    this.gridLayerShow=false;//是否显示格网图层
-    this.gridLayer3D=false;//格网图层是否为3D
+    this.gridLayerShow=true;//是否显示格网图层
+    this.gridLayer3D=true;//格网图层是否为3D
     this.speedLayerShow=false;//是否显示速度图层
-    this.speedLayer3D=false;//速度图层是否为3D
+    this.speedLayer3D=true;//速度图层是否为3D
     this.gridWidth=100;//格网图层的宽度
     this.tripsLayerShow=false;
     this.iconLayerShow=false;
@@ -75,6 +75,7 @@ class DeckGLMap extends Component {
   };
 
   getTrajNodes = () => {
+    // console.log(this.props.userData)
     let Nodes=[];//统计所有节点的坐标
     let Count ={};//统计每天的轨迹数目
     let Speeds=[];//统计速度
@@ -85,15 +86,11 @@ class DeckGLMap extends Component {
       else{
         Count[this.props.userData[i].date]={'count':Count[this.props.userData[i].date].count+1}//否则是其他轨迹被录入，数目加一
       }
-      for(let j=0;j<this.props.userData[i].data.length;j++){
-        Nodes.push({COORDINATES:this.props.userData[i].data[j],WEIGHT:1});//将所有轨迹点放入同一个数组内，权重均设置为1
+      for(let j=0;j<this.props.userData[i].lngs.length;j++){
+        Nodes.push({COORDINATES:[this.props.userData[i].lngs[j],this.props.userData[i].lats[j]],WEIGHT:1});//将所有轨迹点放入同一个数组内，权重均设置为1
       }
-      for(let j=2;j<this.props.userData[i].data.length;j++){
-        let xy1=this.props.userData[i].data[j-1];
-        let xy2=this.props.userData[i].data[j];
-        let speed= getFlatternDistance(xy1[1],xy1[0],xy2[1],xy2[0]);
-        if(speed>100)continue;
-        Speeds.push({COORDINATES:this.props.userData[i].data[j],WEIGHT:speed});//假设两点间时间一致，速度用欧氏距离代替
+      for(let j=2;j<this.props.userData[i].spd.length;j++){
+        Speeds.push({COORDINATES:[this.props.userData[i].lngs[j],this.props.userData[i].lats[j]],WEIGHT:this.props.userData[i].spd[j]});
       }
     }
     this.trajNodes=Nodes;
@@ -384,22 +381,49 @@ class DeckGLMap extends Component {
     });
   };
 
-  changeGridLayerShow=()=>{//与开关联动，切换格网图层的显示与否
-    this.gridLayerShow=!this.gridLayerShow;
-    this.getGridLayer();
-  };
-  changeGridLayer3D=()=>{//与开关联动，切换格网图层的3D效果
-    this.gridLayer3D=!this.gridLayer3D;
-    this.getGridLayer();
-  };
-  changeSpeedLayerShow=()=>{//与开关联动，切换速度图层的显示与否
-    this.speedLayerShow=!this.speedLayerShow;
-    this.getSpeedLayer();
-  };
-  changeSpeedLayer3D=()=>{//与开关联动，切换速度图层的3D效果
-    this.speedLayer3D=!this.speedLayer3D;
-    this.getSpeedLayer();
-  };
+  // changeGridLayerShow=()=>{//与开关联动，切换格网图层的显示与否
+  //   this.gridLayerShow=!this.gridLayerShow;
+  //   this.getGridLayer();
+  // };
+  // changeGridLayer3D=()=>{//与开关联动，切换格网图层的3D效果
+  //   this.gridLayer3D=!this.gridLayer3D;
+  //   this.getGridLayer();
+  // };
+  // changeSpeedLayerShow=()=>{//与开关联动，切换速度图层的显示与否
+  //   this.speedLayerShow=!this.speedLayerShow;
+  //   this.getSpeedLayer();
+  // };
+  // changeSpeedLayer3D=()=>{//与开关联动，切换速度图层的3D效果
+  //   this.speedLayer3D=!this.speedLayer3D;
+  //   this.getSpeedLayer();
+  // };
+  changeGridOrSpeed=(event)=>{//切换图层
+    if(event.target.value=="Grid"){
+      this.gridLayerShow=true;
+      this.speedLayerShow=false;
+      this.getGridLayer();
+    }else if(event.target.value=="Speed"){
+      this.speedLayerShow=true;
+      this.gridLayerShow=false;
+      this.getSpeedLayer();
+    }
+  }
+  change3D=(event)=>{//切换图层三维显示
+    if(event.target.value=="2D"){
+      this.gridLayer3D=false;
+      this.speedLayer3D=false;
+    }
+    else{
+      this.gridLayer3D=true;
+      this.speedLayer3D=true;
+    }
+    if(this.gridLayerShow){
+      this.getGridLayer();
+    }
+    else if(this.speedLayerShow){
+      this.getSpeedLayer();
+    }
+  }
   changeGridWidth=(value)=>{//与滑动条联动，切换格网的网格宽度
     this.gridWidth=value;
     this.getGridLayer();
@@ -490,12 +514,19 @@ class DeckGLMap extends Component {
               { this._renderTooltip() }
           </DeckGL>
           <div className={`moudle`}>
-            GridLayer   <Switch onChange={this.changeGridLayerShow}/><br />
+            <Radio.Group size={"small"} style={{ width: 120 , margin:3}} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
+              <Radio.Button style={{ width: '50%',textAlign:'center' }} value="Grid" >Grid </Radio.Button>
+              <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="Speed">Speed</Radio.Button>
+            </Radio.Group><br />
+            <Radio.Group size={"small"} style={{ width: 120 , margin:3}} buttonStyle="solid" onChange={this.change3D} defaultValue="3D">
+              <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="2D">2D</Radio.Button>
+              <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="3D">3D</Radio.Button>
+            </Radio.Group><br />
+            {/* GridLayer   <Switch onChange={this.changeGridLayerShow}/><br />
             GridLayer3D <Switch onChange={this.changeGridLayer3D}/><br />
             SpeedLayer   <Switch onChange={this.changeSpeedLayerShow}/><br />
-            SpeedLayer3D <Switch onChange={this.changeSpeedLayer3D}/><br />
+            SpeedLayer3D <Switch onChange={this.changeSpeedLayer3D}/><br /> */}
             HeatMapLayer<Switch  onChange={this.changeHeatMapLayerShow} /><br />
-            ArcLayer    <Switch  onChange={this.changeArcLayerShow} /><br />
             TripsLayer   <Switch  onChange={this.changeTripsLayerShow} /><br />
           </div><br/>
           <div className={`moudle`} style = {{'textAlign':'center'}}>

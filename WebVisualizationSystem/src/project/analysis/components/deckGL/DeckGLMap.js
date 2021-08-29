@@ -75,7 +75,7 @@ class DeckGLMap extends Component {
   };
 
   getTrajNodes = () => {
-    console.log(this.props.userData)
+    // console.log(this.props.userData)
     let Nodes=[];//统计所有节点的坐标
     let Count ={};//统计每天的轨迹数目
     let Speeds=[];//统计速度

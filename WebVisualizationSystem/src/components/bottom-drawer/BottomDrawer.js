@@ -56,6 +56,7 @@ class BottomDrawer extends Component {
           keyboard
           mask={false}
           placement='bottom'
+          visible={this.state.drawerVisible}
           bodyStyle={{
             padding: '0 100px',
           }}

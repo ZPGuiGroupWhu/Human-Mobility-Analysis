@@ -134,12 +134,12 @@ class PageAnalysis extends Component {
               </Select>
               <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option} />
             </div>)}
-                     leftwidth={320} rightwidth={370} data={optionData} eventName={this.EVENTNAME}
-                     leftDrawerVisible={this.state.leftDrawerVisible} leftBtnChange={this.state.leftBtnChange}
-                     rightDrawerVisible={this.state.rightDrawerVisible} rightBtnChange={this.state.rightBtnChange}
-                     setDrawerState={this.setDrawerState} />
+          leftwidth={320} rightwidth={370} data={optionData} eventName={this.EVENTNAME}
+          leftDrawerVisible={this.state.leftDrawerVisible} leftBtnChange={this.state.leftBtnChange}
+          rightDrawerVisible={this.state.rightDrawerVisible} rightBtnChange={this.state.rightBtnChange}
+          setDrawerState={this.setDrawerState} />
         <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170}
-                        bottomDrawerVisible={this.state.bottomDrawerVisible} setDrawerState={this.setDrawerState} />
+          bottomDrawerVisible={this.state.bottomDrawerVisible} setDrawerState={this.setDrawerState} />
         <Button
           onClick={() => { this.props.history.push('/select/predict') }}
           style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}

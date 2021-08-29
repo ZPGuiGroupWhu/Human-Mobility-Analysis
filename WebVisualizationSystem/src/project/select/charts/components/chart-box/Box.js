@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './Box.scss';
-import { CompressOutlined, ExpandOutlined } from '@ant-design/icons';
-import { Space } from 'antd';
+import { CompressOutlined, ExpandOutlined, RiseOutlined } from '@ant-design/icons';
+import { Space, Select } from 'antd';
 import { CSSTransition } from 'react-transition-group';
 import _ from 'lodash';
-import { Select } from 'antd';
 
 const { Option } = Select;
 class DropMenu extends Component {
@@ -59,18 +59,34 @@ class Box extends Component {
     }))
   }
 
+  // 选择列表
   getSelectItem = (val) => {
     this.setState({
       curSelectItem: val,
     })
   }
 
+  // 返回选择结果
   findItem = (arr, target) => {
     return arr.find((item) => {
       return item.title === target
     })
   }
 
+  // 数据排序(按照 dim 维度)
+  setSortableData = (data, dim) => {
+    console.log(data);
+    try {
+      if (!Array.isArray(data)) throw new Error('data should be Array Type');
+      if (!dim || (dim >= data.length)) throw new Error('dim Error');
+      data.sort((a, b) => (a[dim] - b[dim]));
+      this.setState({
+        data: _.cloneDeep(data), // 深拷贝，确保数据更新能被监听
+      })
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   componentDidUpdate(prevProps, prevState) {
     if (!_.isEqual(prevProps.data, this.props.data) ||
@@ -93,6 +109,10 @@ class Box extends Component {
           }
           <div className="func-btns">
             <Space>
+              <RiseOutlined
+                style={{ ...this.iconStyle, display: this.props.sortable ? '' : 'none' }}
+                onClick={() => { this.setSortableData(this.state.data, 1) }}
+              />
               {
                 this.state.chartVisible ?
                   <CompressOutlined style={this.iconStyle} onClick={this.setChartVisible} /> :
@@ -117,6 +137,14 @@ class Box extends Component {
       </div>
     );
   }
+}
+
+Box.propTypes = {
+  sortable: PropTypes.bool,
+}
+
+Box.defaultProps = {
+  sortable: true,
 }
 
 export default Box;

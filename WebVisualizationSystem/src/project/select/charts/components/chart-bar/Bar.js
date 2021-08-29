@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
-import * as echarts from 'echarts'
+import * as echarts from 'echarts';
+import Store from '@/store';
 
 class Bar extends Component {
+  static contextType = Store; // 挂载全局状态管理
+
   constructor(props) {
     super(props);
     // props
     this.yAxisName = props.yAxisName;
     this.height = props.height;
     // state
-    this.state = {
-      brushIdx: [],
-    }
+    this.state = {}
   }
 
   ref = React.createRef(null);
@@ -177,27 +178,26 @@ class Bar extends Component {
     ]
   };
 
+  
+
   componentDidMount() {
-    this.chart = echarts.init(this.ref.current);
-    // 添加 brushSelected 事件，存储刷选的数据索引
-    this.chart.on('brushSelected', function (params) {
+    this.chart = echarts.init(this.ref.current); // 初始化容器
+    // 添加 brushSelected 事件，存储刷选的数据索引映射
+    this.chart.on('brushSelected', (params) => {
       let brushComponent = params.batch[0];
-      this.setState({
-        brushIdx: brushComponent.selected[0],
-      })
+      this.context.dispatch({
+        type: 'setSelectedUsers', 
+        payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][0]), // 刷选索引映射到数据维度
+      });
     })
-    this.chart.setOption(this.option);
+    this.chart.setOption(this.option); // 初始化视图
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.data !== this.props.data) {
-      this.chart.setOption(
-        {
-          series: [{
-            data: this.props.data
-          }]
-        }
-      )
+      // 数据驱动更新视图
+      this.option.series[0].data = this.props.data
+      this.chart.setOption(this.option)
     }
   }
 

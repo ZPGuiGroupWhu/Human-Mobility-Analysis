@@ -1,0 +1,9 @@
+.chart-group-ctn {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; // 触发BFC，布局溢出添加滚动
+}
+
+.chart-group-ctn::-webkit-scrollbar {
+  display: none;
+}

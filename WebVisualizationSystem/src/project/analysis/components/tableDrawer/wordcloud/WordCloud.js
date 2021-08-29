@@ -21,10 +21,6 @@ export default function WordCloud(props){
         }
     });
 
-    const mousePosition = function(e){
-        return [e.pageX, e.pageY]
-    };
-
     const option = {
         backgroundColor:'rgba(250,235,215,0.2)',
         tooltip: {
@@ -104,7 +100,7 @@ export default function WordCloud(props){
             ref={ref}
             style={{
                 width: 300,
-                height: 277,
+                height: 280,
             }}
         ></div>
     )

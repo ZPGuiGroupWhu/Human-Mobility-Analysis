@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import "./PageSelect.scss";
 import Map from './map/Map';
 import Footer from './footer/Footer';
-import Charts from './charts/Charts';
+import ChartLeft from './charts/left/ChartLeft';
+import ChartRight from './charts/right/ChartRight';
 
 class PageSelect extends Component {
   constructor(props) {
@@ -36,10 +37,10 @@ class PageSelect extends Component {
           </div>
         </div>
         <div className="left">
-          <Charts></Charts>
+          <ChartLeft />
         </div>
         <div className="right">
-          <Charts></Charts>
+          <ChartRight />
         </div>
       </div>
     )

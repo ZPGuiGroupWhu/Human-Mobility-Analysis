@@ -12,7 +12,7 @@ import userData from './components/deckGL/399313.json'
 import personalityData from './components/tableDrawer/radar/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
-import BottomDrawer from '@/components/bottom-drawer/BottomDrawer';
+import CalendarDrawer from './components/calendar/CalendarDrawer';
 import Calendar from './components/calendar/Calendar';
 import TableDrawer from "./components/tableDrawer/TableDrawer";
 import Radar from "./components/tableDrawer/radar/Radar";
@@ -53,9 +53,11 @@ class PageAnalysis extends Component {
     this.state = {
       date: null,
       option: initlabel,
-      leftBtnDisabled: false,
-      rightBtnDisabled: false,
-      bottomBtnDisabled: false,
+      leftBtnChange: true,
+      rightBtnChange: true,
+      leftDrawerVisible: false,
+      rightDrawerVisible: false,
+      bottomDrawerVisible: false,
     }
   };
   static contextType = drawerVisibility;
@@ -66,14 +68,35 @@ class PageAnalysis extends Component {
     })
   };
 
-  setBtnState = (btn) => {
-    this.setState((prevState, props) => {
-      return {
-        leftBtnDisabled: (btn === 'leftBtn') ? prevState.leftBtnDisabled : !prevState.leftBtnDisabled,
-        rightBtnDisabled: (btn === 'rightBtn') ? prevState.rightBtnDisabled : !prevState.rightBtnDisabled,
-        bottomBtnDisabled: (btn === 'bottomBtn') ? prevState.bottomBtnDisabled : !prevState.bottomBtnDisabled,
-      };
-    });
+  setDrawerState = (drawer) => {
+    if (drawer === 'left') {
+      this.setState(prev => ({
+        leftBtnChange: !prev.leftBtnChange,
+        leftDrawerVisible: !prev.leftDrawerVisible,
+        rightBtnChange: true,
+        rightDrawerVisible: false,
+        bottomDrawerVisible: false
+      }))
+    }
+    if (drawer === 'right') {
+      this.setState(prev => ({
+        rightBtnChange: !prev.rightBtnChange,
+        rightDrawerVisible: !prev.rightDrawerVisible,
+        leftBtnChange: true,
+        leftDrawerVisible: false,
+        bottomDrawerVisible: false
+      }))
+    }
+    if (drawer === 'bottom') {
+      this.setState(prev => ({
+        bottomBtnChange: !prev.bottomBtnChange,
+        bottomDrawerVisible: !prev.bottomDrawerVisible,
+        leftBtnChange: true,
+        rightBtnChange: true,
+        leftDrawerVisible: false,
+        rightDrawerVisible: false
+      }))
+    }
   };
 
   // select下拉框改变值
@@ -110,11 +133,13 @@ class PageAnalysis extends Component {
                 ))}
               </Select>
               <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440} option={this.state.option} />
-            </div>
-          )} leftwidth={310} rightwidth={370} data={optionData} eventName={this.EVENTNAME}
-          leftBtnDisabled={this.state.leftBtnDisabled} rightBtnDisabled={this.state.rightBtnDisabled} setBtnSate={this.setBtnState} />
-        <BottomDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170}
-          bottomBtnDisabled={this.state.bottomBtnDisabled} setBtnSate={this.setBtnState} />
+            </div>)}
+          leftwidth={320} rightwidth={370} data={optionData} eventName={this.EVENTNAME}
+          leftDrawerVisible={this.state.leftDrawerVisible} leftBtnChange={this.state.leftBtnChange}
+          rightDrawerVisible={this.state.rightDrawerVisible} rightBtnChange={this.state.rightBtnChange}
+          setDrawerState={this.setDrawerState} />
+        <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)} height={170}
+          bottomDrawerVisible={this.state.bottomDrawerVisible} setDrawerState={this.setDrawerState} />
         <Button
           onClick={() => { this.props.history.push('/select/predict') }}
           style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}

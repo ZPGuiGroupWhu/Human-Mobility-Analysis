@@ -23,13 +23,6 @@ export default class TableDrawer extends Component {
       key: '1',
       data: this.props.violinplot()
     }];
-
-    this.state = {
-      leftBtnChange: true,
-      leftDrawerVisible: false,
-      rightBtnChange: true,
-      rightDrawerVisible: false,
-    };
   }
 
 
@@ -65,8 +58,8 @@ export default class TableDrawer extends Component {
   };
 
   //将按钮状态返回给父组件
-  toParent = (btn) => {
-    this.props.setBtnSate(btn);
+  toParent = (drawer) => {
+    this.props.setDrawerState(drawer);
   };
 
   componentWillUpdate(prevProps, prevState, snapshot) {
@@ -83,7 +76,7 @@ export default class TableDrawer extends Component {
           keyboard
           mask={false}
           placement='left'
-          visible={this.state.leftDrawerVisible}
+          visible={this.props.leftDrawerVisible}
           bodyStyle={{
             padding: '70px 0px 0px 0px',
             overflowX: 'hidden',
@@ -92,6 +85,7 @@ export default class TableDrawer extends Component {
         >
           <Table
             showHeader={false}
+            scroll={{ y: 'calc(100vh - 70px)' }}
             pagination={false}
             dataSource={this.leftData}
             columns={this.Column}
@@ -101,9 +95,8 @@ export default class TableDrawer extends Component {
         <Button
           shape="square"
           ghost
-          disabled={this.props.leftBtnDisabled}
           icon={
-            this.state.leftBtnChange ?
+            this.props.leftBtnChange ?
               <RightCircleTwoTone twoToneColor="#fff" /> :
               <LeftCircleTwoTone twoToneColor="#fff" />
           }
@@ -111,16 +104,12 @@ export default class TableDrawer extends Component {
             size: 'normal',
             position: 'absolute',
             top: '50%',
-            left: (this.state.leftBtnChange ? 0 : this.props.leftwidth) + 'px',
+            left: (this.props.leftBtnChange ? 0 : this.props.leftwidth) + 'px',
             width: 32,
             transform: 'translateX(0%)',
           }}
           onClick={(e) => {
-            this.toParent('leftBtn');
-            this.setState(prev => ({
-              leftBtnChange: !prev.leftBtnChange,
-              leftDrawerVisible: !prev.leftDrawerVisible,
-            }))
+            this.toParent('left');
           }}
         />
 
@@ -130,7 +119,7 @@ export default class TableDrawer extends Component {
           keyboard
           mask={false}
           placement='right'
-          visible={this.state.rightDrawerVisible}
+          visible={this.props.rightDrawerVisible}
           bodyStyle={{
             padding: '70px 0px 0px 0px',
             overflowX: 'hidden',
@@ -149,9 +138,8 @@ export default class TableDrawer extends Component {
         <Button
           shape="square"
           ghost
-          disabled={this.props.rightBtnDisabled}
           icon={
-            this.state.rightBtnChange ?
+            this.props.rightBtnChange ?
               <LeftCircleTwoTone twoToneColor="#fff" /> :
               <RightCircleTwoTone twoToneColor="#fff" />
           }
@@ -159,16 +147,12 @@ export default class TableDrawer extends Component {
             size: 'normal',
             position: 'absolute',
             top: '50%',
-            right: (this.state.rightBtnChange ? 0 : this.props.rightwidth) + 'px',
+            right: (this.props.rightBtnChange ? 0 : this.props.rightwidth) + 'px',
             width: 32,
             transform: 'translateX(0%)',
           }}
           onClick={(e) => {
-            this.toParent('rightBtn');
-            this.setState(prev => ({
-              rightBtnChange: !prev.rightBtnChange,
-              rightDrawerVisible: !prev.rightDrawerVisible,
-            }))
+            this.toParent('right');
           }}
         />
       </>

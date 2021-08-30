@@ -72,7 +72,7 @@ class ChartLeft extends Component {
           sortable={true} // 是否启用排列按钮
           filterable={true} // 是否启用数据递进过滤按钮
         >
-          {(data, props = {}) => (<Bar height='250px' yAxisName="熵值" data={data} {...props} />)}
+          {(data, props = {}) => (<Bar height='250px' data={data} {...props} />)}
         </Charts.Box>
       </Charts.Group>
     );

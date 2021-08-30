@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './Box.scss';
-import { CompressOutlined, ExpandOutlined, RiseOutlined, SnippetsOutlined } from '@ant-design/icons';
+import {
+  CompressOutlined,
+  ExpandOutlined,
+  RiseOutlined,
+  SnippetsOutlined,
+  ReloadOutlined
+} from '@ant-design/icons';
 import { Space, Select } from 'antd';
 import { CSSTransition } from 'react-transition-group';
 import _ from 'lodash';
+import Hover from '../../common/Hover';
 
 const { Option } = Select;
 class DropMenu extends Component {
@@ -46,11 +53,12 @@ class Box extends Component {
     this.defaultSelectItem = props.dataKey[0];
     // state
     this.state = {
-      chartVisible: true, // 是否可视图表
+      isVisible: true, // 是否可视图表
       data: null, // 数据源
-      sortedData: null, // 排序后的数据源
+      sortedData: null, // 存储排序后的数据源
       curSelectItem: this.defaultSelectItem, // 当前选择项(多源数据时生效)
-      isSorted: {}, // 是否开启
+      isSorted: {}, // 是否进行一次排序：对象间比较必为false，确保每次都触发
+      isReload: {}, // 是否进行一次重置
       withFilter: false, // 是否开启过滤功能
     };
   }
@@ -58,7 +66,7 @@ class Box extends Component {
   // 内容展开/关闭
   setChartVisible = () => {
     this.setState(prev => ({
-      chartVisible: !prev.chartVisible
+      isVisible: !prev.isVisible
     }))
   }
 
@@ -70,11 +78,7 @@ class Box extends Component {
   }
 
   // 返回选择结果
-  findItem = (arr, target) => {
-    return arr.find((item) => {
-      return item.title === target
-    })
-  }
+  findItem = (arr, target) => (arr.find((item) => (item.title === target)));
 
   // 数据排序(按照 dim 维度)
   setSortableData = (data, dim) => {
@@ -90,13 +94,33 @@ class Box extends Component {
     }
   }
 
+  getBoxData = (data, curSelectItem) => {
+    let res = this.findItem(data, curSelectItem);
+    this.setState({
+      data: typeof res.data === 'function' ? res.data() : res.data,
+    })
+  }
+
+  // 重置回初始状态
+  reState = () => {
+    this.setState({
+      isVisible: true,
+      withFilter: false,
+    })
+    this.getBoxData(this.props.data, this.state.curSelectItem);
+  }
+
   componentDidUpdate(prevProps, prevState) {
-    if (!_.isEqual(prevProps.data, this.props.data) ||
-      !_.isEqual(prevState.curSelectItem, this.state.curSelectItem)) {
+    // 数据源发生改变 或 筛选项发生改变 - 更换当前 box 的数据源
+    if (!_.isEqual(prevProps.data, this.props.data) || !_.isEqual(prevState.curSelectItem, this.state.curSelectItem)) {
       let res = this.findItem(this.props.data, this.state.curSelectItem);
       this.setState({
         data: typeof res.data === 'function' ? res.data() : res.data,
       })
+    }
+
+    if (prevState.isReload !== this.state.isReload) {
+      this.reState();
     }
   }
 
@@ -111,24 +135,83 @@ class Box extends Component {
           }
           <div className="func-btns">
             <Space>
-              <RiseOutlined
-                style={{ ...this.iconStyle, display: this.props.sortable ? '' : 'none' }}
-                onClick={() => { this.setState({isSorted: {}}) }}
-              />
-              <SnippetsOutlined
-                style={{ ...this.iconStyle, display: this.props.filterable ? '' : 'none' }}
-                onClick={() => { this.setState(prev => ({ withFilter: !prev.withFilter })) }}
-              />
+              <Hover>
+                {
+                  ({ isHovering }) => (
+                    <RiseOutlined
+                      style={{
+                        ...this.iconStyle,
+                        display: this.props.sortable ? '' : 'none',
+                        color: isHovering ? '#05f8d6' : '#fff'
+                      }}
+                      onClick={() => { this.setState({ isSorted: {} }) }} // 触发一次排序
+                    />
+                  )
+                }
+              </Hover>
+              <Hover isReload={this.state.isReload}>
+                {
+                  ({ isHovering, isClicked }) => (
+                    <SnippetsOutlined
+                      style={{
+                        ...this.iconStyle,
+                        display: this.props.filterable ? '' : 'none',
+                        color: (isHovering || isClicked) ? '#05f8d6' : '#fff'
+                      }}
+                      onClick={() => { this.setState(prev => ({ withFilter: !prev.withFilter })) }}
+                    />
+                  )
+                }
+              </Hover>
+              <Hover>
+                {
+                  ({ isHovering }) => (
+                    <ReloadOutlined
+                      style={{
+                        ...this.iconStyle,
+                        display: this.props.filterable ? '' : 'none',
+                        color: isHovering ? '#05f8d6' : '#fff'
+                      }}
+                      onClick={() => { this.setState({ isReload: {} }) }}
+                    />
+                  )
+                }
+              </Hover>
               {
-                this.state.chartVisible ?
-                  <CompressOutlined style={this.iconStyle} onClick={this.setChartVisible} /> :
-                  <ExpandOutlined style={this.iconStyle} onClick={this.setChartVisible} />
+                this.state.isVisible ?
+                  <Hover>
+                    {
+                      ({ isHovering }) => (
+                        <CompressOutlined
+                          style={{
+                            ...this.iconStyle,
+                            color: isHovering ? '#05f8d6' : '#fff'
+                          }}
+                          onClick={this.setChartVisible}
+                        />
+                      )
+                    }
+                  </Hover>
+                  :
+                  <Hover>
+                    {
+                      ({ isHovering }) => (
+                        <ExpandOutlined
+                          style={{
+                            ...this.iconStyle,
+                            color: isHovering ? '#05f8d6' : '#fff'
+                          }}
+                          onClick={this.setChartVisible}
+                        />
+                      )
+                    }
+                  </Hover>
               }
             </Space>
           </div>
         </div>
         <CSSTransition
-          in={this.state.chartVisible}
+          in={this.state.isVisible}
           timeout={300}
           classNames='chart'
           onEnter={(node) => { node.style.setProperty('display', '') }}

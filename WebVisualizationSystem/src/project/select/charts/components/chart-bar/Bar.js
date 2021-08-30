@@ -7,12 +7,9 @@ class Bar extends Component {
 
   constructor(props) {
     super(props);
-    // props
-    this.yAxisName = props.yAxisName;
-    this.height = props.height;
     // state
     this.state = {
-      selectedData: [],
+      selectedData: [], // 筛选出来用于视图更新的数据
     }
   }
 
@@ -59,7 +56,6 @@ class Bar extends Component {
       gridIndex: 0,
       position: 'left',
       type: 'value',
-      name: this.yAxisName, // 坐标轴名称
       nameLocation: 'end', // 坐标周名称显示位置
       nameTextStyle: {
         color: '#fff', // 文本颜色
@@ -180,7 +176,9 @@ class Bar extends Component {
     ]
   };
 
-  setSelectedData = (selectedId) => {
+  // 获取筛选数据
+  getSelectedData = (selectedId) => {
+    if (!Array.isArray(selectedId)) throw new Error('SelectedId should be Array Type');
     return selectedId.map(val => (this.props.data.find(item => (item[0] === val))))
   }
 
@@ -203,8 +201,7 @@ class Bar extends Component {
 
   componentDidMount() {
     this.chart = echarts.init(this.ref.current); // 初始化容器
-    // 添加 brushSelected 事件
-    this.chart.on('brushSelected', this.onBrushSelected);
+    this.chart.on('brushSelected', this.onBrushSelected); // 添加 brushSelected 事件
     this.chart.setOption(this.option); // 初始化视图
   }
 
@@ -214,7 +211,7 @@ class Bar extends Component {
       if (this.props.withFilter) {
         // 若开启，则当存在选中用户时，切换类型加载选中数据；若不开启，或当前没有选中用户时，加载数据源
         const data = this.context.state.selectedUsers;
-        const res = this.setSelectedData(data);
+        const res = this.getSelectedData(data);
         this.reSetOption(
           !!data.length ? res : this.props.data
         );
@@ -227,11 +224,14 @@ class Bar extends Component {
       }
     }
 
+    // 根据排序更新视图
     if (prevProps.sortedData !== this.props.sortedData) {
       this.reSetOption(this.props.sortedData);
     }
 
+    // 触发一次排序
     if (prevProps.isSorted !== this.props.isSorted) {
+      // 若开启过滤功能，则排序筛选的数据，反之，排序所有数据
       if (this.props.withFilter) {
         this.props.setSortableData(this.state.selectedData, 1);
       } else {
@@ -244,7 +244,7 @@ class Bar extends Component {
     return (
       <div
         style={{
-          height: this.height,
+          height: this.props.height,
         }}
         draggable={false}
         ref={this.ref}

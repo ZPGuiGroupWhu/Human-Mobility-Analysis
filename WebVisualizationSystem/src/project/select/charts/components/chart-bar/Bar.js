@@ -224,9 +224,10 @@ class Bar extends Component {
       }
     }
 
-    // 根据排序更新视图
+
     if (prevProps.sortedData !== this.props.sortedData) {
-      this.reSetOption(this.props.sortedData);
+      this.reSetOption(this.props.sortedData); // 根据排序更新视图
+      this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
     }
 
     // 触发一次排序

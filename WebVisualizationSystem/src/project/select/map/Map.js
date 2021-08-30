@@ -1,12 +1,13 @@
-import React, { Component ,createRef} from 'react'
+import React, { Component, createRef } from 'react'
 import * as echarts from 'echarts'
 import 'echarts-gl'
+import Store from '@/store'
 import "./Map.scss"
 import chinaJson from './China'
 import _ from 'lodash'
 
 //测试数据
-const userID = Array.from({length:100});
+const userID = Array.from({ length: 100 });
 
 class Map extends Component {
   constructor(props) {
@@ -24,11 +25,11 @@ class Map extends Component {
     let minlat = 109.664816;
     let maxlon = 25.519951;
     let minlon = 20.223273;
-    _.forEach(users, function(item){
-      data.push([Math.floor(Math.random()*(maxlat-minlat+1)+minlat), Math.floor(Math.random()*(maxlon-minlon+1) + minlon), Math.random()*100])
+    _.forEach(users, function (item) {
+      data.push([Math.floor(Math.random() * (maxlat - minlat + 1) + minlat), Math.floor(Math.random() * (maxlon - minlon + 1) + minlon), Math.random() * 100])
     });
     // 防止OD的weight过大，取一个平方根
-    let newData = data.map(function(dataItem){
+    let newData = data.map(function (dataItem) {
       return [dataItem[0], dataItem[1], Math.sqrt(dataItem[2])]
     });
     console.log(newData);
@@ -172,16 +173,18 @@ class Map extends Component {
 
   render() {
     return (
-        <div
-            className="select-map-ctn"
-            ref={this.mapRef}
-            style={{
-              height: '100%',
-              width: '100%'
-            }}
-        ></div>
+      <div
+        className="select-map-ctn"
+        ref={this.mapRef}
+        style={{
+          height: '100%',
+          width: '100%'
+        }}
+      ></div>
     );
   }
 }
+
+Map.contextType = Store;
 
 export default Map;

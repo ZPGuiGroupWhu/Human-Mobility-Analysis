@@ -100,7 +100,7 @@ export default function WordCloud(props){
             ref={ref}
             style={{
                 width: 300,
-                height: 280,
+                height: 'calc(50vh - 35px)',
             }}
         ></div>
     )

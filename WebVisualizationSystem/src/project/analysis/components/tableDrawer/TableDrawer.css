@@ -32,7 +32,7 @@
 /*修改列表文字、背景颜色*/
 .ant-table-tbody > tr >td{
     background: rgba(250,235,215,0.3) !important;
-    padding:0px 0px 0px 4px !important;
+    padding:0px 0px 0px 0px !important;
     border-color: white !important;
     border-width: 3px !important;
 }

@@ -171,7 +171,7 @@ export default class Radar extends Component{
                 ref={this.chartRef}
                 style={{
                     width: 300,
-                    height: 'calc(100vh - 350px)',
+                    height: 'calc(50vh - 35px)',
                 }}
             ></div>
         );

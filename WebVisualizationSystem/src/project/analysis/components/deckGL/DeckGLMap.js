@@ -64,12 +64,22 @@ class DeckGLMap extends Component {
     }
   }
 
-  //获取所有的OD点
+  // //对应旧json格式：获取所有的OD点
+  // getAllOdNodes = () => {
+  //   let OdNodes = [];
+  //   for (let i = 0; i < this.props.userData.length; i++) {
+  //     OdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
+  //     OdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
+  //   }
+  //   this.OdNodes = OdNodes;
+  // };
+
+  //对应新json格式：获取所有的OD点
   getAllOdNodes = () => {
     let OdNodes = [];
     for (let i = 0; i < this.props.userData.length; i++) {
-      OdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
-      OdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
+      OdNodes.push({COORDINATES: this.props.userData[i].origin});
+      OdNodes.push({COORDINATES: this.props.userData[i].destination});
     }
     this.OdNodes = OdNodes;
   };
@@ -100,7 +110,25 @@ class DeckGLMap extends Component {
   toParent = () => {//将每天的轨迹数目统计结果反馈给父组件
     this.props.getTrajCounts(this.trajCounts)
   };
-  // 根据日期筛选可视化的轨迹
+
+  // // 对应旧json格式：根据日期筛选可视化的轨迹
+  // getSelectData = (start, end) => {
+  //   let selectOdNodes = [];
+  //   let selectTrajs = [];
+  //   let startTimeStamp = Date.parse(start);
+  //   let endTimeStamp = Date.parse(end);
+  //   for (let i = 0; i < this.props.userData.length; i++) {
+  //     if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp){
+  //       selectOdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
+  //       selectOdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
+  //       selectTrajs.push(this.props.userData[i]);
+  //     }
+  //   }
+  //   console.log(selectTrajs);
+  //   return [selectOdNodes, selectTrajs]
+  // };
+
+  // 对应新json格式：根据日期筛选可视化的轨迹
   getSelectData = (start, end) => {
     let selectOdNodes = [];
     let selectTrajs = [];
@@ -108,14 +136,19 @@ class DeckGLMap extends Component {
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < this.props.userData.length; i++) {
       if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp){
-        selectOdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
-        selectOdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
-        selectTrajs.push(this.props.userData[i]);
+        selectOdNodes.push({COORDINATES: this.props.userData[i].origin});
+        selectOdNodes.push({COORDINATES: this.props.userData[i].destination});
+        let path = [];
+        for(let j=0;j<this.props.userData[i].lngs.length;j++){
+          path.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]])
+        }
+        //筛选数据，由于点击事件需要用到id，也要加入id
+        selectTrajs.push({id:this.props.userData[i].id, data:path});
       }
     }
-    // console.log(selectTrajs);
     return [selectOdNodes, selectTrajs]
   };
+
   //构建OD弧段图层
   getArcLayer = () =>{
     this.setState({
@@ -205,7 +238,67 @@ class DeckGLMap extends Component {
     })
   };
 
-  //轨迹点击事件
+  // //对应旧json格式：轨迹点击事件
+  // clickTraj = (info) =>{
+  //   this.setState({
+  //     Opacity:0.02
+  //   }, ()=> {
+  //     let id = info.object ? info.object.id : null;
+  //     // 绘制OD弧线
+  //     if (id === null) {
+  //       console.log('no trajectory!')
+  //     } else {
+  //       //存储点击的OD点信息和轨迹信息
+  //       const tempOD = [];
+  //       const tempTraj = [];
+  //       for (let i = 0; i < this.props.userData.length; i++) {
+  //         if (this.props.userData[i].id === id) {
+  //           tempOD.push({O: this.props.userData[i].O, D: this.props.userData[i].D});
+  //           tempTraj = this.props.userData[i].data;
+  //           break
+  //         }
+  //       }
+  //       const tempPath = [{path: tempTraj}];
+  //       this.setState({
+  //         arcLayerOne: new ArcLayer({
+  //           id: 'arc-layer-one',
+  //           data: tempOD,
+  //           pickable: true,
+  //           getWidth: 1,
+  //           getSourcePosition: d => d.O,
+  //           getTargetPosition: d => d.D,
+  //           getSourceColor: [175, 255, 255],
+  //           getTargetColor: [0, 128, 128],
+  //         })
+  //       });
+  //       //轨迹高亮
+  //       // console.log(tempPath);
+  //       this.setState({
+  //         tripsLayerOne: new TripsLayer({
+  //           id: 'trips-layer-one',
+  //           data: tempPath,
+  //           getPath: d => d.path,
+  //           // deduct start timestamp from each data point to avoid overflow
+  //           // getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
+  //           getColor: [256, 0, 0],
+  //           opacity: 1,
+  //           widthMinPixels: 3,
+  //           rounded: true,
+  //           trailLength: 200,
+  //           currentTime: 100,
+  //         })
+  //       });
+  //       // 存储轨迹
+  //       this.context.dispatch({type: 'setSelectedTraj', payload: info.object});
+  //       // Opacity改变，重新绘制其他轨迹
+  //       const [selectOdNodes, selectTrajs] = this.getSelectData(this.state.selectDate.start, this.state.selectDate.end);
+  //       // this.getIconLayer(selectOdNodes);
+  //       this.getTripsLayer(selectTrajs);
+  //     }
+  //   })
+  // };
+
+  //对应新json格式：轨迹点击事件
   clickTraj = (info) =>{
     this.setState({
       Opacity:0.02
@@ -215,13 +308,15 @@ class DeckGLMap extends Component {
       if (id === null) {
         console.log('no trajectory!')
       } else {
+        console.log(id);
+        //存储点击的OD点信息和轨迹信息
         const tempOD = [];
         const tempTraj = [];
         for (let i = 0; i < this.props.userData.length; i++) {
           if (this.props.userData[i].id === id) {
-            tempOD.push({O: this.props.userData[i].O, D: this.props.userData[i].D});
-            for (let j = 0; j < this.props.userData[i].data.length; j++) {
-              tempTraj.push(this.props.userData[i].data[j])
+            tempOD.push({O: this.props.userData[i].origin, D: this.props.userData[i].destination});
+            for (let j = 0; j < this.props.userData[i].lngs.length; j++) {
+              tempTraj.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]]);
             }
             break
           }

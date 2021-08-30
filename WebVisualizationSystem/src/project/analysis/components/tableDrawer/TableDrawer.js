@@ -85,11 +85,12 @@ export default class TableDrawer extends Component {
         >
           <Table
             showHeader={false}
-            scroll={{ y: 'calc(100vh - 70px)' }}
+            // scroll={{ y: 'calc(100vh - 70px)' }}
             pagination={false}
             dataSource={this.leftData}
             columns={this.Column}
             bordered={true}
+            width={this.props.leftwidth}
           />
         </Drawer>
         <Button
@@ -133,6 +134,7 @@ export default class TableDrawer extends Component {
             dataSource={this.rightData}
             columns={this.Column}
             bordered={true}
+            width={this.props.rightwidth}
           />
         </Drawer>
         <Button

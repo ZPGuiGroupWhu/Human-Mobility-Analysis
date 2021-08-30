@@ -452,19 +452,18 @@ class DeckGLMap extends Component {
         }
     )
   };
-
+  // 初始化单条OD图层
   getArcLayerOne = () =>{
     this.setState({
       arcLayerOne: null,
     })
   };
-
+  //初始化单挑轨迹图层
   getTripsLayerOne = () =>{
     this.setState({
       tripsLayerOne: null,
     })
   };
-
   // 可视化筛选的轨迹
   showSelectTraj = (start, end) =>{
     this.setState({
@@ -475,7 +474,6 @@ class DeckGLMap extends Component {
       this.getTripsLayer(selectTrajs);
     });
   };
-
   // changeGridLayerShow=()=>{//与开关联动，切换格网图层的显示与否
   //   this.gridLayerShow=!this.gridLayerShow;
   //   this.getGridLayer();

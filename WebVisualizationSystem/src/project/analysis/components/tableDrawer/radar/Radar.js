@@ -151,6 +151,7 @@ export default class Radar extends Component{
             ]
         };
         myChart.setOption(option);
+        window.onresize = myChart.resize;
     };
 
     componentDidMount() {

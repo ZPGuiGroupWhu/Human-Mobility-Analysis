@@ -56,7 +56,7 @@ class Bar extends Component {
       gridIndex: 0,
       position: 'left',
       type: 'value',
-      nameLocation: 'end', // 坐标周名称显示位置
+      nameLocation: 'end', // 坐标轴名称显示位置
       nameTextStyle: {
         color: '#fff', // 文本颜色
         fontSize: 12, // 文本大小

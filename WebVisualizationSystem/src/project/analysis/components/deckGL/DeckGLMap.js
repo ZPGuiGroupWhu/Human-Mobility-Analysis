@@ -6,7 +6,6 @@ import {ArcLayer, IconLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {Switch,Slider,Radio} from 'antd';
 import './DeckGLMap.css'
-import getFlatternDistance from './distanceCalculater.js'
 import { eventEmitter } from '@/common/func/EventEmitter';
 import _ from 'lodash';
 import Store from '@/store';
@@ -18,7 +17,6 @@ class DeckGLMap extends Component {
   constructor(props){
     super(props);
     this.trajNodes=[];//轨迹点集合
-    this.speedNodes=[];//速度点集合
     this.OdNodes = [];//OD点集合
     this.arcLayerShow=false;//是否显示OD弧段图层
     this.heatMapLayerShow=false;//是否显示热力图图层
@@ -64,12 +62,22 @@ class DeckGLMap extends Component {
     }
   }
 
-  //获取所有的OD点
+  // //对应旧json格式：获取所有的OD点
+  // getAllOdNodes = () => {
+  //   let OdNodes = [];
+  //   for (let i = 0; i < this.props.userData.length; i++) {
+  //     OdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
+  //     OdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
+  //   }
+  //   this.OdNodes = OdNodes;
+  // };
+
+  //对应新json格式：获取所有的OD点
   getAllOdNodes = () => {
     let OdNodes = [];
     for (let i = 0; i < this.props.userData.length; i++) {
-      OdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
-      OdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
+      OdNodes.push({COORDINATES: this.props.userData[i].origin});
+      OdNodes.push({COORDINATES: this.props.userData[i].destination});
     }
     this.OdNodes = OdNodes;
   };
@@ -87,20 +95,34 @@ class DeckGLMap extends Component {
         Count[this.props.userData[i].date]={'count':Count[this.props.userData[i].date].count+1}//否则是其他轨迹被录入，数目加一
       }
       for(let j=0;j<this.props.userData[i].lngs.length;j++){
-        Nodes.push({COORDINATES:[this.props.userData[i].lngs[j],this.props.userData[i].lats[j]],WEIGHT:1});//将所有轨迹点放入同一个数组内，权重均设置为1
-      }
-      for(let j=2;j<this.props.userData[i].spd.length;j++){
-        Speeds.push({COORDINATES:[this.props.userData[i].lngs[j],this.props.userData[i].lats[j]],WEIGHT:this.props.userData[i].spd[j]});
+        Nodes.push({COORDINATES:[this.props.userData[i].lngs[j],this.props.userData[i].lats[j]],WEIGHT:1,SPD:this.props.userData[i].spd[j]});//将所有轨迹点放入同一个数组内，权重均设置为1
       }
     }
     this.trajNodes=Nodes;
     this.trajCounts=Count;
-    this.speedNodes=Speeds;
   };
   toParent = () => {//将每天的轨迹数目统计结果反馈给父组件
     this.props.getTrajCounts(this.trajCounts)
   };
-  // 根据日期筛选可视化的轨迹
+
+  // // 对应旧json格式：根据日期筛选可视化的轨迹
+  // getSelectData = (start, end) => {
+  //   let selectOdNodes = [];
+  //   let selectTrajs = [];
+  //   let startTimeStamp = Date.parse(start);
+  //   let endTimeStamp = Date.parse(end);
+  //   for (let i = 0; i < this.props.userData.length; i++) {
+  //     if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp){
+  //       selectOdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
+  //       selectOdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
+  //       selectTrajs.push(this.props.userData[i]);
+  //     }
+  //   }
+  //   console.log(selectTrajs);
+  //   return [selectOdNodes, selectTrajs]
+  // };
+
+  // 对应新json格式：根据日期筛选可视化的轨迹
   getSelectData = (start, end) => {
     let selectOdNodes = [];
     let selectTrajs = [];
@@ -108,14 +130,26 @@ class DeckGLMap extends Component {
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < this.props.userData.length; i++) {
       if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp){
-        selectOdNodes.push({COORDINATES: this.props.userData[i].O, id: this.props.userData[i].id});
-        selectOdNodes.push({COORDINATES: this.props.userData[i].D, id: this.props.userData[i].id});
-        selectTrajs.push(this.props.userData[i]);
+        selectOdNodes.push({COORDINATES: this.props.userData[i].origin});//存储OD点数据
+        selectOdNodes.push({COORDINATES: this.props.userData[i].destination});
+        let path = [];//存储选择的所有轨迹
+        let importance = [];//存储对应轨迹每个位置的重要程度
+        for(let j=0;j<this.props.userData[i].lngs.length;j++){
+          path.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]]);
+          // 计算重要程度，判断speed是否为0
+          importance.push(
+              this.props.userData[i].spd[j] === 0 ?
+              this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / 0.00001 :
+              this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / this.props.userData[i].spd[j]);
+        }
+        //组织数据
+        selectTrajs.push({id:this.props.userData[i].id, data:path,
+          spd:this.props.userData[i].spd, azimuth:this.props.userData[i].azimuth, importance:importance});
       }
     }
-    // console.log(selectTrajs);
-    return [selectOdNodes, selectTrajs]
+    return [selectOdNodes, selectTrajs]//返回选择轨迹的OD点和轨迹信息
   };
+
   //构建OD弧段图层
   getArcLayer = () =>{
     this.setState({
@@ -176,7 +210,7 @@ class DeckGLMap extends Component {
     this.setState({
       speedLayer:new GPUGridLayer({
         id: 'gpu-grid-layer-speed',
-        data:this.speedNodes,
+        data:this.trajNodes,
         pickable: true,
         extruded: this.speedLayer3D,//是否显示为3D效果
         cellSize: this.gridWidth,//格网宽度，默认为100m
@@ -185,8 +219,8 @@ class DeckGLMap extends Component {
         colorAggregation:'MEAN',
         colorRange:[[219, 251, 255],[0, 161, 179],[82, 157, 255],[0, 80, 184],[173, 66, 255],[95, 0, 168]],
         getPosition: d => d.COORDINATES,
-        getElevationWeight:d=>d.WEIGHT,
-        getColorWeight:d=>d.WEIGHT,
+        getElevationWeight:d=>d.SPD,
+        getColorWeight:d=>d.SPD,
         onHover:({object, x, y})=>{//构建悬浮框信息
           var str="";
           if(object==null){
@@ -205,8 +239,69 @@ class DeckGLMap extends Component {
     })
   };
 
-  //轨迹点击事件
+  // //对应旧json格式：轨迹点击事件
+  // clickTraj = (info) =>{
+  //   this.setState({
+  //     Opacity:0.02
+  //   }, ()=> {
+  //     let id = info.object ? info.object.id : null;
+  //     // 绘制OD弧线
+  //     if (id === null) {
+  //       console.log('no trajectory!')
+  //     } else {
+  //       //存储点击的OD点信息和轨迹信息
+  //       const tempOD = [];
+  //       const tempTraj = [];
+  //       for (let i = 0; i < this.props.userData.length; i++) {
+  //         if (this.props.userData[i].id === id) {
+  //           tempOD.push({O: this.props.userData[i].O, D: this.props.userData[i].D});
+  //           tempTraj = this.props.userData[i].data;
+  //           break
+  //         }
+  //       }
+  //       const tempPath = [{path: tempTraj}];
+  //       this.setState({
+  //         arcLayerOne: new ArcLayer({
+  //           id: 'arc-layer-one',
+  //           data: tempOD,
+  //           pickable: true,
+  //           getWidth: 1,
+  //           getSourcePosition: d => d.O,
+  //           getTargetPosition: d => d.D,
+  //           getSourceColor: [175, 255, 255],
+  //           getTargetColor: [0, 128, 128],
+  //         })
+  //       });
+  //       //轨迹高亮
+  //       // console.log(tempPath);
+  //       this.setState({
+  //         tripsLayerOne: new TripsLayer({
+  //           id: 'trips-layer-one',
+  //           data: tempPath,
+  //           getPath: d => d.path,
+  //           // deduct start timestamp from each data point to avoid overflow
+  //           // getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
+  //           getColor: [256, 0, 0],
+  //           opacity: 1,
+  //           widthMinPixels: 3,
+  //           rounded: true,
+  //           trailLength: 200,
+  //           currentTime: 100,
+  //         })
+  //       });
+  //       // 存储轨迹
+  //       this.context.dispatch({type: 'setSelectedTraj', payload: info.object});
+  //       // Opacity改变，重新绘制其他轨迹
+  //       const [selectOdNodes, selectTrajs] = this.getSelectData(this.state.selectDate.start, this.state.selectDate.end);
+  //       // this.getIconLayer(selectOdNodes);
+  //       this.getTripsLayer(selectTrajs);
+  //     }
+  //   })
+  // };
+
+  //对应新json格式：轨迹点击事件
   clickTraj = (info) =>{
+    console.log(info);
     this.setState({
       Opacity:0.02
     }, ()=> {
@@ -215,13 +310,15 @@ class DeckGLMap extends Component {
       if (id === null) {
         console.log('no trajectory!')
       } else {
+        // console.log(id);
+        //存储点击的OD点信息和轨迹信息
         const tempOD = [];
         const tempTraj = [];
         for (let i = 0; i < this.props.userData.length; i++) {
           if (this.props.userData[i].id === id) {
-            tempOD.push({O: this.props.userData[i].O, D: this.props.userData[i].D});
-            for (let j = 0; j < this.props.userData[i].data.length; j++) {
-              tempTraj.push(this.props.userData[i].data[j])
+            tempOD.push({O: this.props.userData[i].origin, D: this.props.userData[i].destination});
+            for (let j = 0; j < this.props.userData[i].lngs.length; j++) {
+              tempTraj.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]]);
             }
             break
           }
@@ -256,7 +353,7 @@ class DeckGLMap extends Component {
             currentTime: 100,
           })
         });
-        // 存储轨迹
+        // 存储轨迹 info.object = [id:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
         this.context.dispatch({type: 'setSelectedTraj', payload: info.object});
         // Opacity改变，重新绘制其他轨迹
         const [selectOdNodes, selectTrajs] = this.getSelectData(this.state.selectDate.start, this.state.selectDate.end);
@@ -357,19 +454,18 @@ class DeckGLMap extends Component {
         }
     )
   };
-
+  // 初始化单条OD图层
   getArcLayerOne = () =>{
     this.setState({
       arcLayerOne: null,
     })
   };
-
+  //初始化单挑轨迹图层
   getTripsLayerOne = () =>{
     this.setState({
       tripsLayerOne: null,
     })
   };
-
   // 可视化筛选的轨迹
   showSelectTraj = (start, end) =>{
     this.setState({
@@ -380,7 +476,6 @@ class DeckGLMap extends Component {
       this.getTripsLayer(selectTrajs);
     });
   };
-
   // changeGridLayerShow=()=>{//与开关联动，切换格网图层的显示与否
   //   this.gridLayerShow=!this.gridLayerShow;
   //   this.getGridLayer();
@@ -406,6 +501,10 @@ class DeckGLMap extends Component {
       this.speedLayerShow=true;
       this.gridLayerShow=false;
       this.getSpeedLayer();
+    }else if(event.target.value=="None"){
+      this.speedLayerShow=false;
+      this.gridLayerShow=false;
+      this.setState({hoveredMessage:""});
     }
   }
   change3D=(event)=>{//切换图层三维显示
@@ -514,11 +613,12 @@ class DeckGLMap extends Component {
               { this._renderTooltip() }
           </DeckGL>
           <div className={`moudle`}>
-            <Radio.Group size={"small"} style={{ width: 120 , margin:3}} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
-              <Radio.Button style={{ width: '50%',textAlign:'center' }} value="Grid" >Grid </Radio.Button>
-              <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="Speed">Speed</Radio.Button>
+            <Radio.Group size={"small"} style={{ width: 160 , margin:3}} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
+              <Radio.Button style={{ width: '35%',textAlign:'center' }} value="Grid" >Grid </Radio.Button>
+              <Radio.Button style={{ width: '35%',textAlign:'center'  }} value="Speed">Speed</Radio.Button>
+              <Radio.Button style={{ width: '30%',textAlign:'center'  }} value="None">None</Radio.Button>
             </Radio.Group><br />
-            <Radio.Group size={"small"} style={{ width: 120 , margin:3}} buttonStyle="solid" onChange={this.change3D} defaultValue="3D">
+            <Radio.Group size={"small"} style={{ width: 160 , margin:3}} buttonStyle="solid" onChange={this.change3D} defaultValue="3D">
               <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="2D">2D</Radio.Button>
               <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="3D">3D</Radio.Button>
             </Radio.Group><br />

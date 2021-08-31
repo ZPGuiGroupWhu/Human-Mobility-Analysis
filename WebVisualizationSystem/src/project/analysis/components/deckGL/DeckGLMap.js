@@ -136,17 +136,24 @@ class DeckGLMap extends Component {
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < this.props.userData.length; i++) {
       if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp){
-        selectOdNodes.push({COORDINATES: this.props.userData[i].origin});
+        selectOdNodes.push({COORDINATES: this.props.userData[i].origin});//存储OD点数据
         selectOdNodes.push({COORDINATES: this.props.userData[i].destination});
-        let path = [];
+        let path = [];//存储选择的所有轨迹
+        let importance = [];//存储对应轨迹每个位置的重要程度
         for(let j=0;j<this.props.userData[i].lngs.length;j++){
-          path.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]])
+          path.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]]);
+          // 计算重要程度，判断speed是否为0
+          importance.push(
+              this.props.userData[i].spd[j] === 0 ?
+              this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / 0.00001 :
+              this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / this.props.userData[i].spd[j]);
         }
-        //筛选数据，由于点击事件需要用到id，也要加入id
-        selectTrajs.push({id:this.props.userData[i].id, data:path});
+        //组织数据
+        selectTrajs.push({id:this.props.userData[i].id, data:path,
+          spd:this.props.userData[i].spd, azimuth:this.props.userData[i].azimuth, importance:importance});
       }
     }
-    return [selectOdNodes, selectTrajs]
+    return [selectOdNodes, selectTrajs]//返回选择轨迹的OD点和轨迹信息
   };
 
   //构建OD弧段图层
@@ -300,6 +307,7 @@ class DeckGLMap extends Component {
 
   //对应新json格式：轨迹点击事件
   clickTraj = (info) =>{
+    console.log(info);
     this.setState({
       Opacity:0.02
     }, ()=> {
@@ -308,7 +316,7 @@ class DeckGLMap extends Component {
       if (id === null) {
         console.log('no trajectory!')
       } else {
-        console.log(id);
+        // console.log(id);
         //存储点击的OD点信息和轨迹信息
         const tempOD = [];
         const tempTraj = [];
@@ -351,7 +359,7 @@ class DeckGLMap extends Component {
             currentTime: 100,
           })
         });
-        // 存储轨迹
+        // 存储轨迹 info.object = [id:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
         this.context.dispatch({type: 'setSelectedTraj', payload: info.object});
         // Opacity改变，重新绘制其他轨迹
         const [selectOdNodes, selectTrajs] = this.getSelectData(this.state.selectDate.start, this.state.selectDate.end);

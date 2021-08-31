@@ -27,16 +27,11 @@ import '@/project/bmap.scss';
 import Store from '@/store';
 
 
-
-
-
-// iconfont Symbol 在线 url
-const iconScriptUrl = '//at.alicdn.com/t/font_2577661_dmweq4qmkar.js';
-
 function PagePredict(props) {
   const { state, dispatch } = useContext(Store); // 全局状态管理 Store
   const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
   useEffect(() => {
+    // console.log(state.selectedTraj);
     if (Object.keys(state.selectedTraj).length) {
       const data = transcoords(state.selectedTraj.data); // 坐标纠偏
       const traj = _.cloneDeep(state.selectedTraj); // 深拷贝，返回 immutable 对象
@@ -239,6 +234,21 @@ function PagePredict(props) {
     searchCompleteResult,
   } = usePoiSearch(bmap, selectedTraj);
 
+
+  const [highlightData, setHighlightData] = useState([]);
+  function onHighlight(idx) {
+    setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
+  }
+  useEffect(() => {
+    if (!chart) return () => {};
+    chart.setOption({
+      series: [{
+        name: '高亮点',
+        data: highlightData,
+      }]
+    });
+  }, [chart, highlightData])
+
   return (
     <>
       {/* bmap 容器 */}
@@ -268,7 +278,6 @@ function PagePredict(props) {
       </Tooltip>
 
       {/* EChart 图表 */}
-
       <EChartbar>
         {/* 1. POI检索环形统计图 */}
         <Doughnut
@@ -283,9 +292,10 @@ function PagePredict(props) {
         <RelationChart
           titleText='时间 - 速度/转向角'
           legendData={['速度', '转向角']}
-          xAxisData={[1, 2, 3]}
+          xAxisData={Array.from({ length: selectedTraj?.spd?.length })}
           yAxis={['速度(km/h)', '转向角(rad)']}
-          data={[[1, 2, 3], [2, 3, 4]]}
+          data={[selectedTraj?.spd, selectedTraj?.azimuth]}
+          onHighlight={onHighlight}
         />
       </EChartbar>
     </>

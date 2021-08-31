@@ -199,6 +199,18 @@ export const option = {
         },
       },
       zlevel: 1002
-    },
+    }, {
+      name: '高亮点',
+      type: 'effectScatter',
+      showEffectOn: 'render',
+      rippleEffect: {
+        period: 4,
+        scale: 3,
+      },
+      coordinateSystem: 'bmap',
+      symbolSize: 8,
+      data: [],
+      zlevel: 1000,
+    }
   ]
 }

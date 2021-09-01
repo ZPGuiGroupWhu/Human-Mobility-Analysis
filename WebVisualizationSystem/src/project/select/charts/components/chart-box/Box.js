@@ -26,7 +26,7 @@ class DropMenu extends Component {
         style={{ width: 120 }}
         bordered={false} // 是否显示边框
         showArrow={false} // 是否显示箭头
-        showSearch // 是否启用搜索
+        // showSearch // 是否启用搜索
         onSelect={(value) => { this.getSelectItem(value) }} // 触发选中时的回调函数
       >
         {

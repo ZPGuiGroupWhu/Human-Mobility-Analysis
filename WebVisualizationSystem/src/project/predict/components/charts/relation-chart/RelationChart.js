@@ -35,7 +35,7 @@ function RelationChart(props) {
       },
       formatter: (params) => {
         // console.log(params);
-        return `${yAxis[0]}: ${params[0].value.toFixed(2)}<br/>${yAxis[1]}: ${params[1].value.toFixed(2)}`
+        return `${yAxis[1]}: ${params[0].value.toFixed(2)}<br/>${yAxis[0]}: ${params[1].value.toFixed(2)}`
       }
     },
     legend: {

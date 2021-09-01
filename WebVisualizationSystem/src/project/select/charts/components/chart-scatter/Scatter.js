@@ -166,10 +166,21 @@ class Scatter extends Component {
     animationDurationUpdate: 2000
   };
 
+  // 存储刷选的数据索引映射
+  onBrushSelected = (params) => {
+    let brushComponent = params.batch[0];
+    console.log(brushComponent);
+    // this.context.dispatch({
+    //   type: 'setSelectedUsers',
+    //   payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][0]), // 刷选索引映射到数据维度
+    // });
+  }
+
   componentDidMount() {
     this.chart = echarts.init(this.ref.current); // 初始化容器
     this.chart.setOption(this.option); // 初始化视图
     this.chart.getZr().configLayer(1, { motionBlur: 0.5 }); // zlevel 为 1 的层开启尾迹特效
+    this.chart.on('brushSelected', this.onBrushSelected); // 添加 brushSelected 事件
   }
 
   componentDidUpdate(prevProps, prevState) {

@@ -84,7 +84,7 @@ class ChartLeft extends Component {
           xAxis={this.groupTwoKey[0]}
           yAxis={this.groupTwoKey[1]}
         >
-          {(data, props = {}) => (<Scatter height='200px' data={data} {...props} />)}
+          {(data, props = {}) => (<Scatter height='250px' data={data} {...props} />)}
         </Charts.Box2d>
       </Charts.Group>
     );

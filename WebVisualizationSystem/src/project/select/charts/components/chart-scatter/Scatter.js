@@ -12,6 +12,24 @@ class Scatter extends Component {
   chart = null;
 
   option = {
+    // 工具栏配置
+    toolbox: {
+      iconStyle: {
+        color: '#fff', // icon 图形填充颜色
+        borderColor: '#fff', // icon 图形描边颜色
+      },
+      emphasis: {
+        iconStyle: {
+          color: '#7cd6cf',
+          borderColor: '#7cd6cf',
+        }
+      }
+    },
+    // 框选工具配置
+    brush: {
+      toolbox: ['rect', 'lineX', 'lineY', 'keep', 'clear'],
+      xAxisIndex: 0
+    },
     tooltip: {
       show: true,
       trigger: 'item', // 触发类型
@@ -33,7 +51,7 @@ class Scatter extends Component {
     grid: {
       show: false, // 是否显示直角坐标系网格
       left: '45', // 距离容器左侧距离
-      top: '20', // 距离容器上侧距离
+      top: '40', // 距离容器上侧距离
       right: '20',
       bottom: '40',
     },

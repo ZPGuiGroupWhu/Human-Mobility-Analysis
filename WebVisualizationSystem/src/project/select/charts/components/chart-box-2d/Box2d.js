@@ -5,8 +5,6 @@ import './Box2d.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
-  RiseOutlined,
-  SnippetsOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
 import { Space, Select } from 'antd';
@@ -60,6 +58,8 @@ class Box2d extends Component {
       curData: null, // 当前展示的数据
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
+      prevAllData: null, // 历史数据源 - 重渲染依据
+      prevSelectedUsers: [], // 历史筛选记录 - 重渲染依据
     };
   }
 
@@ -67,6 +67,29 @@ class Box2d extends Component {
   getYAxis = (val) => { this.setState({ yAxis: val }) }; // 获取 y 轴类型
 
   handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType); // 判断数据类型
+  handleEmptyArray = (arr) => {
+    try {
+      if (!Array.isArray(arr)) throw new Error('input should be Array Type');
+      if (arr.length === 0) {
+        return true;
+      } else {
+        arr.reduce((prev, item) => {
+          if (!Array.isArray(item)) return false;
+          return prev && this.handleEmptyArray(item);
+        }, true)
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }; // 判断数组是否为空
+
+
+  // 根据人员编号筛选数据
+  getDataBySelectedUsers = (data, arr) => {
+    return arr.map(idx => {
+      return Object.values(data).find(item => (item['人员编号'] === idx));
+    })
+  }
 
   // 依据选择项筛选生成当前视图的渲染数据
   getCurData = (data, xAxis, yAxis) => {
@@ -110,10 +133,29 @@ class Box2d extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // 数据受控
-    if (!_.isEqual(this.state.data, this.context.state.allData)) {
+    // 数据源(包含所有属性)
+    if (!_.isEqual(this.state.prevAllData, this.context.state.allData)) {
+      const newAllData = _.cloneDeep(this.context.state.allData)
       this.setState({
-        data: _.cloneDeep(this.context.state.allData),
+        prevAllData: newAllData,
+        data: newAllData,
+      })
+    }
+
+    if (
+      !_.isEqual(this.state.prevAllData, this.context.state.allData) ||
+      !_.isEqual(this.state.prevSelectedUsers, this.context.state.selectedUsers)
+    ) {
+      const { allData, selectedUsers } = this.context.state;
+      this.setState(prev => {
+        return {
+          prevSelectedUsers: _.cloneDeep(selectedUsers),
+          data: _.cloneDeep(
+            this.handleEmptyArray(selectedUsers) ?
+              allData :
+              this.getDataBySelectedUsers(allData, selectedUsers)
+          ),
+        }
       })
     }
 

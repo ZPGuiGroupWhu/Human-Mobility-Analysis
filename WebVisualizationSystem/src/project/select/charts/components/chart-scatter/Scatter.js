@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
 import _ from 'lodash';
+import Store from '@/store';
 
 class Scatter extends Component {
   constructor(props) {
@@ -27,12 +28,13 @@ class Scatter extends Component {
     },
     // 框选工具配置
     brush: {
-      toolbox: ['rect', 'lineX', 'lineY', 'keep', 'clear'],
+      toolbox: ['rect', 'keep', 'clear'],
       xAxisIndex: 0
     },
     tooltip: {
       show: true,
       trigger: 'item', // 触发类型
+      confine: true, // tooltip 限制在图表区域内
       axisPointer: {
         type: 'cross',
         snap: true, // 指示器是否自动吸附
@@ -44,7 +46,7 @@ class Scatter extends Component {
         }
       },
       formatter: (params) => {
-        return `人员编号: ${params.value[2]}<br/>X: ${params.value[0]}<br/>Y: ${params.value[1]}`
+        return `人员编号: ${params.value[2]}<br/>${this.props.xAxisName}: ${params.value[0].toFixed(3)}<br/>${this.props.yAxisName}: ${params.value[1].toFixed(3)}`
       }
     },
     // grid - 定位图表在容器中的位置
@@ -169,11 +171,10 @@ class Scatter extends Component {
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
     let brushComponent = params.batch[0];
-    console.log(brushComponent);
-    // this.context.dispatch({
-    //   type: 'setSelectedUsers',
-    //   payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][0]), // 刷选索引映射到数据维度
-    // });
+    this.context.dispatch({
+      type: 'setSelectedUsers',
+      payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][2]), // 刷选索引映射到数据维度
+    });
   }
 
   componentDidMount() {
@@ -190,6 +191,12 @@ class Scatter extends Component {
       Reflect.set(this.option.yAxis, 'name', this.props.yAxisName);
       this.chart.setOption(this.option);
     }
+
+    if (this.props.withFilter) {
+      if ((prevProps.xAxisName !== this.props.xAxisName) || (prevProps.yAxisName !== this.props.yAxisName)) {
+        this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
+      }
+    }
   }
 
   render() {
@@ -204,5 +211,7 @@ class Scatter extends Component {
     );
   }
 }
+
+Scatter.contextType = Store;
 
 export default Scatter;

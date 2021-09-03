@@ -5,7 +5,8 @@ import './Box2d.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  SnippetsOutlined,
 } from '@ant-design/icons';
 import { Space, Select } from 'antd';
 import { CSSTransition } from 'react-transition-group';
@@ -24,6 +25,7 @@ class DropMenu extends Component {
         defaultValue={this.props.defaultValue}
         value={this.props.value}
         style={{ width: 100 }}
+        size='small'
         bordered={false} // 是否显示边框
         showArrow={false} // 是否显示箭头
         showSearch={false} // 是否启用搜索
@@ -51,6 +53,8 @@ class Box2d extends Component {
     super(props);
     this.defaultXAxis = this.handleTypeJudge(props.xAxis, '[object Array]') ? props.xAxis[0] : props.xAxis; // 初始默认 xAxis
     this.defaultYAxis = this.handleTypeJudge(props.yAxis, '[object Array]') ? props.yAxis[1] : props.yAxis; // 初始默认 yAxis
+    this.prevSelectedUsers = null; // 历史 context 记录 - 监听 context 内容变化
+    this.prevData = null;
     // state
     this.state = {
       isVisible: true, // 是否可视图表
@@ -58,8 +62,7 @@ class Box2d extends Component {
       curData: null, // 当前展示的数据
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
-      prevAllData: null, // 历史数据源 - 重渲染依据
-      prevSelectedUsers: [], // 历史筛选记录 - 重渲染依据
+      withFilter: false,
     };
   }
 
@@ -123,49 +126,56 @@ class Box2d extends Component {
   reState = () => {
     this.setState({
       isVisible: true,
+      withFilter: false,
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
     })
-    this.setCurData(this.state.data, this.defaultXAxis, this.defaultYAxis);
+    this.handleInit();
+    this.context.dispatch({
+      type: 'setSelectedUsers',
+      payload: []
+    })
   }
 
-  componentDidMount() {
+  handleInit = () => {
+    const data = _.cloneDeep(this.context.state.allData);
+    this.setState({
+      data,
+    })
+    this.setCurData(data, this.defaultXAxis, this.defaultYAxis);
+    this.prevData = data;
   }
+
 
   componentDidUpdate(prevProps, prevState) {
-    // 数据源(包含所有属性)
-    if (!_.isEqual(this.state.prevAllData, this.context.state.allData)) {
-      const newAllData = _.cloneDeep(this.context.state.allData)
-      this.setState({
-        prevAllData: newAllData,
-        data: newAllData,
-      })
-    }
+    if (!this.props.reqSuccess) return; // 数据未请求成功
+    if (this.props.reqSuccess !== prevProps.reqSuccess) {
+      this.handleInit();
+    } // 初次渲染视图
 
-    if (
-      !_.isEqual(this.state.prevAllData, this.context.state.allData) ||
-      !_.isEqual(this.state.prevSelectedUsers, this.context.state.selectedUsers)
-    ) {
+    if (!_.isEqual(this.prevSelectedUsers, this.context.state.selectedUsers)) {
       const { allData, selectedUsers } = this.context.state;
       this.setState(prev => {
         return {
-          prevSelectedUsers: _.cloneDeep(selectedUsers),
           data: _.cloneDeep(
             this.handleEmptyArray(selectedUsers) ?
               allData :
-              this.getDataBySelectedUsers(allData, selectedUsers)
+              this.getDataBySelectedUsers(prev.withFilter ? this.prevData : allData, selectedUsers)
           ),
         }
       })
+      this.prevSelectedUsers = [...selectedUsers];
     }
 
     // 数据源改变
-    if (!_.isEqual(prevState.data, this.state.data)) {
-      this.setCurData(this.state.data, this.state.xAxis, this.state.yAxis);
-    }
-    // 选项改变
+    // 数据源改变
     if ((this.state.xAxis !== prevState.xAxis) || (this.state.yAxis !== prevState.yAxis)) {
-      this.setCurData(this.state.data, this.state.xAxis, this.state.yAxis);
+      this.prevData = this.state.data;
+      if (this.state.withFilter) {
+        this.setCurData(this.state.data, this.state.xAxis, this.state.yAxis);
+      } else {
+        this.setCurData(this.context.state.allData, this.state.xAxis, this.state.yAxis);
+      }
     }
 
     if (prevState.isReload !== this.state.isReload) {
@@ -177,6 +187,7 @@ class Box2d extends Component {
     return (
       <div className="chart-box2d-ctn">
         <div className="title-bar">
+          <span>X:</span>
           {
             this.handleTypeJudge(this.props.xAxis, '[object Array]') ?
               <DropMenu
@@ -187,6 +198,7 @@ class Box2d extends Component {
               /> :
               <span className="text">{this.state.xAxis}</span>
           }
+          <span>Y:</span>
           {
             this.handleTypeJudge(this.props.yAxis, '[object Array]') ?
               <DropMenu
@@ -199,6 +211,20 @@ class Box2d extends Component {
           }
           <div className="func-btns">
             <Space>
+              <Hover isReload={this.state.isReload}>
+                {
+                  ({ isHovering, isClicked }) => (
+                    <SnippetsOutlined
+                      style={{
+                        ...this.iconStyle,
+                        display: this.props.filterable ? '' : 'none',
+                        color: (isHovering || isClicked) ? '#05f8d6' : '#fff'
+                      }}
+                      onClick={() => { this.setState(prev => ({ withFilter: !prev.withFilter })) }}
+                    />
+                  )
+                }
+              </Hover>
               <Hover>
                 {
                   ({ isHovering }) => (
@@ -256,6 +282,7 @@ class Box2d extends Component {
             className="chart-content"
           >
             {this.props.children(this.state.curData, {
+              withFilter: this.state.withFilter,
               xAxisName: this.state.xAxis,
               yAxisName: this.state.yAxis,
             })}
@@ -267,5 +294,13 @@ class Box2d extends Component {
 }
 
 Box2d.contextType = Store;
+
+Box2d.propTypes = {
+  reqSuccess: PropTypes.bool.isRequired,
+}
+
+Box2d.defaultProps = {
+  filterable: false,
+}
 
 export default Box2d;

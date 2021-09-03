@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import './Box.scss';
+import Store from '@/store';
+import './Box1d.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
-  RiseOutlined,
+  ReloadOutlined,
   SnippetsOutlined,
-  ReloadOutlined
 } from '@ant-design/icons';
 import { Space, Select } from 'antd';
 import { CSSTransition } from 'react-transition-group';
@@ -22,11 +22,12 @@ class DropMenu extends Component {
   render() {
     return (
       <Select
-        defaultValue={this.props.items[0]}
-        style={{ width: 120 }}
+        defaultValue={this.props.defaultValue}
+        value={this.props.value}
+        style={{ width: 100 }}
         bordered={false} // 是否显示边框
         showArrow={false} // 是否显示箭头
-        // showSearch // 是否启用搜索
+        showSearch={false} // 是否启用搜索
         onSelect={(value) => { this.getSelectItem(value) }} // 触发选中时的回调函数
       >
         {
@@ -40,8 +41,7 @@ class DropMenu extends Component {
 }
 
 
-// Box 宽度继承父元素，高度由子元素撑起
-class Box extends Component {
+class Box1d extends Component {
   // icon 通用配置
   iconStyle = {
     fontSize: '13px',
@@ -50,17 +50,60 @@ class Box extends Component {
 
   constructor(props) {
     super(props);
-    this.defaultSelectItem = props.dataKey[0];
+    this.defaultAxis = this.handleTypeJudge(props.axis, '[object Array]') ? props.axis[0] : props.axis; // 初始默认 axis
+    this.prevSelectedUsers = null; // 历史 context 记录 - 监听 context 内容变化
+    this.prevData = null;
     // state
     this.state = {
       isVisible: true, // 是否可视图表
       data: null, // 数据源
-      sortedData: null, // 存储排序后的数据源
-      curSelectItem: this.defaultSelectItem, // 当前选择项(多源数据时生效)
-      isSorted: {}, // 是否进行一次排序：对象间比较必为false，确保每次都触发
-      isReload: {}, // 是否进行一次重置
-      withFilter: false, // 是否开启过滤功能
+      curData: null, // 当前展示的数据
+      axis: this.defaultAxis,
+      withFilter: false, // 是否启用过滤
     };
+  }
+
+  getAxis = (val) => { this.setState({ axis: val }) };
+
+  handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType); // 判断数据类型
+  handleEmptyArray = (arr) => {
+    try {
+      if (!Array.isArray(arr)) throw new Error('input should be Array Type');
+      if (arr.length === 0) {
+        return true;
+      } else {
+        arr.reduce((prev, item) => {
+          if (!Array.isArray(item)) return false;
+          return prev && this.handleEmptyArray(item);
+        }, true)
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }; // 判断数组是否为空
+
+
+  // 根据人员编号筛选数据
+  getDataBySelectedUsers = (data, arr) => {
+    return arr.map(idx => {
+      return Object.values(data).find(item => (item['人员编号'] === idx));
+    })
+  }
+
+  // 依据选择项筛选生成当前视图的渲染数据
+  getCurData = (data, axis) => {
+    if (!data || !axis) return null;
+    return Object.values(data).map(obj => {
+      return [axis, '人员编号'].reduce((prev, item) => {
+        return [...prev, obj[item]]
+      }, []);
+    })
+  }
+  // 数据存储
+  setCurData = (data, axis) => {
+    this.setState({
+      curData: this.getCurData(data, axis),
+    })
   }
 
   // 内容展开/关闭
@@ -70,53 +113,56 @@ class Box extends Component {
     }))
   }
 
-  // 选择列表
-  getSelectItem = (val) => {
-    this.setState({
-      curSelectItem: val,
-    })
-  }
-
-  // 返回选择结果
-  findItem = (arr, target) => (arr.find((item) => (item.title === target)));
-
-  // 数据排序(按照 dim 维度)
-  setSortableData = (data, dim) => {
-    try {
-      if (!Array.isArray(data)) throw new Error('data should be Array Type');
-      if (!dim || (dim >= data.length)) throw new Error('dim Error');
-      data.sort((a, b) => (a[dim] - b[dim]));
-      this.setState({
-        sortedData: _.cloneDeep(data), // 深拷贝，确保数据更新能被监听
-      })
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  getBoxData = (data, curSelectItem) => {
-    let res = this.findItem(data, curSelectItem);
-    this.setState({
-      data: typeof res.data === 'function' ? res.data() : res.data,
-    })
-  }
-
   // 重置回初始状态
   reState = () => {
     this.setState({
       isVisible: true,
       withFilter: false,
+      axis: this.defaultAxis,
     })
-    this.getBoxData(this.props.data, this.state.curSelectItem);
+    this.handleInit();
+    this.context.dispatch({
+      type: 'setSelectedUsers',
+      payload: []
+    })
+  }
+
+  handleInit = () => {
+    const data = _.cloneDeep(this.context.state.allData);
+    this.setState({
+      data,
+    })
+    this.setCurData(data, this.defaultAxis);
+    this.prevData = data;
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // 数据源发生改变 或 筛选项发生改变 - 更换当前 box 的数据源
-    if (!_.isEqual(prevProps.data, this.props.data) || !_.isEqual(prevState.curSelectItem, this.state.curSelectItem)) {
-      let res = this.findItem(this.props.data, this.state.curSelectItem);
-      this.setState({
-        data: typeof res.data === 'function' ? res.data() : res.data,
-      })
+    if (!this.props.reqSuccess) return; // 数据未请求成功
+    if (this.props.reqSuccess !== prevProps.reqSuccess) {
+      this.handleInit();
+    } // 初次渲染视图
+
+    // 筛选
+    if (!_.isEqual(this.prevSelectedUsers, this.context.state.selectedUsers)) {
+      const { allData, selectedUsers } = this.context.state; // 订阅 selectedUsers
+      this.setState(prev => {
+        return {
+          data: _.cloneDeep(
+            this.handleEmptyArray(selectedUsers) ?
+              allData :
+              this.getDataBySelectedUsers(prev.withFilter ? this.prevData : allData, selectedUsers))
+        }
+      });
+      this.prevSelectedUsers = [...selectedUsers];
+    }
+    // 数据源改变
+    if (this.state.axis !== prevState.axis) {
+      this.prevData = this.state.data;
+      if (this.state.withFilter) {
+        this.setCurData(this.state.data, this.state.axis);
+      } else {
+        this.setCurData(this.context.state.allData, this.state.axis);
+      }
     }
 
     if (prevState.isReload !== this.state.isReload) {
@@ -126,29 +172,20 @@ class Box extends Component {
 
   render() {
     return (
-      <div className="chart-box-ctn">
+      <div className="chart-box1d-ctn">
         <div className="title-bar">
           {
-            this.props.dataKey.length !== 1 ?
-              <DropMenu items={this.props.dataKey} getSelectItem={this.getSelectItem} /> :
-              <span className="text">{this.props.data[0].title}</span>
+            this.handleTypeJudge(this.props.axis, '[object Array]') ?
+              <DropMenu
+                defaultValue={this.state.axis}
+                value={this.state.axis}
+                items={this.props.axis}
+                getSelectItem={this.getAxis}
+              /> :
+              <span className="text">{this.state.axis}</span>
           }
           <div className="func-btns">
             <Space>
-              <Hover>
-                {
-                  ({ isHovering }) => (
-                    <RiseOutlined
-                      style={{
-                        ...this.iconStyle,
-                        display: this.props.sortable ? '' : 'none',
-                        color: isHovering ? '#05f8d6' : '#fff'
-                      }}
-                      onClick={() => { this.setState({ isSorted: {} }) }} // 触发一次排序
-                    />
-                  )
-                }
-              </Hover>
               <Hover isReload={this.state.isReload}>
                 {
                   ({ isHovering, isClicked }) => (
@@ -169,7 +206,6 @@ class Box extends Component {
                     <ReloadOutlined
                       style={{
                         ...this.iconStyle,
-                        display: this.props.filterable ? '' : 'none',
                         color: isHovering ? '#05f8d6' : '#fff'
                       }}
                       onClick={() => { this.setState({ isReload: {} }) }}
@@ -220,15 +256,10 @@ class Box extends Component {
           <div
             className="chart-content"
           >
-            {this.props.children(
-              this.state.data,
-              {
-                withFilter: this.state.withFilter,
-                isSorted: this.state.isSorted,
-                sortedData: this.state.sortedData,
-                setSortableData: this.setSortableData,
-              }
-            )}
+            {this.props.children(this.state.curData, {
+              axisName: this.state.axis,
+              withFilter: this.state.withFilter,
+            })}
           </div>
         </CSSTransition>
       </div>
@@ -236,14 +267,14 @@ class Box extends Component {
   }
 }
 
-Box.propTypes = {
-  sortable: PropTypes.bool,
-  filterable: PropTypes.bool,
+Box1d.contextType = Store;
+
+Box1d.propTypes = {
+  reqSuccess: PropTypes.bool.isRequired,
 }
 
-Box.defaultProps = {
-  sortable: false,
+Box1d.defaultProps = {
   filterable: false,
 }
 
-export default Box;
+export default Box1d;

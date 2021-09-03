@@ -3,6 +3,7 @@ import axios from 'axios';
 import Charts from '../Charts';
 import Bar from '../components/chart-bar/Bar';
 import Scatter from '../components/chart-scatter/Scatter';
+import Histogram from '../components/chart-histogram/Histogram';
 import Store from '@/store';
 
 
@@ -72,15 +73,16 @@ class ChartLeft extends Component {
   render() {
     return (
       <Charts.Group>
-        <Charts.Box
-          data={this.state.groupOne} // 数据
-          dataKey={this.groupOneKey} // 数据 key 值
-          sortable={true} // 是否启用排列按钮
+        <Charts.Box1d
           filterable={true} // 是否启用数据递进过滤按钮
+          reqSuccess={this.state.reqSuccess} // 请求状态
+          axis={this.groupOneKey}
         >
-          {(data, props = {}) => (<Bar height='250px' data={data} {...props} />)}
-        </Charts.Box>
+          {(data, props = {}) => (<Histogram height="250px" data={data} {...props} />)}
+        </Charts.Box1d>
         <Charts.Box2d
+          filterable={true} // 是否启用数据递进过滤按钮
+          reqSuccess={this.state.reqSuccess} // 请求状态
           xAxis={this.groupTwoKey[0]}
           yAxis={this.groupTwoKey[1]}
         >

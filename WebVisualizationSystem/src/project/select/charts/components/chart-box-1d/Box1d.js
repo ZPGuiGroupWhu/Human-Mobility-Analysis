@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Store from '@/store';
-import './Box2d.scss';
+import './Box1d.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
@@ -15,7 +15,9 @@ import Hover from '../../common/Hover';
 import DropMenu from '../../common/DropMenu';
 
 
-class Box2d extends Component {
+
+
+class Box1d extends Component {
   // icon 通用配置
   iconStyle = {
     fontSize: '13px',
@@ -24,8 +26,7 @@ class Box2d extends Component {
 
   constructor(props) {
     super(props);
-    this.defaultXAxis = this.handleTypeJudge(props.xAxis, '[object Array]') ? props.xAxis[0] : props.xAxis; // 初始默认 xAxis
-    this.defaultYAxis = this.handleTypeJudge(props.yAxis, '[object Array]') ? props.yAxis[1] : props.yAxis; // 初始默认 yAxis
+    this.defaultAxis = this.handleTypeJudge(props.axis, '[object Array]') ? props.axis[0] : props.axis; // 初始默认 axis
     this.defaultWithFilter = props.withFilter;
     this.prevSelectedUsers = null; // 历史 context 记录 - 监听 context 内容变化
     this.prevData = null;
@@ -34,15 +35,13 @@ class Box2d extends Component {
       isVisible: true, // 是否可视图表
       data: null, // 数据源
       curData: null, // 当前展示的数据
-      xAxis: this.defaultXAxis,
-      yAxis: this.defaultYAxis,
-      withFilter: this.defaultWithFilter,
+      axis: this.defaultAxis,
+      withFilter: this.defaultWithFilter, // 是否启用过滤
       prevFilter: this.defaultWithFilter,
     };
   }
 
-  getXAxis = (val) => { this.setState({ xAxis: val }) }; // 获取 x 轴类型
-  getYAxis = (val) => { this.setState({ yAxis: val }) }; // 获取 y 轴类型
+  getAxis = (val) => { this.setState({ axis: val }) };
 
   handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType); // 判断数据类型
   handleEmptyArray = (arr) => {
@@ -70,23 +69,18 @@ class Box2d extends Component {
   }
 
   // 依据选择项筛选生成当前视图的渲染数据
-  getCurData = (data, xAxis, yAxis) => {
-    if (!data || !xAxis || !yAxis) return null;
+  getCurData = (data, axis) => {
+    if (!data || !axis) return null;
     return Object.values(data).map(obj => {
-      return [xAxis, yAxis, '人员编号'].reduce((prev, item) => {
+      return [axis, '人员编号'].reduce((prev, item) => {
         return [...prev, obj[item]]
       }, []);
     })
   }
-  // 模拟生成权重 dim = 4
-  getCurDataWeight = (curData) => {
-    if (!curData) return null;
-    return curData.map(item => ([...item, item[0] + item[1]]));
-  }
   // 数据存储
-  setCurData = (data, xAxis, yAxis) => {
+  setCurData = (data, axis) => {
     this.setState({
-      curData: this.getCurDataWeight(this.getCurData(data, xAxis, yAxis)),
+      curData: this.getCurData(data, axis),
     })
   }
 
@@ -116,8 +110,7 @@ class Box2d extends Component {
     this.setState({
       isVisible: true,
       withFilter: this.defaultWithFilter,
-      xAxis: this.defaultXAxis,
-      yAxis: this.defaultYAxis,
+      axis: this.defaultAxis,
     })
     this.handleInit();
     this.context.dispatch({
@@ -131,10 +124,9 @@ class Box2d extends Component {
     this.setState({
       data,
     })
-    this.setCurData(data, this.defaultXAxis, this.defaultYAxis);
+    this.setCurData(data, this.defaultAxis);
     this.prevData = data;
   }
-
 
   componentDidUpdate(prevProps, prevState) {
     if (!this.props.reqSuccess) return; // 数据未请求成功
@@ -142,34 +134,32 @@ class Box2d extends Component {
       this.handleInit();
     } // 初次渲染视图
 
+    // 筛选
     if (!_.isEqual(this.prevSelectedUsers, this.context.state.selectedUsers)) {
-      const { allData, selectedUsers } = this.context.state;
+      const { allData, selectedUsers } = this.context.state; // 订阅 selectedUsers
       this.setState(prev => {
         return {
           data: _.cloneDeep(
             this.handleEmptyArray(selectedUsers) ?
               allData :
-              this.getDataBySelectedUsers(prev.withFilter ? this.prevData : allData, selectedUsers)
-          ),
+              this.getDataBySelectedUsers(prev.withFilter ? this.prevData : allData, selectedUsers))
         }
-      })
+      });
       this.prevSelectedUsers = [...selectedUsers];
     }
-
     // 数据源改变
-    // 数据源改变
-    if ((this.state.xAxis !== prevState.xAxis) || (this.state.yAxis !== prevState.yAxis)) {
+    if (this.state.axis !== prevState.axis) {
       this.prevData = this.state.data;
       if (this.state.withFilter) {
-        this.setCurData(this.state.data, this.state.xAxis, this.state.yAxis);
+        this.setCurData(this.state.data, this.state.axis);
       } else {
-        this.setCurData(this.context.state.allData, this.state.xAxis, this.state.yAxis);
+        this.setCurData(this.context.state.allData, this.state.axis);
       }
     }
 
     if (!_.isEqual(this.state.data, prevState.data)) {
       if (this.state.withFilter) {
-        this.setCurData(this.state.data, this.state.xAxis, this.state.yAxis);
+        this.setCurData(this.state.data, this.state.axis);
       }
     }
 
@@ -180,29 +170,17 @@ class Box2d extends Component {
 
   render() {
     return (
-      <div className="chart-box2d-ctn">
+      <div className="chart-box1d-ctn">
         <div className="title-bar">
-          <span>X:</span>
           {
-            this.handleTypeJudge(this.props.xAxis, '[object Array]') ?
+            this.handleTypeJudge(this.props.axis, '[object Array]') ?
               <DropMenu
-                defaultValue={this.state.xAxis}
-                value={this.state.xAxis}
-                items={this.props.xAxis}
-                getSelectItem={this.getXAxis}
+                defaultValue={this.state.axis}
+                value={this.state.axis}
+                items={this.props.axis}
+                getSelectItem={this.getAxis}
               /> :
-              <span className="text">{this.state.xAxis}</span>
-          }
-          <span>Y:</span>
-          {
-            this.handleTypeJudge(this.props.yAxis, '[object Array]') ?
-              <DropMenu
-                defaultValue={this.state.yAxis}
-                value={this.state.yAxis}
-                items={this.props.yAxis}
-                getSelectItem={this.getYAxis}
-              /> :
-              <span className="text">{this.state.yAxis}</span>
+              <span className="text">{this.state.axis}</span>
           }
           <div className="func-btns">
             <Space>
@@ -284,9 +262,8 @@ class Box2d extends Component {
             className="chart-content"
           >
             {this.props.children(this.state.curData, {
+              axisName: this.state.axis,
               withFilter: this.state.withFilter,
-              xAxisName: this.state.xAxis,
-              yAxisName: this.state.yAxis,
               forbiddenFilter: this.forbiddenFilter,
               reopenFilter: this.reopenFilter,
             })}
@@ -297,15 +274,15 @@ class Box2d extends Component {
   }
 }
 
-Box2d.contextType = Store;
+Box1d.contextType = Store;
 
-Box2d.propTypes = {
+Box1d.propTypes = {
   reqSuccess: PropTypes.bool.isRequired,
 }
 
-Box2d.defaultProps = {
+Box1d.defaultProps = {
   filterable: false,
   withFilter: true,
 }
 
-export default Box2d;
+export default Box1d;

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
 import _ from 'lodash';
+import Store from '@/store';
 
 class Scatter extends Component {
   constructor(props) {
@@ -27,12 +28,14 @@ class Scatter extends Component {
     },
     // 框选工具配置
     brush: {
-      toolbox: ['rect', 'lineX', 'lineY', 'keep', 'clear'],
-      xAxisIndex: 0
+      toolbox: ['rect', 'keep', 'clear'],
+      xAxisIndex: 0,
+      throttleType: 'debounce',
     },
     tooltip: {
       show: true,
       trigger: 'item', // 触发类型
+      confine: true, // tooltip 限制在图表区域内
       axisPointer: {
         type: 'cross',
         snap: true, // 指示器是否自动吸附
@@ -44,7 +47,7 @@ class Scatter extends Component {
         }
       },
       formatter: (params) => {
-        return `人员编号: ${params.value[2]}<br/>X: ${params.value[0]}<br/>Y: ${params.value[1]}`
+        return `人员编号: ${params.value[2]}<br/>${this.props.xAxisName}: ${params.value[0].toFixed(3)}<br/>${this.props.yAxisName}: ${params.value[1].toFixed(3)}`
       }
     },
     // grid - 定位图表在容器中的位置
@@ -168,12 +171,16 @@ class Scatter extends Component {
 
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
+    this.props.forbiddenFilter();
     let brushComponent = params.batch[0];
-    console.log(brushComponent);
-    // this.context.dispatch({
-    //   type: 'setSelectedUsers',
-    //   payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][0]), // 刷选索引映射到数据维度
-    // });
+    this.context.dispatch({
+      type: 'setSelectedUsers',
+      payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][2]), // 刷选索引映射到数据维度
+    });
+  }
+
+  onBrushEnd = (params) => {
+    this.props.reopenFilter();
   }
 
   componentDidMount() {
@@ -181,6 +188,7 @@ class Scatter extends Component {
     this.chart.setOption(this.option); // 初始化视图
     this.chart.getZr().configLayer(1, { motionBlur: 0.5 }); // zlevel 为 1 的层开启尾迹特效
     this.chart.on('brushSelected', this.onBrushSelected); // 添加 brushSelected 事件
+    this.chart.on('brushEnd', this.onBrushEnd);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -189,6 +197,12 @@ class Scatter extends Component {
       Reflect.set(this.option.xAxis, 'name', this.props.xAxisName);
       Reflect.set(this.option.yAxis, 'name', this.props.yAxisName);
       this.chart.setOption(this.option);
+    }
+
+    if (this.props.withFilter) {
+      if ((prevProps.xAxisName !== this.props.xAxisName) || (prevProps.yAxisName !== this.props.yAxisName)) {
+        this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
+      }
     }
   }
 
@@ -204,5 +218,7 @@ class Scatter extends Component {
     );
   }
 }
+
+Scatter.contextType = Store;
 
 export default Scatter;

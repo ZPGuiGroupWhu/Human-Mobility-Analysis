@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Charts from '../Charts';
-import Bar from '../components/chart-bar/Bar';
 import Scatter from '../components/chart-scatter/Scatter';
 import Histogram from '../components/chart-histogram/Histogram';
 import Store from '@/store';

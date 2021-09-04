@@ -5,6 +5,10 @@ import { pipe } from '../../common/HOC/pipe';
 import FuncBar from '../func-bar/FuncBar';
 
 class Group extends Component {
+  /**
+   * props
+   * @param {boolean} reqSuccess - 原始数据是否请求成功
+   */
   constructor(props) {
     super(props);
     this.state = {}
@@ -14,7 +18,7 @@ class Group extends Component {
     return (
       <div className="chart-group-ctn">
         <FuncBar />
-        {this.props.children}
+        {this.props.children({ reqSuccess: this.props.reqSuccess })}
       </div>
     );
   }

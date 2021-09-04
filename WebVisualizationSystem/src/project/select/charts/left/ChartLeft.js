@@ -28,27 +28,25 @@ class ChartLeft extends Component {
     return (
       <Charts.Group>
         {
-          ({ reqSuccess }) => {
-            return (
-              <>
-                <Charts.Box1d
-                  filterable={true} // 是否启用数据递进过滤按钮
-                  reqSuccess={reqSuccess} // 请求状态
-                  axis={this.groupOneKey}
-                >
-                  {(data, props = {}) => (<Histogram height="250px" data={data} {...props} />)}
-                </Charts.Box1d>
-                <Charts.Box2d
-                  filterable={true} // 是否启用数据递进过滤按钮
-                  reqSuccess={reqSuccess} // 请求状态
-                  xAxis={this.groupTwoKey[0]}
-                  yAxis={this.groupTwoKey[1]}
-                >
-                  {(data, props = {}) => (<Scatter height='250px' data={data} {...props} />)}
-                </Charts.Box2d>
-              </>
-            )
-          }
+          ({ reqSuccess }) => (
+            <>
+              <Charts.Box1d
+                filterable={true} // 是否启用数据递进过滤按钮
+                reqSuccess={reqSuccess} // 请求状态
+                axis={this.groupOneKey}
+              >
+                {(data, props = {}) => (<Histogram height="250px" data={data} {...props} />)}
+              </Charts.Box1d>
+              <Charts.Box2d
+                filterable={true} // 是否启用数据递进过滤按钮
+                reqSuccess={reqSuccess} // 请求状态
+                xAxis={this.groupTwoKey[0]}
+                yAxis={this.groupTwoKey[1]}
+              >
+                {(data, props = {}) => (<Scatter height='250px' data={data} {...props} />)}
+              </Charts.Box2d>
+            </>
+          )
         }
 
       </Charts.Group>

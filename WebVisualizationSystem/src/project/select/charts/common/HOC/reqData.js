@@ -28,7 +28,7 @@ export const reqData = (url) => (WrappedComponent) => {
     render() {
       return (
         <WrappedComponent {...this.state} {...this.props}>
-          {this.props.children({ reqSuccess: this.state.reqSuccess })}
+          {this.props.children}
         </WrappedComponent>
       )
     }

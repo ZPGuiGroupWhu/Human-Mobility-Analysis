@@ -6,6 +6,7 @@ import _ from 'lodash';
 
 import IconButton from '../../common/IconButton';
 import { connectWhite, connectActive } from '@/assets/select-charts/connect';
+import { reloadWhite, reloadActive } from '@/assets/select-charts/reload';
 
 
 
@@ -36,6 +37,10 @@ class FuncBar extends Component {
     console.log('connect');
   }
 
+  handleReload = () => {
+    console.log('reload');
+  }
+
   render() {
     return (
       <div className="chart-box1d-ctn">
@@ -43,6 +48,7 @@ class FuncBar extends Component {
           <div className="func-btns">
             <Space>
               <IconButton actImage={connectActive} noActImage={connectWhite} onClick={ this.handleConnect } />
+              <IconButton actImage={reloadActive} noActImage={reloadWhite} onClick={ this.handleReload } imgHeight={'20px'}/>
             </Space>
           </div>
         </div>

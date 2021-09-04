@@ -4,6 +4,7 @@ import Hover from './Hover';
 class IconButton extends Component {
   static defaultProps = {
     withClickArgs: [],
+    imgHeight: '25px',
   }
 
   /**
@@ -12,6 +13,7 @@ class IconButton extends Component {
    * @param {array?} withClickArgs - 点击事件函数参数 
    * @param {string} actImage - 按钮激活的图片地址
    * @param {string} noActImage - 按钮未激活的图片地址
+   * @param {string?} imgHeight - 图片高度
    */
   constructor(props) {
     super(props);
@@ -23,10 +25,6 @@ class IconButton extends Component {
     text_decoration: 'none',
     outline: 'none',
     color: '#000',
-  }
-
-  imgStyle = {
-    height: '25px',
   }
 
   onClick = (e, ...params) => {
@@ -45,8 +43,8 @@ class IconButton extends Component {
             >
               {
                 (isHovering || isClicked) ?
-                  <img src={this.props.actImage} alt="" style={this.imgStyle} /> :
-                  <img src={this.props.noActImage} alt="" style={this.imgStyle} />
+                  <img src={this.props.actImage} alt="" style={{ height: this.props.imgHeight }} /> :
+                  <img src={this.props.noActImage} alt="" style={{ height: this.props.imgHeight }} />
               }
             </a>
           )

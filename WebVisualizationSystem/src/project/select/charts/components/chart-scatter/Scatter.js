@@ -29,7 +29,8 @@ class Scatter extends Component {
     // 框选工具配置
     brush: {
       toolbox: ['rect', 'keep', 'clear'],
-      xAxisIndex: 0
+      xAxisIndex: 0,
+      throttleType: 'debounce',
     },
     tooltip: {
       show: true,
@@ -170,6 +171,7 @@ class Scatter extends Component {
 
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
+    this.props.forbiddenFilter();
     let brushComponent = params.batch[0];
     this.context.dispatch({
       type: 'setSelectedUsers',
@@ -177,11 +179,16 @@ class Scatter extends Component {
     });
   }
 
+  onBrushEnd = (params) => {
+    this.props.reopenFilter();
+  }
+
   componentDidMount() {
     this.chart = echarts.init(this.ref.current); // 初始化容器
     this.chart.setOption(this.option); // 初始化视图
     this.chart.getZr().configLayer(1, { motionBlur: 0.5 }); // zlevel 为 1 的层开启尾迹特效
     this.chart.on('brushSelected', this.onBrushSelected); // 添加 brushSelected 事件
+    this.chart.on('brushEnd', this.onBrushEnd);
   }
 
   componentDidUpdate(prevProps, prevState) {

@@ -1,11 +1,13 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 class Hover extends Component {
   constructor(props) {
     super(props);
+    this.defaultHoveringState = props.isHovering;
+    this.defaultClickedState = props.isClicked;
     this.state = {
-      isHovering: false,
-      isClicked: false,
+      isHovering: this.defaultHoveringState,
+      isClicked: this.defaultClickedState,
     }
   }
 
@@ -29,9 +31,8 @@ class Hover extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.isReload !== this.props.isReload) {
-      console.log(this.state);
       this.setState({
-        isClicked: false
+        isClicked: this.props.isClicked
       })
     }
   }
@@ -47,6 +48,11 @@ class Hover extends Component {
       </div>
     );
   }
+}
+
+Hover.defaultProps = {
+  isHovering: false,
+  isClicked: false,
 }
 
 export default Hover;

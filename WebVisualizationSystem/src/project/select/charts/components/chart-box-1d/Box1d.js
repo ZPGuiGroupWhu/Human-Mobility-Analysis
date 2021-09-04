@@ -8,37 +8,13 @@ import {
   ReloadOutlined,
   SnippetsOutlined,
 } from '@ant-design/icons';
-import { Space, Select } from 'antd';
+import { Space } from 'antd';
 import { CSSTransition } from 'react-transition-group';
 import _ from 'lodash';
 import Hover from '../../common/Hover';
+import DropMenu from '../../common/DropMenu';
 
-const { Option } = Select;
-class DropMenu extends Component {
-  getSelectItem = (value) => {
-    this.props.getSelectItem(value)
-  }
 
-  render() {
-    return (
-      <Select
-        defaultValue={this.props.defaultValue}
-        value={this.props.value}
-        style={{ width: 100 }}
-        bordered={false} // 是否显示边框
-        showArrow={false} // 是否显示箭头
-        showSearch={false} // 是否启用搜索
-        onSelect={(value) => { this.getSelectItem(value) }} // 触发选中时的回调函数
-      >
-        {
-          this.props.items.map((item, idx) => (
-            <Option value={item} key={idx}>{item}</Option>
-          ))
-        }
-      </Select>
-    )
-  }
-}
 
 
 class Box1d extends Component {
@@ -51,6 +27,7 @@ class Box1d extends Component {
   constructor(props) {
     super(props);
     this.defaultAxis = this.handleTypeJudge(props.axis, '[object Array]') ? props.axis[0] : props.axis; // 初始默认 axis
+    this.defaultWithFilter = props.withFilter;
     this.prevSelectedUsers = null; // 历史 context 记录 - 监听 context 内容变化
     this.prevData = null;
     // state
@@ -59,7 +36,8 @@ class Box1d extends Component {
       data: null, // 数据源
       curData: null, // 当前展示的数据
       axis: this.defaultAxis,
-      withFilter: false, // 是否启用过滤
+      withFilter: this.defaultWithFilter, // 是否启用过滤
+      prevFilter: this.defaultWithFilter,
     };
   }
 
@@ -113,11 +91,25 @@ class Box1d extends Component {
     }))
   }
 
+  forbiddenFilter = () => {
+    this.setState(prev => {
+      return {
+        withFilter: false
+      }
+    });
+  }
+
+  reopenFilter = () => {
+    this.setState({
+      withFilter: this.state.prevFilter,
+    })
+  }
+
   // 重置回初始状态
   reState = () => {
     this.setState({
       isVisible: true,
-      withFilter: false,
+      withFilter: this.defaultWithFilter,
       axis: this.defaultAxis,
     })
     this.handleInit();
@@ -165,6 +157,12 @@ class Box1d extends Component {
       }
     }
 
+    if (!_.isEqual(this.state.data, prevState.data)) {
+      if (this.state.withFilter) {
+        this.setCurData(this.state.data, this.state.axis);
+      }
+    }
+
     if (prevState.isReload !== this.state.isReload) {
       this.reState();
     }
@@ -186,16 +184,23 @@ class Box1d extends Component {
           }
           <div className="func-btns">
             <Space>
-              <Hover isReload={this.state.isReload}>
+              <Hover isReload={this.state.isReload} isClicked={this.defaultWithFilter}>
                 {
                   ({ isHovering, isClicked }) => (
                     <SnippetsOutlined
                       style={{
                         ...this.iconStyle,
                         display: this.props.filterable ? '' : 'none',
-                        color: (isHovering || isClicked) ? '#05f8d6' : '#fff'
+                        color: (isHovering || this.state.withFilter) ? '#05f8d6' : '#fff'
                       }}
-                      onClick={() => { this.setState(prev => ({ withFilter: !prev.withFilter })) }}
+                      onClick={() => {
+                        this.setState(prev => {
+                          return {
+                            withFilter: !prev.withFilter,
+                            prevFilter: !prev.prevFilter,
+                          }
+                        })
+                      }}
                     />
                   )
                 }
@@ -259,6 +264,8 @@ class Box1d extends Component {
             {this.props.children(this.state.curData, {
               axisName: this.state.axis,
               withFilter: this.state.withFilter,
+              forbiddenFilter: this.forbiddenFilter,
+              reopenFilter: this.reopenFilter,
             })}
           </div>
         </CSSTransition>
@@ -275,6 +282,7 @@ Box1d.propTypes = {
 
 Box1d.defaultProps = {
   filterable: false,
+  withFilter: true,
 }
 
 export default Box1d;

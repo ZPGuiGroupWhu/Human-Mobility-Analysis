@@ -8,38 +8,11 @@ import {
   ReloadOutlined,
   SnippetsOutlined,
 } from '@ant-design/icons';
-import { Space, Select } from 'antd';
+import { Space } from 'antd';
 import { CSSTransition } from 'react-transition-group';
 import _ from 'lodash';
 import Hover from '../../common/Hover';
-
-const { Option } = Select;
-class DropMenu extends Component {
-  getSelectItem = (value) => {
-    this.props.getSelectItem(value)
-  }
-
-  render() {
-    return (
-      <Select
-        defaultValue={this.props.defaultValue}
-        value={this.props.value}
-        style={{ width: 100 }}
-        size='small'
-        bordered={false} // 是否显示边框
-        showArrow={false} // 是否显示箭头
-        showSearch={false} // 是否启用搜索
-        onSelect={(value) => { this.getSelectItem(value) }} // 触发选中时的回调函数
-      >
-        {
-          this.props.items.map((item, idx) => (
-            <Option value={item} key={idx}>{item}</Option>
-          ))
-        }
-      </Select>
-    )
-  }
-}
+import DropMenu from '../../common/DropMenu';
 
 
 class Box2d extends Component {
@@ -53,6 +26,7 @@ class Box2d extends Component {
     super(props);
     this.defaultXAxis = this.handleTypeJudge(props.xAxis, '[object Array]') ? props.xAxis[0] : props.xAxis; // 初始默认 xAxis
     this.defaultYAxis = this.handleTypeJudge(props.yAxis, '[object Array]') ? props.yAxis[1] : props.yAxis; // 初始默认 yAxis
+    this.defaultWithFilter = props.withFilter;
     this.prevSelectedUsers = null; // 历史 context 记录 - 监听 context 内容变化
     this.prevData = null;
     // state
@@ -62,7 +36,8 @@ class Box2d extends Component {
       curData: null, // 当前展示的数据
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
-      withFilter: false,
+      withFilter: this.defaultWithFilter,
+      prevFilter: this.defaultWithFilter,
     };
   }
 
@@ -122,11 +97,25 @@ class Box2d extends Component {
     }))
   }
 
+  forbiddenFilter = () => {
+    this.setState(prev => {
+      return {
+        withFilter: false
+      }
+    });
+  }
+
+  reopenFilter = () => {
+    this.setState({
+      withFilter: this.state.prevFilter,
+    })
+  }
+
   // 重置回初始状态
   reState = () => {
     this.setState({
       isVisible: true,
-      withFilter: false,
+      withFilter: this.defaultWithFilter,
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
     })
@@ -178,6 +167,12 @@ class Box2d extends Component {
       }
     }
 
+    if (!_.isEqual(this.state.data, prevState.data)) {
+      if (this.state.withFilter) {
+        this.setCurData(this.state.data, this.state.xAxis, this.state.yAxis);
+      }
+    }
+
     if (prevState.isReload !== this.state.isReload) {
       this.reState();
     }
@@ -211,16 +206,23 @@ class Box2d extends Component {
           }
           <div className="func-btns">
             <Space>
-              <Hover isReload={this.state.isReload}>
+              <Hover isReload={this.state.isReload} isClicked={this.defaultWithFilter}>
                 {
                   ({ isHovering, isClicked }) => (
                     <SnippetsOutlined
                       style={{
                         ...this.iconStyle,
                         display: this.props.filterable ? '' : 'none',
-                        color: (isHovering || isClicked) ? '#05f8d6' : '#fff'
+                        color: (isHovering || this.state.withFilter) ? '#05f8d6' : '#fff'
                       }}
-                      onClick={() => { this.setState(prev => ({ withFilter: !prev.withFilter })) }}
+                      onClick={() => {
+                        this.setState(prev => {
+                          return {
+                            withFilter: !prev.withFilter,
+                            prevFilter: !prev.prevFilter,
+                          }
+                        })
+                      }}
                     />
                   )
                 }
@@ -285,6 +287,8 @@ class Box2d extends Component {
               withFilter: this.state.withFilter,
               xAxisName: this.state.xAxis,
               yAxisName: this.state.yAxis,
+              forbiddenFilter: this.forbiddenFilter,
+              reopenFilter: this.reopenFilter,
             })}
           </div>
         </CSSTransition>
@@ -301,6 +305,7 @@ Box2d.propTypes = {
 
 Box2d.defaultProps = {
   filterable: false,
+  withFilter: true,
 }
 
 export default Box2d;

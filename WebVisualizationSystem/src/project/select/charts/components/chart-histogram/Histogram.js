@@ -34,7 +34,8 @@ class Histogram extends Component {
     // 框选工具配置
     brush: {
       toolbox: ['lineX', 'lineY', 'keep', 'clear'],
-      xAxisIndex: 0
+      xAxisIndex: 0,
+      throttleType: 'debounce',
     },
     // grid - 定位图表在容器中的位置
     grid: {
@@ -163,6 +164,7 @@ class Histogram extends Component {
 
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
+    this.props.forbiddenFilter();
     let brushComponent = params.batch[0];
     if (this.props.withFilter && !brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
     this.context.dispatch({
@@ -173,10 +175,15 @@ class Histogram extends Component {
     });
   }
 
+  onBrushEnd = (params) => {
+    this.props.reopenFilter();
+  }
+
   componentDidMount() {
     this.chart = echarts.init(this.ref.current); // 初始化容器
     this.chart.setOption(this.option); // 初始化视图
     this.chart.on('brushSelected', this.onBrushSelected); // 添加 brushSelected 事件
+    this.chart.on('brushEnd', this.onBrushEnd);
   }
 
   componentDidUpdate(prevProps, prevState) {

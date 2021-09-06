@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import Charts from '../Charts';
-import Bar from '../components/chart-bar/Bar';
 import Scatter from '../components/chart-scatter/Scatter';
 import Histogram from '../components/chart-histogram/Histogram';
 import Store from '@/store';
@@ -26,30 +24,58 @@ class ChartLeft extends Component {
 
   render() {
     return (
-      <Charts.Group>
-        {
-          ({ reqSuccess }) => (
+      <Charts.Group
+        render={
+          ({ reqSuccess, isReload, connect, isBrushEnd, handleBrushEnd }) => (
             <>
-              <Charts.Box1d
-                filterable={true} // 是否启用数据递进过滤按钮
-                reqSuccess={reqSuccess} // 请求状态
-                axis={this.groupOneKey}
+              <Charts.Box
+                id={1}
+                reqSuccess={reqSuccess}
+                isReload={isReload}
+                connect={connect}
+                xAxis={this.groupOneKey}
+                yAxis={'人数'}
+                isBrushEnd={isBrushEnd}
+                handleBrushEnd={handleBrushEnd}
+                render={
+                  ({ data, xAxisName, yAxisName, handleBrushEnd }) => (
+                    <Histogram
+                      height="250px"
+                      data={data}
+                      xAxisName={xAxisName}
+                      yAxisName={yAxisName}
+                      handleBrushEnd={handleBrushEnd}
+                    />
+                  )
+                }
               >
-                {(data, props = {}) => (<Histogram height="250px" data={data} {...props} />)}
-              </Charts.Box1d>
-              <Charts.Box2d
-                filterable={true} // 是否启用数据递进过滤按钮
-                reqSuccess={reqSuccess} // 请求状态
+              </Charts.Box>
+              <Charts.Box
+                id={2}
+                reqSuccess={reqSuccess}
+                isReload={isReload}
+                connect={connect}
                 xAxis={this.groupTwoKey[0]}
                 yAxis={this.groupTwoKey[1]}
+                isBrushEnd={isBrushEnd}
+                handleBrushEnd={handleBrushEnd}
+                render={
+                  ({ data, xAxisName, yAxisName, handleBrushEnd }) => (
+                    <Scatter
+                      height="250px"
+                      data={data}
+                      xAxisName={xAxisName}
+                      yAxisName={yAxisName}
+                      handleBrushEnd={handleBrushEnd}
+                    />
+                  )
+                }
               >
-                {(data, props = {}) => (<Scatter height='250px' data={data} {...props} />)}
-              </Charts.Box2d>
+              </Charts.Box>
             </>
           )
         }
-
-      </Charts.Group>
+      ></Charts.Group>
     );
   }
 }

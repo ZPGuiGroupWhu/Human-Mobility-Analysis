@@ -34,36 +34,37 @@ class FuncBar extends Component {
   }
 
   handleConnect = () => {
-    console.log('connect');
+    this.props.handleConnect();
   }
 
   handleReload = () => {
-    console.log('reload');
+    this.props.handleReload();
   }
 
   render() {
     return (
-      <div className="chart-box1d-ctn">
+      <div className="chart-funcbar-ctn">
         <div className="title-bar">
           <div className="func-btns">
             <Space>
-              <IconButton actImage={connectActive} noActImage={connectWhite} onClick={ this.handleConnect } />
-              <IconButton actImage={reloadActive} noActImage={reloadWhite} onClick={ this.handleReload } imgHeight={'20px'}/>
+              <IconButton
+                actImage={connectActive}
+                noActImage={connectWhite}
+                onClick={this.handleConnect}
+              />
+              <IconButton
+                actImage={reloadActive}
+                noActImage={reloadWhite}
+                onClick={this.handleReload}
+                imgHeight={'20px'}
+                isReserveActive={false}
+              />
             </Space>
           </div>
         </div>
       </div>
     );
   }
-}
-
-FuncBar.propTypes = {
-  reqSuccess: PropTypes.bool.isRequired,
-}
-
-FuncBar.defaultProps = {
-  filterable: false,
-  withFilter: true,
 }
 
 export default FuncBar;

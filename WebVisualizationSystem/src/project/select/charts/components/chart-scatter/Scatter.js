@@ -171,7 +171,6 @@ class Scatter extends Component {
 
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
-    this.props.forbiddenFilter();
     let brushComponent = params.batch[0];
     this.context.dispatch({
       type: 'setSelectedUsers',
@@ -180,7 +179,7 @@ class Scatter extends Component {
   }
 
   onBrushEnd = (params) => {
-    this.props.reopenFilter();
+    this.props.handleBrushEnd();
   }
 
   componentDidMount() {

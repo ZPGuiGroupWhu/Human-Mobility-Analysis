@@ -3,6 +3,7 @@ import * as echarts from 'echarts'
 import 'echarts-gl'
 import {message} from "antd";
 import Store from '@/store'
+import {eventEmitter} from '@/common/func/EventEmitter';
 //测试数据
 import chinaJson from './regionJson/China'
 import userData from '@/project/analysis/components/deckGL/399313(1).json'
@@ -12,12 +13,14 @@ import "./Map.scss"
 
 //测试数据
 const userID = Array.from({length: 0});
+const usersArr = [];
 
 class Map extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            gridLayer: null
+            gridLayer: null,
+            usersArr: []
         };
     }
     mapRef = createRef();
@@ -33,7 +36,7 @@ class Map extends Component {
         return allUserNodes
         // return getWeightData(allUserNodes);
     };
-    
+
     //初始化地图
     initMap = (barData) => {
         //绘制基础地图的option参数
@@ -197,11 +200,33 @@ class Map extends Component {
         window.onresize = myMap.resize;
     };
 
+    /**
+     * 为了实现整个页面各components的联动，该部分后续可能会放在PageSelect主页面中
+     * 根据筛选的日期，找出在这些时间中出行的所有用户ID，存入usersArr数组中。
+     * 根据usersArr数组中的用户ID，统计出每个用户出行的地点并可视化。
+     * */
+    // 根据日期选择用户，监听函数。
+    addDateSelectListener() {
+        eventEmitter.on('addUsersData', ({ start, end }) => {
+            usersArr.push({start: start, end: end});// 存储时间信息，后续需要一个新的数组存储所有时间段内有出行的用户ID数据
+            console.log(usersArr)
+        });
+    };
+
+    /***
+     * Map中用于存放筛选的用户数据的数组，在收到clear按钮eventEmitter事件后，也需要clear。
+     * 此处需要添加一个响应清空函数。
+     */
 
     componentDidMount() {
         let barData = this.getUserData();
         this.initMap(barData);
+        this.addDateSelectListener();
     }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+    }
+
 
     render() {
         return (

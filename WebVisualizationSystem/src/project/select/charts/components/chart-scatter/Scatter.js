@@ -171,7 +171,6 @@ class Scatter extends Component {
 
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
-    this.props.forbiddenFilter();
     let brushComponent = params.batch[0];
     this.context.dispatch({
       type: 'setSelectedUsers',
@@ -180,7 +179,7 @@ class Scatter extends Component {
   }
 
   onBrushEnd = (params) => {
-    this.props.reopenFilter();
+    this.props.handleBrushEnd();
   }
 
   componentDidMount() {
@@ -197,12 +196,6 @@ class Scatter extends Component {
       Reflect.set(this.option.xAxis, 'name', this.props.xAxisName);
       Reflect.set(this.option.yAxis, 'name', this.props.yAxisName);
       this.chart.setOption(this.option);
-    }
-
-    if (this.props.withFilter) {
-      if ((prevProps.xAxisName !== this.props.xAxisName) || (prevProps.yAxisName !== this.props.yAxisName)) {
-        this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
-      }
     }
   }
 

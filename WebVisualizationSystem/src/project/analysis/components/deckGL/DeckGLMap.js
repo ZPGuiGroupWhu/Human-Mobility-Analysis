@@ -37,6 +37,7 @@ class DeckGLMap extends Component {
     this.state={
       arcLayer:null,//OD弧段图层
       heatMapLayer:null,//热力图图层
+      heatMapLayerSPD:null,
       gridLayer:null,//格网图层
       trajCounts:[],//每天的轨迹数目
       hoveredMessage: null,//悬浮框内的信息
@@ -149,6 +150,13 @@ class DeckGLMap extends Component {
         getPosition: d => d.COORDINATES,
         getWeight: d => d.WEIGHT,
         aggregation: 'SUM'
+      }),
+      heatMapLayerSPD:new HeatmapLayer({
+        id: 'heatmapLayerSPD',
+        data:this.trajNodes,
+        getPosition: d => d.COORDINATES,
+        getWeight: d => d.SPD,
+        aggregation: 'MEAN'
       })
     })
   };
@@ -416,31 +424,25 @@ class DeckGLMap extends Component {
       this.getIconLayer(false, selectDNodes);
     })
   };
-  // changeGridLayerShow=()=>{//与开关联动，切换格网图层的显示与否
-  //   this.gridLayerShow=!this.gridLayerShow;
-  //   this.getGridLayer();
-  // };
-  // changeGridLayer3D=()=>{//与开关联动，切换格网图层的3D效果
-  //   this.gridLayer3D=!this.gridLayer3D;
-  //   this.getGridLayer();
-  // };
-  // changeSpeedLayerShow=()=>{//与开关联动，切换速度图层的显示与否
-  //   this.speedLayerShow=!this.speedLayerShow;
-  //   this.getSpeedLayer();
-  // };
-  // changeSpeedLayer3D=()=>{//与开关联动，切换速度图层的3D效果
-  //   this.speedLayer3D=!this.speedLayer3D;
-  //   this.getSpeedLayer();
-  // };
   changeGridOrSpeed=(event)=>{//切换图层
     if(event.target.value=="Grid"){
       this.gridLayerShow=true;
       this.speedLayerShow=false;
-      this.getGridLayer();
+      if(this.heatMapLayerShow)
+      {
+        this.getHeatMapLayer();
+      }else{
+        this.getGridLayer();
+      }
     }else if(event.target.value=="Speed"){
       this.speedLayerShow=true;
       this.gridLayerShow=false;
-      this.getSpeedLayer();
+      if(this.heatMapLayerShow)
+      {
+        this.getHeatMapLayer();
+      }else{
+        this.getSpeedLayer();
+      }
     }else if(event.target.value=="None"){
       this.speedLayerShow=false;
       this.gridLayerShow=false;
@@ -451,10 +453,17 @@ class DeckGLMap extends Component {
     if(event.target.value=="2D"){
       this.gridLayer3D=false;
       this.speedLayer3D=false;
+      this.heatMapLayerShow=false;
     }
-    else{
+    else if(event.target.value=="3D"){
       this.gridLayer3D=true;
       this.speedLayer3D=true;
+      this.heatMapLayerShow=false;
+    }
+    else if(event.target.value=="Heat"){
+      this.heatMapLayerShow=true;
+      this.getHeatMapLayer();
+      return;
     }
     if(this.gridLayerShow){
       this.getGridLayer();
@@ -468,14 +477,7 @@ class DeckGLMap extends Component {
     this.getGridLayer();
     this.getSpeedLayer();
   };
-  changeHeatMapLayerShow=()=>{//与开关联动，切换热力图图层的显示与否
-    this.heatMapLayerShow=!this.heatMapLayerShow;
-    this.getHeatMapLayer();
-  };
-  changeArcLayerShow=()=>{//与开关联动，切换OD弧段图层的显示与否
-    this.arcLayerShow=!this.arcLayerShow;
-    this.getArcLayer();
-  };
+
   changeTripsLayerShow=()=>{//与开关联动，切换轨迹图层和icon图层的显示与否
     this.iconDisabled=!this.iconDisabled;//和icon图层间的联动
     if(this.iconChecked === true){//关闭trips图层时，如果icon图层开着的话，需要一起关闭
@@ -513,8 +515,6 @@ class DeckGLMap extends Component {
     this.getGridLayer();//构建格网图层
     this.getSpeedLayer();//构建速度图层
     this.toParent();//将每天的轨迹数目统计结果反馈给父组件
-    // this.getTripsLayer(this.props.userData);//构建轨迹图层
-    // this.getIconLayer(this.OdNodes);//构建icon图标图层
     this.getTripsLayerOne();//初始化单挑高亮轨迹图层
     this.getArcLayerOne();//初始化单挑OD图层
     this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
@@ -553,10 +553,10 @@ class DeckGLMap extends Component {
                 pitch: 45,
                 bearing: 0}}
               controller={true}
-              layers={[this.gridLayerShow ? this.state.gridLayer : null,
-                this.heatMapLayerShow ? this.state.heatMapLayer : null,
-                this.arcLayerShow ? this.state.arcLayer : null,
-                this.speedLayerShow ? this.state.speedLayer : null,
+              layers={[this.gridLayerShow&&!this.heatMapLayerShow ? this.state.gridLayer : null,
+                this.heatMapLayerShow&&this.gridLayerShow ? this.state.heatMapLayer : null,
+                this.heatMapLayerShow&&this.speedLayerShow ? this.state.heatMapLayerSPD : null,
+                this.speedLayerShow&&!this.heatMapLayerShow ? this.state.speedLayer : null,
                 this.tripsLayerShow ? this.state.tripsLayer : null,
                 this.iconLayerOShow ? this.state.iconLayerO : null,
                 this.iconLayerDShow ? this.state.iconLayerD : null,
@@ -568,26 +568,22 @@ class DeckGLMap extends Component {
                 <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'}/>
               { this._renderTooltip() }
           </DeckGL>
+          <div className={`moudle`} style = {{'textAlign':'center'}}>
+            <Radio.Group size={"small"} style={{ width: 186 , margin:3}} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
+              <Radio.Button style={{ width: '33%',textAlign:'center' }} value="Grid" >点密度</Radio.Button>
+              <Radio.Button style={{ width: '33%',textAlign:'center'  }} value="Speed">速度</Radio.Button>
+              <Radio.Button style={{ width: '34%',textAlign:'center'  }} value="None">关闭</Radio.Button>
+            </Radio.Group><br />
+            <Radio.Group size={"small"} style={{ width: 186 , margin:3}} buttonStyle="solid" onChange={this.change3D} defaultValue="3D">
+              <Radio.Button style={{ width: '33%',textAlign:'center'  }} value="2D">二维</Radio.Button>
+              <Radio.Button style={{ width: '33%',textAlign:'center'  }} value="3D">三维</Radio.Button>
+              <Radio.Button style={{ width: '33%',textAlign:'center'  }} value="Heat">热力图</Radio.Button>
+            </Radio.Group><br />
+            格网宽度   <Slider style = {{width:'180px'}} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)}/>
+          </div><br/>
           <div className={`moudle`}>
-            <Radio.Group size={"small"} style={{ width: 160 , margin:3}} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
-              <Radio.Button style={{ width: '35%',textAlign:'center' }} value="Grid" >Grid </Radio.Button>
-              <Radio.Button style={{ width: '35%',textAlign:'center'  }} value="Speed">Speed</Radio.Button>
-              <Radio.Button style={{ width: '30%',textAlign:'center'  }} value="None">None</Radio.Button>
-            </Radio.Group><br />
-            <Radio.Group size={"small"} style={{ width: 160 , margin:3}} buttonStyle="solid" onChange={this.change3D} defaultValue="3D">
-              <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="2D">2D</Radio.Button>
-              <Radio.Button style={{ width: '50%',textAlign:'center'  }} value="3D">3D</Radio.Button>
-            </Radio.Group><br />
-            {/* GridLayer   <Switch onChange={this.changeGridLayerShow}/><br />
-            GridLayer3D <Switch onChange={this.changeGridLayer3D}/><br />
-            SpeedLayer   <Switch onChange={this.changeSpeedLayerShow}/><br />
-            SpeedLayer3D <Switch onChange={this.changeSpeedLayer3D}/><br /> */}
-            HeatMapLayer<Switch  onChange={this.changeHeatMapLayerShow} /><br />
             TripsLayer   <Switch  onChange={this.changeTripsLayerShow} /><br />
             IconLayer <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked}/><br />
-          </div><br/>
-          <div className={`moudle`} style = {{'textAlign':'center'}}>
-            GridWidth   <Slider style = {{width:'140px'}} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)}/>
           </div>
         </div>
     )

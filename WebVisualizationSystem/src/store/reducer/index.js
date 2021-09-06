@@ -12,6 +12,11 @@ export function reducer(state, action) {
         ...state,
         selectedUsers: payload,
       }
+    case 'setCurId':
+      return {
+        ...state,
+        curId: payload,
+      }
     // predict 页面
     case 'setSelectedTraj':
       return {

@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import Hover from './Hover';
+import { Tooltip } from 'antd';
 
 class IconButton extends Component {
   static defaultProps = {
     withClickArgs: [],
     imgHeight: '25px',
+    isReserveActive: true,
   }
 
   /**
@@ -14,6 +16,8 @@ class IconButton extends Component {
    * @param {string} actImage - 按钮激活的图片地址
    * @param {string} noActImage - 按钮未激活的图片地址
    * @param {string?} imgHeight - 图片高度
+   * @param {boolean} isReserveActive - 点击后是否保留激活效果
+   * @param {string} text - 提示框文本内容
    */
   constructor(props) {
     super(props);
@@ -42,9 +46,15 @@ class IconButton extends Component {
               onClick={(e) => this.onClick(e, ...this.props.withClickArgs)}
             >
               {
-                (isHovering || isClicked) ?
-                  <img src={this.props.actImage} alt="" style={{ height: this.props.imgHeight }} /> :
-                  <img src={this.props.noActImage} alt="" style={{ height: this.props.imgHeight }} />
+                (isHovering || (this.props.isReserveActive && isClicked)) ?
+                  <Tooltip placement="topLeft" title={<span>{this.props.text}</span>} color='cyan'>
+                    <img src={this.props.actImage} alt="" style={{ height: this.props.imgHeight }} />
+                  </Tooltip>
+                  :
+                  <Tooltip placement="topLeft" title={<span>{this.props.text}</span>} color='cyan'>
+                    <img src={this.props.noActImage} alt="" style={{ height: this.props.imgHeight }} />
+                  </Tooltip>
+
               }
             </a>
           )

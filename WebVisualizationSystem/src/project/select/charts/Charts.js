@@ -1,10 +1,8 @@
-import Box1d from './components/chart-box-1d/Box1d';
-import Box2d from './components/chart-box-2d/Box2d';
+import Box from './components/chart-box/Box';
 import Group from './components/chart-group/Group';
 
 const components = {
-  Box1d,
-  Box2d,
+  Box,
   Group,
 };
 

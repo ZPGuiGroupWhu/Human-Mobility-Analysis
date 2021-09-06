@@ -6,7 +6,7 @@ import Store from '@/store'
 import {eventEmitter} from '@/common/func/EventEmitter';
 //测试数据
 import chinaJson from './regionJson/China'
-import userData from '@/project/analysis/components/deckGL/399313(1).json'
+import userData from '@/project/analysis/components/deckGL/399313.json'
 // import getWeightData from './calculateGridData/girdStatictis'
 import _ from 'lodash'
 import "./Map.scss"

@@ -197,12 +197,6 @@ class Scatter extends Component {
       Reflect.set(this.option.yAxis, 'name', this.props.yAxisName);
       this.chart.setOption(this.option);
     }
-
-    if (this.props.withFilter) {
-      if ((prevProps.xAxisName !== this.props.xAxisName) || (prevProps.yAxisName !== this.props.yAxisName)) {
-        this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
-      }
-    }
   }
 
   render() {

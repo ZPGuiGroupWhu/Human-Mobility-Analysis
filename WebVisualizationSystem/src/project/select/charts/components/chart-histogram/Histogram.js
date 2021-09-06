@@ -47,7 +47,7 @@ class Histogram extends Component {
     },
     xAxis: {
       show: true,
-      name: this.props.axisName,
+      name: this.props.xAxisName,
       type: 'category',
       nameLocation: 'center',
       nameTextStyle: {
@@ -199,10 +199,9 @@ class Histogram extends Component {
       this.chart.setOption(this.option);
     }
 
-    if (this.props.withFilter) {
-      if (prevProps.axisName !== this.props.axisName) {
-        this.chart.dispatchAction({ type: 'brush', areas: [] }); // 清除框选
-      }
+    if (prevProps.xAxisName !== this.props.xAxisName) {
+      Reflect.set(this.option.xAxis, 'name', this.props.xAxisName);
+      this.chart.setOption(this.option);
     }
   }
 

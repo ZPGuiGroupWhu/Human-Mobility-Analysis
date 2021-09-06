@@ -48,11 +48,13 @@ class FuncBar extends Component {
           <div className="func-btns">
             <Space>
               <IconButton
+                text='图表联动'
                 actImage={connectActive}
                 noActImage={connectWhite}
                 onClick={this.handleConnect}
               />
               <IconButton
+                text="重置"
                 actImage={reloadActive}
                 noActImage={reloadWhite}
                 onClick={this.handleReload}

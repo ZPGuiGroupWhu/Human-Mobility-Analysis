@@ -12,8 +12,8 @@ import _ from 'lodash'
 import "./Map.scss"
 
 //测试数据
-const userID = Array.from({length: 0});
-const usersArr = [];
+const userID = Array.from({length: 50});
+let usersArr = [];
 
 class Map extends Component {
     constructor(props) {
@@ -207,8 +207,13 @@ class Map extends Component {
      * */
     // 根据日期选择用户，监听函数。
     addDateSelectListener() {
-        eventEmitter.on('addUsersData', ({ start, end }) => {
-            usersArr.push({start: start, end: end});// 存储时间信息，后续需要一个新的数组存储所有时间段内有出行的用户ID数据
+        eventEmitter.on('clearCalendarHighlight', ({clear}) => {//如果点击clear，则清空数组
+            if(clear){
+                usersArr = [];
+            }
+        });
+        eventEmitter.on('addUsersData', ({ start, end }) => {// 存储时间信息，后续需要一个新的数组存储所有时间段内有出行的用户ID数据
+            usersArr.push({start: start, end: end});
             console.log(usersArr)
         });
     };

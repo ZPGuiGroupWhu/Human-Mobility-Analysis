@@ -4,7 +4,7 @@ import { debounce } from '@/common/func/debounce';
 import { eventEmitter } from '@/common/func/EventEmitter';
 
 let myChart = null;
-let timePeriod = [];
+let timePeriod = [];//存储需要高亮的时间段
 
 export default function Calendar(props) {
     const {
@@ -16,7 +16,6 @@ export default function Calendar(props) {
     // ECharts 容器实例
     const ref = useRef(null);
 
-    // let tempData = [];
 
     // 根据筛选的起始日期与终止日期，高亮数据
     function highLightData(obj, startDate, endDate) {
@@ -27,29 +26,38 @@ export default function Calendar(props) {
         for (let time = start; time <= end; time += dayTime) {
             const date = echarts.format.formatTime('yyyy-MM-dd', time);
             timePeriod.push({
-                value: [date, Reflect.get(obj, date) || 0],
+                value: [date, Reflect.get(obj, date)?.count || 0],
                 symbol: 'rect',
                 itemStyle: {
                     color: '#81D0F1'
                 }
             });
         }
-        // return data;
+        return timePeriod;
     }
 
-    const cellSize = [23, 10]; // 日历单元格大小
+    const cellSize = [23, 10.5]; // 日历单元格大小
     const hightLightcellSize = [20, 8]; // 高亮单元格大小
 
     // 参数设置
     const option = {
+        // title: {
+        //     top: 'top',
+        //     left: 'center',
+        //     text: '2018年用户出行统计',
+        //     textStyle: {
+        //         color: '#fff',
+        //         fontWeight: 'normal',
+        //         fontFamily: 'Microsoft YaHei',
+        //         fontSize: 15,
+        //     }
+        // },
         tooltip: {
             formatter: function (params) {// 说明某日出行用户数量
                 return '日期: ' + params.value[0] + '<br />' + '出行用户: ' + params.value[1];
-            }
+            },
         },
         visualMap: {
-            min: 0,
-            max: 740,
             calculable: true,
             orient: 'vertical',
             left: 'right',
@@ -66,7 +74,7 @@ export default function Calendar(props) {
         calendar: {
             orient: 'vertical',
             top: 18,
-            left: 70,
+            left: 'center',
             cellSize: cellSize,
             range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
             itemStyle: {
@@ -119,7 +127,7 @@ export default function Calendar(props) {
         let dayTime = 3600 * 24 * 1000;
         let data = [];
         for (let time = start; time < end; time += dayTime) {
-            const date = echarts.format.formatTime('yyyy-MM-dd', time)
+            const date = echarts.format.formatTime('yyyy-MM-dd', time);
             data.push([
                 date,
                 Reflect.get(obj, date)?.count || 0 // 没有数据用 0 填充
@@ -150,7 +158,7 @@ export default function Calendar(props) {
     // 确保函数只执行一次
     const isdown = useRef(false);
     useEffect(() => {
-        const wait = 100;
+        const wait = 10;
         if (!myChart) return () => { };
         // 鼠标按下事件
         myChart.on('mousedown', (params) => {
@@ -229,14 +237,13 @@ export default function Calendar(props) {
 
     // 高亮筛选部分
     useEffect(() => {
-        highLightData(data, date.start, date.end);//向原有的时间数据中添加新的时间段
         if (!date.start || !date.end) return () => {};
         myChart?.setOption({
             series: [{
                 name: '高亮',
-                data: timePeriod,
+                data: highLightData(data, date.start, date.end)
             }]
-        })
+        });
     }, [data, date]);
 
     // 清除高亮

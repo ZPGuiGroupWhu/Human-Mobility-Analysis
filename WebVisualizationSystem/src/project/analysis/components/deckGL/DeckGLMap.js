@@ -17,6 +17,7 @@ class DeckGLMap extends Component {
   constructor(props){
     super(props);
     this.trajNodes=[];//轨迹点集合
+    this.trajCounts={};//每天的轨迹数目
     this.OdNodes = [];//OD点集合
     this.arcLayerShow=false;//是否显示OD弧段图层
     this.heatMapLayerShow=false;//是否显示热力图图层
@@ -30,8 +31,8 @@ class DeckGLMap extends Component {
     this.iconLayerDShow=false;//是否显示D点的icon图层
     this.tripsLayerOneShow=false;//是否显示选中的单条轨迹图层
     this.arcLayerOneShow=false;//是否显示选中轨迹的OD弧线
-    this.iconLayerOneOShow=false;
-    this.iconLayerOneDShow=false;
+    this.iconLayerOneOShow=false;//是否显示选中轨迹的O点icon图标
+    this.iconLayerOneDShow=false;//是否显示选中轨迹的D点icon图标
     this.iconDisabled=true;//icon图层开关的disabled属性
     this.iconChecked=false;//icon图层开关属性
     this.state={
@@ -39,7 +40,6 @@ class DeckGLMap extends Component {
       heatMapLayer:null,//热力图图层
       heatMapLayerSPD:null,
       gridLayer:null,//格网图层
-      trajCounts:[],//每天的轨迹数目
       hoveredMessage: null,//悬浮框内的信息
       pointerX: null,//悬浮框的位置
       pointerY: null,
@@ -471,7 +471,7 @@ class DeckGLMap extends Component {
     else if(this.speedLayerShow){
       this.getSpeedLayer();
     }
-  }
+  };
   changeGridWidth=(value)=>{//与滑动条联动，切换格网的网格宽度
     this.gridWidth=value;
     this.getGridLayer();

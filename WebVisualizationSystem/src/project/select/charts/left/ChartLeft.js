@@ -72,6 +72,28 @@ class ChartLeft extends Component {
                 }
               >
               </Charts.Box>
+              <Charts.Box
+                id={3}
+                reqSuccess={reqSuccess}
+                isReload={isReload}
+                connect={connect}
+                xAxis={this.groupOneKey}
+                yAxis={'人数'}
+                isBrushEnd={isBrushEnd}
+                handleBrushEnd={handleBrushEnd}
+                render={
+                  ({ data, xAxisName, yAxisName, handleBrushEnd }) => (
+                    <Histogram
+                      height="250px"
+                      data={data}
+                      xAxisName={xAxisName}
+                      yAxisName={yAxisName}
+                      handleBrushEnd={handleBrushEnd}
+                    />
+                  )
+                }
+              >
+              </Charts.Box>
             </>
           )
         }

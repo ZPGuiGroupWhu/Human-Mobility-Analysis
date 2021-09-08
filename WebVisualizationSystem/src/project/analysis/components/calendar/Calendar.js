@@ -24,7 +24,7 @@ export default function Calendar(props) {
     for (let time = start; time <= end; time += dayTime) {
       const date = echarts.format.formatTime('yyyy-MM-dd', time);
       data.push({
-        value: [date, Reflect.get(obj, date) || 0],
+        value: [date, Reflect.get(obj, date)?.count || 0],
         symbol: 'rect',
         itemStyle: {
           color: '#81D0F1'

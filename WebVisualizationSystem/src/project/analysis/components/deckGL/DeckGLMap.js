@@ -228,7 +228,7 @@ class DeckGLMap extends Component {
     console.log(info);
     this.setState({
       tripsOpacity:0.02,
-      iconOpacity: 0
+      iconOpacity: 50
     }, ()=> {
       let id = info.object ? info.object.id : null;
       // 绘制OD弧线
@@ -399,10 +399,17 @@ class DeckGLMap extends Component {
       arcLayerOne: null,
     })
   };
-  //初始化单挑轨迹图层
+  //初始化单条轨迹图层
   getTripsLayerOne = () =>{
     this.setState({
       tripsLayerOne: null,
+    })
+  };
+  //初始化单条轨迹OD点的icon图层
+  geticonLayerOneOD = () =>{
+    this.setState({
+      iconLayerOneO: null,
+      iconLayerOneD: null,
     })
   };
   // 可视化筛选的轨迹
@@ -485,10 +492,6 @@ class DeckGLMap extends Component {
       this.iconLayerOShow=!this.iconLayerOShow;
       this.iconLayerDShow=!this.iconLayerDShow;
     }
-    // 初始化透明度
-    this.setState({
-      tripsOpacity: initOpacity
-    });
     // 显示和关闭各图层，轨迹、单条轨迹、单条OD弧段、OD点icon图标
     this.tripsLayerShow=!this.tripsLayerShow;
     this.tripsLayerOneShow=!this.tripsLayerOneShow;
@@ -498,6 +501,7 @@ class DeckGLMap extends Component {
     // 初始化图层
     this.getTripsLayerOne();
     this.getArcLayerOne();
+    this.geticonLayerOneOD();
     this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
   };
   //显示和关闭OD点icon图层
@@ -515,8 +519,9 @@ class DeckGLMap extends Component {
     this.getGridLayer();//构建格网图层
     this.getSpeedLayer();//构建速度图层
     this.toParent();//将每天的轨迹数目统计结果反馈给父组件
-    this.getTripsLayerOne();//初始化单挑高亮轨迹图层
-    this.getArcLayerOne();//初始化单挑OD图层
+    this.getTripsLayerOne();//初始化单条高亮轨迹图层
+    this.getArcLayerOne();//初始化单条OD图层
+    this.geticonLayerOneOD();//初始化单条OD的icon图层
     this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
   };
   // 根据日期选择轨迹，监听函数

@@ -74,6 +74,7 @@ export default function Calendar(props) {
         calendar: {
             orient: 'vertical',
             top: 18,
+            bottom: 10,
             left: 'center',
             cellSize: cellSize,
             range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)

@@ -40,7 +40,7 @@ class Histogram extends Component {
     // grid - 定位图表在容器中的位置
     grid: {
       show: true, // 是否显示直角坐标系网格
-      left: '35', // 距离容器左侧距离
+      left: '45', // 距离容器左侧距离
       top: '40', // 距离容器上侧距离
       right: '20',
       bottom: '35',
@@ -69,12 +69,12 @@ class Histogram extends Component {
       gridIndex: 0,
       position: 'left',
       type: 'value',
-      nameLocation: 'end', // 坐标轴名称显示位置
+      nameLocation: 'center', // 坐标轴名称显示位置
       nameTextStyle: {
         color: '#fff', // 文本颜色
         fontSize: 12, // 文本大小
       },
-      nameGap: 15, // 坐标轴名称与轴线距离
+      nameGap: 30, // 坐标轴名称与轴线距离
       axisLine: {
         show: true, // 是否显示坐标轴线
         symbol: ['none', 'none'],

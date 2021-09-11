@@ -16,13 +16,17 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
       margin: 0 $auto-width;
       display: flex;
       flex-direction: column;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
 
-      .map {
+      .top-bracket {
         flex: 1 1;
       }
 
       .footer-bar {
-        flex: 0 0 150px;
+        flex: 0 0 200px;
+        pointer-events: auto;
       }
     }
   }

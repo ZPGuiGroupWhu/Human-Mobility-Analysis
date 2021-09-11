@@ -1,4 +1,4 @@
-.chart-box-ctn {
+.chart-box-parallel-ctn {
   // 边框样式
   border-radius: 5px;
   border: 0.7px solid #fff;
@@ -14,6 +14,7 @@
   overflow: hidden;
   float: left;
   font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif; // 字体样式
+  
 
   .title-bar {
     float: left;
@@ -26,28 +27,19 @@
     position: relative;
     z-index: 2;
 
-    .axis-title {
-      width: 60px;
-      height: 100%;
-      margin-left: 5px;
-      display: flex;
-      align-items: center;
-
-      .text {
-        display: block;
-        font-size: 14px;
-        margin-left: 10px;
-        // 省略文字
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        // 指针样式
-        cursor: pointer;
-      }
-    }
-
     .ant-select {
       color: #fff !important;
+    }
+
+    .text {
+      display: block;
+      font-size: 16px;
+      // 省略文字
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      // 指针样式
+      cursor: pointer;
     }
 
     .func-btns {
@@ -56,7 +48,7 @@
     }
   }
 
-  .chart-content {
+  .chart-parallel-content {
     float: left;
     width: 100%;
     overflow: hidden;
@@ -65,24 +57,24 @@
   }
 
   // 图表显示/隐藏动画
-  .chart-enter {
+  .chart-parallel-enter {
     opacity: 0;
   }
-  .chart-enter-active {
+  .chart-parallel-enter-active {
     opacity: 1;
     transition: all 300ms;
   }
-  .chart-enter-done {
+  .chart-parallel-enter-done {
     opacity: 1;
   }
-  .chart-exit {
+  .chart-parallel-exit {
     opacity: 1;
   }
-  .chart-exit-active {
+  .chart-parallel-exit-active {
     opacity: 0;
     transition: all 300ms;
   }
-  .chart-exit-done {
+  .chart-parallel-exit-done {
     opacity: 0;
   }
 }
@@ -95,3 +87,4 @@
     box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
   }
 }
+

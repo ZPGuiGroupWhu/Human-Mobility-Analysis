@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Store from '@/store';
-import './Box.scss';
+import './BoxParallel.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
@@ -9,10 +9,9 @@ import {
 import { Space } from 'antd';
 import _ from 'lodash';
 import Hover from '../../common/Hover';
-import DropMenu from '../../common/DropMenu';
-import Chart from './Chart';
+import ChartParallel from './ChartParallel';
 
-class Box extends Component {
+class BoxParallel extends Component {
   // icon 通用配置
   iconStyle = {
     fontSize: '13px',
@@ -110,45 +109,12 @@ class Box extends Component {
   render() {
     return (
       <div
-        className="chart-box-ctn"
+        className="chart-box-parallel-ctn"
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
       >
         <div className="title-bar">
-          {
-            this.state.isVisible ?
-              <>
-                <div className="axis-title">
-                  <span style={{fontWeight: 'bold'}}>X:</span>
-                  {
-                    this.handleTypeJudge(this.props.xAxis, '[object Array]') ?
-                      <DropMenu
-                        defaultValue={this.state.xAxis}
-                        value={this.state.xAxis}
-                        items={this.props.xAxis}
-                        getSelectItem={this.getXAxis}
-                      /> :
-                      <span className="text">{this.state.xAxis}</span>
-                  }
-                </div>
-                <div className="axis-title">
-                  <span style={{fontWeight: 'bold'}}>Y:</span>
-                  {
-                    this.handleTypeJudge(this.props.yAxis, '[object Array]') ?
-                      <DropMenu
-                        defaultValue={this.state.yAxis}
-                        value={this.state.yAxis}
-                        items={this.props.yAxis}
-                        getSelectItem={this.getYAxis}
-                      /> :
-                      <span className="text">{this.state.yAxis}</span>
-                  }
-                </div>
-              </> :
-              <span style={{ marginLeft: '5px', fontWeight: 'bold' }}>{`${this.state.xAxis}-${this.state.yAxis}`}</span>
-          }
-
-
+          <span style={{ marginLeft: '5px', fontWeight: 'bold' }}>{this.props.title}</span>
           <div className="func-btns">
             <Space>
               {
@@ -184,18 +150,13 @@ class Box extends Component {
             </Space>
           </div>
         </div>
-        <Chart
+        <ChartParallel
           reqSuccess={this.props.reqSuccess} // 数据是否请求成功
           isVisible={this.state.isVisible} // 控制 Chart 可视
           id={this.props.id} // 实例id
           connect={this.props.connect} // 是否联动
           handleBrushEnd={this.props.handleBrushEnd} // 刷选结束事件
           isBrushEnd={this.props.isBrushEnd} // 刷选结束
-          isAxisChange={this.state.isAxisChange} // 坐标轴改变
-          xAxis={this.state.xAxis} // x轴
-          yAxis={this.state.yAxis} // y轴
-          defaultXAxis={this.defaultXAxis} // 默认初始 x 轴
-          defaultYAxis={this.defaultYAxis} // 默认初始 y 轴
           isReload={this.props.isReload} // 重置
           render={this.props.render} // render
         />
@@ -204,10 +165,10 @@ class Box extends Component {
   }
 }
 
-Box.contextType = Store;
+BoxParallel.contextType = Store;
 
-Box.propTypes = {
+BoxParallel.propTypes = {
   reqSuccess: PropTypes.bool.isRequired,
 }
 
-export default Box;
+export default BoxParallel;

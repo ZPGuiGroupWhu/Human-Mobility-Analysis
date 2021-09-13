@@ -60,7 +60,7 @@ class Footer extends Component {
               size="small"
               bodyStyle={{padding:1}}
             >
-            <Tooltip placement="topLeft" placement="rightTop" title={<span>{val.id}<br/>指标1<br/>指标2</span>}>
+            <Tooltip placement="rightTop" title={<span>{val.id}<br/>指标1<br/>指标2</span>}>
             <div style={{height:"70px",position:"relative"}} >
             {/* 出现了新的问题，当使用Deck.gl时，会导致WARNING: Too many active WebGL contexts. Oldest context will be lost，从而使底图消失 */}
             {/* 问题已解决，在更新前删除对应canvas的上下文即可，保留备注以备不时之需*/}

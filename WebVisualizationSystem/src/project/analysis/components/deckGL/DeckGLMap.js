@@ -153,6 +153,7 @@ class DeckGLMap extends Component {
       }),
       heatMapLayerSPD:new HeatmapLayer({
         id: 'heatmapLayerSPD',
+        radiusPixels:15,
         data:this.trajNodes,
         getPosition: d => d.COORDINATES,
         getWeight: d => d.SPD,
@@ -539,6 +540,9 @@ class DeckGLMap extends Component {
       })
     })
   };
+  sliderToolTipFormatter=(value)=>{
+    return `${value}m`
+  }
   _renderTooltip() {//TooTip的渲染
     const {hoveredMessage, pointerX, pointerY} = this.state || {};
     return hoveredMessage && (
@@ -584,7 +588,7 @@ class DeckGLMap extends Component {
               <Radio.Button style={{ width: '33%',textAlign:'center'  }} value="3D">三维</Radio.Button>
               <Radio.Button style={{ width: '33%',textAlign:'center'  }} value="Heat">热力图</Radio.Button>
             </Radio.Group><br />
-            格网宽度   <Slider style = {{width:'180px'}} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)}/>
+            格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style = {{width:'180px'}} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)}/>
           </div><br/>
           <div className={`moudle`}>
             TripsLayer   <Switch  onChange={this.changeTripsLayerShow} /><br />

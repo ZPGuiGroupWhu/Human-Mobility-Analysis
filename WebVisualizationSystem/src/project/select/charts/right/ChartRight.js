@@ -37,7 +37,19 @@ class ChartRight extends Component {
       });
       // console.log(data);
       this.data = data;
-  }
+  };
+
+    getCountRange  = (value) => {
+        let minCount = (value[0] <= value[1])? value[0]: value[1];
+        let maxCount = (value[0] <= value[1])? value[1]: value[0];
+        let clear = true;
+        eventEmitter.emit('clearCalendarHighlight', {clear});
+        //每次设置setState时会重新渲染，因此需要先更新data数据在setState
+        this.setState({
+            minCount: minCount,
+            maxCount: maxCount
+        });
+    };
 
 
   // 加载组件前传递数据给calendar
@@ -51,29 +63,42 @@ class ChartRight extends Component {
       }
   }
 
-
-
-
   render(){
     return (
       <>
         <div>
-          <Button
-            ghost
-            size='small'
-            type='default'
-            icon={<RedoOutlined style={{ color: '#fff' }} />}
-            onClick={(e) => {
-              let clear = true;
-              eventEmitter.emit('clearCalendarHighlight', { clear })
-            }}
-            style={{
-              position: 'absolute',
-              right: '10px',
-              zIndex: '9999' //至于顶层
-            }}
-          /></div>
-          <Calendar data={this.data} />
+            <Slider
+                range
+                defaultValue={[0, 2]}
+                max={10}
+                min={0}
+                step={1}
+                disabled={false}
+                onChange={this.getCountRange}
+                onAfterChange={() => {
+                    let clear = true;
+                    eventEmitter.emit('clearCalendarHighlight', {clear});
+                }}
+                style={{
+                    zIndex: '9999' //至于顶层
+                }}
+            />
+            <Button
+                ghost
+                size='small'
+                type='default'
+                icon={<RedoOutlined style={{color: '#fff'}}/>}
+                onClick={(e) => {
+                    let clear = true;
+                    eventEmitter.emit('clearCalendarHighlight', {clear})
+                }}
+                style={{
+                    position: 'absolute',
+                    right: '10px',
+                    zIndex: '9999' //至于顶层
+                }}
+            /></div>
+          <Calendar data={this.data}/>
       </>
     );
   }

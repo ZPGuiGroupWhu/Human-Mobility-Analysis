@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Charts from '../Charts';
 import Scatter from '../components/chart-scatter/Scatter';
 import Histogram from '../components/chart-histogram/Histogram';
+import Parallel from '../components/chart-parallel/Parallel';
 import Store from '@/store';
 
 
@@ -10,16 +11,11 @@ class ChartLeft extends Component {
 
   constructor(props) {
     super(props);
-    this.groupOneKey = ['时间无关熵', '随机熵', '真实熵', '离家距离熵', '旅行熵']; // 第一组 key 值
-    this.groupTwoKey = [
-      ['总出行距离', '总出行次数', 'k值', '速度均值', '速度最大值'],
-      ['总出行距离', '总出行次数', 'k值', '速度均值', '速度最大值'],
-    ]; // 第二组 key 值
-    this.state = {
-      reqSuccess: false,
-      groupOne: [], // 第一组数据
-      groupTwo: [], // 第二组数据
-    }
+    this.keys = ['总出行次数', '总出行距离', '旋转半径', 'k值', '时间无关熵', '旅行熵', '日内节律熵', '速度均值', '速度标准差均值']
+    this.groupOneKey = this.keys; // 第一组 key 值
+    this.groupTwoKey = [this.keys, this.keys]; // 第二组 key 值
+    this.groupThreeKey = ['外向性', '开放性', '神经质性', '尽责性']; // 第三组 key 值
+    this.state = {}
   }
 
   render() {
@@ -72,6 +68,26 @@ class ChartLeft extends Component {
                 }
               >
               </Charts.Box>
+              <Charts.BoxParallel
+                id={3}
+                reqSuccess={reqSuccess}
+                isReload={isReload}
+                connect={connect}
+                isBrushEnd={isBrushEnd}
+                handleBrushEnd={handleBrushEnd}
+                title="大五人格"
+                render={
+                  ({ data, handleBrushEnd }) => (
+                    <Parallel
+                      height="250px"
+                      data={data}
+                      keys={this.groupThreeKey}
+                      handleBrushEnd={handleBrushEnd}
+                    />
+                  )
+                }
+              >
+              </Charts.BoxParallel>
             </>
           )
         }

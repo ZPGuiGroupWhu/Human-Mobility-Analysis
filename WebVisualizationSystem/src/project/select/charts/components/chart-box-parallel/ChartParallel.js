@@ -3,10 +3,9 @@ import { CSSTransition } from 'react-transition-group';
 import Store from '@/store';
 // HOC
 import { filterBySelect } from '../../common/HOC/filterBySelect';
-import { filterByAxis } from '../../common/HOC/filterByAxis';
 import { pipe } from '../../common/HOC/pipe';
 
-class Chart extends Component {
+class ChartParallel extends Component {
   static contextType = Store;
 
   /**
@@ -26,16 +25,14 @@ class Chart extends Component {
       <CSSTransition
         in={this.props.isVisible}
         timeout={300}
-        classNames='chart'
+        classNames='chart-parallel'
         onEnter={(node) => { node.style.setProperty('display', '') }}
         onExiting={(node) => { node.style.setProperty('display', 'none') }}
       >
-        <div className="chart-content">
+        <div className="chart-parallel-content">
           {
             this.props.render({
               data: this.props.data,
-              xAxisName: this.props.xAxis,
-              yAxisName: this.props.yAxis,
               handleBrushEnd: this.props.handleBrushEnd,
             })
           }
@@ -47,7 +44,6 @@ class Chart extends Component {
 
 const compose = pipe(
   filterBySelect(),
-  filterByAxis(),
 )
 
-export default compose(Chart);
+export default compose(ChartParallel);

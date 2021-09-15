@@ -239,10 +239,7 @@ class Map extends Component {
                 <div
                     className="select-map-ctn"
                     ref={this.mapRef}
-                    style={{
-                        height: '100%',
-                        width: '100%'
-                    }}>
+                    >
                 </div>
             </>
         );

@@ -26,3 +26,5 @@ yarn-error.log*
 
 # test data
 /src/project/analysis/components/deckGL/399313.json
+/src/project/select/footer/ODs.json
+/src/project/select/footer/ShenZhen.json

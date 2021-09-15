@@ -27,10 +27,9 @@ class PageSelect extends Component {
     return (
       <div className="select-page-ctn">
         <div className="center">
+          <Map />
           <div className="inner">
-            <div className="map">
-              <Map />
-            </div>
+            <div className="top-bracket"></div>
             <div className="footer-bar">
               <Footer />
             </div>

@@ -5,7 +5,7 @@ import {message} from "antd";
 import Store from '@/store'
 import {eventEmitter} from '@/common/func/EventEmitter';
 //测试数据
-import chinaJson from './regionJson/China'
+import regionJson from './regionJson/Shenzhen'
 import userData from '@/project/analysis/components/deckGL/399313.json'
 // import getWeightData from './calculateGridData/girdStatictis'
 import _ from 'lodash'
@@ -59,7 +59,7 @@ class Map extends Component {
             },
             // geo3D地图
             geo3D: {
-                map: 'China',
+                map: 'Shenzhen',
                 // 行政区边界
                 itemStyle: {
                     opacity: 1,
@@ -194,7 +194,7 @@ class Map extends Component {
                 }];
         }
         // 注册地图到组件
-        echarts.registerMap('China', chinaJson);
+        echarts.registerMap('Shenzhen', regionJson);
         const myMap = echarts.init(this.mapRef.current);
         myMap.setOption(option);
         window.onresize = myMap.resize;

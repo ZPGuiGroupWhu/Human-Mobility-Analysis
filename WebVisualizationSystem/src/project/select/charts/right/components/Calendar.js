@@ -11,6 +11,7 @@ export default function Calendar(props) {
         data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
         // eventName, // 注册事件名
     } = props;
+
     const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
 
     // ECharts 容器实例
@@ -142,8 +143,10 @@ export default function Calendar(props) {
         const counts = format.map(item => (item[1]));
         myChart.setOption({
             visualMap: {
-                min: Math.min(...counts),
-                max: Math.max(...counts)
+                // min: Math.min(...counts),
+                // max: Math.max(...counts)
+                min: 0,
+                max: 500
             },
             series: {
                 data: format,
@@ -164,7 +167,6 @@ export default function Calendar(props) {
         // 鼠标按下事件
         myChart.on('mousedown', (params) => {
             if (isdown.current) return;
-            // console.log(params.data);
             // 已触发，添加标记
             isdown.current = true;
             // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]

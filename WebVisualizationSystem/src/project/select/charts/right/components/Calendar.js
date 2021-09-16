@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { debounce } from '@/common/func/debounce';
 import { eventEmitter } from '@/common/func/EventEmitter';
+import _ from 'lodash'
 
 let myChart = null;
 let timePeriod = [];//存储需要高亮的时间段
@@ -12,29 +13,63 @@ export default function Calendar(props) {
         // eventName, // 注册事件名
     } = props;
 
+
     const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
 
     // ECharts 容器实例
     const ref = useRef(null);
 
-
     // 根据筛选的起始日期与终止日期，高亮数据
     function highLightData(obj, startDate, endDate) {
+        //存储需要高亮的轨迹日期及其数据
+        let data = [];
+        //判断向data中添加历史时间段只执行一次
+        let addFinish = false;
+        //添加历史日期
+        for(let i = 0; i < timePeriod.length; i++){
+            //如果没有添加结束则可以继续添加
+            if(addFinish === false){
+                let start = +echarts.number.parseDate(timePeriod[i].start);
+                let end = +echarts.number.parseDate(timePeriod[i].end);
+                let dayTime = 3600 * 24 * 1000;
+                for (let time = start; time <= end; time += dayTime) {
+                    const date = echarts.format.formatTime('yyyy-MM-dd', time);
+                    data.push({
+                        value: [date, Reflect.get(obj, date)?.count || 0],
+                        symbol: 'rect',
+                        itemStyle: {
+                            color: 'rgba(129,208,241,256)',
+                            borderColor: '#81D0F1',
+                            borderWidth: 0.8,
+                            borderType: 'solid'
+                        }
+                    });
+                }
+            }
+            //如果已经添加到最后一个时间段，则将addFinish标记为true,并跳出
+            if (i === timePeriod.length - 1){
+                addFinish = true;
+                break
+            }
+        }
+        //添加当前筛选的日期数据
         let start = +echarts.number.parseDate(startDate);
         let end = +echarts.number.parseDate(endDate);
         let dayTime = 3600 * 24 * 1000;
-        // let data = [];
         for (let time = start; time <= end; time += dayTime) {
             const date = echarts.format.formatTime('yyyy-MM-dd', time);
-            timePeriod.push({
+            data.push({
                 value: [date, Reflect.get(obj, date)?.count || 0],
                 symbol: 'rect',
                 itemStyle: {
-                    color: '#81D0F1'
+                    color: 'rgba(129,208,241,256)',
+                    // borderColor: '#81D0F1',
+                    // borderWidth: 0.8,
+                    // borderType: 'solid'
                 }
             });
         }
-        return timePeriod;
+        return data;
     }
 
     const cellSize = [23, 10.5]; // 日历单元格大小
@@ -162,11 +197,11 @@ export default function Calendar(props) {
     // 确保函数只执行一次
     const isdown = useRef(false);
     useEffect(() => {
-        const wait = 10;
+        const wait = 50;
         if (!myChart) return () => { };
         // 鼠标按下事件
-        myChart.on('mousedown', (params) => {
-            if (isdown.current) return;
+        const mouseDown = (params) => {
+            // if (isdown.current) return;
             // 已触发，添加标记
             isdown.current = true;
             // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]
@@ -179,9 +214,10 @@ export default function Calendar(props) {
             setDate({
                 start: params.data[0] || params.data.value[0],
                 end: params.data[0] || params.data.value[0],
-            })
-        });
-
+            });
+            // console.log('timePeriod_Down:', timePeriod)
+        };
+        myChart.on('mousedown', mouseDown);
         // 鼠标移动事件
         const selectDate = debounce(
             (params) => {
@@ -204,7 +240,7 @@ export default function Calendar(props) {
             false
         );
         const mouseMove = (params) => {
-            action.mousedown && selectDate(params)
+            action.mousedown && selectDate(params);
         };
         myChart.on('mousemove', mouseMove);
 
@@ -228,10 +264,14 @@ export default function Calendar(props) {
             // end: yyyy-MM-dd
             eventEmitter.emit('addUsersData', { start, end });
             console.log(start, end);
+            //每次选择完则向timePeriod中添加本次筛选的日期，提供给下一次渲染。
+            timePeriod.push({start: start, end: end});
+            // console.log('timePeriod_mouseUp:', timePeriod)
         };
         myChart.on('mouseup', mouseUp);
 
         return () => {
+            myChart.off('mousedown', mouseDown);
             myChart.off('mousemove', mouseMove);
             myChart.off('mouseup', mouseUp);
         }

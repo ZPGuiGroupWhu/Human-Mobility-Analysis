@@ -38,9 +38,8 @@ export default function Calendar(props) {
                         value: [date, Reflect.get(obj, date)?.count || 0],
                         symbol: 'rect',
                         itemStyle: {
-                            color: 'rgba(129,208,241,256)',
-                            borderColor: '#81D0F1',
-                            borderWidth: 0.8,
+                            borderColor: '#00BFFF',
+                            borderWidth: 1,
                             borderType: 'solid'
                         }
                     });
@@ -62,10 +61,9 @@ export default function Calendar(props) {
                 value: [date, Reflect.get(obj, date)?.count || 0],
                 symbol: 'rect',
                 itemStyle: {
-                    color: 'rgba(129,208,241,256)',
-                    // borderColor: '#81D0F1',
-                    // borderWidth: 0.8,
-                    // borderType: 'solid'
+                    borderColor: '#00BFFF',
+                    borderWidth: 1,
+                    borderType: 'solid'
                 }
             });
         }
@@ -109,7 +107,7 @@ export default function Calendar(props) {
         },
         calendar: {
             orient: 'vertical',
-            top: 18,
+            top: 25,
             bottom: 10,
             left: 'center',
             cellSize: cellSize,
@@ -149,14 +147,13 @@ export default function Calendar(props) {
         myChart.setOption(option);
     }, [ref]);
 
-
-
     // strDate: yyyy-MM-dd
     function str2date(strDate) {
         strDate.replace('-', '/');
         return new Date(strDate);
     }
 
+    // 组织日历数据
     function formatData(obj) {
         // const year = str2date(Object.keys(obj)[0]).getFullYear();
         let start = +echarts.number.parseDate(year + '-01-01');
@@ -189,6 +186,21 @@ export default function Calendar(props) {
         })
     }, [data]);
 
+
+    //返回所有筛选的用户
+    function getUsers(obj, times){
+        let users = [];
+        for (let i = 0; i < times.length; i++) {
+            let start = +echarts.number.parseDate(times[i].start);
+            let end = +echarts.number.parseDate(times[i].end);
+            let dayTime = 3600 * 24 * 1000;
+            for (let time = start; time <= end; time += dayTime) {
+                const date = echarts.format.formatTime('yyyy-MM-dd', time);
+                users = Array.from(new Set(users.concat(Reflect.get(obj, date).users)))//对每个日期下符合要求的用户求并集
+            }
+        }
+        return users;
+    }
 
     // 记录框选的日期范围
     const [date, setDate] = useState({ start: '', end: '' });
@@ -266,6 +278,9 @@ export default function Calendar(props) {
             console.log(start, end);
             //每次选择完则向timePeriod中添加本次筛选的日期，提供给下一次渲染。
             timePeriod.push({start: start, end: end});
+            //返回筛选后符合要求的所有用户id信息，传递给其他页面。
+            let userIDs = getUsers(data, timePeriod);
+            eventEmitter.emit('getUsers', {userIDs});
             // console.log('timePeriod_mouseUp:', timePeriod)
         };
         myChart.on('mouseup', mouseUp);
@@ -288,6 +303,7 @@ export default function Calendar(props) {
             }]
         });
     }, [data, date]);
+
 
     // 清除高亮
     // 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮

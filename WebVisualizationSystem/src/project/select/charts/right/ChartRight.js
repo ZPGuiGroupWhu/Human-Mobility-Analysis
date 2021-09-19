@@ -22,11 +22,11 @@ class ChartRight extends Component {
   }
 
   // 组织日历数据：{ 日期date：出行用户数量count }
-  getAllUsersData = (minCount, maxCount) => {
+  getDateData = (minCount, maxCount) => {
       let data = {};
       _.forEach(dateCounts, function (item) {
           let users = [];
-          let count = 0;
+          let count = 0;//记录该日期下有多少用户
           for (let i = 0; i < item.userData.length; i++) {
               if (item.userData[i].count <= maxCount && item.userData[i].count >= minCount) {
                   users.push(item.userData[i].user);
@@ -42,6 +42,7 @@ class ChartRight extends Component {
     getCountRange  = (value) => {
         let minCount = (value[0] <= value[1])? value[0]: value[1];
         let maxCount = (value[0] <= value[1])? value[1]: value[0];
+        //清楚高亮标记
         let clear = true;
         eventEmitter.emit('clearCalendarHighlight', {clear});
         //每次设置setState时会重新渲染，因此需要先更新data数据在setState
@@ -51,15 +52,14 @@ class ChartRight extends Component {
         });
     };
 
-
   // 加载组件前传递数据给calendar
   componentWillMount() {
-      this.getAllUsersData(this.state.minCount, this.state.maxCount);
+      this.getDateData(this.state.minCount, this.state.maxCount);
   }
 
   componentWillUpdate(nextProps, nextState, nextContext) {
       if(this.state.minCount !== nextState.minCount || this.state.maxCount !== nextState.maxCount){
-          this.getAllUsersData(nextState.minCount, nextState.maxCount);
+          this.getDateData(nextState.minCount, nextState.maxCount);
       }
   }
 
@@ -74,8 +74,12 @@ class ChartRight extends Component {
                 min={0}
                 step={1}
                 disabled={false}
+                tipFormatter={function(value){
+                    return '当日出行总数: ' + value;
+                }}
                 onChange={this.getCountRange}
                 onAfterChange={() => {
+                    //清楚高亮标记
                     let clear = true;
                     eventEmitter.emit('clearCalendarHighlight', {clear});
                 }}

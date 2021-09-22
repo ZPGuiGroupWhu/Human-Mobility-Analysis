@@ -64,6 +64,13 @@ class ChartRight extends Component {
   }
 
   render(){
+      //获取网页可视页面高度
+      const clientHieght = document.body.clientHeight;
+      /**
+       * 标题padding 70px, 组件top 100px, bottom 20px， slider和visualMap间隔 200px
+       * slider比visualMap稍长50px
+       */
+      const sliderHeight = (clientHieght - 390) / 2 + 50;
       //利用marks可以标注刻度，实现Slider标签及其位置设置
       const marks = {
           0: {
@@ -103,13 +110,13 @@ class ChartRight extends Component {
                 }}
                 onChange={this.getCountRange}
                 onAfterChange={() => {
-                    //清楚高亮标记
+                    //清除高亮标记
                     let clear = true;
                     eventEmitter.emit('clearCalendarHighlight', {clear});
                 }}
                 marks={marks}
                 style={{
-                    height: '200px',
+                    height: sliderHeight,
                     position: 'absolute',
                     right: '5px',
                     top: '100px',

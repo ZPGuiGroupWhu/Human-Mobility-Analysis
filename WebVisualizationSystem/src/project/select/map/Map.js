@@ -9,6 +9,7 @@ import "./Map.scss";
 //测试数据
 import regionJson from './regionJson/Shenzhen';
 import userLocations from '../charts/right/jsonData/userLoctionCounts'
+import {clamp} from "react-map-gl/dist/es5/utils/math-utils";
 
 
 //测试数据
@@ -62,7 +63,7 @@ class Map extends Component {
             },
             //visualMap图例
             visualMap: {
-                left: '310px',
+                left: _.clamp(400, 250, 400),
                 top: 'top',
                 max: 500, //最大值
                 realtime: true, //拖拽时是否实时更新

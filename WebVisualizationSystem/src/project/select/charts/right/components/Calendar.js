@@ -70,8 +70,12 @@ export default function Calendar(props) {
         return data;
     }
 
-    const cellSize = [23, 10.5]; // 日历单元格大小
-    const hightLightcellSize = [20, 8]; // 高亮单元格大小
+    //获取网页可视页面高度
+    const clientHieght = document.body.clientHeight;
+    const visualMapHeight = (clientHieght - 390) / 2;
+    const cellHeight = (clientHieght - 105) / 53; //top 25px, padding 70px, bottom 10px，共53行
+    const cellSize = [35, cellHeight]; // 日历单元格大小
+    // const hightLightcellSize = [20, 8]; // 高亮单元格大小
 
     // 参数设置
     const option = {
@@ -97,6 +101,7 @@ export default function Calendar(props) {
             // left: 'right',
             bottom: 50,
             right: 0,
+            itemHeight: visualMapHeight,
             textStyle: {
                 color: '#fff',
             },
@@ -135,7 +140,7 @@ export default function Calendar(props) {
             type: 'scatter',
             name: '高亮',
             coordinateSystem: 'calendar',
-            symbolSize: hightLightcellSize,
+            symbolSize: cellSize,
             data: [],
             zlevel: 2,
         }]

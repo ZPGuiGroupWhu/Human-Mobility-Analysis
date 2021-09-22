@@ -64,6 +64,29 @@ class ChartRight extends Component {
   }
 
   render(){
+      //利用marks可以标注刻度，实现Slider标签及其位置设置
+      const marks = {
+          0: {
+              style: {
+                  color: '#fff',
+              },
+              label: <p style={{
+                  position: 'absolute',
+                  right: '30px',
+                  top: '-20px'
+              }}>0</p>
+          },
+          8: {
+              style: {
+                  color: '#fff',
+              },
+              label: <p style={{
+                  position: 'absolute',
+                  right: '30px',
+                  top: '-20px'
+              }}>8</p>
+          },
+      };
     return (
       <>
         <div>
@@ -73,6 +96,7 @@ class ChartRight extends Component {
                 max={8}
                 min={0}
                 step={1}
+                vertical={true}
                 disabled={false}
                 tipFormatter={function(value){
                     return '当日出行总数: ' + value;
@@ -83,7 +107,12 @@ class ChartRight extends Component {
                     let clear = true;
                     eventEmitter.emit('clearCalendarHighlight', {clear});
                 }}
+                marks={marks}
                 style={{
+                    height: '200px',
+                    position: 'absolute',
+                    right: '5px',
+                    top: '100px',
                     zIndex: '9999' //至于顶层
                 }}
             />

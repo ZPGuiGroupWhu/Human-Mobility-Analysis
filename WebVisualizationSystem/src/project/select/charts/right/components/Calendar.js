@@ -94,8 +94,9 @@ export default function Calendar(props) {
         visualMap: {
             calculable: true,
             orient: 'vertical',
-            left: 'right',
-            top: 'center',
+            // left: 'right',
+            bottom: 50,
+            right: 0,
             textStyle: {
                 color: '#fff',
             },

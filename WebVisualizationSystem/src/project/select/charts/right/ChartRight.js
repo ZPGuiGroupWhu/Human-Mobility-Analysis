@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import Charts from '../Charts';
 import Calendar from './components/Calendar';
-import {Button, Slider} from "antd";
-import {RedoOutlined} from "@ant-design/icons";
+import { Button, Slider } from "antd";
+import { RedoOutlined } from "@ant-design/icons";
 import { eventEmitter } from "@/common/func/EventEmitter";
 import _ from 'lodash'
 //数据
@@ -15,52 +15,52 @@ class ChartRight extends Component {
   constructor(props) {
     super(props);
     this.data = {};
-    this.state ={
-        minCount: sliderMin,
-        maxCount: sliderMax,
+    this.state = {
+      minCount: sliderMin,
+      maxCount: sliderMax,
     };
   }
 
   // 组织日历数据：{ 日期date：出行用户数量count }
   getDateData = (minCount, maxCount) => {
-      let data = {};
-      _.forEach(dateCounts, function (item) {
-          let users = [];
-          let count = 0;//记录该日期下有多少用户
-          for (let i = 0; i < item.userData.length; i++) {
-              if (item.userData[i].count <= maxCount && item.userData[i].count >= minCount) {
-                  users.push(item.userData[i].user);
-                  count += 1
-              }
-          }
-          data[item.date] = {'count': count, 'users': users}
-      });
-      // console.log(data);
-      this.data = data;
+    let data = {};
+    _.forEach(dateCounts, function (item) {
+      let users = [];
+      let count = 0;//记录该日期下有多少用户
+      for (let i = 0; i < item.userData.length; i++) {
+        if (item.userData[i].count <= maxCount && item.userData[i].count >= minCount) {
+          users.push(item.userData[i].user);
+          count += 1
+        }
+      }
+      data[item.date] = { 'count': count, 'users': users }
+    });
+    // console.log(data);
+    this.data = data;
   };
 
-    getCountRange  = (value) => {
-        let minCount = (value[0] <= value[1])? value[0]: value[1];
-        let maxCount = (value[0] <= value[1])? value[1]: value[0];
-        //清楚高亮标记
-        let clear = true;
-        eventEmitter.emit('clearCalendarHighlight', {clear});
-        //每次设置setState时会重新渲染，因此需要先更新data数据在setState
-        this.setState({
-            minCount: minCount,
-            maxCount: maxCount
-        });
-    };
+  getCountRange = (value) => {
+    let minCount = (value[0] <= value[1]) ? value[0] : value[1];
+    let maxCount = (value[0] <= value[1]) ? value[1] : value[0];
+    //清楚高亮标记
+    let clear = true;
+    eventEmitter.emit('clearCalendarHighlight', { clear });
+    //每次设置setState时会重新渲染，因此需要先更新data数据在setState
+    this.setState({
+      minCount: minCount,
+      maxCount: maxCount
+    });
+  };
 
   // 加载组件前传递数据给calendar
   componentWillMount() {
-      this.getDateData(this.state.minCount, this.state.maxCount);
+    this.getDateData(this.state.minCount, this.state.maxCount);
   }
 
   componentWillUpdate(nextProps, nextState, nextContext) {
-      if(this.state.minCount !== nextState.minCount || this.state.maxCount !== nextState.maxCount){
-          this.getDateData(nextState.minCount, nextState.maxCount);
-      }
+    if (this.state.minCount !== nextState.minCount || this.state.maxCount !== nextState.maxCount) {
+      this.getDateData(nextState.minCount, nextState.maxCount);
+    }
   }
 
   render(){

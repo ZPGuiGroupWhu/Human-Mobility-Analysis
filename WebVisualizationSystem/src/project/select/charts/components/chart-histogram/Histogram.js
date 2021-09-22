@@ -167,7 +167,7 @@ class Histogram extends Component {
     let brushComponent = params.batch[0];
     if (this.props.withFilter && !brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
     this.context.dispatch({
-      type: 'setSelectedUsers',
+      type: 'setSelectedByCharts',
       payload: brushComponent.selected[0].dataIndex.map(item => {
         return this.state.data[item][2].map(item => item[2]); // dim=3: 人员编号
       }).flat(Infinity), // 刷选索引映射到数据维度

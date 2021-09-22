@@ -12,6 +12,16 @@ export function reducer(state, action) {
         ...state,
         selectedUsers: payload,
       }
+    case 'setSelectedByCharts':
+      return {
+        ...state,
+        selectedByCharts: payload,
+      }
+    case 'setSelectedByCalendar':
+      return {
+        ...state,
+        selectedByCalendar: payload,
+      }
     case 'setCurId':
       return {
         ...state,

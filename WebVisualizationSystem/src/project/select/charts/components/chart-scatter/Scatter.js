@@ -173,7 +173,7 @@ class Scatter extends Component {
   onBrushSelected = (params) => {
     let brushComponent = params.batch[0];
     this.context.dispatch({
-      type: 'setSelectedUsers',
+      type: 'setSelectedByCharts',
       payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][2]), // 刷选索引映射到数据维度
     });
   }

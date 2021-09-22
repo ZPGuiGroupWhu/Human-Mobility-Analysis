@@ -9,7 +9,6 @@ import "./Map.scss";
 //测试数据
 import regionJson from './regionJson/Shenzhen';
 import userLocations from '../charts/right/jsonData/userLoctionCounts'
-import {clamp} from "react-map-gl/dist/es5/utils/math-utils";
 
 
 //测试数据
@@ -63,7 +62,7 @@ class Map extends Component {
             },
             //visualMap图例
             visualMap: {
-                left: _.clamp(400, 250, 400),
+                left: this.props.leftWidth,
                 top: 'top',
                 max: 500, //最大值
                 realtime: true, //拖拽时是否实时更新
@@ -239,6 +238,10 @@ class Map extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        //prevProps获取到的leftWidth是0，在PageSelect页面componentDidMount获取到leftWidth值后，重新初始化
+        if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)){
+            this.initMap();
+        }
         if(!_.isEqual(prevState.userData, this.state.userData)){
             this.updateMap(this.state.userData)
         }

@@ -23,6 +23,8 @@ export const filterBySelect = (...params) => WrappedComponent => {
         data: null, // 数据源
         privateSelectedUsers: [], // 私有筛选成员编号数组
         historyData: null, // 记录最近一次的数据
+
+        prevSelectedByCalendar: [], // 历史日历筛选结果(限制更新)
       }
     }
 
@@ -44,9 +46,13 @@ export const filterBySelect = (...params) => WrappedComponent => {
 
     // 根据人员编号筛选数据
     getDataBySelectedUsers = (data, arr) => {
-      return arr.map(idx => {
-        return Object.values(data).find(item => (item['人员编号'] === idx));
-      })
+      try {
+        return arr.map(idx => {
+          return Object.values(data).find(item => (item['人员编号'] === idx));
+        })
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     updateData = (isConnect) => {
@@ -65,6 +71,14 @@ export const filterBySelect = (...params) => WrappedComponent => {
         this.updateData(this.props.isConnect);
         this.setState({ historyData: this.context.state.allData, });
       } // 初次渲染
+
+      // 其余组件筛选时，触发box更新
+      if (!_.isEqual(prevState.prevSelectedByCalendar, this.context.state.selectedByCalendar)) {
+        this.setState({
+          prevSelectedByCalendar: this.context.state.selectedByCalendar
+        });
+        this.updateData(this.props.connect);
+      }
 
       // 若图表间联动，则调用全局的筛选人员ID，反之调用自身维护的人员ID
       if (this.props.connect) {

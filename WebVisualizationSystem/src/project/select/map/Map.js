@@ -63,7 +63,7 @@ class Map extends Component {
             //visualMap图例
             visualMap: {
                 left: this.props.leftWidth,
-                top: 'top',
+                top: this.props.footerHeight,
                 max: 500, //最大值
                 realtime: true, //拖拽时是否实时更新
                 calculable: true, //拖拽时是否显示手柄
@@ -239,7 +239,7 @@ class Map extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         //prevProps获取到的leftWidth是0，在PageSelect页面componentDidMount获取到leftWidth值后，重新初始化
-        if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)){
+        if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)||!_.isEqual(prevProps.footerHeight, this.props.footerHeight)){
             this.initMap();
         }
         if(!_.isEqual(prevState.userData, this.state.userData)){

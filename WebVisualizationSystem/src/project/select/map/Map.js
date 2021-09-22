@@ -63,7 +63,7 @@ class Map extends Component {
             //visualMap图例
             visualMap: {
                 left: this.props.leftWidth,
-                top: this.props.footerHeight,
+                bottom: this.props.footerHeight,
                 max: 500, //最大值
                 realtime: true, //拖拽时是否实时更新
                 calculable: true, //拖拽时是否显示手柄

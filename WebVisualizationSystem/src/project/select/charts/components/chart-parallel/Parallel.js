@@ -134,7 +134,7 @@ class Parallel extends Component {
     // console.log(indices0);
     // console.log(indices0.map(item => this.state.data[item][4]));
     this.context.dispatch({
-      type: 'setSelectedUsers',
+      type: 'setSelectedByCharts',
       payload: indices0.map(item => this.state.data[item][this.newKeys.findIndex(key => key === '人员编号')]), // 刷选索引映射到数据维度
     });
     // 联动其他图层

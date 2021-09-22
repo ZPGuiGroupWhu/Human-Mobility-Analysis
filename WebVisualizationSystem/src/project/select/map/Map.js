@@ -46,6 +46,13 @@ class Map extends Component {
     initMap = () => {
         //绘制基础地图的option参数
         const option = {
+            tooltip: {
+                formatter: function (params) {// 说明某日出行用户数量
+                    return '经度: ' + params.value[0] + '<br />'
+                        + '纬度: ' + params.value[1] + '<br />'
+                        + '出行次数：' + params.value[2];
+                },
+            },
             // 鼠标悬浮的字体样式
             textStyle: {
                 color: '#000',
@@ -55,12 +62,18 @@ class Map extends Component {
             },
             //visualMap图例
             visualMap: {
+                left: '310px',
+                top: 'top',
                 max: 500, //最大值
                 realtime: true, //拖拽时是否实时更新
                 calculable: true, //拖拽时是否显示手柄
                 inRange: { //颜色数组
                     color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
                 },
+                textStyle: {
+                    color: '#fff',
+                    fontWeight: 'normal'
+                }
             },
             // geo3D地图
             geo3D: {
@@ -78,9 +91,10 @@ class Map extends Component {
                     alpha: 60,//初始视角
                     minAlpha: 30,//最小视角
                     maxAlpha: 90,//最大视角
-                    distance: 70,//视角到主体的初始距离
+                    distance: 82,//视角到主体的初始距离
                     minDistance: 5,//鼠标拉近的最小距离
-                    maxDistance: 80,//鼠标拉近的最大距离
+                    maxDistance: 150,//鼠标拉近的最大距离
+                    center: [-1, 0, 17],//视角中心点，初始化地图位置
                     //自动旋转动画
                     // autoRotate: true,
                     // antoRotateDirection: 'ccw',//逆时针
@@ -139,38 +153,16 @@ class Map extends Component {
                 data: [],
                 barSize: 0.5, //柱的大小
                 minHeight: 0.6,//柱高的最小值
-                silent: false, //是否不响应鼠标事件，false未响应，反之为不响应
+                silent: false, //是否不响应鼠标事件，false为响应，反之为不响应
                 itemStyle: {//柱条样式
-                    opacity: 0.8
+                    opacity: 1
+                },
+                // 柱条高亮标签样式
+                emphasis: {
+                    label: {//开启高亮，但不显示标签，以tooltips代替标签
+                        show: false,
+                    }
                 }
-                //柱条，鼠标悬浮/点击的标签事件
-                // label: {
-                //   show: false,
-                //   distance: 1,
-                //   //显示weight数据
-                //   formatter: params=> params.value[2],
-                //   //字体格式
-                //   textStyle: {
-                //     // color: '#000',
-                //     fontFamily: 'Microsoft Yahei',
-                //     fontSize: 10,
-                //     fontWeight: 'normal'
-                //   }
-                // },
-                // // 柱条高亮标签样式
-                // emphasis: {
-                //     label: {
-                //         show: false,//不展示时下方代码无效
-                //         distance: 2,
-                //         formatter: params => params.value[2],
-                //         textStyle: {
-                //             color: '#000',
-                //             fontFamily: 'Microsoft Yahei',
-                //             fontSize: 10,
-                //             fontWeight: 'bolder'
-                //         }
-                //     }
-                // }
             }]
         };
         // 注册地图到组件, 初始化实例对象

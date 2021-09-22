@@ -70,7 +70,7 @@ class ChartRight extends Component {
             <Slider
                 range
                 defaultValue={[0, 2]}
-                max={10}
+                max={8}
                 min={0}
                 step={1}
                 disabled={false}

@@ -63,6 +63,7 @@ class ChartRight extends Component {
     }
   }
 
+<<<<<<< HEAD
   render() {
     //利用marks可以标注刻度，实现Slider标签及其位置设置
     const marks = {
@@ -132,6 +133,77 @@ class ChartRight extends Component {
             }}
           /></div>
         <Calendar data={this.data} />
+=======
+  render(){
+      //利用marks可以标注刻度，实现Slider标签及其位置设置
+      const marks = {
+          0: {
+              style: {
+                  color: '#fff',
+              },
+              label: <p style={{
+                  position: 'absolute',
+                  right: '30px',
+                  top: '-20px'
+              }}>0</p>
+          },
+          8: {
+              style: {
+                  color: '#fff',
+              },
+              label: <p style={{
+                  position: 'absolute',
+                  right: '30px',
+                  top: '-20px'
+              }}>8</p>
+          },
+      };
+    return (
+      <>
+        <div>
+            <Slider
+                range
+                defaultValue={[0, 2]}
+                max={8}
+                min={0}
+                step={1}
+                vertical={true}
+                disabled={false}
+                tipFormatter={function(value){
+                    return '当日出行总数: ' + value;
+                }}
+                onChange={this.getCountRange}
+                onAfterChange={() => {
+                    //清楚高亮标记
+                    let clear = true;
+                    eventEmitter.emit('clearCalendarHighlight', {clear});
+                }}
+                marks={marks}
+                style={{
+                    height: '200px',
+                    position: 'absolute',
+                    right: '5px',
+                    top: '100px',
+                    zIndex: '9999' //至于顶层
+                }}
+            />
+            <Button
+                ghost
+                size='small'
+                type='default'
+                icon={<RedoOutlined style={{color: '#fff'}}/>}
+                onClick={(e) => {
+                    let clear = true;
+                    eventEmitter.emit('clearCalendarHighlight', {clear})
+                }}
+                style={{
+                    position: 'absolute',
+                    right: '10px',
+                    zIndex: '9999' //至于顶层
+                }}
+            /></div>
+          <Calendar data={this.data}/>
+>>>>>>> 2769c1ad39a253e7f34829444fd82e64388bd1ac
       </>
     );
   }

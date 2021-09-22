@@ -76,6 +76,7 @@ export default function Calendar(props) {
   const cellSize = [23, 10.5]; // 日历单元格大小
   const hightLightcellSize = [20, 8]; // 高亮单元格大小
 
+<<<<<<< HEAD
   // 参数设置
   const option = {
     // title: {
@@ -143,6 +144,75 @@ export default function Calendar(props) {
       zlevel: 2,
     }]
   };
+=======
+    // 参数设置
+    const option = {
+        // title: {
+        //     top: 'top',
+        //     left: 'center',
+        //     text: '2018年用户出行统计',
+        //     textStyle: {
+        //         color: '#fff',
+        //         fontWeight: 'normal',
+        //         fontFamily: 'Microsoft YaHei',
+        //         fontSize: 15,
+        //     }
+        // },
+        tooltip: {
+            formatter: function (params) {// 说明某日出行用户数量
+                return '日期: ' + params.value[0] + '<br />' + '出行用户: ' + params.value[1];
+            },
+        },
+        visualMap: {
+            calculable: true,
+            orient: 'vertical',
+            // left: 'right',
+            bottom: 50,
+            right: 0,
+            textStyle: {
+                color: '#fff',
+            },
+            precision: 0,
+            align: 'auto',
+            formatter: function (value) {
+                return parseInt(value)
+            }
+        },
+        calendar: {
+            orient: 'vertical',
+            top: 25,
+            bottom: 10,
+            left: 'center',
+            cellSize: cellSize,
+            range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
+            itemStyle: {
+                borderWidth: 0.5
+            },
+            dayLabel: {
+                color: '#fff',
+                nameMap: 'cn',
+            },
+            monthLabel: {
+                color: '#fff',
+                nameMap: 'cn',
+            },
+            yearLabel: { show: false }
+        },
+        series: [{
+            type: 'heatmap',
+            coordinateSystem: 'calendar',
+            data: [],
+            zlevel: 1,
+        }, {
+            type: 'scatter',
+            name: '高亮',
+            coordinateSystem: 'calendar',
+            symbolSize: hightLightcellSize,
+            data: [],
+            zlevel: 2,
+        }]
+    };
+>>>>>>> 2769c1ad39a253e7f34829444fd82e64388bd1ac
 
   // 初始化 ECharts 实例对象
   useEffect(() => {

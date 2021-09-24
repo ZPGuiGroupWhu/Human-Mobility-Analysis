@@ -45,7 +45,8 @@ class Footer extends Component {
   render() {
     let data = ODs;
     return (
-      <div className="select-footer-ctn" style={{marginTop:"40px"}}>
+      <div className="outer-container">
+      <div className="select-footer-ctn">
       <Row gutter={[8,8]} style={{width:"100%"}}>
       {data &&
           data.length > 0 &&
@@ -107,6 +108,7 @@ class Footer extends Component {
           defaultPageSize={this.pageSize} />
         </Col>
       </Row>
+      </div>
       </div>
     );
   }

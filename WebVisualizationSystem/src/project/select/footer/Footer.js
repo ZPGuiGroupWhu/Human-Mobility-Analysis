@@ -45,22 +45,27 @@ class Footer extends Component {
   render() {
     let data = ODs;
     return (
-      <div className="select-footer-ctn">
-      <Row gutter={16} style={{height:"90%"}}>
+      <div className="select-footer-ctn" style={{marginTop:"40px"}}>
+      <Row gutter={[8,8]} style={{width:"100%"}}>
       {data &&
           data.length > 0 &&
           data.slice(this.state.minValue, this.state.maxValue).map(val => (
-            <Col span={4} key={val.id}>
-            <Popover content={
-              <p>{val.id}</p>
-            } title={val.id} trigger="click">
+            <Col span={24} key={val.id}>
+            <Popover 
+            title={val.id} trigger="hover" placement="left" 
+            content={
+              <div>
+                <p>指标1</p>
+                <p>指标2</p>
+                <p>etc.</p>
+              </div>
+            } >
             <Card
               title={val.id}
               hoverable={true}
               size="small"
               bodyStyle={{padding:1}}
             >
-            <Tooltip placement="rightTop" title={<span>{val.id}<br/>指标1<br/>指标2</span>}>
             <div style={{height:"70px",position:"relative"}} >
             {/* 出现了新的问题，当使用Deck.gl时，会导致WARNING: Too many active WebGL contexts. Oldest context will be lost，从而使底图消失 */}
             {/* 问题已解决，在更新前删除对应canvas的上下文即可，保留备注以备不时之需*/}
@@ -92,15 +97,16 @@ class Footer extends Component {
                 ]}>
               </DeckGL>
               </div>
-              </Tooltip>
             </Card>
             </Popover>
             </Col>
           ))}
+        <Col span={24} key={"Pagination"}>
+        <Pagination style={{position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
+          simple size="small" current={this.state.currentPage} onChange={this.onChange} total={data.length} showSizeChanger={false}
+          defaultPageSize={this.pageSize} />
+        </Col>
       </Row>
-        <Pagination style={{position: "absolute",left: "50%",top:"96%",transform:"translate(-50%, 0)",width:"100%",textAlign:"center"}}
-          size="small" current={this.state.currentPage} onChange={this.onChange} total={data.length} showQuickJumper showSizeChanger={false}
-          defaultPageSize={this.pageSize} showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}/>
       </div>
     );
   }

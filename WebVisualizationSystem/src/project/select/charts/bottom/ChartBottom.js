@@ -11,7 +11,7 @@ import dateCounts from './jsonData/date_counts'
 const sliderMin = 0;
 const sliderMax = 2;
 
-class ChartRight extends Component {
+class ChartBottom extends Component {
     constructor(props) {
         super(props);
         this.data = {};
@@ -65,13 +65,8 @@ class ChartRight extends Component {
 
 
     render() {
-        //获取网页可视页面高度
-        const clientHieght = document.body.clientHeight;
-        /**
-         * 标题padding 70px, 组件top 100px, bottom 20px， slider和visualMap间隔 200px
-         * slider比visualMap稍长50px
-         */
-        const sliderHeight = (clientHieght - 390) / 2 + 50;
+        //计算slider高度, 和chart的visualMap一样高
+        const sliderHeight = this.props.bottomHeight - 50;
         //利用marks可以标注刻度，实现Slider标签及其位置设置
         const marks = {
             0: {
@@ -80,8 +75,8 @@ class ChartRight extends Component {
                 },
                 label: <p style={{
                     position: 'absolute',
-                    right: '30px',
-                    top: '-20px'
+                    right: '20px',
+                    top: '-18px',
                 }}>0</p>
             },
             8: {
@@ -90,8 +85,8 @@ class ChartRight extends Component {
                 },
                 label: <p style={{
                     position: 'absolute',
-                    right: '30px',
-                    top: '-20px'
+                    right: '20px',
+                    top: '-18px',
                 }}>8</p>
             },
         };
@@ -100,7 +95,7 @@ class ChartRight extends Component {
                 <div>
                     <Slider
                         range
-                        defaultValue={[0, 2]}
+                        defaultValue={[0, 8]}
                         max={8}
                         min={0}
                         step={1}
@@ -117,10 +112,11 @@ class ChartRight extends Component {
                         }}
                         marks={marks}
                         style={{
+                            display: 'inline-block',
                             height: sliderHeight,
                             position: 'absolute',
-                            right: '5px',
-                            top: '100px',
+                            right: 5,
+                            bottom: -15,
                             zIndex: '9999' //至于顶层
                         }}
                     />
@@ -139,10 +135,10 @@ class ChartRight extends Component {
                             zIndex: '9999' //至于顶层
                         }}
                     /></div>
-                <Calendar data={this.data} rightWidth={this.props.rightWidth}/>
+                <Calendar data={this.data} bottomHeight={this.props.bottomHeight} bottomWidth={this.props.bottomWidth}/>
             </>
         );
     }
 }
 
-export default ChartRight;
+export default ChartBottom;

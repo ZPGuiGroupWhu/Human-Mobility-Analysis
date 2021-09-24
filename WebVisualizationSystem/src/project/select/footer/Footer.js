@@ -72,7 +72,7 @@ class Footer extends Component {
             {/* 问题已解决，在更新前删除对应canvas的上下文即可，保留备注以备不时之需*/}
               <DeckGL
                 initialViewState={{
-                longitude: 114.12,
+                longitude: 114.18,
                 latitude: 22.7,
                 zoom: 6.5,
                 pitch: 45,

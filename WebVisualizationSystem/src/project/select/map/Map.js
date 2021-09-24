@@ -8,7 +8,7 @@ import _ from 'lodash';
 import "./Map.scss";
 //测试数据
 import regionJson from './regionJson/Shenzhen';
-import userLocations from '../charts/right/jsonData/userLoctionCounts'
+import userLocations from '../charts/bottom/jsonData/userLoctionCounts'
 
 
 //测试数据
@@ -63,7 +63,7 @@ class Map extends Component {
             //visualMap图例
             visualMap: {
                 left: this.props.leftWidth,
-                bottom: this.props.footerHeight,
+                bottom: this.props.bottomHeight,
                 max: 500, //最大值
                 realtime: true, //拖拽时是否实时更新
                 calculable: true, //拖拽时是否显示手柄
@@ -91,10 +91,10 @@ class Map extends Component {
                     alpha: 60,//初始视角
                     minAlpha: 30,//最小视角
                     maxAlpha: 90,//最大视角
-                    distance: 82,//视角到主体的初始距离
+                    distance: 90,//视角到主体的初始距离
                     minDistance: 5,//鼠标拉近的最小距离
                     maxDistance: 150,//鼠标拉近的最大距离
-                    center: [-1, 0, 17],//视角中心点，初始化地图位置
+                    center: [-10, 0, 18],//视角中心点，初始化地图位置
                     //自动旋转动画
                     // autoRotate: true,
                     // antoRotateDirection: 'ccw',//逆时针
@@ -239,7 +239,7 @@ class Map extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         //prevProps获取到的leftWidth是0，在PageSelect页面componentDidMount获取到leftWidth值后，重新初始化
-        if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)||!_.isEqual(prevProps.footerHeight, this.props.footerHeight)){
+        if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)||!_.isEqual(prevProps.bottomHeight, this.props.bottomHeight)){
             this.initMap();
         }
         if(!_.isEqual(prevState.userData, this.state.userData)){

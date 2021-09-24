@@ -3,7 +3,7 @@ import "./PageSelect.scss";
 import Map from './map/Map';
 import Footer from './footer/Footer';
 import ChartLeft from './charts/left/ChartLeft';
-import ChartRight from './charts/right/ChartRight';
+import ChartBottom from './charts/bottom/ChartBottom';
 import Store from '@/store';
 import _ from 'lodash';
 
@@ -14,8 +14,8 @@ class PageSelect extends Component {
     super(props);
     this.state = {
       leftWidth: 0, // 左侧栏宽度
-      rightWidth: 0, //右侧栏宽度
-      footerHeight: 0, //底部内容高度
+      bottomHeight: 0, //底部内容高度
+      bottomWidth: 0, //底部内容宽度
       selectedByCharts: [], // 历史筛选记录(限制更新)
       selectedByCalendar: [],
     };
@@ -40,12 +40,15 @@ class PageSelect extends Component {
   }
 
   componentDidMount() {
+    const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
+    const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().bottom
+        - document.querySelector('.bottom').getBoundingClientRect().top;
+    const bottomWidth = document.querySelector('.bottom').getBoundingClientRect().right
+        - document.querySelector('.bottom').getBoundingClientRect().left;
     this.setState({
-      leftWidth: document.querySelector('.left').getBoundingClientRect().right,
-      rightWidth: document.querySelector('.right').getBoundingClientRect().right
-          - document.querySelector('.right').getBoundingClientRect().left,
-      footerHeight: document.querySelector('.footer-bar').getBoundingClientRect().bottom
-          - document.querySelector('.footer-bar').getBoundingClientRect().top,
+      leftWidth: leftWidth,
+      bottomHeight: bottomHeight,
+      bottomWidth: bottomWidth,
     })
   }
 
@@ -71,19 +74,18 @@ class PageSelect extends Component {
     return (
       <div className="select-page-ctn">
         <div className="center">
-          <Map leftWidth={this.state.leftWidth} footerHeight={this.state.footerHeight}/>
+          <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight}/>
           <div className="inner">
             <div className="top-bracket"></div>
-            <div className="footer-bar">
-              {/* <Footer /> */}
+            <div className="bottom">
+               <ChartBottom bottomHeight={this.state.bottomHeight} bottomWidth={this.state.bottomWidth}/>
             </div>
           </div>
         </div>
         <div className="left">
           <ChartLeft />
         </div>
-        <div className="right" style={{width:"200px",float:"right"}}>
-          {/* <ChartRight rightWidth={this.state.rightWidth}/> */}
+        <div className="footer-bar" style={{float:"right"}}>
           <Footer />
         </div>
       </div>

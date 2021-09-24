@@ -13,7 +13,7 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
 
     .inner {
       height: 100%;
-      margin: 0 $auto-width;
+      margin: 0 170px 0 $auto-width;
       display: flex;
       flex-direction: column;
       position: absolute;
@@ -21,11 +21,11 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
       pointer-events: none;
 
       .top-bracket {
-        flex: 1 1;
+        flex: 1 1 ;
       }
 
-      .footer-bar {
-        flex: 0 0 200px;
+      .bottom {
+        flex: 0 0 30%;
         pointer-events: auto;
       }
     }
@@ -38,11 +38,12 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
     margin-left: -100%;
   }
 
-  .right {
-    width: $auto-width;
+  .footer-bar {
+    //width: $auto-width;
+    width: 170px;
     height: 100%;
     float: left;
-    margin-left: $reverse-auto-width;
+    margin-left: -170px;
   }
 }
 

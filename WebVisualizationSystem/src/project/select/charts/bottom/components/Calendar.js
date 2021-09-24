@@ -11,7 +11,8 @@ let timePeriod = [];//存储需要高亮的时间段
 export default function Calendar(props) {
     const {
         data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
-        rightWidth
+        bottomHeight,
+        bottomWidth,
         // eventName, // 注册事件名
     } = props;
 
@@ -74,13 +75,11 @@ export default function Calendar(props) {
         return data;
     }
 
-    //获取网页可视页面高度
-    const clientHieght = document.body.clientHeight;
-    const visualMapHeight = (clientHieght - 390) / 2;
-    const cellHeight = (clientHieght - 105) / 53; //top 25px, padding 70px, bottom 10px，共53行
-    const cellWidth = (rightWidth - 150) / 7; //右边slider和visualMap 150px，共7列
+    // 自适应计算格网长宽
+    const cellHeight = (bottomHeight - 10) / 8; //共8行，自适应计算
+    const cellWidth = (bottomWidth - 140) / 53; //共53列，自适应计算
     const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
-    // const hightLightcellSize = [20, 8]; // 高亮单元格大小
+
 
     // 参数设置
     const option = {
@@ -103,24 +102,27 @@ export default function Calendar(props) {
         visualMap: {
             calculable: true,
             orient: 'vertical',
-            // left: 'right',
-            bottom: 50,
-            right: 0,
-            itemHeight: visualMapHeight,
+            // left: 'bottom',
+            top: 30,
+            right: 70,
+            itemWidth: 5,
+            itemHeight: 0,
             textStyle: {
                 color: '#fff',
+                fontSize: 12,
             },
             precision: 0,
             align: 'auto',
             formatter: function (value) {
                 return parseInt(value)
-            }
+            },
+            handleIcon:'circle'
         },
         calendar: {
-            orient: 'vertical',
+            orient: 'horizontal',
             top: 25,
             bottom: 10,
-            left: 'center',
+            left: 0,
             cellSize: cellSize,
             range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
             itemStyle: {
@@ -157,6 +159,7 @@ export default function Calendar(props) {
         };
         myChart = echarts.init(ref.current);
         myChart.setOption(option);
+        window.onresize = myChart.resize;
     }, [ref]);
 
     // strDate: yyyy-MM-dd
@@ -187,14 +190,18 @@ export default function Calendar(props) {
         const format = formatData(data);
         const counts = format.map(item => (item[1]));
         myChart.setOption({
-            calendar: { //prevProps获取到的rightWidth是0，在PageSelect页面componentDidMount获取到rightWidth值后，rightWidth值改变后重新渲染
+            // prevProps获取到的bottomWidth/Height是0，
+            // 在PageSelect页面componentDidMount获取到bottomWidth/Height值后，rightWidth值改变后重新渲染
+            calendar: {
+                left: cellWidth * 2,
                 cellSize: cellSize,
             },
             visualMap: {
                 // min: Math.min(...counts),
                 // max: Math.max(...counts)
                 min: 0,
-                max: 500
+                max: 500,
+                itemHeight: bottomHeight - 50,
             },
             series: [{
                 data: format,
@@ -203,7 +210,7 @@ export default function Calendar(props) {
                 symbolSize: cellSize,
             }]
         })
-    }, [data, rightWidth]);
+    }, [data, bottomWidth, bottomHeight]);
 
 
     //返回所有筛选的用户

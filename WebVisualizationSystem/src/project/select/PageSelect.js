@@ -75,15 +75,16 @@ class PageSelect extends Component {
           <div className="inner">
             <div className="top-bracket"></div>
             <div className="footer-bar">
-              <Footer />
+              {/* <Footer /> */}
             </div>
           </div>
         </div>
         <div className="left">
           <ChartLeft />
         </div>
-        <div className="right">
-          <ChartRight rightWidth={this.state.rightWidth}/>
+        <div className="right" style={{width:"200px",float:"right"}}>
+          {/* <ChartRight rightWidth={this.state.rightWidth}/> */}
+          <Footer />
         </div>
       </div>
     )

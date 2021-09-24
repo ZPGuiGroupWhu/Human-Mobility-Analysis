@@ -9,7 +9,7 @@ import _ from 'lodash'
 import dateCounts from './jsonData/date_counts'
 
 const sliderMin = 0;
-const sliderMax = 2;
+const sliderMax = 8;
 
 class ChartBottom extends Component {
     constructor(props) {

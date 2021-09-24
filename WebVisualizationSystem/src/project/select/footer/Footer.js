@@ -103,8 +103,8 @@ class Footer extends Component {
             </Col>
           ))}
         <Col span={24} key={"Pagination"}>
-        <Pagination style={{position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
-          simple size="small" current={this.state.currentPage} onChange={this.onChange} total={data.length} showSizeChanger={false}
+        <Pagination style={{fontSize:12, position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
+          simple size='small' current={this.state.currentPage} onChange={this.onChange} total={data.length} showSizeChanger={false}
           defaultPageSize={this.pageSize} />
         </Col>
       </Row>

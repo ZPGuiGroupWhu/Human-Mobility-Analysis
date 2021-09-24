@@ -104,7 +104,7 @@ export default function Calendar(props) {
             orient: 'vertical',
             // left: 'bottom',
             top: 30,
-            right: 70,
+            right: 50,
             itemWidth: 5,
             itemHeight: 0,
             textStyle: {
@@ -307,9 +307,9 @@ export default function Calendar(props) {
             timePeriod.push({start: start, end: end});
             //返回筛选后符合要求的所有用户id信息，传递给其他页面。
             let userIDs = getUsers(data, timePeriod);
-            eventEmitter.emit('getUsers', {userIDs});
+            // eventEmitter.emit('getUsers', {userIDs});
+            //将数据传递到setSelectedByCalendar数组中
             dispatch({type: 'setSelectedByCalendar', payload: userIDs.map(item => +item)})
-            // console.log('timePeriod_mouseUp:', timePeriod)
         };
         myChart.on('mouseup', mouseUp);
 
@@ -333,9 +333,11 @@ export default function Calendar(props) {
         });
     }, [data, date]);
 
-
-    // 清除高亮
-    // 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮
+    /**
+     *清除高亮
+     * 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮
+     * 清除高亮的同时，也是清除日历筛选的数据，即清空setSelectedByCalendar数组
+     */
     useEffect(() => {
         eventEmitter.on('clearCalendarHighlight', ({clear}) => {
             if (clear === true) {
@@ -345,6 +347,8 @@ export default function Calendar(props) {
                         data: [],
                     }]
                 });
+                //清空setSelectedByCalendar数组
+                dispatch({type: 'setSelectedByCalendar', payload: []});
                 timePeriod = [];
             }
         })

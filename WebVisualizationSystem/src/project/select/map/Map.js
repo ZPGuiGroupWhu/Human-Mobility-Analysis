@@ -10,23 +10,20 @@ import "./Map.scss";
 import regionJson from './regionJson/Shenzhen';
 import userLocations from '../charts/bottom/jsonData/userLoctionCounts'
 
-
-//测试数据
-// const userID = Array.from({length: 50});
 let myMap = null;
 
 class Map extends Component {
+    static contextType = Store;
     constructor(props) {
         super(props);
-        // this.userData = {};
         this.state = {
-            userData: [],
+            SelectedUsers: [], //用于记录历史的selectedUsers, 用于判断是否重新渲染
         };
     }
     mapRef = createRef();
 
     // 组织用户-top5位置数据：{id1:[{lnglat:[], count:XX}, {lnglat:[], count:XX},...], id2:[{lnglat:[], count:XX}, {lnglat:[], count:XX},...] ....}
-    getUserData = (userIDs) => {
+    getUserData = (selectedUsers) => {
         //重新组织数据形式，便于后续筛选
         let data = {};
         _.forEach(userLocations, function (item) {
@@ -34,12 +31,10 @@ class Map extends Component {
         });
         //存储筛选的用户数据: [{id:xx, locations: [{lnglat:[], count:xx}, {lnglat:[], count:xx},...]},...]
         let userData = [];
-        for(let i = 0; i < userIDs.length; i++){
-            userData.push({id: userIDs[i], locations: data[userIDs[i]]})
+        for(let i = 0; i < selectedUsers.length; i++){
+            userData.push({id: selectedUsers[i], locations: data[selectedUsers[i].toString()]})
         }
-        this.setState({
-            userData: userData
-        });
+        return userData;
     };
 
     //初始化地图
@@ -176,7 +171,7 @@ class Map extends Component {
     updateMap = (barData) =>{
         // 如果没有数据则warning
         if (barData.length === 0) {
-            message.warning('No selected data !', 2);
+            // message.warning('No selected data !', 2);//warning
             // 多发生在点击清空按钮后，因此需要将bar图层的数据设置为空
             myMap.setOption({
                 series: [{
@@ -202,39 +197,9 @@ class Map extends Component {
         }
     };
 
-    /**
-     * 为了实现整个页面各components的联动，该部分后续可能会放在PageSelect主页面中
-     * 根据筛选的日期，找出在这些时间中出行的所有用户ID，存入usersArr数组中。
-     * 根据usersArr数组中的用户ID，统计出每个用户出行的地点并可视化。
-     * */
-    // 根据日期选择用户，监听函数。
-    addDateSelectListener() {
-        //如果点击clear，则清空数组并清除地图上的渲染内容
-        eventEmitter.on('clearCalendarHighlight', ({clear}) => {
-            if(clear){
-                this.setState({
-                    userData: []
-                })
-            }
-        });
-        // 根据rightChart获取用户ID信息，并重新组织数据用于地图展示。
-        eventEmitter.on('getUsers', ({userIDs}) => {
-            this.getUserData(userIDs);
-        });
-        // 根据rightChart存储筛选时段的起止时间信息。
-        eventEmitter.on('addUsersData', ({start, end}) => {});
-    };
-
-
-    /***
-     * Map中用于存放筛选的用户数据的数组，在收到clear按钮eventEmitter事件后，也需要clear。
-     * 此处需要添加一个响应清空函数。
-     */
-
 
     componentDidMount() {
         this.initMap();
-        this.addDateSelectListener();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -242,8 +207,13 @@ class Map extends Component {
         if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)||!_.isEqual(prevProps.bottomHeight, this.props.bottomHeight)){
             this.initMap();
         }
-        if(!_.isEqual(prevState.userData, this.state.userData)){
-            this.updateMap(this.state.userData)
+        //只要this.context.state.selectedUsers中的值改变，就会在地图上重新渲染
+        if(!_.isEqual(prevState.SelectedUsers, this.context.state.selectedUsers)){
+            let usersData = this.getUserData(this.context.state.selectedUsers);
+            this.updateMap(usersData);
+            this.setState({
+                SelectedUsers: this.context.state.selectedUsers
+            })
         }
     }
 

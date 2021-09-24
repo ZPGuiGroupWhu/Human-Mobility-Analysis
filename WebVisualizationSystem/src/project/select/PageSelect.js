@@ -6,6 +6,7 @@ import ChartLeft from './charts/left/ChartLeft';
 import ChartBottom from './charts/bottom/ChartBottom';
 import Store from '@/store';
 import _ from 'lodash';
+import {eventEmitter} from '@/common/func/EventEmitter';
 
 class PageSelect extends Component {
   static contextType = Store;
@@ -17,7 +18,7 @@ class PageSelect extends Component {
       bottomHeight: 0, //底部内容高度
       bottomWidth: 0, //底部内容宽度
       selectedByCharts: [], // 历史筛选记录(限制更新)
-      selectedByCalendar: [],
+      selectedByCalendar: [], //历史---日历筛选记录
     };
   }
 
@@ -33,13 +34,14 @@ class PageSelect extends Component {
       if (prev.length === 0) return [...cur];
       if (cur.length === 0) return [...prev];
       return Array.from(new Set(prev.filter(item => cur.includes(item))))
-    }, [])
+    }, []);
 
     console.log(this.context.state);
     this.context.dispatch({type: 'setSelectedUsers', payload: result});
-  }
+  };
 
   componentDidMount() {
+    //返回各组件的边界位置，用于日历、map等组件的布局
     const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
     const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().bottom
         - document.querySelector('.bottom').getBoundingClientRect().top;
@@ -62,7 +64,7 @@ class PageSelect extends Component {
       this.setState({
         selectedByCharts: this.context.state.selectedByCharts,
         selectedByCalendar: this.context.state.selectedByCalendar,
-      })
+      });
     }
   }
 

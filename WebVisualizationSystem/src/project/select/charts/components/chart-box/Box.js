@@ -86,7 +86,7 @@ class Box extends Component {
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
     });
-    if (!this.handleEmptyArray(this.context.state.selectedUsers)) {
+    if (!this.handleEmptyArray(this.context.state.selectedByCharts)) {
       this.context.dispatch({ type: 'setSelectedByCharts', payload: [] });
     }
   }

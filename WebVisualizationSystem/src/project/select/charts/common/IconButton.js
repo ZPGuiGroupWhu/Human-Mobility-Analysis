@@ -31,6 +31,10 @@ class IconButton extends Component {
     color: '#000',
   }
 
+  commonStyle = {
+    transition: 'all .3s ease-out',
+  }
+
   onClick = (e, ...params) => {
     e.preventDefault();
     this.props.onClick.call(this, ...params);
@@ -48,11 +52,19 @@ class IconButton extends Component {
               {
                 (isHovering || (this.props.isReserveActive && isClicked)) ?
                   <Tooltip placement="topLeft" title={<span>{this.props.text}</span>} color='cyan'>
-                    <img src={this.props.actImage} alt="" style={{ height: this.props.imgHeight }} />
+                    <img
+                      src={this.props.actImage}
+                      alt=""
+                      style={{
+                        height: this.props.imgHeight,
+                        transform: 'rotate(180deg)',
+                        ...this.commonStyle
+                      }}
+                    />
                   </Tooltip>
                   :
                   <Tooltip placement="topLeft" title={<span>{this.props.text}</span>} color='cyan'>
-                    <img src={this.props.noActImage} alt="" style={{ height: this.props.imgHeight }} />
+                    <img src={this.props.noActImage} alt="" style={{ height: this.props.imgHeight, ...this.commonStyle }} />
                   </Tooltip>
 
               }

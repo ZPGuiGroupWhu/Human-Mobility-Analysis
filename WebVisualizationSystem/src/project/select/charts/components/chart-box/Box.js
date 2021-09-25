@@ -43,10 +43,10 @@ class Box extends Component {
     };
   }
 
+  // 鼠标移入/移除组件 - 标识当前操作图表的 id
   onMouseEnter = () => {
     this.context.dispatch({ type: 'setCurId', payload: this.props.id });
   }
-
   onMouseLeave = () => {
     this.context.dispatch({ type: 'setCurId', payload: -1 });
   }
@@ -61,7 +61,9 @@ class Box extends Component {
   getXAxis = (val) => { this.setState({ xAxis: val }) }; // 获取 x 轴类型
   getYAxis = (val) => { this.setState({ yAxis: val }) }; // 获取 y 轴类型
 
-  handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType); // 判断数据类型
+  // 判断数据类型
+  handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType); 
+  // 判断数组是否为空
   handleEmptyArray = (arr) => {
     try {
       if (!Array.isArray(arr)) throw new Error('input should be Array Type');
@@ -76,11 +78,11 @@ class Box extends Component {
     } catch (err) {
       console.log(err);
     }
-  }; // 判断数组是否为空
+  }; 
 
 
+  // 重置
   handleReload = () => {
-    // 重置 state
     this.setState({
       isVisible: true,
       xAxis: this.defaultXAxis,
@@ -184,11 +186,11 @@ class Box extends Component {
             </Space>
           </div>
         </div>
+        {/* 图表 */}
         <Chart
           reqSuccess={this.props.reqSuccess} // 数据是否请求成功
           isVisible={this.state.isVisible} // 控制 Chart 可视
           id={this.props.id} // 实例id
-          connect={this.props.connect} // 是否联动
           handleBrushEnd={this.props.handleBrushEnd} // 刷选结束事件
           isBrushEnd={this.props.isBrushEnd} // 刷选结束
           isAxisChange={this.state.isAxisChange} // 坐标轴改变

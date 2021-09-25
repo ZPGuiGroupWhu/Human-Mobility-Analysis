@@ -14,7 +14,6 @@ class Group extends Component {
     this.state = {
       isReload: {}, // 是否重置
       isBrushEnd: {}, // 是否结束刷选
-      connect: false, // 是否联动
     }
   }
 
@@ -28,19 +27,12 @@ class Group extends Component {
     return (
       <div className="chart-group-ctn">
         <FuncBar
-          handleReload={() => {
-            this.setState({ isReload: {} });
-            setTimeout(() => {
-              this.setState({ isReload: {} });
-            }, 0)
-          }} // 触发重置
-          handleConnect={() => this.setState(prev => ({ connect: !prev.connect }))} // 改变联动状态
+          handleReload={() => { this.setState({ isReload: {} }) }} // 触发重置
         />
         {
           this.props.render({
             reqSuccess: this.props.reqSuccess,
             isReload: this.state.isReload,
-            connect: this.state.connect,
             isBrushEnd: this.state.isBrushEnd,
             handleBrushEnd: this.handleBrushEnd,
           })

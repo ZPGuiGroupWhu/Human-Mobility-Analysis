@@ -60,22 +60,33 @@ class Footer extends Component {
     });
   };
 
+  getPopInfo=(id)=>{
+    let info=[]
+    this.context.state.allData&&Object.keys(Object.values(this.context.state.allData).find(item=>item['人员编号']=id)).forEach(key=>(
+      info.push(<li style={{float:"left",width:"50%"}}>{key}:{Object.values(this.context.state.allData).find(item=>item['人员编号']=id)[key]}</li>)
+      ))
+    info.push(<div class="clear"></div>)
+    return info
+  }
   render() {
     return (
       <div className="outer-container">
       <div className="select-footer-ctn">
       <Row gutter={[8,8]} style={{width:"100%"}}>
+      <Col span={24} key={"Pagination"}>
+        <Pagination style={{fontSize:12, position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
+          simple size='small' current={this.state.currentPage} onChange={this.onChange} total={this.data.length} showSizeChanger={false}
+          defaultPageSize={this.pageSize} />
+      </Col>
       {this.data &&
           this.data.length > 0 &&
           this.data.slice(this.state.minValue, this.state.maxValue).map(val => (
             <Col span={24} key={this.changeTimes+'-'+val.id}>
             <Popover 
-            title={val.id} trigger="hover" placement="left" 
+            title={val.id} trigger="click" placement="left" 
             content={
-              <div>
-                <p>指标1</p>
-                <p>指标2</p>
-                <p>etc.</p>
+              <div style={{width:"500px"}}>
+                {this.getPopInfo(val.id)}
               </div>
             } >
             <Card
@@ -120,11 +131,6 @@ class Footer extends Component {
             </Popover>
             </Col>
           ))}
-        <Col span={24} key={"Pagination"}>
-        <Pagination style={{fontSize:12, position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
-          simple size='small' current={this.state.currentPage} onChange={this.onChange} total={this.data.length} showSizeChanger={false}
-          defaultPageSize={this.pageSize} />
-        </Col>
       </Row>
       </div>
       </div>

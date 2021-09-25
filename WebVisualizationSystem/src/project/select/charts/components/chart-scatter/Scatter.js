@@ -172,6 +172,7 @@ class Scatter extends Component {
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
     let brushComponent = params.batch[0];
+    if (this.props.connect && !brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
     this.context.dispatch({
       type: 'setSelectedByCharts',
       payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][2]), // 刷选索引映射到数据维度
@@ -196,6 +197,14 @@ class Scatter extends Component {
       Reflect.set(this.option.xAxis, 'name', this.props.xAxisName);
       Reflect.set(this.option.yAxis, 'name', this.props.yAxisName);
       this.chart.setOption(this.option);
+    }
+
+    if (prevProps.isReload !== this.props.isReload) {
+      // 清除选框
+      this.chart.dispatchAction({
+        type: 'brush',
+        areas: [],
+      })
     }
   }
 

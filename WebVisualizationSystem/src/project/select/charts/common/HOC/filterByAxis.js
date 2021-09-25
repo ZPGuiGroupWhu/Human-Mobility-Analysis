@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Store from '@/store';
 
 export const filterByAxis = (...params) => WrappedComponent => {
-  class FilterBySelect extends Component {
+  class FilterByAxis extends Component {
     static contextType = Store;
 
     /**
@@ -26,12 +26,16 @@ export const filterByAxis = (...params) => WrappedComponent => {
 
     // 依据选择项筛选生成当前视图的渲染数据
     getData = (data, xAxis, yAxis) => {
-      if (!data || !xAxis || !yAxis) return null;
-      return Object.values(data).map(obj => {
-        return [xAxis, yAxis, '人员编号'].reduce((prev, item) => {
-          return [...prev, obj[item] || 0]
-        }, []);
-      })
+      try {
+        if (!data || !xAxis || !yAxis) return null;
+        return Object.values(data).map(obj => {
+          return [xAxis, yAxis, '人员编号'].reduce((prev, item) => {
+            return [...prev, obj[item] || 0]
+          }, []);
+        })
+      } catch (err) {
+        console.log(err);
+      }
     }
     // 模拟生成权重 dim = 4
     getDataWeight = (curData) => {
@@ -44,9 +48,8 @@ export const filterByAxis = (...params) => WrappedComponent => {
     }
 
     handleInit = () => {
-      const data = _.cloneDeep(this.context.state.allData);
       this.setState({
-        data: this.setData(data, this.props.defaultXAxis, this.props.defaultYAxis),
+        data: this.setData(this.props.data, this.props.defaultXAxis, this.props.defaultYAxis),
       })
     }
 
@@ -81,7 +84,7 @@ export const filterByAxis = (...params) => WrappedComponent => {
     }
 
     render() {
-      const {defaultXAxis, defaultYAxis, ...passThroughProps} = this.props;
+      const { defaultXAxis, defaultYAxis, ...passThroughProps } = this.props;
 
       return (
         <WrappedComponent {...passThroughProps} {...this.state} />
@@ -89,5 +92,5 @@ export const filterByAxis = (...params) => WrappedComponent => {
     }
   }
 
-  return FilterBySelect;
+  return FilterByAxis;
 }

@@ -55,13 +55,18 @@ export const filterBySelect = (...params) => WrappedComponent => {
       }
     }
 
-    updateData = (isConnect) => {
+    // 更新数据
+    updateData = (isConnect, isReload = false) => {
       const { allData, selectedUsers } = this.context.state; // 订阅 selectedUsers
       this.setState(prev => ({
+        historyData: prev.data, // 保存上一次数据
         data: _.cloneDeep(
           this.handleEmptyArray(isConnect ? selectedUsers : this.state.privateSelectedUsers) ?
-            allData :
-            this.getDataBySelectedUsers(this.state.historyData, isConnect ? selectedUsers : this.state.privateSelectedUsers))
+            allData : // 若筛选项为空，加载所有数据
+            this.getDataBySelectedUsers(isReload ? allData : prev.data, isConnect ? // 发生重置，则从所有数据中生成
+              selectedUsers : this.state.privateSelectedUsers
+            ) // 若存在筛选项，则依据上一次记录进一步筛选，加载筛选后的数据
+        )
       }));
     }
 
@@ -69,7 +74,6 @@ export const filterBySelect = (...params) => WrappedComponent => {
       if (!this.props.reqSuccess) return; // 数据未请求成功
       if (this.props.reqSuccess !== prevProps.reqSuccess) {
         this.updateData(this.props.isConnect);
-        this.setState({ historyData: this.context.state.allData, });
       } // 初次渲染
 
       // 其余组件筛选时，触发box更新
@@ -77,7 +81,7 @@ export const filterBySelect = (...params) => WrappedComponent => {
         this.setState({
           prevSelectedByCalendar: this.context.state.selectedByCalendar
         });
-        this.updateData(this.props.connect);
+        this.updateData(this.props.connect, true);
       }
 
       // 若图表间联动，则调用全局的筛选人员ID，反之调用自身维护的人员ID
@@ -85,31 +89,27 @@ export const filterBySelect = (...params) => WrappedComponent => {
         // 数据更新时机：当前筛选图表在进一步筛选时更新，联动图表在刷选结束时更新
         if (this.context.state.curId === this.id) {
           if (this.props.isAxisChange !== prevProps.isAxisChange) {
-            this.setState({ historyData: this.state.data, });
             this.updateData(this.props.connect);
           }
         } else {
           if (prevProps.isBrushEnd !== this.props.isBrushEnd) {
-            this.updateData(this.props.connect);
+            this.updateData(this.props.connect, true);
           }
         }
       } else {
         if (this.props.isAxisChange !== prevProps.isAxisChange) {
-          this.setState({ historyData: this.state.data, });
           this.updateData(this.props.connect);
         }
       }
 
       // 重置数据
       if (this.props.isReload !== prevProps.isReload) {
-        this.setState({ historyData: this.context.state.allData, });
-        this.context.dispatch({ type: 'setSelectedUsers', payload: [] });
-        this.setState({ data: this.context.state.allData });
+        this.updateData(this.props.connect, true);
       }
     }
 
     render() {
-      const { id, connect, isBrushEnd, isAxisChange, ...passThroughProps } = this.props;
+      const { id, isBrushEnd, isAxisChange, ...passThroughProps } = this.props;
 
       return (
         <WrappedComponent {...passThroughProps} {...this.state} />

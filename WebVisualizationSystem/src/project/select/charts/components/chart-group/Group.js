@@ -28,7 +28,12 @@ class Group extends Component {
     return (
       <div className="chart-group-ctn">
         <FuncBar
-          handleReload={() => this.setState({ isReload: {} })} // 触发重置
+          handleReload={() => {
+            this.setState({ isReload: {} });
+            setTimeout(() => {
+              this.setState({ isReload: {} });
+            }, 0)
+          }} // 触发重置
           handleConnect={() => this.setState(prev => ({ connect: !prev.connect }))} // 改变联动状态
         />
         {

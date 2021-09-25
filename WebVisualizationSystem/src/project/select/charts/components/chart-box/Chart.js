@@ -34,6 +34,8 @@ class Chart extends Component {
           {
             this.props.render({
               data: this.props.data,
+              connect: this.props.connect,
+              isReload: this.props.isReload,
               xAxisName: this.props.xAxis,
               yAxisName: this.props.yAxis,
               handleBrushEnd: this.props.handleBrushEnd,

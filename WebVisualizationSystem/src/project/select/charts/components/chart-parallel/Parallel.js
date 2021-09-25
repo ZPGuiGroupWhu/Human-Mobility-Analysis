@@ -129,10 +129,8 @@ class Parallel extends Component {
 
   // 存储刷选的数据索引映射
   onAxisAreaSelected = (params) => {
-    var series0 = this.chart.getModel().getSeries()[0];
-    var indices0 = series0.getRawIndicesByActiveState('active');
-    // console.log(indices0);
-    // console.log(indices0.map(item => this.state.data[item][4]));
+    let series0 = this.chart.getModel().getSeries()[0];
+    let indices0 = series0.getRawIndicesByActiveState('active');
     this.context.dispatch({
       type: 'setSelectedByCharts',
       payload: indices0.map(item => this.state.data[item][this.newKeys.findIndex(key => key === '人员编号')]), // 刷选索引映射到数据维度

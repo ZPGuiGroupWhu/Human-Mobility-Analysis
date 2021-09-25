@@ -34,10 +34,12 @@ class ChartLeft extends Component {
                 isBrushEnd={isBrushEnd}
                 handleBrushEnd={handleBrushEnd}
                 render={
-                  ({ data, xAxisName, yAxisName, handleBrushEnd }) => (
+                  ({ data, xAxisName, yAxisName, handleBrushEnd, connect, isReload }) => (
                     <Histogram
                       height="250px"
                       data={data}
+                      connect={connect}
+                      isReload={isReload}
                       xAxisName={xAxisName}
                       yAxisName={yAxisName}
                       handleBrushEnd={handleBrushEnd}
@@ -56,10 +58,12 @@ class ChartLeft extends Component {
                 isBrushEnd={isBrushEnd}
                 handleBrushEnd={handleBrushEnd}
                 render={
-                  ({ data, xAxisName, yAxisName, handleBrushEnd }) => (
+                  ({ data, xAxisName, yAxisName, handleBrushEnd, connect, isReload }) => (
                     <Scatter
                       height="250px"
                       data={data}
+                      connect={connect}
+                      isReload={isReload}
                       xAxisName={xAxisName}
                       yAxisName={yAxisName}
                       handleBrushEnd={handleBrushEnd}

@@ -6,10 +6,14 @@ import {ArcLayer,GeoJsonLayer} from '@deck.gl/layers';
 import ODs from './ODs.json'
 import ShenZhen from './ShenZhen.json'
 import $ from 'jquery';
+import Store from '@/store'
 class Footer extends Component {
+  static contextType = Store;
   constructor(props) {
     super(props);
+    this.changeTimes=0;
     this.pageSize=6;
+    this.data=ODs
     this.state = {
       currentPage:1,
       minValue: 0,
@@ -17,12 +21,26 @@ class Footer extends Component {
     }
   }
   componentWillUpdate(nextProps, nextState) {//当界面更新时删除对应canvas的上下文，防止Oldest context will be lost
-    if(this.state.minValue!==nextState.minValue){//仅当用户换页时进行该操作
+    this.data=ODs
+    if(this.context.state.selectedUsers.length>0){
+      this.data=[]
+      for(let i=0;i<this.context.state.selectedUsers.length;i=i+1){
+        this.data.push(ODs.find(item=>item.id==this.context.state.selectedUsers[i]))
+      }
+    }
+    if(this.state.maxValue!==nextState.maxValue ||this.props.selectedByCharts !== nextProps.selectedByCharts || this.props.selectedByCalendar !== nextProps.selectedByCalendar){
+      console.log("clear canvas")
+      this.changeTimes=this.changeTimes+1;
     for(let i=0;i<$("canvas[id='deckgl-overlay']").length;i++)
     {
       let gl = $("canvas[id='deckgl-overlay']")[i].getContext('webgl2');
       gl.getExtension('WEBGL_lose_context').loseContext();
     }
+    }
+  }
+  componentDidUpdate(prevProps,prevState){
+    if(this.props.selectedByCharts !== prevProps.selectedByCharts || this.props.selectedByCalendar !== prevProps.selectedByCalendar){
+      this.setState({currentPage:1,minValue: 0,maxValue: this.pageSize})
     }
   }
   onChange = (page) => {
@@ -43,15 +61,14 @@ class Footer extends Component {
   };
 
   render() {
-    let data = ODs;
     return (
       <div className="outer-container">
       <div className="select-footer-ctn">
       <Row gutter={[8,8]} style={{width:"100%"}}>
-      {data &&
-          data.length > 0 &&
-          data.slice(this.state.minValue, this.state.maxValue).map(val => (
-            <Col span={24} key={val.id}>
+      {this.data &&
+          this.data.length > 0 &&
+          this.data.slice(this.state.minValue, this.state.maxValue).map(val => (
+            <Col span={24} key={this.changeTimes+'-'+val.id}>
             <Popover 
             title={val.id} trigger="hover" placement="left" 
             content={
@@ -63,7 +80,7 @@ class Footer extends Component {
             } >
             <Card
               title={val.id}
-              hoverable={true}
+              hoverable={false}
               size="small"
               bodyStyle={{padding:1}}
             >
@@ -78,6 +95,7 @@ class Footer extends Component {
                 pitch: 45,
                 bearing: 0}}
                 controller={false}
+                getCursor={({isDragging})=> 'default'}
                 layers={[
                   new ArcLayer({
                     id: 'arc-layer',
@@ -104,7 +122,7 @@ class Footer extends Component {
           ))}
         <Col span={24} key={"Pagination"}>
         <Pagination style={{fontSize:12, position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
-          simple size='small' current={this.state.currentPage} onChange={this.onChange} total={data.length} showSizeChanger={false}
+          simple size='small' current={this.state.currentPage} onChange={this.onChange} total={this.data.length} showSizeChanger={false}
           defaultPageSize={this.pageSize} />
         </Col>
       </Row>

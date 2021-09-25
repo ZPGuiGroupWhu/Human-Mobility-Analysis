@@ -87,8 +87,8 @@ class PageSelect extends Component {
         <div className="left">
           <ChartLeft />
         </div>
-        <div className="footer-bar" style={{float:"right"}}>
-          <Footer />
+        <div className="footer-bar" style={{float:"right"}} >
+          <Footer selectedByCharts={this.state.selectedByCharts} selectedByCalendar={this.state.selectedByCalendar}/>
         </div>
       </div>
     )

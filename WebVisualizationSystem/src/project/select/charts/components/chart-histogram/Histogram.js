@@ -165,7 +165,7 @@ class Histogram extends Component {
   // 存储刷选的数据索引映射
   onBrushSelected = (params) => {
     let brushComponent = params.batch[0];
-    if (this.props.connect && !brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
+    if (!brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
     this.context.dispatch({
       type: 'setSelectedByCharts',
       payload: brushComponent.selected[0].dataIndex.map(item => {

@@ -6,6 +6,7 @@ import ChartLeft from './charts/left/ChartLeft';
 import ChartBottom from './charts/bottom/ChartBottom';
 import Store from '@/store';
 import _ from 'lodash';
+import { eventEmitter } from '@/common/func/EventEmitter';
 
 class PageSelect extends Component {
   static contextType = Store;
@@ -36,16 +37,16 @@ class PageSelect extends Component {
     }, []);
 
     console.log(this.context.state);
-    this.context.dispatch({type: 'setSelectedUsers', payload: result});
+    this.context.dispatch({ type: 'setSelectedUsers', payload: result });
   };
 
   componentDidMount() {
     //返回各组件的边界位置，用于日历、map等组件的布局
     const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
     const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().bottom
-        - document.querySelector('.bottom').getBoundingClientRect().top;
+      - document.querySelector('.bottom').getBoundingClientRect().top;
     const bottomWidth = document.querySelector('.bottom').getBoundingClientRect().right
-        - document.querySelector('.bottom').getBoundingClientRect().left;
+      - document.querySelector('.bottom').getBoundingClientRect().left;
     this.setState({
       leftWidth: leftWidth,
       bottomHeight: bottomHeight,
@@ -75,19 +76,19 @@ class PageSelect extends Component {
     return (
       <div className="select-page-ctn">
         <div className="center">
-          <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight}/>
+          <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight} />
           <div className="inner">
             <div className="top-bracket"></div>
             <div className="bottom">
-               <ChartBottom bottomHeight={this.state.bottomHeight} bottomWidth={this.state.bottomWidth}/>
+              <ChartBottom bottomHeight={this.state.bottomHeight} bottomWidth={this.state.bottomWidth} />
             </div>
           </div>
         </div>
         <div className="left">
           <ChartLeft />
         </div>
-        <div className="footer-bar" style={{float:"right"}} >
-          <Footer selectedByCharts={this.state.selectedByCharts} selectedByCalendar={this.state.selectedByCalendar}/>
+        <div className="footer-bar" style={{ float: "right" }} >
+          <Footer selectedByCharts={this.state.selectedByCharts} selectedByCalendar={this.state.selectedByCalendar} />
         </div>
       </div>
     )

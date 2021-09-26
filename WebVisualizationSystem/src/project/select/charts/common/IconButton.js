@@ -7,6 +7,7 @@ class IconButton extends Component {
     withClickArgs: [],
     imgHeight: '25px',
     isReserveActive: true,
+    isClicked: false,
   }
 
   /**
@@ -18,6 +19,7 @@ class IconButton extends Component {
    * @param {string?} imgHeight - 图片高度
    * @param {boolean} isReserveActive - 点击后是否保留激活效果
    * @param {string} text - 提示框文本内容
+   * @param {boolean} isClicked - 是否默认点击
    */
   constructor(props) {
     super(props);
@@ -42,7 +44,7 @@ class IconButton extends Component {
 
   render() {
     return (
-      <Hover>
+      <Hover isClicked={this.props.isClicked}>
         {
           ({ isHovering, isClicked }) => (
             <a

@@ -5,9 +5,6 @@ import Store from '@/store';
 export const filterBySelect = (...params) => WrappedComponent => {
   class FilterBySelect extends Component {
     static contextType = Store;
-    static defaultProps = {
-      connect: false,
-    };
 
     /**
      * props

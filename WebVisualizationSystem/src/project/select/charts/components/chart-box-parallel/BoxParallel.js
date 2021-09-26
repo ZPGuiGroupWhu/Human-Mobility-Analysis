@@ -154,7 +154,6 @@ class BoxParallel extends Component {
           reqSuccess={this.props.reqSuccess} // 数据是否请求成功
           isVisible={this.state.isVisible} // 控制 Chart 可视
           id={this.props.id} // 实例id
-          connect={this.props.connect} // 是否联动
           handleBrushEnd={this.props.handleBrushEnd} // 刷选结束事件
           isBrushEnd={this.props.isBrushEnd} // 刷选结束
           isReload={this.props.isReload} // 重置

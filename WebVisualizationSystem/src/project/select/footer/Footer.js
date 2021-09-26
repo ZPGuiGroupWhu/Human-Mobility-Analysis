@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import DeckGL from '@deck.gl/react';
 import "./Footer.scss";
-import {Card, Col, Row ,Pagination,Popover,Tooltip} from 'antd';
+import {Card, Col, Row ,Pagination,Popover} from 'antd';
 import {ArcLayer,GeoJsonLayer} from '@deck.gl/layers';
 import ODs from './ODs.json'
 import ShenZhen from './ShenZhen.json'
@@ -29,7 +29,7 @@ class Footer extends Component {
       }
     }
     if(this.state.maxValue!==nextState.maxValue ||this.props.selectedByCharts !== nextProps.selectedByCharts || this.props.selectedByCalendar !== nextProps.selectedByCalendar){
-      console.log("clear canvas")
+      // console.log("clear canvas")
       this.changeTimes=this.changeTimes+1;
     for(let i=0;i<$("canvas[id='deckgl-overlay']").length;i++)
     {
@@ -62,10 +62,10 @@ class Footer extends Component {
 
   getPopInfo=(id)=>{
     let info=[]
-    this.context.state.allData&&Object.keys(Object.values(this.context.state.allData).find(item=>item['人员编号']=id)).forEach(key=>(
-      info.push(<li style={{float:"left",width:"50%"}}>{key}:{Object.values(this.context.state.allData).find(item=>item['人员编号']=id)[key]}</li>)
+    this.context.state.allData&&Object.keys(Object.values(this.context.state.allData).find(item=>item['人员编号']==id)).forEach(key=>(
+      info.push(<li style={{float:"left",width:"50%"}}>{key}:{Object.values(this.context.state.allData).find(item=>item['人员编号']==id)[key]}</li>)
       ))
-    info.push(<div class="clear"></div>)
+    info.push(<div className="clear"></div>)
     return info
   }
   render() {

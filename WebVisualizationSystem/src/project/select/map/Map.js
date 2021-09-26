@@ -3,7 +3,6 @@ import * as echarts from 'echarts'
 import 'echarts-gl'
 import {message} from "antd";
 import Store from '@/store'
-import {eventEmitter} from '@/common/func/EventEmitter';
 import _ from 'lodash';
 import "./Map.scss";
 //测试数据

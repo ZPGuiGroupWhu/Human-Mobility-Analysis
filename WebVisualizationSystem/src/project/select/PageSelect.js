@@ -6,7 +6,6 @@ import ChartLeft from './charts/left/ChartLeft';
 import ChartBottom from './charts/bottom/ChartBottom';
 import Store from '@/store';
 import _ from 'lodash';
-import {eventEmitter} from '@/common/func/EventEmitter';
 
 class PageSelect extends Component {
   static contextType = Store;

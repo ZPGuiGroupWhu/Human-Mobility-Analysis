@@ -75,11 +75,49 @@ export default function Calendar(props) {
         return data;
     }
 
+    /**
+     * 此部分后续有待修改！！！
+     * 将面罩改为不可选取状态
+     * */
+    // 寻找不包括selectedUsers中用户的日期，并对其绘制其他颜色。
+    function highlightSelectedUsersDates(obj){
+        // 如果selectedByCharts为空的时候，不需要对日历进行筛选添加面罩，即显示所有日期
+        if (state.selectedUsers.length === 0){
+            return [];
+        }else{ //反之则给不包含Charts选择用户的日期加上面罩，作为提示
+            /**
+             * 后续可以将面罩改为不可选取
+             * 当前只是以高亮的形式提示用户这些日期不包含charts筛选出的用户出行轨迹
+             * */
+            const unselectedUsersDates = [];
+            const data = [];
+            const selectedUsers = state.selectedUsers;
+            for (const date in obj) {
+                const dateUsers = obj[date].users.map(item => parseInt(item));
+                //求交集，如果数组长度为0，则加入数组
+                const intersection = Array.from(new Set(selectedUsers.filter(item => dateUsers.includes(item))));
+                if(intersection.length === 0){
+                    unselectedUsersDates.push(date)
+                }
+            }
+            // 绘制面罩，以灰色的高亮图层的形式显示。
+            for(const time of unselectedUsersDates){
+                data.push({
+                    value: [time, Reflect.get(obj, time)?.count || 0],
+                    symbol: 'rect',
+                    itemStyle: {
+                        color: 'rgba(119, 136, 153, 5)',
+                    }
+                });
+            }
+            return data;
+        }
+    }
+
     // 自适应计算格网长宽
     const cellHeight = (bottomHeight - 10) / 8; //共8行，自适应计算
     const cellWidth = (bottomWidth - 140) / 53; //共53列，自适应计算
     const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
-
 
     // 参数设置
     const option = {
@@ -150,6 +188,13 @@ export default function Calendar(props) {
             symbolSize: cellSize,
             data: [],
             zlevel: 2,
+        },{
+            type: 'scatter',
+            name: '面罩',
+            coordinateSystem: 'calendar',
+            symbolSize: cellSize,
+            data: [],
+            zlevel: 2,
         }]
     };
 
@@ -185,6 +230,7 @@ export default function Calendar(props) {
         return data;
     }
 
+    // 将得到的数据重新数组，并重新渲染日历内容和位置、大小
     useEffect(() => {
         //data或rightWidth值改变后重新渲染
         const format = formatData(data);
@@ -208,6 +254,9 @@ export default function Calendar(props) {
             },{
                 name: '高亮',
                 symbolSize: cellSize,
+            },{
+                name: '面罩',
+                symbolSize: cellSize
             }]
         })
     }, [data, bottomWidth, bottomHeight]);
@@ -333,6 +382,15 @@ export default function Calendar(props) {
         });
     }, [data, date]);
 
+    // 如果selectedUsers变化了，则需要对不包含筛选用户的日期添加面罩作为提示
+    useEffect(() => {
+        myChart?.setOption({
+            series: [{
+                name: '面罩',
+                data: highlightSelectedUsersDates(data)
+            }]
+        })
+    }, [data, state.selectedUsers]);
     /**
      *清除高亮
      * 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮

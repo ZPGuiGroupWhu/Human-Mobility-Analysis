@@ -35,7 +35,7 @@ class ChartBottom extends Component {
             }
             data[item.date] = {'count': count, 'users': users}
         });
-        // console.log(data);
+        console.log(data);
         this.data = data;
     };
 

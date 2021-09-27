@@ -108,6 +108,10 @@ export default function Calendar(props) {
                     itemStyle: {
                         color: 'rgba(119, 136, 153, 5)',
                     },
+                    cursor: 'not-allowed', // 显示不可选取
+                    emphasis: {
+                        scale: false
+                    }
                 });
             }
             return data;
@@ -169,7 +173,7 @@ export default function Calendar(props) {
             splitLine:{
               show: true,
               lineStyle: {
-                  width: 1,
+                  width: 0.75,
               }
             },
             dayLabel: {
@@ -186,21 +190,21 @@ export default function Calendar(props) {
             type: 'heatmap',
             coordinateSystem: 'calendar',
             data: [],
-            zlevel: 1,
+            zlevel: 0,
         }, {
             type: 'scatter',
             name: '高亮',
             coordinateSystem: 'calendar',
             symbolSize: cellSize,
             data: [],
-            zlevel: 2,
+            zlevel: 0,
         },{
             type: 'scatter',
             name: '面罩',
             coordinateSystem: 'calendar',
             symbolSize: cellSize,
             data: [],
-            zlevel: 3,
+            zlevel: 1,
         }]
     };
 

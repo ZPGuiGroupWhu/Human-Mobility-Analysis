@@ -79,10 +79,10 @@ export default function Calendar(props) {
      * 此部分后续有待修改！！！
      * 将面罩改为不可选取状态
      * */
-    // 寻找不包括selectedUsers中用户的日期，并对其绘制其他颜色。
+    // 寻找不包括selectedByCharts中用户的日期，并对其绘制其他颜色。
     function highlightSelectedUsersDates(obj){
         // 如果selectedByCharts为空的时候，不需要对日历进行筛选添加面罩，即显示所有日期
-        if (state.selectedUsers.length === 0){
+        if (state.selectedByCharts.length === 0){
             return [];
         }else{ //反之则给不包含Charts选择用户的日期加上面罩，作为提示
             /**
@@ -91,7 +91,7 @@ export default function Calendar(props) {
              * */
             const unselectedUsersDates = [];
             const data = [];
-            const selectedUsers = state.selectedUsers;
+            const selectedUsers = state.selectedByCharts;
             for (const date in obj) {
                 const dateUsers = obj[date].users.map(item => parseInt(item));
                 //求交集，如果数组长度为0，则加入数组
@@ -107,7 +107,7 @@ export default function Calendar(props) {
                     symbol: 'rect',
                     itemStyle: {
                         color: 'rgba(119, 136, 153, 5)',
-                    }
+                    },
                 });
             }
             return data;
@@ -166,6 +166,12 @@ export default function Calendar(props) {
             itemStyle: {
                 borderWidth: 0.5
             },
+            splitLine:{
+              show: true,
+              lineStyle: {
+                  width: 1,
+              }
+            },
             dayLabel: {
                 color: '#fff',
                 nameMap: 'cn',
@@ -174,7 +180,7 @@ export default function Calendar(props) {
                 color: '#fff',
                 nameMap: 'cn',
             },
-            yearLabel: {show: false}
+            yearLabel: {show: false},
         },
         series: [{
             type: 'heatmap',
@@ -194,7 +200,7 @@ export default function Calendar(props) {
             coordinateSystem: 'calendar',
             symbolSize: cellSize,
             data: [],
-            zlevel: 2,
+            zlevel: 3,
         }]
     };
 
@@ -382,7 +388,7 @@ export default function Calendar(props) {
         });
     }, [data, date]);
 
-    // 如果selectedUsers变化了，则需要对不包含筛选用户的日期添加面罩作为提示
+    // 如果selectedByCharts变化了，则需要对不包含筛选用户的日期添加面罩作为提示
     useEffect(() => {
         myChart?.setOption({
             series: [{
@@ -390,7 +396,7 @@ export default function Calendar(props) {
                 data: highlightSelectedUsersDates(data)
             }]
         })
-    }, [data, state.selectedUsers]);
+    }, [data, state.selectedByCharts]);
     /**
      *清除高亮
      * 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮

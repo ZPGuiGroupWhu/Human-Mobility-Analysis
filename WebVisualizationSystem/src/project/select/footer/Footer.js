@@ -12,8 +12,8 @@ class Footer extends Component {
   constructor(props) {
     super(props);
     this.changeTimes=0;
-    this.pageSize=6;
-    this.data=ODs
+    this.pageSize=8;
+    this.data=ODs;
     this.state = {
       currentPage:1,
       minValue: 0,

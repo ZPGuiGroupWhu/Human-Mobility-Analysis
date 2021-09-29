@@ -21,6 +21,22 @@ export default function Calendar(props) {
 
     const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
 
+    const dateFlag = {}; //日期是否可选取的标记flag
+
+    // 初始化每个日期的flag
+    function initDateFlag(){
+        let start = +echarts.number.parseDate(year + '-01-01');
+        let end = +echarts.number.parseDate((+year + 1) + '-01-01');
+        let dayTime = 3600 * 24 * 1000;
+        for (let time = start; time < end; time += dayTime) {
+            const date = echarts.format.formatTime('yyyy-MM-dd', time);
+            dateFlag[date] = true;
+        }
+    }
+    useEffect(() => {
+        initDateFlag()
+    });
+
     // ECharts 容器实例
     const ref = useRef(null);
 
@@ -77,7 +93,7 @@ export default function Calendar(props) {
 
     /**
      * 此部分后续有待修改！！！
-     * 将面罩改为不可选取状态
+     * 将面罩改为不可选取状态（目前受API闲置，只能以面罩形式展现，添加鼠标不可选取的标志，且点击无效，从而作为示意）
      * */
     // 寻找不包括selectedByCharts中用户的日期，并对其绘制其他颜色。
     function highlightSelectedUsersDates(obj){
@@ -94,7 +110,7 @@ export default function Calendar(props) {
             const selectedUsers = state.selectedByCharts;
             for (const date in obj) {
                 const dateUsers = obj[date].users.map(item => parseInt(item));
-                //求交集，如果数组长度为0，则加入数组
+                // 求交集，如果数组长度为0，则加入数组
                 const intersection = Array.from(new Set(selectedUsers.filter(item => dateUsers.includes(item))));
                 if(intersection.length === 0){
                     unselectedUsersDates.push(date)
@@ -102,6 +118,7 @@ export default function Calendar(props) {
             }
             // 绘制面罩，以灰色的高亮图层的形式显示。
             for(const time of unselectedUsersDates){
+                dateFlag[time] = false; // 将不可选取的日子的flag设置为false,及不可选取
                 data.push({
                     value: [time, Reflect.get(obj, time)?.count || 0],
                     symbol: 'rect',
@@ -125,17 +142,6 @@ export default function Calendar(props) {
 
     // 参数设置
     const option = {
-        // title: {
-        //     top: 'top',
-        //     left: 'center',
-        //     text: '2018年用户出行统计',
-        //     textStyle: {
-        //         color: '#fff',
-        //         fontWeight: 'normal',
-        //         fontFamily: 'Microsoft YaHei',
-        //         fontSize: 15,
-        //     }
-        // },
         tooltip: {
             formatter: function (params) {// 说明某日出行用户数量
                 return '日期: ' + params.value[0] + '<br />' + '出行用户: ' + params.value[1];
@@ -197,14 +203,14 @@ export default function Calendar(props) {
             coordinateSystem: 'calendar',
             symbolSize: cellSize,
             data: [],
-            zlevel: 0,
+            zlevel: 1,
         },{
             type: 'scatter',
             name: '面罩',
             coordinateSystem: 'calendar',
             symbolSize: cellSize,
             data: [],
-            zlevel: 1,
+            zlevel: 2,
         }]
     };
 
@@ -234,7 +240,7 @@ export default function Calendar(props) {
             const date = echarts.format.formatTime('yyyy-MM-dd', time);
             data.push([
                 date,
-                Reflect.get(obj, date)?.count || 0 // 没有数据用 0 填充
+                Reflect.get(obj, date)?.count || 0, // 没有数据用 0 填充
             ]);
         }
         return data;
@@ -299,21 +305,24 @@ export default function Calendar(props) {
         };
         // 鼠标按下事件
         const mouseDown = (params) => {
-            // if (isdown.current) return;
-            // 已触发，添加标记
-            isdown.current = true;
-            // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]
-            setAction(prev => {
-                return {
-                    ...prev,
-                    mousedown: true,
-                }
-            });
-            setDate({
-                start: params.data[0] || params.data.value[0],
-                end: params.data[0] || params.data.value[0],
-            });
-            // console.log('timePeriod_Down:', timePeriod)
+            //需要判断当前
+            if (dateFlag[params.data[0]]) {
+                // if (isdown.current) return;
+                // 已触发，添加标记
+                isdown.current = true;
+                // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]
+                setAction(prev => {
+                    return {
+                        ...prev,
+                        mousedown: true,
+                    }
+                });
+                setDate({
+                    start: params.data[0] || params.data.value[0],
+                    end: params.data[0] || params.data.value[0],
+                });
+                // console.log('timePeriod_Down:', timePeriod)
+            }
         };
         myChart.on('mousedown', mouseDown);
         // 鼠标移动事件
@@ -342,13 +351,12 @@ export default function Calendar(props) {
         };
         myChart.on('mousemove', mouseMove);
 
-        // 鼠标抬起事件
-        const mouseUp = (params) => {
+        // 鼠标抬起事件：结束选取
+        const endSelect = (params) => {
             // 重置鼠标状态
             setAction(() => ({mousedown: false, mousemove: false}));
             // 清除标记
             isdown.current = false;
-
             let start = date.start, end = date.end;
             let startDate = str2date(start), endDate = str2date(end);
             // 校正时间顺序
@@ -369,6 +377,11 @@ export default function Calendar(props) {
             // eventEmitter.emit('getUsers', {userIDs});
             //将数据传递到setSelectedByCalendar数组中
             dispatch({type: 'setSelectedByCalendar', payload: userIDs.map(item => +item)})
+        };
+        const mouseUp = (params) => {
+            if (isdown.current){ //如果点击的是不可选取的内容，则isdown不会变为true，也就不存在mouseUp功能
+                endSelect(params)
+            }
         };
         myChart.on('mouseup', mouseUp);
 
@@ -397,7 +410,7 @@ export default function Calendar(props) {
         myChart?.setOption({
             series: [{
                 name: '面罩',
-                data: highlightSelectedUsersDates(data)
+                data: highlightSelectedUsersDates(data),
             }]
         })
     }, [data, state.selectedByCharts]);

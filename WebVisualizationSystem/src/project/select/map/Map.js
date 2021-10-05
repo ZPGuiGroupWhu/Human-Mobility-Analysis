@@ -1,8 +1,6 @@
 import React, {Component, createRef} from 'react'
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import {message} from "antd";
-import {eventEmitter} from '@/common/func/EventEmitter';
 import _ from 'lodash';
 import "./Map.scss";
 //测试数据

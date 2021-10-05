@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import Store from '@/store';
 
 export const filterByAxis = (...params) => WrappedComponent => {
   class FilterByAxis extends Component {
-    static contextType = Store;
-
     /**
      * props
      * @param {object} data - 数据源

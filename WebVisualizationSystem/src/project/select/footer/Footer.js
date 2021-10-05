@@ -6,14 +6,16 @@ import {ArcLayer,GeoJsonLayer} from '@deck.gl/layers';
 import ODs from './ODs.json'
 import ShenZhen from './ShenZhen.json'
 import $ from 'jquery';
-import Store from '@/store'
+// react-redux
+import {connect} from 'react-redux';
+
+
 class Footer extends Component {
-  static contextType = Store;
   constructor(props) {
     super(props);
     this.changeTimes=0;
-    this.pageSize=6;
-    this.data=ODs
+    this.pageSize=8;
+    this.data=ODs;
     this.state = {
       currentPage:1,
       minValue: 0,
@@ -22,10 +24,10 @@ class Footer extends Component {
   }
   componentWillUpdate(nextProps, nextState) {//当界面更新时删除对应canvas的上下文，防止Oldest context will be lost
     this.data=ODs
-    if(this.context.state.selectedUsers.length>0){
+    if(this.props.selectedUsers.length>0){
       this.data=[]
-      for(let i=0;i<this.context.state.selectedUsers.length;i=i+1){
-        this.data.push(ODs.find(item=>item.id==this.context.state.selectedUsers[i]))
+      for(let i=0;i<this.props.selectedUsers.length;i=i+1){
+        this.data.push(ODs.find(item=>item.id==this.props.selectedUsers[i]))
       }
     }
     if(this.state.maxValue!==nextState.maxValue ||this.props.selectedByCharts !== nextProps.selectedByCharts || this.props.selectedByCalendar !== nextProps.selectedByCalendar){
@@ -62,8 +64,8 @@ class Footer extends Component {
 
   getPopInfo=(id)=>{
     let info=[]
-    this.context.state.allData&&Object.keys(Object.values(this.context.state.allData).find(item=>item['人员编号']==id)).forEach(key=>(
-      info.push(<li style={{float:"left",width:"50%"}}>{key}:{Object.values(this.context.state.allData).find(item=>item['人员编号']==id)[key]}</li>)
+    this.props.data&&Object.keys(Object.values(this.props.data).find(item=>item['人员编号']==id)).forEach(key=>(
+      info.push(<li style={{float:"left",width:"50%"}}>{key}:{Object.values(this.props.data).find(item=>item['人员编号']==id)[key]}</li>)
       ))
     info.push(<div className="clear"></div>)
     return info
@@ -138,4 +140,13 @@ class Footer extends Component {
   }
 }
 
-export default Footer;
+const mapStateToProps = (state) => (
+  {
+    selectedUsers: state.select.selectedUsers,
+    selectedByCharts: state.select.selectedByCharts,
+    selectedByCalendar: state.select.selectedByCalendar,
+    data: state.select.data,
+  }
+)
+
+export default connect(mapStateToProps, null)(Footer);

@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
 import _ from 'lodash';
-import Store from '@/store';
+// react-redux
+import { connect } from 'react-redux';
+import { setSelectedByCharts } from '@/app/slice/selectSlice';
+
 
 class Scatter extends Component {
   constructor(props) {
@@ -173,10 +176,8 @@ class Scatter extends Component {
   onBrushSelected = (params) => {
     let brushComponent = params.batch[0];
     if (!brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
-    this.context.dispatch({
-      type: 'setSelectedByCharts',
-      payload: brushComponent.selected[0].dataIndex.map(item => this.props.data[item][2]), // 刷选索引映射到数据维度
-    });
+    const payload = brushComponent.selected[0].dataIndex.map(item => this.props.data[item][2]);
+    this.props.setSelectedByCharts(payload);
   }
 
   onBrushEnd = (params) => {
@@ -221,6 +222,11 @@ class Scatter extends Component {
   }
 }
 
-Scatter.contextType = Store;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
+  }
+}
 
-export default Scatter;
+
+export default connect(null, mapDispatchToProps)(Scatter);

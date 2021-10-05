@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from 'reac
 import * as echarts from 'echarts'; // ECharts
 import 'echarts/extension/bmap/bmap';
 import _ from 'lodash'; // lodash
+import { useSelector } from 'react-redux';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
@@ -23,22 +24,19 @@ import Tooltip from '@/components/tooltip/Tooltip'; // 自定义悬浮框
 import ScatterTooltip from './components/scatter-tooltip/ScatterTooltip'; // 点-tooltip
 // 样式
 import '@/project/bmap.scss';
-// 全局状态管理
-import Store from '@/store';
 
 
 function PagePredict(props) {
-  const { state, dispatch } = useContext(Store); // 全局状态管理 Store
+  const res = useSelector(state => state.predict.selectedTraj);
   const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
   useEffect(() => {
-    // console.log(state.selectedTraj);
-    if (Object.keys(state.selectedTraj).length) {
-      const data = transcoords(state.selectedTraj.data); // 坐标纠偏
-      const traj = _.cloneDeep(state.selectedTraj); // 深拷贝，返回 immutable 对象
+    if (Object.keys(res).length) {
+      const data = transcoords(res.data); // 坐标纠偏
+      const traj = _.cloneDeep(res); // 深拷贝，返回 immutable 对象
       Reflect.set(traj, 'data', data);
       setSelectedTraj(traj);
     }
-  }, [state.selectedTraj]);
+  }, [res]);
 
   const ref = useRef(null); // 容器 ref 对象
   // 首次进入页面，创建 echarts 实例
@@ -240,7 +238,7 @@ function PagePredict(props) {
     setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
   }
   useEffect(() => {
-    if (!chart) return () => {};
+    if (!chart) return () => { };
     chart.setOption({
       series: [{
         name: '高亮点',

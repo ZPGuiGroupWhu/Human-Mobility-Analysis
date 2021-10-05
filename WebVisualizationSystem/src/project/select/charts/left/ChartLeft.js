@@ -3,11 +3,9 @@ import Charts from '../Charts';
 import Scatter from '../components/chart-scatter/Scatter';
 import Histogram from '../components/chart-histogram/Histogram';
 import Parallel from '../components/chart-parallel/Parallel';
-import Store from '@/store';
 
 
 class ChartLeft extends Component {
-  static contextType = Store;
 
   constructor(props) {
     super(props);
@@ -22,23 +20,20 @@ class ChartLeft extends Component {
     return (
       <Charts.Group
         render={
-          ({ reqSuccess, isReload, connect, isBrushEnd, handleBrushEnd }) => (
+          ({ isReload, isBrushEnd, handleBrushEnd }) => (
             <>
               <Charts.Box
                 id={1}
-                reqSuccess={reqSuccess}
                 isReload={isReload}
-                connect={connect}
                 xAxis={this.groupOneKey}
                 yAxis={'人数'}
                 isBrushEnd={isBrushEnd}
                 handleBrushEnd={handleBrushEnd}
                 render={
-                  ({ data, xAxisName, yAxisName, handleBrushEnd, connect, isReload }) => (
+                  ({ data, xAxisName, yAxisName, handleBrushEnd, isReload }) => (
                     <Histogram
                       height="250px"
                       data={data}
-                      connect={connect}
                       isReload={isReload}
                       xAxisName={xAxisName}
                       yAxisName={yAxisName}
@@ -50,19 +45,16 @@ class ChartLeft extends Component {
               </Charts.Box>
               <Charts.Box
                 id={2}
-                reqSuccess={reqSuccess}
                 isReload={isReload}
-                connect={connect}
                 xAxis={this.groupTwoKey[0]}
                 yAxis={this.groupTwoKey[1]}
                 isBrushEnd={isBrushEnd}
                 handleBrushEnd={handleBrushEnd}
                 render={
-                  ({ data, xAxisName, yAxisName, handleBrushEnd, connect, isReload }) => (
+                  ({ data, xAxisName, yAxisName, handleBrushEnd, isReload }) => (
                     <Scatter
                       height="250px"
                       data={data}
-                      connect={connect}
                       isReload={isReload}
                       xAxisName={xAxisName}
                       yAxisName={yAxisName}
@@ -74,9 +66,7 @@ class ChartLeft extends Component {
               </Charts.Box>
               <Charts.BoxParallel
                 id={3}
-                reqSuccess={reqSuccess}
                 isReload={isReload}
-                connect={connect}
                 isBrushEnd={isBrushEnd}
                 handleBrushEnd={handleBrushEnd}
                 title="大五人格"

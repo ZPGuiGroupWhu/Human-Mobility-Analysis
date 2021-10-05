@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import Store from '@/store';
 import './BoxParallel.scss';
 import {
   CompressOutlined,
@@ -10,6 +8,10 @@ import { Space } from 'antd';
 import _ from 'lodash';
 import Hover from '../../common/Hover';
 import ChartParallel from './ChartParallel';
+// react-redux
+import { connect } from 'react-redux';
+import { setCurId, setSelectedByCharts } from '@/app/slice/selectSlice';
+
 
 class BoxParallel extends Component {
   // icon 通用配置
@@ -43,11 +45,11 @@ class BoxParallel extends Component {
   }
 
   onMouseEnter = () => {
-    this.context.dispatch({ type: 'setCurId', payload: this.props.id });
+    this.props.setCurId(this.props.id);
   }
 
   onMouseLeave = () => {
-    this.context.dispatch({ type: 'setCurId', payload: -1 });
+    this.props.setCurId(-1);
   }
 
   // 内容展开/关闭
@@ -85,8 +87,8 @@ class BoxParallel extends Component {
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
     });
-    if (!this.handleEmptyArray(this.context.state.selectedByCharts)) {
-      this.context.dispatch({ type: 'setSelectedByCharts', payload: [] });
+    if (!this.handleEmptyArray(this.props.selectedByCharts)) {
+      this.props.setSelectedByCharts([]);
     }
   }
 
@@ -151,7 +153,6 @@ class BoxParallel extends Component {
           </div>
         </div>
         <ChartParallel
-          reqSuccess={this.props.reqSuccess} // 数据是否请求成功
           isVisible={this.state.isVisible} // 控制 Chart 可视
           id={this.props.id} // 实例id
           handleBrushEnd={this.props.handleBrushEnd} // 刷选结束事件
@@ -164,10 +165,17 @@ class BoxParallel extends Component {
   }
 }
 
-BoxParallel.contextType = Store;
-
-BoxParallel.propTypes = {
-  reqSuccess: PropTypes.bool.isRequired,
+const mapStateToProps = (state) => {
+  return {
+    selectedByCharts: state.select.selectedByCharts,
+  }
 }
 
-export default BoxParallel;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setCurId: (payload) => dispatch(setCurId(payload)),
+    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(BoxParallel);

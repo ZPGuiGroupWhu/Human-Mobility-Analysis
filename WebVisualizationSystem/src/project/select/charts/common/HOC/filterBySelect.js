@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import Store from '@/store';
+// react-redux
+import { connect } from 'react-redux';
 
 export const filterBySelect = (...params) => WrappedComponent => {
   class FilterBySelect extends Component {
-    static contextType = Store;
-
     /**
      * props
      * @param {number} id - 当前实例标签
@@ -17,7 +16,7 @@ export const filterBySelect = (...params) => WrappedComponent => {
       this.id = props.id;
       this.state = {
         data: null, // 数据源
-        prevSelectedUsers: [], // 用户的历史筛选记录(用于 diff vdom)
+        isFirst: false,
       }
     }
 
@@ -51,28 +50,30 @@ export const filterBySelect = (...params) => WrappedComponent => {
     // 更新数据
     updateData = () => {
       // 订阅 selectedUsers
-      const { allData, selectedUsers } = this.context.state;
+      const { data, selectedUsers } = this.props;
       this.setState(prev => ({
-        prevSelectedUsers: selectedUsers,
         data: _.cloneDeep(this.handleEmptyArray(selectedUsers) ?
-          allData :
-          this.getDataBySelectedUsers(allData, selectedUsers))
+          data :
+          this.getDataBySelectedUsers(data, selectedUsers))
       }));
     }
 
     componentDidUpdate(prevProps, prevState) {
       // 数据未请求成功
-      if (!this.props.reqSuccess) return;
+      if (this.props.reqStatus !== 'succeeded') return;
 
       // 初次渲染
-      if (this.props.reqSuccess !== prevProps.reqSuccess) {
+      if (this.props.reqStatus === 'succeeded' && !this.state.isFirst) {
         this.updateData();
+        this.setState({
+          isFirst: true,
+        })
       }
 
-      // context 中的 selectedUsers 发生变化时，触发图表数据更新
-      if (!_.isEqual(prevState.prevSelectedUsers, this.context.state.selectedUsers)) {
+      // selectedUsers 发生变化时，触发图表数据更新
+      if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers)) {
         // 数据更新时机：当前筛选图表在进一步筛选时更新，联动图表在刷选结束时更新
-        if (this.context.state.curId === this.id) {
+        if (this.props.curId === this.id) {
           if (this.props.isAxisChange !== prevProps.isAxisChange) {
             this.updateData();
           }
@@ -91,5 +92,14 @@ export const filterBySelect = (...params) => WrappedComponent => {
     }
   }
 
-  return FilterBySelect;
+  const mapStateToProps = (state) => {
+    return {
+      curId: state.select.curId,
+      data: state.select.data,
+      selectedUsers: state.select.selectedUsers,
+      reqStatus: state.select.reqStatus,
+    }
+  }
+
+  return connect(mapStateToProps, null)(FilterBySelect);
 }

@@ -4,21 +4,19 @@ import Map from './map/Map';
 import Footer from './footer/Footer';
 import ChartLeft from './charts/left/ChartLeft';
 import ChartBottom from './charts/bottom/ChartBottom';
-import Store from '@/store';
 import _ from 'lodash';
-import { eventEmitter } from '@/common/func/EventEmitter';
+// react-redux
+import { connect } from 'react-redux';
+import { fetchData, setSelectedUsers } from '@/app/slice/selectSlice';
+
 
 class PageSelect extends Component {
-  static contextType = Store;
-
   constructor(props) {
     super(props);
     this.state = {
       leftWidth: 0, // 左侧栏宽度
       bottomHeight: 0, //底部内容高度
       bottomWidth: 0, //底部内容宽度
-      selectedByCharts: [], // 历史筛选记录(限制更新)
-      selectedByCalendar: [], //历史---日历筛选记录
     };
   }
 
@@ -36,11 +34,13 @@ class PageSelect extends Component {
       return Array.from(new Set(prev.filter(item => cur.includes(item))))
     }, []);
 
-    console.log(this.context.state);
-    this.context.dispatch({ type: 'setSelectedUsers', payload: result });
+    this.props.setSelectedUsers(result);
   };
 
   componentDidMount() {
+    // 请求数据
+    this.props.fetchData(`${process.env.PUBLIC_URL}/mock/ocean_score.json`);
+
     //返回各组件的边界位置，用于日历、map等组件的布局
     const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
     const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().bottom
@@ -55,21 +55,12 @@ class PageSelect extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // 监听 context
     if (
-      !_.isEqual(prevState.selectedByCharts, this.context.state.selectedByCharts) ||
-      !_.isEqual(prevState.selectedByCalendar, this.context.state.selectedByCalendar)
+      !_.isEqual(prevProps.selectedByCharts, this.props.selectedByCharts) ||
+      !_.isEqual(prevProps.selectedByCalendar, this.props.selectedByCalendar)
     ) {
-      this.handleIntersection(this.context.state.selectedByCharts, this.context.state.selectedByCalendar);
-      this.setState({
-        selectedByCharts: this.context.state.selectedByCharts,
-        selectedByCalendar: this.context.state.selectedByCalendar,
-      });
+      this.handleIntersection(this.props.selectedByCharts, this.props.selectedByCalendar);
     }
-  }
-
-  componentWillUnmount() {
-
   }
 
   render() {
@@ -88,11 +79,25 @@ class PageSelect extends Component {
           <ChartLeft />
         </div>
         <div className="footer-bar" style={{ float: "right" }} >
-          <Footer selectedByCharts={this.state.selectedByCharts} selectedByCalendar={this.state.selectedByCalendar} />
+          <Footer />
         </div>
       </div>
     )
   }
 }
 
-export default PageSelect
+const mapStateToProps = (state) => {
+  return {
+    selectedByCharts: state.select.selectedByCharts,
+    selectedByCalendar: state.select.selectedByCalendar,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    fetchData: (url) => dispatch(fetchData(url)),
+    setSelectedUsers: (payload) => dispatch(setSelectedUsers(payload)),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PageSelect);

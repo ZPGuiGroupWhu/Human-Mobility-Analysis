@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import Store from '@/store';
 import './Box.scss';
 import {
   CompressOutlined,
@@ -11,6 +9,9 @@ import _ from 'lodash';
 import Hover from '../../common/Hover';
 import DropMenu from '../../common/DropMenu';
 import Chart from './Chart';
+// react-redux
+import { connect } from 'react-redux';
+import { setCurId, setSelectedByCharts } from '@/app/slice/selectSlice';
 
 class Box extends Component {
   // icon 通用配置
@@ -23,7 +24,6 @@ class Box extends Component {
    * props
    * @param {boolean} reqSuccess - 源数据是否请求成功
    * @param {object} isReload - 是否重置
-   * @param {boolean} connect - 联动状态
    * @param {array || string} xAxis - x轴选项列表(字段)
    * @param {array || string} yAxis - y轴选项列表(字段)
    * @param {number} id - 实例标识
@@ -45,10 +45,10 @@ class Box extends Component {
 
   // 鼠标移入/移除组件 - 标识当前操作图表的 id
   onMouseEnter = () => {
-    this.context.dispatch({ type: 'setCurId', payload: this.props.id });
+    this.props.setCurId(this.props.id);
   }
   onMouseLeave = () => {
-    this.context.dispatch({ type: 'setCurId', payload: -1 });
+    this.props.setCurId(-1);
   }
 
   // 内容展开/关闭
@@ -62,7 +62,7 @@ class Box extends Component {
   getYAxis = (val) => { this.setState({ yAxis: val }) }; // 获取 y 轴类型
 
   // 判断数据类型
-  handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType); 
+  handleTypeJudge = (data, targetType) => (Object.prototype.toString.call(data) === targetType);
   // 判断数组是否为空
   handleEmptyArray = (arr) => {
     try {
@@ -78,7 +78,7 @@ class Box extends Component {
     } catch (err) {
       console.log(err);
     }
-  }; 
+  };
 
 
   // 重置
@@ -88,8 +88,8 @@ class Box extends Component {
       xAxis: this.defaultXAxis,
       yAxis: this.defaultYAxis,
     });
-    if (!this.handleEmptyArray(this.context.state.selectedByCharts)) {
-      this.context.dispatch({ type: 'setSelectedByCharts', payload: [] });
+    if (!this.handleEmptyArray(this.props.selectedByCharts)) {
+      this.props.setSelectedByCharts([]);
     }
   }
 
@@ -121,7 +121,7 @@ class Box extends Component {
             this.state.isVisible ?
               <>
                 <div className="axis-title">
-                  <span style={{fontWeight: 'bold'}}>X:</span>
+                  <span style={{ fontWeight: 'bold' }}>X:</span>
                   {
                     this.handleTypeJudge(this.props.xAxis, '[object Array]') ?
                       <DropMenu
@@ -134,7 +134,7 @@ class Box extends Component {
                   }
                 </div>
                 <div className="axis-title">
-                  <span style={{fontWeight: 'bold'}}>Y:</span>
+                  <span style={{ fontWeight: 'bold' }}>Y:</span>
                   {
                     this.handleTypeJudge(this.props.yAxis, '[object Array]') ?
                       <DropMenu
@@ -188,7 +188,6 @@ class Box extends Component {
         </div>
         {/* 图表 */}
         <Chart
-          reqSuccess={this.props.reqSuccess} // 数据是否请求成功
           isVisible={this.state.isVisible} // 控制 Chart 可视
           id={this.props.id} // 实例id
           handleBrushEnd={this.props.handleBrushEnd} // 刷选结束事件
@@ -206,10 +205,17 @@ class Box extends Component {
   }
 }
 
-Box.contextType = Store;
-
-Box.propTypes = {
-  reqSuccess: PropTypes.bool.isRequired,
+const mapStateToProps = (state) => {
+  return {
+    selectedByCharts: state.select.selectedByCharts,
+  }
 }
 
-export default Box;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setCurId: (payload) => dispatch(setCurId(payload)),
+    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Box);

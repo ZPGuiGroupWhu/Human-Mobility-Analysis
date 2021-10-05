@@ -2,23 +2,21 @@ import React, {Component, createRef} from 'react'
 import * as echarts from 'echarts'
 import 'echarts-gl'
 import {message} from "antd";
-import Store from '@/store'
 import {eventEmitter} from '@/common/func/EventEmitter';
 import _ from 'lodash';
 import "./Map.scss";
 //测试数据
 import regionJson from './regionJson/Shenzhen';
-import userLocations from '../charts/bottom/jsonData/userLoctionCounts'
+import userLocations from '../charts/bottom/jsonData/userLoctionCounts';
+// react-redux
+import {connect} from 'react-redux';
 
 let myMap = null;
 
 class Map extends Component {
-    static contextType = Store;
     constructor(props) {
         super(props);
-        this.state = {
-            SelectedUsers: [], //用于记录历史的selectedUsers, 用于判断是否重新渲染
-        };
+        this.state = {};
     }
     mapRef = createRef();
 
@@ -207,13 +205,11 @@ class Map extends Component {
         if(!_.isEqual(prevProps.leftWidth, this.props.leftWidth)||!_.isEqual(prevProps.bottomHeight, this.props.bottomHeight)){
             this.initMap();
         }
-        //只要this.context.state.selectedUsers中的值改变，就会在地图上重新渲染
-        if(!_.isEqual(prevState.SelectedUsers, this.context.state.selectedUsers)){
-            let usersData = this.getUserData(this.context.state.selectedUsers);
+        //只要this.props.selectedUsers中的值改变，就会在地图上重新渲染
+        if(!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers)){
+            let usersData = this.getUserData(this.props.selectedUsers);
+            console.log(usersData);
             this.updateMap(usersData);
-            this.setState({
-                SelectedUsers: this.context.state.selectedUsers
-            })
         }
     }
 
@@ -231,6 +227,8 @@ class Map extends Component {
     }
 }
 
-Map.contextType = Store;
+const mapStateToProps = (state) => ({
+  selectedUsers: state.select.selectedUsers,
+})
 
-export default Map;
+export default connect(mapStateToProps)(Map);

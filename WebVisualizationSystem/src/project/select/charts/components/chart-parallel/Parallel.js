@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
 import _ from 'lodash';
-import Store from '@/store';
+// react-redux
+import { connect } from 'react-redux';
+import { setSelectedByCharts } from '@/app/slice/selectSlice';
+
 
 class Parallel extends Component {
-  static contextType = Store;
-
   constructor(props) {
     super(props);
     this.state = {
@@ -131,10 +132,8 @@ class Parallel extends Component {
   onAxisAreaSelected = (params) => {
     let series0 = this.chart.getModel().getSeries()[0];
     let indices0 = series0.getRawIndicesByActiveState('active');
-    this.context.dispatch({
-      type: 'setSelectedByCharts',
-      payload: indices0.map(item => this.state.data[item][this.newKeys.findIndex(key => key === '人员编号')]), // 刷选索引映射到数据维度
-    });
+    const payload = indices0.map(item => this.state.data[item][this.newKeys.findIndex(key => key === '人员编号')]);
+    this.props.setSelectedByCharts(payload);
     // 联动其他图层
     this.props.handleBrushEnd();
   }
@@ -172,4 +171,10 @@ class Parallel extends Component {
   }
 }
 
-export default Parallel;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
+  }
+}
+
+export default connect(null, mapDispatchToProps)(Parallel);

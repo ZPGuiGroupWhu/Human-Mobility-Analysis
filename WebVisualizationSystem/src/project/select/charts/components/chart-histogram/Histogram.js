@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import * as echarts from 'echarts';
 import _ from 'lodash';
-import Store from '@/store';
+// react-redux
+import { connect } from 'react-redux';
+import { setSelectedByCharts } from '@/app/slice/selectSlice';
 
 class Histogram extends Component {
   ref = React.createRef(null);
@@ -166,12 +168,10 @@ class Histogram extends Component {
   onBrushSelected = (params) => {
     let brushComponent = params.batch[0];
     if (!brushComponent.selected[0].dataIndex.length) return; // 若开启过滤，则始终保留历史刷选数据
-    this.context.dispatch({
-      type: 'setSelectedByCharts',
-      payload: brushComponent.selected[0].dataIndex.map(item => {
-        return this.state.data[item][2].map(item => item[2]); // dim=3: 人员编号
-      }).flat(Infinity), // 刷选索引映射到数据维度
-    });
+    const payload = brushComponent.selected[0].dataIndex.map(item => {
+      return this.state.data[item][2].map(item => item[2]); // dim=3: 人员编号
+    }).flat(Infinity) // 刷选索引映射到数据维度
+    this.props.setSelectedByCharts(payload);
   }
 
   onBrushEnd = (params) => {
@@ -226,6 +226,10 @@ class Histogram extends Component {
   }
 }
 
-Histogram.contextType = Store;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
+  }
+}
 
-export default Histogram;
+export default connect(null, mapDispatchToProps)(Histogram);

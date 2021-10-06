@@ -11,8 +11,6 @@ import { useResize } from '@/common/hooks/useResize';
 import { windowResize, drawerVisibility } from '@/context/mainContext';
 // 图片
 import { logo } from '@/icon';
-// 全局状态管理
-import { wrappedWithRedux } from '@/store';
 
 function Main() {
   // 窗口 resize 监听
@@ -60,4 +58,4 @@ function Main() {
   );
 }
 
-export default wrappedWithRedux(Main);
+export default Main;

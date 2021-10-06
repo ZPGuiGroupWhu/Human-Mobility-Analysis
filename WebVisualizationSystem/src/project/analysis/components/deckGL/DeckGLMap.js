@@ -8,7 +8,6 @@ import { Switch, Slider, Radio } from 'antd';
 import './DeckGLMap.css'
 import { eventEmitter } from '@/common/func/EventEmitter';
 import _ from 'lodash';
-import Store from '@/store';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';

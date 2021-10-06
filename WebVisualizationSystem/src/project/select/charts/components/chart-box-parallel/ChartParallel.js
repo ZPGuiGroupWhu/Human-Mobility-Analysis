@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import { CSSTransition } from 'react-transition-group';
-import Store from '@/store';
 // HOC
 import { filterBySelect } from '../../common/HOC/filterBySelect';
 import { pipe } from '../../common/HOC/pipe';
 
 class ChartParallel extends Component {
-  static contextType = Store;
-
   /**
    * props
    * @param {boolean} isVisible - 是否可视

@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import { CSSTransition } from 'react-transition-group';
-import Store from '@/store';
 // HOC
 import { filterBySelect } from '../../common/HOC/filterBySelect';
 import { filterByAxis } from '../../common/HOC/filterByAxis';
 import { pipe } from '../../common/HOC/pipe';
 
 class Chart extends Component {
-  static contextType = Store;
 
   /**
    * props

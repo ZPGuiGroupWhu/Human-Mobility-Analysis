@@ -54,7 +54,7 @@ export default class Radar extends Component{
             //         color: '#eee'
             //     }
             // },
-            legend: {
+            legend: { //图例
                 bottom: 5,
                 data: ['当前用户', '平均水平'],
                 itemGap: 50,
@@ -65,7 +65,7 @@ export default class Radar extends Component{
                 },
                 // selectedMode: 'single'
             },
-            tooltip: {
+            tooltip: { //tooltip显示信息
                 position: ['10%', '50%'],
                 textStyle: {
                     fontSize:5,
@@ -92,7 +92,7 @@ export default class Radar extends Component{
                 startAngle: 90,
                 shape: 'circle',
                 splitNumber: 4,
-                center: ['50%', '45%'],
+                center: ['50%', '47%'],
                 name: {
                     textStyle: {
                         color: '#428BD4',
@@ -154,6 +154,7 @@ export default class Radar extends Component{
         window.onresize = myChart.resize;
     };
 
+    // 初始化
     componentDidMount() {
         this.getRadar();
     }
@@ -171,8 +172,8 @@ export default class Radar extends Component{
                 className={'radarChart'}
                 ref={this.chartRef}
                 style={{
-                    width: 300,
-                    height: 'calc(50vh - 35px)',
+                    width: this.props.rightWidth, //宽度为右边栏宽度
+                    height: 'calc(50vh - 35px)', //高度，一半屏幕高度
                 }}
             ></div>
         );

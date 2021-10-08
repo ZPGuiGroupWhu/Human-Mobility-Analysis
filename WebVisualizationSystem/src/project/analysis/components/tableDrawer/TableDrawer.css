@@ -1,3 +1,10 @@
+.ant-descriptions-title{
+    font-size: 15px !important;
+    line-height: 15px !important;
+    position: relative !important;
+    top:-50% !important;
+    transform:translateY(50%) !important;
+}
 .ant-descriptions-item-label{
     font-size: 5px !important;
     font-family:'Microsoft Yahei' !important;
@@ -24,7 +31,7 @@
     font-family:'Microsoft Yahei' !important;
     font-weight: bolder!important;
     background-color: rgba(250,235,215,0.3) !important;
-    padding: 5px 0 5px 0 !important;
+    padding: 0px 0px 0px 0px !important;
     border-color: white !important;
     border-width: 3px !important;
 }

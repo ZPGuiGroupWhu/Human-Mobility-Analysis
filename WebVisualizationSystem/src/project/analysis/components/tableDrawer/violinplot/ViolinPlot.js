@@ -30,11 +30,9 @@ export default class ViolinPlot extends Component{
         });
 
         const drawData = [{
-            // width:1,
-            // height:300,
             type: 'violin',
-            y: this.unPack(userData, option),
-            hoverinfo: 'y',
+            x: this.unPack(userData, option),
+            hoverinfo: 'x',
             hoverlabel:{
                 bgcolor:'#FFC0CB',
                 bordercolor: 'grey',
@@ -90,15 +88,18 @@ export default class ViolinPlot extends Component{
             paper_bgcolor: 'rgba(250,235,215,0.1)',
             plot_bgcolor: 'rgba(250,235,215,0.1)',
             xaxis: {
-                zeroline: false
+                zeroline: false,
             },
-            height:380,
-            width:345,
+            yaxis: {
+                showline: true
+            },
+            height: 200,
+            width: this.props.rightWidth,
             margin:{
-                b:30,
-                l:40,
-                r:20,
-                t:20
+                b:20,
+                l:0,
+                r:0,
+                t:10
             }
         };
 
@@ -111,7 +112,10 @@ export default class ViolinPlot extends Component{
         this.getViolinPlot();
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
-        this.getViolinPlot();
+        if(!_.isEqual(prevProps.option, this.props.option)){
+            console.log(this.props.option);
+            this.getViolinPlot();
+        }
     }
 
     render() {

@@ -7,7 +7,7 @@ import './WordCloud.css'
 let myChart = null;
 
 export default function WordCloud(props){
-    const { data, maskImage, id} = props;
+    const { data, maskImage, id, rightWidth} = props;
     // ECharts 容器实例
     const ref = useRef(null);
 
@@ -21,9 +21,10 @@ export default function WordCloud(props){
         }
     });
 
+    // 词云图属性
     const option = {
         backgroundColor:'rgba(250,235,215,0.2)',
-        tooltip: {
+        tooltip: { //tooltip属性
             show: true,
             position: function (pos, params, dom, rect, size) {
                 // 鼠标在左侧时 tooltip 显示到右侧，鼠标在右侧时 tooltip 显示到左侧。
@@ -40,14 +41,14 @@ export default function WordCloud(props){
         series: [ {
             type: 'wordCloud',
             shape: 'circle',
-            // maskImage: maskImage,
+            // maskImage: maskImage, //掩膜形状
             left: 'center',
             top: 'center',
             right: 'center',
             bottom: 'center',
             width: '100%',
             height: '100%',
-            sizeRange: [6, 15],
+            sizeRange: [6, 20],
 
             // Text rotation range and step in degree. Text will be rotated randomly in range [-90, 90] by rotationStep 45
 
@@ -99,8 +100,8 @@ export default function WordCloud(props){
             className={'WordCloud'}
             ref={ref}
             style={{
-                width: 300,
-                height: 'calc(50vh - 35px)',
+                width: rightWidth, //宽度
+                height: 'calc(50vh - 35px)', //高度，一半屏幕高度
             }}
         ></div>
     )

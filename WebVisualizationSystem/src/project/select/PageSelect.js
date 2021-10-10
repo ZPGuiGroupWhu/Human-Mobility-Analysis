@@ -79,7 +79,7 @@ class PageSelect extends Component {
           <ChartLeft />
         </div>
         <div className="footer-bar" style={{ float: "right" }} >
-          <Footer />
+          <Footer setRoutes={this.props.setRoutes} />
         </div>
       </div>
     )

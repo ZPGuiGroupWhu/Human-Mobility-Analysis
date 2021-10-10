@@ -33,13 +33,13 @@ class Layout extends Component {
             />
             <h1>{title}</h1>
           </div>
-          {/* <div className='func-bar'>
+          <div className='func-bar'>
             {children[0]}
-          </div> */}
+          </div>
         </div>
         <div className='main' onMouseMove={e => { this.setState({ mouseXY: [e.pageX, e.pageY] }) }}>
           <MouseXY.Provider value={this.state.mouseXY}>
-            {children[0]}
+            {children[1]}
           </MouseXY.Provider>
         </div>
       </div>

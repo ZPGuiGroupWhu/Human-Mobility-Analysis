@@ -1,6 +1,7 @@
 // 组件导入
-import React from 'react';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Redirect, Route, Switch, NavLink } from 'react-router-dom';
+import BreadCrumb from '@/components/bread-crumb/BreadCrumb.js';
 import Layout from '@/components/layout/Layout';
 import PageAnalysis from '@/project/analysis/PageAnalysis';
 import PageSelect from '@/project/select/PageSelect';
@@ -20,6 +21,11 @@ function Main() {
     initZoom: 12,
   }
 
+  const [routes, setRoutes] = useState([
+    { breadCrumbName: '用户筛选', targetURL: '/select', status: { available: true, forbidden: false } },
+    { breadCrumbName: '轨迹筛选', targetURL: '/select/analysis', status: { available: false, forbidden: true } },
+    { breadCrumbName: '目的地预测', targetURL: '/select/predict', status: { available: false, forbidden: true } },
+  ])
 
   return (
     <windowResize.Provider value={isResize}>
@@ -30,11 +36,16 @@ function Main() {
           imgHeight='60%'
         >
           {
+            <BreadCrumb
+              routes={routes}
+            ></BreadCrumb>
+          }
+          {
             <Switch>
               <Route exact path='/select'>
-                <PageSelect {...initParams} />
+                <PageSelect {...initParams} setRoutes={setRoutes} />
               </Route>
-              <Route exact path='/select/analysis' render={() => <PageAnalysis {...initParams} />} />
+              <Route exact path='/select/analysis' render={() => <PageAnalysis {...initParams} setRoutes={setRoutes} />} />
               <Route path='/select/predict' render={() => <Predict {...initParams} />} />
               {/* 若均未匹配，重定向至首页 */}
               <Redirect to='/select' />

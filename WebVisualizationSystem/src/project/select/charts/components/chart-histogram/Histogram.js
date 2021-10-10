@@ -38,6 +38,7 @@ class Histogram extends Component {
       toolbox: ['lineX', 'lineY', 'keep', 'clear'],
       xAxisIndex: 0,
       throttleType: 'debounce',
+      throttleDelay: 300,
     },
     // grid - 定位图表在容器中的位置
     grid: {

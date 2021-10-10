@@ -34,6 +34,7 @@ class Scatter extends Component {
       toolbox: ['rect', 'keep', 'clear'],
       xAxisIndex: 0,
       throttleType: 'debounce',
+      throttleDelay: 300,
     },
     tooltip: {
       show: true,

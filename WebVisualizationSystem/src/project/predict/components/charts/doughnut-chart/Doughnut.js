@@ -59,7 +59,7 @@ class Doughnut extends Component {
 
   setCarousel = (data) => {
     const lens = data.length;
-    function carousel() {
+    const carousel = () => {
       if (this.curIdx >= lens) { this.curIdx = 0 };
       if (data[this.curIdx].value === 0) {
         this.curIdx += 1;
@@ -79,12 +79,15 @@ class Doughnut extends Component {
         this.curIdx += 1; // 当前索引后移
       }
     }
-    if (this.timer) {
-      clearInterval(this.timer);
+    // 仅当有索引结果时执行
+    if (data.some(item => item.value !== 0)) {
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
+        carousel.call(this);
+      }, this.props.autoplayInterval)
     }
-    this.timer = setInterval(() => {
-      carousel.call(this);
-    }, this.props.autoplayInterval)
   }
 
   onHighlight = (params) => {

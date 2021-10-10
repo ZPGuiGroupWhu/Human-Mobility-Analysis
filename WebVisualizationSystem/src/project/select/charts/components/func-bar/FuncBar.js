@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import './FuncBar.scss';
 import { Space } from 'antd';
 import _ from 'lodash';
 
 import IconButton from '../../common/IconButton';
-import { connectWhite, connectActive } from '@/assets/select-charts/connect';
 import { reloadWhite, reloadActive } from '@/assets/select-charts/reload';
 
 

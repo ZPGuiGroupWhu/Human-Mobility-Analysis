@@ -63,6 +63,7 @@ class Parallel extends Component {
       toolbox: ['clear'],
       xAxisIndex: 0,
       throttleType: 'debounce',
+      throttleDelay: 300,
     },
     visualMap: [
       {

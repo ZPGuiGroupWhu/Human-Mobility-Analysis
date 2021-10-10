@@ -321,6 +321,12 @@ class DeckGLMap extends Component {
         });
         // 存储轨迹 info.object = [id:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
         this.props.setSelectedTraj(info.object);
+        // 激活“目的地预测”跳转导航
+        this.props.setRoutes(prev => {
+          const newRoutes = _.cloneDeep(prev);
+          newRoutes[2].status = true;
+          return newRoutes;
+        })
         // Opacity改变，重新绘制其他轨迹
         const [selectONodes, selectDNodes, selectTrajs] = this.getSelectData(this.state.selectDate.start, this.state.selectDate.end);
         // this.getIconLayer(selectOdNodes);

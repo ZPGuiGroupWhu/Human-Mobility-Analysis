@@ -23,7 +23,7 @@ function Main() {
 
   const [routes, setRoutes] = useState([
     { breadCrumbName: '用户筛选', targetURL: '/select', status: true },
-    { breadCrumbName: '轨迹筛选', targetURL: '/select/analysis', status: false },
+    { breadCrumbName: '轨迹筛选', targetURL: '/select/analysis', status: true },
     { breadCrumbName: '目的地预测', targetURL: '/select/predict', status: false },
   ])
 

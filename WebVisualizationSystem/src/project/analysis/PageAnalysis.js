@@ -97,7 +97,12 @@ class PageAnalysis extends Component {
   render() {
     return (
       <>
-        <DeckGLMap userData={userData} getTrajCounts={this.getTrajCounts} eventName={this.EVENTNAME} />
+        <DeckGLMap
+          userData={userData}
+          getTrajCounts={this.getTrajCounts}
+          eventName={this.EVENTNAME}
+          setRoutes={this.props.setRoutes}
+        />
         <TableDrawer radar={() => (
           <div>
             <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} rightWidth={this.state.rightWidth} />
@@ -180,14 +185,14 @@ class PageAnalysis extends Component {
           height={170}
           bottomDrawerVisible={this.state.bottomDrawerVisible}
           setDrawerState={this.setDrawerState} />
-        <Button
+        {/* <Button
           onClick={() => {
             this.props.history.push('/select/predict')
           }}
           style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}
         >
           预测
-        </Button>
+        </Button> */}
       </>
     )
   }

@@ -39,32 +39,25 @@ export default function BreadCrumb(props) {
   }
 
   const createItem = ({ breadCrumbName, targetURL, status }) => {
-    const { available, forbidden } = status;
-    const Item = () => {
-      switch (true) {
-        case (available):
-          return (
-            <NavLinkItem
-              availableStyle={availableStyle}
-              activeStyle={activeStyle}
-              sperator={sperator}
-              breadCrumbName={breadCrumbName}
-              targetURL={targetURL}
-            />
-          )
-        case forbidden:
-          return (
-            <SpanItem
-              style={available ? availableStyle : (forbidden ? forbiddenStyle : '')}
-              breadCrumbName={breadCrumbName}
-              sperator={sperator}
-            />
-          )
-        default:
-          return;
-      }
-    }
-    return <Item />
+    return (
+      status ?
+        (
+          <NavLinkItem
+            availableStyle={availableStyle}
+            activeStyle={activeStyle}
+            sperator={sperator}
+            breadCrumbName={breadCrumbName}
+            targetURL={targetURL}
+          />
+        ) :
+        (
+          <SpanItem
+            style={forbiddenStyle}
+            breadCrumbName={breadCrumbName}
+            sperator={sperator}
+          />
+        )
+    )
   }
   return (
     <span className="bread-crumb-ctn">

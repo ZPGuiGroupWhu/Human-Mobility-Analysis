@@ -1,6 +1,6 @@
 // 组件导入
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Redirect, Route, Switch, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import BreadCrumb from '@/components/bread-crumb/BreadCrumb.js';
 import Layout from '@/components/layout/Layout';
 import PageAnalysis from '@/project/analysis/PageAnalysis';
@@ -22,10 +22,16 @@ function Main() {
   }
 
   const [routes, setRoutes] = useState([
-    { breadCrumbName: '用户筛选', targetURL: '/select', status: { available: true, forbidden: false } },
-    { breadCrumbName: '轨迹筛选', targetURL: '/select/analysis', status: { available: false, forbidden: true } },
-    { breadCrumbName: '目的地预测', targetURL: '/select/predict', status: { available: false, forbidden: true } },
+    { breadCrumbName: '用户筛选', targetURL: '/select', status: true },
+    { breadCrumbName: '轨迹筛选', targetURL: '/select/analysis', status: false },
+    { breadCrumbName: '目的地预测', targetURL: '/select/predict', status: false },
   ])
+
+  // setRoutes(prev => {
+  //   const newRoutes = _.cloneDeep(prev);
+  //   newRoutes[1].status = true;
+  //   return newRoutes;
+  // })
 
   return (
     <windowResize.Provider value={isResize}>

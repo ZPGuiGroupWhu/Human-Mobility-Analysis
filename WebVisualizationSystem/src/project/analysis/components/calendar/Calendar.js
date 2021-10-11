@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { debounce } from '@/common/func/debounce';
 import { eventEmitter } from '@/common/func/EventEmitter';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedTraj } from '@/app/slice/predictSlice';
+import _ from 'lodash';
 
 
 let myChart = null;
@@ -12,6 +15,9 @@ export default function Calendar(props) {
   } = props;
   const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
 
+  // 获取筛选的轨迹数据
+  const state = useSelector(state => state.predict);
+  const dispatch = useDispatch();
   // ECharts 容器实例
   const ref = useRef(null);
 
@@ -27,14 +33,37 @@ export default function Calendar(props) {
         value: [date, Reflect.get(obj, date)?.count || 0],
         symbol: 'rect',
         itemStyle: {
-          color: '#81D0F1'
+          borderColor: '#81D0F1',
+          borderWidth: 2,
+          borderType: 'solid'
         }
       });
     }
     return data;
   }
 
-  const cellSize = [16, 16]; // 日历单元格大小
+  // 高亮所选择的轨迹对应的日期格, selectedTraj为选择的轨迹
+  function highlightSelectedTrajectoryDate(obj, selectedTraj) {
+    const selectedDate = selectedTraj.date;
+    let data = [];
+    data.push({
+      value: [selectedDate, Reflect.get(obj, selectedDate)?.count || 0],
+      symbol: 'rect',
+      itemStyle: {
+        color: "rgba(0, 0, 0, 0)",
+        borderColor: 'red',
+        borderWidth: 2,
+        borderType: 'solid'
+      }
+    })
+    return data;
+  }
+  // 基于网页宽度，动态计算cell的宽度
+  const clientWidth = document.body.clientWidth;
+  const cellWidth = (clientWidth - 310) / 55;
+  // drawer高度170，减去top padding 20, bottom padding 10, 月份数字高度10，
+  const cellHeight = (170 - 20 - 10 - 10) / 7;
+  const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
   const option = {
     // title: {
     //   top: 10,
@@ -86,10 +115,17 @@ export default function Calendar(props) {
       type: 'heatmap',
       coordinateSystem: 'calendar',
       data: [],
-      zlevel: 1,
+      zlevel: 0,
     }, {
       type: 'scatter',
       name: '高亮',
+      coordinateSystem: 'calendar',
+      symbolSize: cellSize,
+      data: [],
+      zlevel: 1,
+    }, { //增加选中图层
+      type: 'scatter',
+      name: 'select',
       coordinateSystem: 'calendar',
       symbolSize: cellSize,
       data: [],
@@ -155,6 +191,7 @@ export default function Calendar(props) {
     if (!myChart) return () => { };
     // 鼠标按下事件
     myChart.on('mousedown', (params) => {
+      dispatch(setSelectedTraj({}));
       if (isdown.current) return;
       // console.log(params.data);
       // 已触发，添加标记
@@ -194,7 +231,7 @@ export default function Calendar(props) {
       false
     )
     const mouseMove = (params) => {
-      action.mousedown && selectDate(params)
+      action.mousedown && selectDate(params);
     }
     myChart.on('mousemove', mouseMove);
 
@@ -230,7 +267,7 @@ export default function Calendar(props) {
 
   // 高亮筛选部分
   useEffect(() => {
-    if (!date.start || !date.end) return () => {}
+    if (!date.start || !date.end) return () => { }
     myChart?.setOption({
       series: [{
         name: '高亮',
@@ -239,18 +276,31 @@ export default function Calendar(props) {
     })
   }, [data, date])
 
-  // 清除高亮
-  // 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮
+  // 筛选轨迹的日期标记部分
   useEffect(() => {
-    eventEmitter.on('clearCalendarHighlight', () => {
-      myChart?.setOption({
-        series: [{
-          name: '高亮',
-          data: [],
-        }]
-      })
+    myChart?.setOption({
+      series: [{
+        name: 'select',
+        data: highlightSelectedTrajectoryDate(data, state.selectedTraj)
+      }]
     })
-  }, [])
+  }, [data, state.selectedTraj])
+
+  // 清除高亮和标记
+  // 对应组件调用 eventEmitter.emit('clearAnalysisHighlight') 可清除高亮
+  useEffect(() => {
+    eventEmitter.on('clearAnalysisHighlight', ({ clear }) => {
+      if (clear === true) {
+        dispatch(setSelectedTraj({})); // 清除标记
+        myChart?.setOption({ // 清除高亮
+          series: [{
+            name: '高亮',
+            data: [],
+          }]
+        })
+      }
+    }, [])
+  })
 
   return (
     <div

@@ -28,14 +28,14 @@ class DeckGLMap extends Component {
     this.speedLayerShow = false;//是否显示速度图层
     this.speedLayer3D = true;//速度图层是否为3D
     this.gridWidth = 100;//格网图层的宽度
-    this.tripsLayerShow = false;//是否显示轨迹图层
+    this.tripsLayerShow = true;//是否显示轨迹图层
     this.iconLayerOShow = false;//是否显示O点的icon图层
     this.iconLayerDShow = false;//是否显示D点的icon图层
-    this.tripsLayerOneShow = false;//是否显示选中的单条轨迹图层
-    this.arcLayerOneShow = false;//是否显示选中轨迹的OD弧线
-    this.iconLayerOneOShow = false;//是否显示选中轨迹的O点icon图标
-    this.iconLayerOneDShow = false;//是否显示选中轨迹的D点icon图标
-    this.iconDisabled = true;//icon图层开关的disabled属性
+    this.tripsLayerOneShow = true;//是否显示选中的单条轨迹图层
+    this.arcLayerOneShow = true;//是否显示选中轨迹的OD弧线
+    this.iconLayerOneOShow = true;//是否显示选中轨迹的O点icon图标
+    this.iconLayerOneDShow = true;//是否显示选中轨迹的D点icon图标
+    this.iconDisabled = false;//icon图层开关的disabled属性
     this.iconChecked = false;//icon图层开关属性
     this.state = {
       arcLayer: null,//OD弧段图层
@@ -64,6 +64,7 @@ class DeckGLMap extends Component {
   componentDidMount() {
     this.getLayers();
     this.addDateSelectListener();
+    this.clear();
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.userData !== this.props.userData) {
@@ -74,7 +75,7 @@ class DeckGLMap extends Component {
       this.showSelectOD(this.state.selectDate.start, this.state.selectDate.end);
     }
   }
-
+  a
   getTrajNodes = () => {
     // console.log(this.props.userData)
     let Nodes = [];//统计所有节点的坐标
@@ -120,9 +121,9 @@ class DeckGLMap extends Component {
               this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / 0.00001 :
               this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / this.props.userData[i].spd[j]);
         }
-        //组织数据
+        //组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
         selectTrajs.push({
-          id: this.props.userData[i].id, data: path,
+          id: this.props.userData[i].id, date: this.props.userData[i].date, data: path,
           spd: this.props.userData[i].spd, azimuth: this.props.userData[i].azimuth, importance: importance
         });
       }
@@ -319,8 +320,9 @@ class DeckGLMap extends Component {
             currentTime: 100,
           })
         });
-        // 存储轨迹 info.object = [id:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
+        // 存储轨迹 info.object = [id:XX, date:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
         this.props.setSelectedTraj(info.object);
+        console.log(info.object)
         // 激活“目的地预测”跳转导航
         this.props.setRoutes(prev => {
           const newRoutes = _.cloneDeep(prev);
@@ -551,6 +553,26 @@ class DeckGLMap extends Component {
       })
     })
   };
+
+  // 清除
+  clear() {
+    eventEmitter.on('clearAnalysisHighlight', ({ clear }) => {
+      if (clear === true) {
+        this.setState({
+          selectDate: {
+            start: '2018-01-01',
+            end: '2018-12-31',
+          },
+          arcLayerOne: null,
+          tripsLayerOne: null,
+          iconLayerOneO: null,
+          iconLayerOneD: null,
+          tripsOpacity: initOpacity,
+        })
+      }
+    })
+  }
+
   sliderToolTipFormatter = (value) => {
     return `${value}m`
   }
@@ -603,7 +625,7 @@ class DeckGLMap extends Component {
           格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)} />
         </div><br />
         <div className={`moudle`}>
-          TripsLayer   <Switch onChange={this.changeTripsLayerShow} /><br />
+          TripsLayer   <Switch defaultChecked={true} onChange={this.changeTripsLayerShow} /><br />
           IconLayer <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} /><br />
         </div>
       </div>

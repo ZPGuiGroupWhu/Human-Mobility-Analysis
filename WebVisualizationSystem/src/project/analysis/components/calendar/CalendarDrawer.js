@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Drawer, Button } from 'antd';
 import './CalendarDrawer.css';
 import { withMouse } from './withMouse';
-import { UpCircleTwoTone, DownCircleTwoTone } from '@ant-design/icons';
-
+import { UpCircleTwoTone, DownCircleTwoTone, RedoOutlined } from '@ant-design/icons';
+import { eventEmitter } from '@/common/func/EventEmitter';
 const bottomBorder = 40;
 class CalendarDrawer extends Component {
   constructor(props) {
@@ -28,8 +28,8 @@ class CalendarDrawer extends Component {
     }
     if (prevProps.bottomDrawerVisible === true) {
       if (
-          prevProps.position.bottom < (prevProps.height + bottomBorder) &&
-          prevProps.position.bottom > (prevProps.height)
+        prevProps.position.bottom < (prevProps.height + bottomBorder) &&
+        prevProps.position.bottom > (prevProps.height)
       ) {
         !prevState.btnVisible && this.setState({
           btnVisible: true
@@ -53,40 +53,56 @@ class CalendarDrawer extends Component {
 
   render() {
     return (
-        <>
-          <Drawer
-              closable={false}
-              height={this.props.height}
-              keyboard
-              mask={false}
-              placement='bottom'
-              visible={this.props.bottomDrawerVisible}
-              bodyStyle={{
-                padding: '0 100px',
-              }}
-          >
-            {this.props.render()}
-          </Drawer>
+      <>
+        <Drawer
+          closable={false}
+          height={this.props.height}
+          keyboard
+          mask={false}
+          placement='bottom'
+          visible={this.props.bottomDrawerVisible}
+          bodyStyle={{
+            padding: '0 100px',
+          }}
+        >
+          {this.props.render()}
           <Button
-              ghost
-              shape="circle"
-              icon={
-                this.props.bottomDrawerVisible ?
-                    <DownCircleTwoTone twoToneColor="#fff" /> :
-                    <UpCircleTwoTone twoToneColor="#fff" />
-              }
-              style={{
-                display: (this.state.btnVisible ? '' : 'none'),
-                position: 'absolute',
-                bottom: (this.props.bottomDrawerVisible ? this.props.height + 10 : 10) + 'px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-              onClick={(e) => {
-                this.toParent('bottom');
-              }}
+            ghost
+            size='small'
+            type='default'
+            icon={<RedoOutlined style={{ color: '#fff' }} />}
+            onClick={(e) => {
+              let clear = true;
+              eventEmitter.emit('clearAnalysisHighlight', { clear })
+            }}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              zIndex: '99' //至于顶层
+            }}
           />
-        </>
+        </Drawer>
+        <Button
+          ghost
+          shape="circle"
+          icon={
+            this.props.bottomDrawerVisible ?
+              <DownCircleTwoTone twoToneColor="#fff" /> :
+              <UpCircleTwoTone twoToneColor="#fff" />
+          }
+          style={{
+            display: (this.state.btnVisible ? '' : 'none'),
+            position: 'absolute',
+            bottom: (this.props.bottomDrawerVisible ? this.props.height + 10 : 10) + 'px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+          onClick={(e) => {
+            this.toParent('bottom');
+          }}
+        />
+      </>
 
     )
   }

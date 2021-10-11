@@ -117,10 +117,14 @@ function PagePredict(props) {
             data: params.data,
           }
         })
+        setTimeout(() => {
+          chart.on('mouseout', { seriesName: '出发地' }, function fn(params) {
+            tooltipDispatch({ type: 'hidden' });
+            chart.off('mouseout', fn);
+          });
+        }, 0)
       });
-      chart.on('mouseout', { seriesName: '出发地' }, function (params) {
-        tooltipDispatch({ type: 'hidden' });
-      });
+
       chart.on('click', { seriesName: '目的地' }, function (params) {
         tooltipDispatch({
           type: 'showDest',
@@ -132,10 +136,14 @@ function PagePredict(props) {
             data: params.data,
           }
         })
+        setTimeout(() => {
+          chart.on('mouseout', { seriesName: '目的地' }, function fn(params) {
+            tooltipDispatch({ type: 'hidden' });
+            chart.off('mouseout', fn);
+          });
+        })
       });
-      chart.on('mouseout', { seriesName: '目的地' }, function (params) {
-        tooltipDispatch({ type: 'hidden' });
-      });
+      
       chart.on('click', { seriesName: '当前点' }, function (params) {
         tooltipDispatch({
           type: 'showCur',

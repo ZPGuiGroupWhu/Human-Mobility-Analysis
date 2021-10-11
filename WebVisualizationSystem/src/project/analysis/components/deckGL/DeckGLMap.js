@@ -538,6 +538,7 @@ class DeckGLMap extends Component {
     this.geticonLayerOneOD();//初始化单条OD的icon图层
     this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
   };
+
   // 根据日期选择轨迹，监听函数
   addDateSelectListener() {
     eventEmitter.on(this.props.eventName, ({ start, end }) => {
@@ -546,6 +547,7 @@ class DeckGLMap extends Component {
           start,
           end,
         },
+        // 清除单条高亮轨迹
         arcLayerOne: null,
         tripsLayerOne: null,
         iconLayerOneO: null,
@@ -554,20 +556,29 @@ class DeckGLMap extends Component {
     })
   };
 
-  // 清除
+  /**
+   * ！！！此处按钮点击会卡顿，可能存在一定问题，之后此处有待修改！！！
+   */
+
+  // 清除, 点击清除按钮时，需要显示所有的轨迹
   clear() {
     eventEmitter.on('clearAnalysisHighlight', ({ clear }) => {
       if (clear === true) {
         this.setState({
+          // 设置为全年时间
           selectDate: {
             start: '2018-01-01',
             end: '2018-12-31',
           },
+          // 清除高亮轨迹
           arcLayerOne: null,
           tripsLayerOne: null,
           iconLayerOneO: null,
           iconLayerOneD: null,
-          tripsOpacity: initOpacity,
+        }, () => {
+          // 重新绘制
+          this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
+          this.showSelectOD(this.state.selectDate.start, this.state.selectDate.end);
         })
       }
     })

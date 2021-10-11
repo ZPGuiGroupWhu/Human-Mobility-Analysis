@@ -14,7 +14,7 @@ import { useCreate } from '@/project/predict/function/useCreate'; //
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
 import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
 // 通用组件
-import BottomDrawer from '@/components/bottom-drawer/BottomDrawer'; // 底部抽屉
+import LeftDrawer from '@/components/left-drawer/LeftDrawer'; // 底部抽屉
 // 自定义组件
 import Foobar from './components/foobar/Foobar'; // 底部功能栏
 import EChartbar from './components/charts/EChartbar'; // EChart 侧边栏
@@ -264,7 +264,7 @@ function PagePredict(props) {
         className='bmap-container'
       ></div>
       {/* Bottom-Drawer */}
-      <BottomDrawer render={() => (
+      <LeftDrawer render={() => (
         <Foobar
           // 预测
           onPredictDispatch={predictDispatch}
@@ -274,7 +274,7 @@ function PagePredict(props) {
           poiField={poiState} // poi配置项
           setPoiField={poiDispatch} // poi配置项更新回调
         />
-      )} height={170} />
+      )} width={200} />
       <Tooltip
         top={tooltip.top}
         left={tooltip.left}

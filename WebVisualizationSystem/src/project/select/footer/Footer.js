@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import DeckGL from '@deck.gl/react';
+import { NavLink } from 'react-router-dom';
 import "./Footer.scss";
 import {Card, Col, Row ,Pagination,Popover} from 'antd';
 import {ArcLayer,GeoJsonLayer} from '@deck.gl/layers';
@@ -8,7 +9,7 @@ import ShenZhen from './ShenZhen.json'
 import $ from 'jquery';
 // react-redux
 import {connect} from 'react-redux';
-
+var _ = require('lodash');
 
 class Footer extends Component {
   constructor(props) {
@@ -70,22 +71,61 @@ class Footer extends Component {
     info.push(<div className="clear"></div>)
     return info
   }
+  cardClick=(id,e)=>{
+    for(let i=0;i<$("div[id='deckgl-card']").length;i++)
+    {
+      $("div[id='deckgl-card']")[i].style.backgroundColor="";
+    }
+    if(e.target.className=="ant-card-head-title"){
+      e.target.parentElement.parentElement.parentElement.style.backgroundColor="#c7f0ff"
+    }
+    else if(e.target.className=="ant-card-body"){
+      e.target.parentElement.style.backgroundColor="#c7f0ff"
+    }
+    else if(e.target.id=="deckgl-overlay"){
+      e.target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor="#c7f0ff"
+    }
+    this.props.setRoutes(prev => {
+      const newRoutes = _.cloneDeep(prev);
+      newRoutes[1].status = true;
+      return newRoutes;
+    })
+  }
   render() {
     return (
       <div className="outer-container">
-      <div className="select-footer-ctn">
-      <Row gutter={[8,8]} style={{width:"100%"}}>
-      <Col span={24} key={"Pagination"}>
+      <Row gutter={[8,8]} style={{width:"100%",marginLeft:"0"}}>
+      <Col span={24} key={"Pagination"} style={{marginBottom:"10px"}}>
         <Pagination style={{fontSize:12, position:"relative",left: "0%",top:"2%",transform:"translate(0%, 0)",width:"100%",textAlign:"center",backgroundColor:"white"}}
           simple size='small' current={this.state.currentPage} onChange={this.onChange} total={this.data.length} showSizeChanger={false}
           defaultPageSize={this.pageSize} />
       </Col>
+      </Row>
+      <div className="select-footer-ctn">
+      <Row gutter={[8,8]} style={{width:"100%",marginLeft:"0"}}>
       {this.data &&
           this.data.length > 0 &&
           this.data.slice(this.state.minValue, this.state.maxValue).map(val => (
             <Col span={24} key={this.changeTimes+'-'+val.id}>
-            <Popover 
-            title={val.id} trigger="click" placement="left" 
+            <Popover
+            title={<div>
+              {val.id}
+              <NavLink
+                style={{color: '#5ca5ff',float:"right"}}
+                activeStyle={{color: '#15FBF1',fontWeight: 'bold',}}
+                to={location => {
+                  return {
+                    ...location,
+                    pathname: '/select/analysis',
+                  }
+                }
+                }
+                exact
+              >
+              轨迹筛选
+              </NavLink>
+            </div>
+              } trigger="click" placement="left"
             content={
               <div style={{width:"500px"}}>
                 {this.getPopInfo(val.id)}
@@ -96,6 +136,10 @@ class Footer extends Component {
               hoverable={false}
               size="small"
               bodyStyle={{padding:1}}
+              id="deckgl-card"
+              // className="card"
+              // tabindex={val.id}
+              onClick={(e)=>this.cardClick(val.id,e)}
             >
             <div style={{height:"70px",position:"relative"}} >
             {/* 出现了新的问题，当使用Deck.gl时，会导致WARNING: Too many active WebGL contexts. Oldest context will be lost，从而使底图消失 */}

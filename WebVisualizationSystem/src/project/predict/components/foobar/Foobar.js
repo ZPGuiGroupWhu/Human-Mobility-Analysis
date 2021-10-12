@@ -4,6 +4,23 @@ import PredictFrame from './predict-frame/PredictFrame';
 import PoiFrame from './poi-frame/PoiFrame';
 import ModelFrame from './model-frame/ModelFrame';
 
+const Model1 = (props) => {
+  return (
+    <div>1</div>
+  )
+}
+const Model2 = (props) => {
+  return (
+    <div>2</div>
+  )
+}
+const Model3 = (props) => {
+  return (
+    <div>3</div>
+  )
+}
+
+
 const Foobar = (props) => {
   const {
     // 预测
@@ -15,7 +32,20 @@ const Foobar = (props) => {
     setPoiField,
   } = props;
 
-  const options = ['model1', 'model2', 'model3']
+  const options = [
+    {
+      name: 'model1',
+      component: <Model1 />
+    },
+    {
+      name: 'model2',
+      component: <Model2 />
+    },
+    {
+      name: 'model3',
+      component: <Model3 />
+    }
+  ]
 
   return (
     <div className="foobar-ctn">

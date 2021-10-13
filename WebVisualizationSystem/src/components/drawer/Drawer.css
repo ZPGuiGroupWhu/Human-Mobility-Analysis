@@ -1,0 +1,7 @@
+.ant-drawer-content {
+  background-color: transparent !important;
+}
+
+.ant-drawer {
+  position: absolute !important;
+}

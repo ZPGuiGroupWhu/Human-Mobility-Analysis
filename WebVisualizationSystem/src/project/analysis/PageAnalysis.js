@@ -185,14 +185,6 @@ class PageAnalysis extends Component {
           height={170}
           bottomDrawerVisible={this.state.bottomDrawerVisible}
           setDrawerState={this.setDrawerState} />
-        {/* <Button
-          onClick={() => {
-            this.props.history.push('/select/predict')
-          }}
-          style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: '9999' }}
-        >
-          预测
-        </Button> */}
       </>
     )
   }

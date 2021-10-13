@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import Charts from '../Charts';
 import Calendar from './components/Calendar';
 import {Button, Slider} from "antd";
 import {RedoOutlined} from "@ant-design/icons";
@@ -35,7 +34,7 @@ class ChartBottom extends Component {
             }
             data[item.date] = {'count': count, 'users': users}
         });
-        console.log(data);
+        // console.log(data);
         this.data = data;
     };
 

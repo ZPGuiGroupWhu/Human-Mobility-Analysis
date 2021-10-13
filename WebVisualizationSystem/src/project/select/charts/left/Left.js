@@ -1,16 +1,17 @@
 import React from 'react';
 import Chart from './ChartLeft';
-import LeftDrawer from '@/components/left-drawer/LeftDrawer'; // 左侧抽屉
+import Drawer from '@/components/drawer/Drawer'; // 左侧抽屉
 
 
 export default function Left(props) {
 
   return (
     <>
-      <LeftDrawer 
+      <Drawer 
         render={() => <Chart width={props.width} />}
-        width={props.width}
+        margin={props.width}
         initVisible={true}
+        type='left'
       />
     </>
   )

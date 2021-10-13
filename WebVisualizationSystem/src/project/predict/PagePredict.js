@@ -14,7 +14,7 @@ import { useCreate } from '@/project/predict/function/useCreate'; //
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
 import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
 // 通用组件
-import LeftDrawer from '@/components/left-drawer/LeftDrawer'; // 底部抽屉
+import LeftDrawer from '@/components/left-drawer/LeftDrawer'; // 左侧抽屉
 // 自定义组件
 import Foobar from './components/foobar/Foobar'; // 底部功能栏
 import EChartbar from './components/charts/EChartbar'; // EChart 侧边栏
@@ -143,7 +143,7 @@ function PagePredict(props) {
           });
         })
       });
-      
+
       chart.on('click', { seriesName: '当前点' }, function (params) {
         tooltipDispatch({
           type: 'showCur',
@@ -263,18 +263,21 @@ function PagePredict(props) {
         ref={ref}
         className='bmap-container'
       ></div>
-      {/* Bottom-Drawer */}
-      <LeftDrawer render={() => (
-        <Foobar
-          // 预测
-          onPredictDispatch={predictDispatch}
-          // poi 查询
-          poi={poiDisabled} // 是否开启poi查询
-          onPoi={setPoiDisabled} // 开启/关闭 poi 查询
-          poiField={poiState} // poi配置项
-          setPoiField={poiDispatch} // poi配置项更新回调
-        />
-      )} width={200} />
+      {/* Left-Drawer */}
+      <LeftDrawer
+        render={() => (
+          <Foobar
+            // 预测
+            onPredictDispatch={predictDispatch}
+            // poi 查询
+            poi={poiDisabled} // 是否开启poi查询
+            onPoi={setPoiDisabled} // 开启/关闭 poi 查询
+            poiField={poiState} // poi配置项
+            setPoiField={poiDispatch} // poi配置项更新回调
+          />
+        )}
+        width={200}
+      />
       <Tooltip
         top={tooltip.top}
         left={tooltip.left}

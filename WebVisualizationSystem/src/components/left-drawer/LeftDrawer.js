@@ -10,7 +10,7 @@ class LeftDrawer extends Component {
     super(props);
     this.state = {
       btnVisible: false,
-      drawerVisible: false,
+      drawerVisible: props.initVisible ?? false,
     };
   }
 
@@ -58,8 +58,9 @@ class LeftDrawer extends Component {
           placement='left'
           visible={this.state.drawerVisible}
           bodyStyle={{
-            padding: '75px 0 5px 0',
+            padding: '5px 0 5px 0',
           }}
+          getContainer={() => (document.querySelector('.main'))}
         >
           {this.props.render()}
         </Drawer>

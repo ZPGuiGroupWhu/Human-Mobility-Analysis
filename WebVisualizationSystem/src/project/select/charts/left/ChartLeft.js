@@ -31,6 +31,7 @@ class ChartLeft extends Component {
                 handleBrushEnd={handleBrushEnd}
                 render={
                   ({ data, xAxisName, yAxisName, handleBrushEnd, isReload }) => (
+                    !this.props.width ? null : // width 为 0 时，无法绘制，因此要监听 width 变化
                     <Histogram
                       height="250px"
                       data={data}
@@ -52,6 +53,7 @@ class ChartLeft extends Component {
                 handleBrushEnd={handleBrushEnd}
                 render={
                   ({ data, xAxisName, yAxisName, handleBrushEnd, isReload }) => (
+                    !this.props.width ? null :
                     <Scatter
                       height="250px"
                       data={data}
@@ -72,6 +74,7 @@ class ChartLeft extends Component {
                 title="大五人格"
                 render={
                   ({ data, handleBrushEnd }) => (
+                    !this.props.width ? null :
                     <Parallel
                       height="250px"
                       data={data}

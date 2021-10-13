@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import "./PageSelect.scss";
 import Map from './map/Map';
 import Footer from './footer/Footer';
-import ChartLeft from './charts/left/ChartLeft';
+import Left from './charts/left/Left';
 import ChartBottom from './charts/bottom/ChartBottom';
 import _ from 'lodash';
 // react-redux
@@ -76,7 +76,7 @@ class PageSelect extends Component {
           </div>
         </div>
         <div className="left">
-          <ChartLeft />
+          <Left width={this.state.leftWidth} />
         </div>
         <div className="footer-bar" style={{ float: "right" }} >
           <Footer setRoutes={this.props.setRoutes} />

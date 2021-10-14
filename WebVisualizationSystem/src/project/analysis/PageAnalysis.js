@@ -151,7 +151,7 @@ class PageAnalysis extends Component {
                   onClick={this.switchData} />
                 <Descriptions
                   title='用户属性表'
-                  column={{ xxl: 4, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }}
+                  column={{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }}
                   bordered>
                   {optionData.map(item => (
                     <Descriptions.Item
@@ -183,7 +183,7 @@ class PageAnalysis extends Component {
           rightBtnChange={this.state.rightBtnChange}
           setDrawerState={this.setDrawerState} />
         <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)}
-          height={170}
+          height={200}
           bottomDrawerVisible={this.state.bottomDrawerVisible}
           setDrawerState={this.setDrawerState} />
       </>

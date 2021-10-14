@@ -81,7 +81,8 @@ export default function Calendar(props) {
       calculable: true,
       orient: 'vertical',
       left: 'right',
-      top: 'top',
+      top: 10,
+      itemHeight: 160,
       textStyle: {
         color: '#fff',
       },
@@ -286,8 +287,11 @@ export default function Calendar(props) {
     })
   }, [data, state.selectedTraj])
 
-  // 清除高亮和标记
-  // 对应组件调用 eventEmitter.emit('clearAnalysisHighlight') 可清除高亮
+  /**
+   * ！！！此处按钮点击会卡顿，可能存在一定问题，之后此处有待修改！！！
+   */
+  
+  // 清除高亮和标记，对应组件调用 eventEmitter.emit('clearAnalysisHighlight') 可清除高亮
   useEffect(() => {
     eventEmitter.on('clearAnalysisHighlight', ({ clear }) => {
       if (clear === true) {

@@ -114,8 +114,9 @@ class ChartBottom extends Component {
               display: 'inline-block',
               height: sliderHeight,
               position: 'absolute',
-              right: 5,
-              bottom: -15,
+              left: this.props.bottomWidth - 35,
+              top: 35,
+              // bottom: -15,
               zIndex: '9999' //至于顶层
             }}
           />
@@ -130,12 +131,13 @@ class ChartBottom extends Component {
             }}
             style={{
               position: 'absolute',
-              right: '10px',
+              top: 5,
+              left: this.props.bottomWidth - 30,
               zIndex: '9999' //至于顶层
             }}
           />
         </div>
-        <Calendar data={this.data} bottomHeight={this.props.bottomHeight} bottomWidth={this.props.bottomWidth} />
+        <Calendar data={this.data} bottomHeight={this.props.bottomHeight} bottomWidth={this.props.bottomWidth + 10} />
       </>
     );
   }

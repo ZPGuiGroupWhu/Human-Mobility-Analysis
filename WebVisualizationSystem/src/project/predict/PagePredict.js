@@ -276,7 +276,7 @@ function PagePredict(props) {
             setPoiField={poiDispatch} // poi配置项更新回调
           />
         )}
-        margin={200}
+        width={200}
         type='left'
       />
       <Tooltip

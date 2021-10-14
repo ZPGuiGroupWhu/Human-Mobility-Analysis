@@ -9,7 +9,7 @@ export default function Left(props) {
     <>
       <Drawer 
         render={() => <Chart width={props.width} />}
-        margin={props.width}
+        width={props.width}
         initVisible={true}
         type='left'
       />

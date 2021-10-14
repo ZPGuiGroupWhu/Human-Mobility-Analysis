@@ -43,10 +43,8 @@ class PageSelect extends Component {
 
     //返回各组件的边界位置，用于日历、map等组件的布局
     const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
-    const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().bottom
-      - document.querySelector('.bottom').getBoundingClientRect().top;
-    const bottomWidth = document.querySelector('.bottom').getBoundingClientRect().right
-      - document.querySelector('.bottom').getBoundingClientRect().left;
+    const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().height;
+    const bottomWidth = document.querySelector('.bottom').getBoundingClientRect().width;
     this.setState({
       leftWidth: leftWidth,
       bottomHeight: bottomHeight,

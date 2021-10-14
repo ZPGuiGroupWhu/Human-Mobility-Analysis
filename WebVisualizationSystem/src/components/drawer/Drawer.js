@@ -5,7 +5,7 @@ import { withMouse } from './withMouse';
 import { LeftCircleTwoTone, RightCircleTwoTone, UpCircleTwoTone, DownCircleTwoTone } from '@ant-design/icons';
 
 const gap = 40; // 按钮与内容间的空隙，默认 'px'
-class LeftDrawer extends Component {
+class MyDrawer extends Component {
   static defaultProps = {
     nodeCSSName: '.main',
     initVisible: false,
@@ -15,7 +15,8 @@ class LeftDrawer extends Component {
    * props
    * @param {Boolean} initVisible - 内容初始状态 (可视 / 隐藏)  
    * @param {String} type - 侧边栏类型 (left / right / top / bottom)
-   * @param {Number} margin - 边距，左/右侧边栏则对应 width；上/下侧边栏对应 height
+   * @param {Number} width - 抽屉宽度
+   * @param {Number} height - 抽屉高度
    * @param {String} nodeCSSName - Drawer 挂载节点的 css 选择器
    * @param {Function} render - 子组件渲染函数
    */
@@ -25,6 +26,14 @@ class LeftDrawer extends Component {
       btnVisible: false, // 按钮是否可视
       drawerVisible: props.initVisible, // 内容是否可视
     };
+  }
+
+  calMargin = (type) => {
+    if (type === 'left' || type === 'right') {
+      return this.props.width;
+    } else if (type === 'top' || type === 'bottom') {
+      return this.props.height;
+    }
   }
 
   // 按钮可视
@@ -42,8 +51,8 @@ class LeftDrawer extends Component {
     }
     if (prevState.drawerVisible === true) {
       if (
-        prevProps.position[this.props.type] < (prevProps.margin + gap) &&
-        prevProps.position[this.props.type] > (prevProps.margin)
+        prevProps.position[this.props.type] < (this.calMargin(this.props.type) + gap) &&
+        prevProps.position[this.props.type] > (this.calMargin(this.props.type))
       ) {
         !prevState.btnVisible && this.setState({
           btnVisible: true
@@ -55,6 +64,7 @@ class LeftDrawer extends Component {
       }
     }
   };
+
 
   // 根据类型不同，设置不同的 padding 样式
   getPadding = (type) => {
@@ -116,7 +126,8 @@ class LeftDrawer extends Component {
       <>
         <Drawer
           closable={false}
-          width={this.props.margin}
+          width={this.props.width}
+          height={this.props.height}
           keyboard
           mask={false}
           placement={this.props.type}
@@ -139,7 +150,7 @@ class LeftDrawer extends Component {
           style={{
             display: (this.state.btnVisible ? '' : 'none'),
             position: 'absolute',
-            left: (this.state.drawerVisible ? this.props.margin + 10 : 10) + 'px',
+            left: (this.state.drawerVisible ? this.calMargin(this.props.type) + 10 : 10) + 'px',
             ...(this.getButtonCentered(this.props.type)),
           }}
           onClick={(e) => {
@@ -153,4 +164,4 @@ class LeftDrawer extends Component {
   }
 }
 
-export default withMouse(LeftDrawer);
+export default withMouse(MyDrawer);

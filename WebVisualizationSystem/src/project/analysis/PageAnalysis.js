@@ -17,6 +17,8 @@ import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
 import _ from "lodash";
 import { BlockOutlined } from "@ant-design/icons";
 
+import Drawer from '@/components/drawer/Drawer';
+
 
 /**
  * props

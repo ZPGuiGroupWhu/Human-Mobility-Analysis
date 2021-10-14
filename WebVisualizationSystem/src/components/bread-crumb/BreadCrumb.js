@@ -16,16 +16,20 @@ const NavLinkItem = (props) => (
     }
     exact
   >
-    {props.sperator + props.breadCrumbName}
+    <span>{props.sperator}</span>
+    <span style={{ position: 'relative', top: '1px' }}>{props.breadCrumbName}</span>
   </ NavLink>
 )
 
 const SpanItem = (props) => (
-  <span className="item" style={props.style}>{props.sperator + props.breadCrumbName}</span>
+  <span className="item" style={props.style}>
+    <span>{props.sperator}</span>
+    <span style={{ position: 'relative', top: '1px' }}>{props.breadCrumbName}</span>
+  </span>
 )
 
 export default function BreadCrumb(props) {
-  const sperator = '/ '; // 分隔符
+  const sperator = '> '; // 分隔符
   const activeStyle = {
     color: '#15FBF1',
     fontWeight: 'bold',

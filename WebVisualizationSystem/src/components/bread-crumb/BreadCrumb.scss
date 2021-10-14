@@ -3,7 +3,10 @@
   align-items: center;
 
   .item {
-    font-size: 15px;
+    font-family: "text"; // 自定义字体
+    font-size: 16px;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
   }
 }

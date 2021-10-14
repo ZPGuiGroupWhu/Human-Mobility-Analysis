@@ -1,13 +1,4 @@
 .chart-box-ctn {
-  // 边框样式
-  border-radius: 5px;
-  border: 0.7px solid #fff;
-  animation: animated-border 1.5s infinite;
-  // 背景样式
-  background-color: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
   width: calc(100% - 10px);
   margin: 5px;
   padding: 5px;
@@ -87,11 +78,3 @@
   }
 }
 
-@keyframes animated-border {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
-  100% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-  }
-}

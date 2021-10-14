@@ -18,3 +18,4 @@ export {default as heatmap} from './heatmap.png';
 export {default as trajBlue} from './traj-blue.png';
 export {default as trajBlack} from './traj-black.png';
 export {default as logo} from './logo.png';
+export {default as earth} from './earth.png';

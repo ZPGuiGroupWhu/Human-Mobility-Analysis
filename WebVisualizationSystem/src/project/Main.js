@@ -9,7 +9,7 @@ import Predict from '@/project/predict/Predict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';
 // 图片
-import { logo } from '@/icon';
+import { earth } from '@/icon';
 
 const windowResize = React.createContext(false);
 
@@ -27,19 +27,13 @@ function Main() {
     { breadCrumbName: '目的地预测', targetURL: '/select/predict', status: false },
   ])
 
-  // setRoutes(prev => {
-  //   const newRoutes = _.cloneDeep(prev);
-  //   newRoutes[1].status = true;
-  //   return newRoutes;
-  // })
-
   return (
     <windowResize.Provider value={isResize}>
       <Router>
         <Layout
-          src={logo}
-          title='轨迹目的地预测平台'
-          imgHeight='60%'
+          src={earth}
+          title='用户移动模式分析平台'
+          imgHeight='70%'
         >
           {
             <BreadCrumb

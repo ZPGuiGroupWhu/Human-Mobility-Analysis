@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './BoxParallel.scss';
+import '@/project/border-style.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
@@ -111,7 +112,7 @@ class BoxParallel extends Component {
   render() {
     return (
       <div
-        className="chart-box-parallel-ctn"
+        className="chart-box-parallel-ctn tech-border"
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
       >

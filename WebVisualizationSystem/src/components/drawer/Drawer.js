@@ -71,7 +71,7 @@ class MyDrawer extends Component {
     if (type === 'left' || type === 'right') {
       return '5px 0 5px 0';
     } else if (type === 'top' || type === 'bottom') {
-      return '0 100px';
+      return '0 5px';
     }
   }
   // 根据类型不同，设置不同的按钮 icon
@@ -150,7 +150,7 @@ class MyDrawer extends Component {
           style={{
             display: (this.state.btnVisible ? '' : 'none'),
             position: 'absolute',
-            left: (this.state.drawerVisible ? this.calMargin(this.props.type) + 10 : 10) + 'px',
+            [this.props.type]: (this.state.drawerVisible ? this.calMargin(this.props.type) + 10 : 10) + 'px',
             ...(this.getButtonCentered(this.props.type)),
           }}
           onClick={(e) => {

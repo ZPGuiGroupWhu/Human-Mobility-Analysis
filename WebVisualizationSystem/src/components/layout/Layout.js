@@ -4,12 +4,28 @@ import './layout.scss';
 
 export const MouseXY = React.createContext([0, 0])
 
+const logoRef = React.createRef();
 class Layout extends Component {
   constructor(props) {
     super(props);
     this.state = {
       mouseXY: [0, 0]
     }
+  }
+
+  // logo animation
+  setLogoAnimation = function (target) {
+    let round = 0;
+    const renderAnimation = () => {
+      if (round > 360) round = 0;
+      target.style.setProperty('transform', `rotate(${round++}deg)`);
+      requestAnimationFrame(renderAnimation);
+    }
+    requestAnimationFrame(renderAnimation);
+  }
+
+  componentDidMount() {
+    this.setLogoAnimation(logoRef.current)
   }
 
   render() {
@@ -26,6 +42,7 @@ class Layout extends Component {
         <div className='header'>
           <div className='img-title'>
             <img
+              ref={logoRef}
               src={src}
               alt=''
               style={{ width: imgWidth, height: imgHeight }}
@@ -42,6 +59,8 @@ class Layout extends Component {
             {children[1]}
           </MouseXY.Provider>
         </div>
+        {/* 分割线 */}
+        <div className="split-line"></div>
       </div>
     )
   }

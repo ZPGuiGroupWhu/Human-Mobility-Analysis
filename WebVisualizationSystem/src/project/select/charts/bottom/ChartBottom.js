@@ -133,7 +133,8 @@ class ChartBottom extends Component {
               right: '10px',
               zIndex: '9999' //至于顶层
             }}
-          /></div>
+          />
+        </div>
         <Calendar data={this.data} bottomHeight={this.props.bottomHeight} bottomWidth={this.props.bottomWidth} />
       </>
     );

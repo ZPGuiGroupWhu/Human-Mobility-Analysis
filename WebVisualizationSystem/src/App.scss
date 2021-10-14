@@ -1,6 +1,12 @@
 // antd UI 组件库基础样式文件
 @import '~antd/dist/antd.css';
 
+// 字体样式外链
+@font-face {
+  font-family: 'title';
+  src: url(./assets/font/douyuFont-2.otf);
+}
+
 // 清除浏览器默认设置
 * {
   margin: 0;

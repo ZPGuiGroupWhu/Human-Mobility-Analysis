@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './FuncBar.scss';
+import '@/project/border-style.scss';
 import { Space } from 'antd';
 import _ from 'lodash';
 
@@ -41,7 +42,7 @@ class FuncBar extends Component {
 
   render() {
     return (
-      <div className="chart-funcbar-ctn">
+      <div className="chart-funcbar-ctn tech-border">
         <div className="title-bar">
           <div className="func-btns">
             <Space>

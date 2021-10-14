@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './Box.scss';
+import '@/project/border-style.scss';
 import {
   CompressOutlined,
   ExpandOutlined,
@@ -112,7 +113,7 @@ class Box extends Component {
   render() {
     return (
       <div
-        className="chart-box-ctn"
+        className="chart-box-ctn tech-border"
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
       >

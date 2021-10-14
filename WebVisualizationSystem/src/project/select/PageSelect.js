@@ -3,11 +3,13 @@ import "./PageSelect.scss";
 import Map from './map/Map';
 import Footer from './footer/Footer';
 import Left from './charts/left/Left';
-import ChartBottom from './charts/bottom/ChartBottom';
+// import ChartBottom from './charts/bottom/ChartBottom';
+import Bottom from './charts/bottom/Bottom';
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
 import { fetchData, setSelectedUsers } from '@/app/slice/selectSlice';
+import Drawer from '@/components/drawer/Drawer';
 
 
 class PageSelect extends Component {
@@ -69,7 +71,7 @@ class PageSelect extends Component {
           <div className="inner">
             <div className="top-bracket"></div>
             <div className="bottom">
-              <ChartBottom bottomHeight={this.state.bottomHeight} bottomWidth={this.state.bottomWidth} />
+              <Bottom bottomHeight={this.state.bottomHeight} bottomWidth={this.state.bottomWidth} />
             </div>
           </div>
         </div>
@@ -77,7 +79,12 @@ class PageSelect extends Component {
           <Left width={this.state.leftWidth} />
         </div>
         <div className="footer-bar" style={{ float: "right" }} >
-          <Footer setRoutes={this.props.setRoutes} />
+          <Drawer 
+            render={() => (<Footer setRoutes={this.props.setRoutes} />)}
+            type="right"
+            width={170}
+            initVisible={true}
+          />
         </div>
       </div>
     )

@@ -8,7 +8,7 @@ export default function Bottom(props) {
     <Drawer 
       render={()=>(props.bottomHeight ? <ChartBottom bottomHeight={props.bottomHeight} bottomWidth={props.bottomWidth} /> : null)}
       width={props.bottomWidth}
-      height={props.bottomHeight}
+      height={props.bottomHeight + 21}
       initVisible={true}
       nodeCSSName='.bottom'
       type="bottom"

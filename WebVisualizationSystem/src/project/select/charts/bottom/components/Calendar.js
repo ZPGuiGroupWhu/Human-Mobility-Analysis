@@ -94,10 +94,6 @@ export default function Calendar(props) {
         return data;
     }
 
-    /**
-     * 此部分后续有待修改！！！
-     * 将面罩改为不可选取状态（目前受API闲置，只能以面罩形式展现，添加鼠标不可选取的标志，且点击无效，从而作为示意）
-     * */
     // 寻找不包括selectedByCharts中用户的日期，并对其绘制其他颜色。
     function highlightSelectedUsersDates(obj){
         // 如果selectedByCharts为空的时候，不需要对日历进行筛选添加面罩，即显示所有日期
@@ -105,7 +101,6 @@ export default function Calendar(props) {
             return [];
         }else{ //反之则给不包含Charts选择用户的日期加上面罩，作为提示
             /**
-             * 后续可以将面罩改为不可选取
              * 当前只是以高亮的形式提示用户这些日期不包含charts筛选出的用户出行轨迹
              * */
             const unselectedUsersDates = [];
@@ -154,8 +149,8 @@ export default function Calendar(props) {
             calculable: true,
             orient: 'vertical',
             // left: 'bottom',
-            top: 30,
-            right: 50,
+            top: 35,
+            left: bottomWidth - 105,
             itemWidth: 5,
             itemHeight: 0,
             textStyle: {
@@ -171,9 +166,7 @@ export default function Calendar(props) {
         },
         calendar: {
             orient: 'horizontal',
-            top: 25,
-            bottom: 10,
-            left: 0,
+            top: 30,
             cellSize: cellSize,
             range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
             itemStyle: {
@@ -258,7 +251,7 @@ export default function Calendar(props) {
             // prevProps获取到的bottomWidth/Height是0，
             // 在PageSelect页面componentDidMount获取到bottomWidth/Height值后，rightWidth值改变后重新渲染
             calendar: {
-                left: cellWidth * 2,
+                left: cellWidth * 1.5,
                 cellSize: cellSize,
             },
             visualMap: {

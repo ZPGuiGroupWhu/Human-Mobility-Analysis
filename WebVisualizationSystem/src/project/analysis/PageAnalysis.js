@@ -154,7 +154,7 @@ class PageAnalysis extends Component {
                   onClick={this.switchData} />
                 <Descriptions
                   title='用户属性表'
-                  column={{ xxl: 4, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }}
+                  column={{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }}
                   bordered>
                   {optionData.map(item => (
                     <Descriptions.Item

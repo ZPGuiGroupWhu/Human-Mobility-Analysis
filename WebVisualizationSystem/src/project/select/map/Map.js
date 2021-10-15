@@ -74,6 +74,7 @@ class Map extends Component {
       // geo3D地图
       geo3D: {
         map: 'Shenzhen',
+        regionHeight: 1.5, // 三维模型区域高度
         // 行政区边界
         itemStyle: {
           opacity: 1,
@@ -149,7 +150,8 @@ class Map extends Component {
         shading: 'lambert',// 三维图形的着色效果
         data: [],
         barSize: 0.5, //柱的大小
-        minHeight: 0.6,//柱高的最小值
+        minHeight: 1,//柱高的最小值
+        maxHeight: 10, // 柱高的最大值
         silent: false, //是否不响应鼠标事件，false为响应，反之为不响应
         itemStyle: {//柱条样式
           opacity: 1

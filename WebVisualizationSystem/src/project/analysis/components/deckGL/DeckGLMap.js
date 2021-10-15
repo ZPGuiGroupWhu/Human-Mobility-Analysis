@@ -4,7 +4,7 @@ import { StaticMap } from 'react-map-gl';
 import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
 import { ArcLayer, IconLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
-import { Switch, Slider, Radio } from 'antd';
+import { Switch, Slider, Radio, Button } from 'antd';
 import './DeckGLMap.css';
 import '@/project/border-style.scss';
 import { eventEmitter } from '@/common/func/EventEmitter';
@@ -12,6 +12,8 @@ import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
+// react-router
+import {withRouter} from 'react-router';
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiMjAxNzMwMjU5MDE1NyIsImEiOiJja3FqM3RjYmIxcjdyMnhsbmR0bHo2ZGVpIn0.wNBmzyxhzCMx9PhIH3rwCA';//MAPBOX密钥
 const initOpacity = 0.8;
@@ -623,7 +625,7 @@ class DeckGLMap extends Component {
           <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />
           {this._renderTooltip()}
         </DeckGL>
-        <div className={`moudle tech-border`} style={{ 'textAlign': 'center' }}>
+        <div className={`moudle`} style={{ 'textAlign': 'center' }}>
           <Radio.Group size={"small"} style={{ width: 186, margin: 3 }} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
             <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Grid" >点密度</Radio.Button>
             <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Speed">速度</Radio.Button>
@@ -636,7 +638,7 @@ class DeckGLMap extends Component {
           </Radio.Group><br />
           格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)} />
         </div><br />
-        <div className={`moudle tech-border`}>
+        <div className={`moudle`}>
           <div className='text-button'>
             <span>轨迹图层</span>
             <Switch defaultChecked={true} onChange={this.changeTripsLayerShow} />
@@ -645,14 +647,22 @@ class DeckGLMap extends Component {
             <span>OD图层</span>
             <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} />
           </div>
+          {
+          Object.keys(this.props.selectedTraj).length ? 
+          <Button type="primary" block onClick={() => {this.props.history.push('/select/predict')}}>目的地预测</Button> : null
+          }
         </div>
       </div>
     )
   }
 }
 
+const mapStateToProps = (state) => ({
+  selectedTraj: state.predict.selectedTraj,
+})
+
 const mapDispatchToProps = (dispatch) => ({
   setSelectedTraj: (payload) => dispatch(setSelectedTraj(payload)),
 })
 
-export default connect(null, mapDispatchToProps)(DeckGLMap);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(DeckGLMap));

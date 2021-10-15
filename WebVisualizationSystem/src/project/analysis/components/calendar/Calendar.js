@@ -82,7 +82,7 @@ export default function Calendar(props) {
       orient: 'vertical',
       left: 'right',
       top: 10,
-      itemHeight: 160,
+      itemHeight: 130,
       textStyle: {
         color: '#fff',
       },

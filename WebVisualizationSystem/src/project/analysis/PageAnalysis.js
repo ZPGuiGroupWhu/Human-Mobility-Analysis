@@ -8,11 +8,9 @@ import userData from './components/deckGL/399313.json'
 import personalityData from './components/tableDrawer/radar/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
-// import CalendarDrawer from './components/calendar/CalendarDrawer';
 import Drawer from '@/components/drawer/Drawer';
-// import Calendar from './components/calendar/Calendar';
 import BottomCalendar from './components/calendar/BottomCalendar'
-import TableDrawer from "./components/tableDrawer/TableDrawer copy";
+import TableDrawer from "./components/tableDrawer/TableDrawer";
 import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
@@ -57,6 +55,7 @@ class PageAnalysis extends Component {
       rightBtnChange: true,
       rightDrawerVisible: false,
       bottomDrawerVisible: false,
+      curId: 2, // 当前激活抽屉id
     }
   };
 
@@ -97,6 +96,13 @@ class PageAnalysis extends Component {
     })
   };
 
+  // Drawer 互斥逻辑
+  setCurId = (id) => {
+    this.setState({
+      curId: id,
+    })
+  }
+
   render() {
     return (
       <>
@@ -107,6 +113,9 @@ class PageAnalysis extends Component {
           setRoutes={this.props.setRoutes}
         />
         <TableDrawer
+          id={1}
+          curId={this.state.curId}
+          setCurId={this.setCurId}
           radar={() => (
             <div>
               <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} rightWidth={this.state.rightWidth} />
@@ -188,16 +197,15 @@ class PageAnalysis extends Component {
           rightDrawerVisible={this.state.rightDrawerVisible}
           rightBtnChange={this.state.rightBtnChange}
           setDrawerState={this.setDrawerState} />
-        {/* <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)}
+        <Drawer
           height={170}
-          bottomDrawerVisible={this.state.bottomDrawerVisible}
-          setDrawerState={this.setDrawerState} /> */}
-          <Drawer 
-            height={170}
-            type='bottom'
-            initVisible={true}
-            render={()=>(this.state.date ? <BottomCalendar data={this.state.date} eventName={this.EVENTNAME} /> : null)}
-          />
+          type='bottom'
+          initVisible={true}
+          render={() => (this.state.date ? <BottomCalendar data={this.state.date} eventName={this.EVENTNAME} /> : null)}
+          id={2}
+          curId={this.state.curId}
+          setCurId={this.setCurId}
+        />
       </>
     )
   }

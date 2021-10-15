@@ -1,6 +1,5 @@
 import React, { Component, createRef } from 'react';
 import * as echarts from 'echarts';
-import './Radar.css'
 import _ from "lodash";
 
 export default class Radar extends Component{
@@ -169,7 +168,6 @@ export default class Radar extends Component{
     render() {
         return (
             <div
-                className={'radarChart'}
                 ref={this.chartRef}
                 style={{
                     width: this.props.rightWidth, //宽度为右边栏宽度

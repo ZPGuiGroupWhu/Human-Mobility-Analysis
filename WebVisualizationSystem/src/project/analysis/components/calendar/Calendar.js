@@ -165,6 +165,7 @@ export default function Calendar(props) {
   }
 
   useEffect(() => {
+    if (!data) return () => { };
     const format = formatData(data);
     const counts = format.map(item => (item[1]))
     myChart.setOption({
@@ -278,6 +279,7 @@ export default function Calendar(props) {
 
   // 筛选轨迹的日期标记部分
   useEffect(() => {
+    if (!data) return () => { }
     myChart?.setOption({
       series: [{
         name: 'select',

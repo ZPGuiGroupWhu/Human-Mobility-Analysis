@@ -8,9 +8,10 @@ import userData from './components/deckGL/399313.json'
 import personalityData from './components/tableDrawer/radar/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
-import CalendarDrawer from './components/calendar/CalendarDrawer';
+// import CalendarDrawer from './components/calendar/CalendarDrawer';
+import Drawer from '@/components/drawer/Drawer';
 import Calendar from './components/calendar/Calendar';
-import TableDrawer from "./components/tableDrawer/TableDrawer";
+import TableDrawer from "./components/tableDrawer/TableDrawer copy";
 import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
@@ -104,10 +105,12 @@ class PageAnalysis extends Component {
           eventName={this.EVENTNAME}
           setRoutes={this.props.setRoutes}
         />
-        <TableDrawer radar={() => (
-          <div>
-            <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} rightWidth={this.state.rightWidth} />
-          </div>)}
+        <TableDrawer
+          radar={() => (
+            <div>
+              <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} rightWidth={this.state.rightWidth} />
+            </div>
+          )}
           wordcloud={() => (
             //根据flag判断，切换为词云图还是数据表格
             this.state.flag ?
@@ -161,7 +164,8 @@ class PageAnalysis extends Component {
                     >{item.value.toFixed(5)}</Descriptions.Item>
                   ))}
                 </Descriptions>
-              </div>)}
+              </div>
+          )}
           violinplot={() => (
             <div>
               <p></p>
@@ -177,15 +181,22 @@ class PageAnalysis extends Component {
               </Select>
               <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440}
                 option={this.state.option} rightWidth={this.state.rightWidth} />
-            </div>)}
+            </div>
+          )}
           rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
           rightDrawerVisible={this.state.rightDrawerVisible}
           rightBtnChange={this.state.rightBtnChange}
           setDrawerState={this.setDrawerState} />
-        <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)}
+        {/* <CalendarDrawer render={() => (<Calendar data={this.state.date} eventName={this.EVENTNAME} />)}
           height={170}
           bottomDrawerVisible={this.state.bottomDrawerVisible}
-          setDrawerState={this.setDrawerState} />
+          setDrawerState={this.setDrawerState} /> */}
+          <Drawer 
+            height={170}
+            type='bottom'
+            initVisible={true}
+            render={()=>(this.state.date ? <Calendar data={this.state.date} eventName={this.EVENTNAME} /> : null)}
+          />
       </>
     )
   }

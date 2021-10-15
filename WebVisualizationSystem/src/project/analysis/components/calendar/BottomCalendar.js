@@ -1,22 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from 'antd';
 import { RedoOutlined } from '@ant-design/icons';
 import Calendar from './Calendar';
-import { useDispatch } from 'react-redux';
-import { setSelectedTraj } from '@/app/slice/predictSlice';
+import './BottomCalendar.scss';
 
 export default function BottomCalendar(props) {
-  const dispatch = useDispatch();
-
+  const [clear, setClear] = useState({});
   return (
-    <div>
-      <Calendar />
+    <div className="bottom-calendar-ctn">
+      <Calendar data={props.data} eventName={props.eventName} clear={clear} />
       <Button
             ghost
             size='small'
             type='default'
             icon={<RedoOutlined style={{ color: '#fff' }} />}
-            onClick={() => {dispatch(setSelectedTraj({}));}} // 清除筛选
+            onClick={() => {setClear({})}} // 清除筛选
             style={{
               position: 'absolute',
               top: '10px',

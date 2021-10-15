@@ -10,7 +10,8 @@ import personalityData from './components/tableDrawer/radar/ocean_score.json'
 import DeckGLMap from './components/deckGL/DeckGLMap';
 // import CalendarDrawer from './components/calendar/CalendarDrawer';
 import Drawer from '@/components/drawer/Drawer';
-import Calendar from './components/calendar/Calendar';
+// import Calendar from './components/calendar/Calendar';
+import BottomCalendar from './components/calendar/BottomCalendar'
 import TableDrawer from "./components/tableDrawer/TableDrawer copy";
 import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
@@ -195,7 +196,7 @@ class PageAnalysis extends Component {
             height={170}
             type='bottom'
             initVisible={true}
-            render={()=>(this.state.date ? <Calendar data={this.state.date} eventName={this.EVENTNAME} /> : null)}
+            render={()=>(this.state.date ? <BottomCalendar data={this.state.date} eventName={this.EVENTNAME} /> : null)}
           />
       </>
     )

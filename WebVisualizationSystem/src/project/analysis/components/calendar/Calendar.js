@@ -142,6 +142,20 @@ export default function Calendar(props) {
   }, [ref])
 
 
+  function addZero(number) {
+    if (number < 10) {
+      return '0' + number
+    } else {
+      return number
+    }
+  }
+
+  function date2str(date, sperator) {
+    const year = date.getFullYear();
+    const month = addZero(date.getMonth() + 1);
+    const day = addZero(date.getDate());
+    return year + sperator + month + sperator + day;
+  }
 
   // strDate: yyyy-MM-dd
   function str2date(strDate) {
@@ -289,24 +303,29 @@ export default function Calendar(props) {
     })
   }, [data, state.selectedTraj])
 
-  /**
-   * ！！！此处按钮点击会卡顿，可能存在一定问题，之后此处有待修改！！！
-   */
-  
-  // 清除高亮和标记，对应组件调用 eventEmitter.emit('clearAnalysisHighlight') 可清除高亮
+
+  // 清除高亮和标记
   useEffect(() => {
-    eventEmitter.on('clearAnalysisHighlight', ({ clear }) => {
-      if (clear === true) {
-        dispatch(setSelectedTraj({})); // 清除标记
-        myChart?.setOption({ // 清除高亮
-          series: [{
-            name: '高亮',
-            data: [],
-          }]
-        })
+    const start = date2str(new Date(year, 0, 1), '-');
+    const end = date2str(new Date(year + 1, 0, 0), '-');
+    // 重新渲染全部轨迹
+    setDate(() => {
+      eventEmitter.emit(eventName, { start, end });
+      return {
+        start,
+        end,
       }
-    }, [])
-  })
+    })
+    // 清除高亮
+    setTimeout(() => {
+      myChart?.setOption({
+        series: [{
+          name: '高亮',
+          data: [],
+        }]
+      });
+    }, 0)
+  }, [props.clear])
 
   return (
     <div

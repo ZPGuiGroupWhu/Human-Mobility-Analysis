@@ -60,7 +60,7 @@ class Map extends Component {
         bottom: this.props.bottomHeight,
         itemWidth: 15, // 颜色条宽度
         itemHeight: 100, // 颜色条高度
-        max: 500, //最大值
+        max: 400, //最大值
         realtime: true, //拖拽时是否实时更新
         calculable: true, //拖拽时是否显示手柄
         inRange: { //颜色数组
@@ -112,6 +112,7 @@ class Map extends Component {
             shadow: true,//阴影
             shadowQuality: 'high',//阴影质量
             alpha: 60,// 光照角度
+            beta: 0,
           },
           //全局环境光
           ambient: {
@@ -149,7 +150,7 @@ class Map extends Component {
         coordinateSystem: 'geo3D',//坐标系
         shading: 'lambert',// 三维图形的着色效果
         data: [],
-        barSize: 0.5, //柱的大小
+        barSize: 0.4, //柱的大小
         minHeight: 1,//柱高的最小值
         maxHeight: 10, // 柱高的最大值
         silent: false, //是否不响应鼠标事件，false为响应，反之为不响应

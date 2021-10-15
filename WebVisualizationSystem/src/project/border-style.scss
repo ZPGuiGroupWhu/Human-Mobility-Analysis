@@ -26,6 +26,7 @@
     right: 2px;
     border-right: 1px solid aqua;
     border-bottom: 1px solid aqua;
+    pointer-events: none;
   }
 
   &:hover::before,
@@ -39,7 +40,8 @@
   animation: animated-border 1.5s infinite;
 
   // 背景样式
-  background-color: rgba(255, 255, 255, 0.2);
+  // background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 

@@ -52,9 +52,6 @@ class PageAnalysis extends Component {
       date: null,
       flag: true,
       option: initlabel,
-      rightBtnChange: true,
-      rightDrawerVisible: false,
-      bottomDrawerVisible: false,
       curId: 2, // 当前激活抽屉id
     }
   };
@@ -63,23 +60,6 @@ class PageAnalysis extends Component {
     this.setState({
       date: count,
     })
-  };
-
-  setDrawerState = (drawer) => {
-    if (drawer === 'right') {
-      this.setState(prev => ({
-        rightBtnChange: !prev.rightBtnChange,
-        rightDrawerVisible: !prev.rightDrawerVisible,
-        bottomDrawerVisible: false
-      }))
-    }
-    if (drawer === 'bottom') {
-      this.setState(prev => ({
-        bottomDrawerVisible: !prev.bottomDrawerVisible,
-        rightBtnChange: true,
-        rightDrawerVisible: false
-      }))
-    }
   };
 
   // select下拉框改变值
@@ -194,9 +174,7 @@ class PageAnalysis extends Component {
             </div>
           )}
           rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
-          rightDrawerVisible={this.state.rightDrawerVisible}
-          rightBtnChange={this.state.rightBtnChange}
-          setDrawerState={this.setDrawerState} />
+        />
         <Drawer
           height={170}
           type='bottom'

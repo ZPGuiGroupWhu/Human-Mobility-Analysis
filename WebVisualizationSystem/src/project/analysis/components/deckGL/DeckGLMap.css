@@ -1,23 +1,30 @@
 .deck-tooltip {
-    font-size: 0.8em;
-    font-family: Helvetica, Arial, sans-serif;
-  }
+  font-size: 0.8em;
+  font-family: Helvetica, Arial, sans-serif;
+}
 
-  .moudle {
-    display: inline-block;
-    width: auto;
-    position: relative;
-    border: 0px solid white;
-    border-radius: 10px;
-    margin: 1px 3px 1px 3px;
-    padding: 5px;
-    text-align: end;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1;
-    color: rgb(252, 250, 250);
-  }
+.moudle {
+  display: inline-block;
+  width: auto;
+  position: relative;
+  border: 0px solid white;
+  border-radius: 10px;
+  margin: 1px 3px 1px 3px;
+  padding: 5px;
+  text-align: end;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  color: rgb(252, 250, 250);
+}
 
-  .Switch {
-    position: absolute;
-    right: 7px;
-  }
+.Switch {
+  position: absolute;
+  right: 7px;
+}
+
+.moudle .text-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px;
+}

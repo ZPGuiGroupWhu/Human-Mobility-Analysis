@@ -19,7 +19,8 @@ class MyDrawer extends Component {
    * @param {Number} height - 抽屉高度
    * @param {String} nodeCSSName - Drawer 挂载节点的 css 选择器
    * @param {Function} render - 子组件渲染函数
-   * @param {Nmuber} id - 抽屉id，设置后默认多个抽屉互斥
+   * 互斥属性：所有设置了id的抽屉间互斥，必须传递以下参数
+   * @param {Nmuber} id - 抽屉id
    * @param {Number} curId - 当前激活的抽屉id
    * @param {Function} setCurId - 设置当前激活id
    */
@@ -27,7 +28,7 @@ class MyDrawer extends Component {
     super(props);
     this.state = {
       btnVisible: false, // 按钮是否可视
-      drawerVisible: props.id ? (props.id === props.curId) : props.initVisible, // 内容是否可视
+      drawerVisible: props.id ? (props.id === props.curId) : props.initVisible, // 内容是否可视，若传递id则忽略initVisible设置
     };
     this.check();
   }
@@ -132,6 +133,7 @@ class MyDrawer extends Component {
 
   // 切换抽屉可视状态
   switchDrawerVisible = () => {
+    // 若传递id，则需要在点击时，更新当前激活id
     if (this.props.id) {
       this.props.setCurId(this.props.id);
     }
@@ -145,12 +147,10 @@ class MyDrawer extends Component {
 
     // 若设置了id，表明采用了Drawer互斥，当前激活id与本身不匹配时，隐藏。
     if (prevProps.curId !== this.props.curId) {
-      if (this.props.id) {
-        if (this.props.id !== this.props.curId) {
-          this.setState({
-            drawerVisible: false,
-          })
-        }
+      if (this.props.id && this.props.id !== this.props.curId) {
+        this.setState({
+          drawerVisible: false,
+        })
       }
     }
   }

@@ -6,7 +6,7 @@ import ChartBottom from './ChartBottom';
 export default function Bottom(props) {
   return (
     <Drawer 
-      render={()=>(props.bottomHeight ? <ChartBottom bottomHeight={props.bottomHeight} bottomWidth={props.bottomWidth} /> : null)}
+      render={()=>(props.bottomHeight ? <ChartBottom {...props} /> : null)}
       width={props.bottomWidth}
       height={props.bottomHeight + 21}
       initVisible={true}

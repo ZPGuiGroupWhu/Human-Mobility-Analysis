@@ -3,6 +3,7 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
 
 
 .select-page-ctn {
+  position: relative;
   width: 100%;
   height: calc(100vh - 80px); // header 70px + padding 10px
 
@@ -13,7 +14,7 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
 
     .inner {
       height: 100%;
-      margin: 0 170px 0 $auto-width;
+      margin: 0 200px 0 $auto-width;
       display: flex;
       flex-direction: column;
       position: absolute;
@@ -40,10 +41,10 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
 
   .footer-bar {
     //width: $auto-width;
-    width: 170px;
+    width: 200px;
     height: 100%;
     float: left;
-    margin-left: -170px;
+    margin-left: -200px;
   }
 }
 

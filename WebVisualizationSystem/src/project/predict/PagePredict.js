@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
 import { eventEmitter } from '@/common/func/EventEmitter'; // 发布订阅
-import { withMouse } from '@/components/bottom-drawer/withMouse'; // 高阶函数-监听鼠标位置
+import { withMouse } from '@/components/drawer/withMouse'; // 高阶函数-监听鼠标位置
 // 逻辑分离
 import { useCreate } from '@/project/predict/function/useCreate'; // 
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询

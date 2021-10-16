@@ -3,9 +3,11 @@ import "./PageSelect.scss";
 import Map from './map/Map';
 import Footer from './footer/Footer';
 import Left from './charts/left/Left';
-// import ChartBottom from './charts/bottom/ChartBottom';
+import FunctionBar from './function-bar/FunctionBar';
 import Bottom from './charts/bottom/Bottom';
+// 第三方
 import _ from 'lodash';
+import { ReloadOutlined } from '@ant-design/icons';
 // react-redux
 import { connect } from 'react-redux';
 import { fetchData, setSelectedUsers } from '@/app/slice/selectSlice';
@@ -13,12 +15,29 @@ import Drawer from '@/components/drawer/Drawer';
 
 
 class PageSelect extends Component {
+  functionBarItems = [
+    {
+      id: 0,
+      text: '图表重置',
+      icon: <ReloadOutlined />,
+      onClick: () => { this.setState({ chartsReload: {} }) },
+    }, {
+      id: 1,
+      text: '日历重置',
+      icon: <ReloadOutlined />,
+      onClick: () => { this.setState({ calendarReload: {} }) },
+    }
+  ]
+
   constructor(props) {
     super(props);
     this.state = {
       leftWidth: 0, // 左侧栏宽度
       bottomHeight: 0, //底部内容高度
       bottomWidth: 0, //底部内容宽度
+
+      chartsReload: {},
+      calendarReload: {},
     };
   }
 
@@ -71,21 +90,26 @@ class PageSelect extends Component {
           <div className="inner">
             <div className="top-bracket"></div>
             <div className="bottom">
-              <Bottom bottomHeight={this.state.bottomHeight} bottomWidth={this.state.bottomWidth} />
+              <Bottom
+                bottomHeight={this.state.bottomHeight}
+                bottomWidth={this.state.bottomWidth}
+                calendarReload={this.state.calendarReload}
+              />
             </div>
           </div>
         </div>
         <div className="left">
-          <Left width={this.state.leftWidth} />
+          <Left width={this.state.leftWidth} chartsReload={this.state.chartsReload} />
         </div>
         <div className="footer-bar" style={{ float: "right" }} >
-          <Drawer 
+          <Drawer
             render={() => (<Footer setRoutes={this.props.setRoutes} />)}
             type="right"
-            width={170}
+            width={200}
             initVisible={true}
           />
         </div>
+        <FunctionBar functionBarItems={this.functionBarItems} left={this.state.leftWidth} />
       </div>
     )
   }

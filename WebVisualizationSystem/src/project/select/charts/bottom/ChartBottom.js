@@ -120,24 +120,13 @@ class ChartBottom extends Component {
               zIndex: '9999' //至于顶层
             }}
           />
-          <Button
-            ghost
-            size='small'
-            type='default'
-            icon={<RedoOutlined style={{ color: '#fff' }} />}
-            onClick={(e) => {
-              let clear = true;
-              eventEmitter.emit('clearCalendarHighlight', { clear })
-            }}
-            style={{
-              position: 'absolute',
-              top: 5,
-              left: this.props.bottomWidth - 30,
-              zIndex: '9999' //至于顶层
-            }}
-          />
         </div>
-        <Calendar data={this.data} bottomHeight={this.props.bottomHeight} bottomWidth={this.props.bottomWidth + 10} />
+        <Calendar
+          data={this.data}
+          bottomHeight={this.props.bottomHeight}
+          bottomWidth={this.props.bottomWidth + 10}
+          calendarReload={this.props.calendarReload}
+        />
       </>
     );
   }

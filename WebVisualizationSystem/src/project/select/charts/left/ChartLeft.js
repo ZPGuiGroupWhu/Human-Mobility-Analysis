@@ -20,11 +20,11 @@ class ChartLeft extends Component {
     return (
       <Charts.Group
         render={
-          ({ isReload, isBrushEnd, handleBrushEnd }) => (
+          ({ isBrushEnd, handleBrushEnd }) => (
             <>
               <Charts.Box
                 id={1}
-                isReload={isReload}
+                isReload={this.props.chartsReload}
                 xAxis={this.groupOneKey}
                 yAxis={'人数'}
                 isBrushEnd={isBrushEnd}
@@ -46,7 +46,7 @@ class ChartLeft extends Component {
               </Charts.Box>
               <Charts.Box
                 id={2}
-                isReload={isReload}
+                isReload={this.props.chartsReload}
                 xAxis={this.groupTwoKey[0]}
                 yAxis={this.groupTwoKey[1]}
                 isBrushEnd={isBrushEnd}
@@ -68,7 +68,7 @@ class ChartLeft extends Component {
               </Charts.Box>
               <Charts.BoxParallel
                 id={3}
-                isReload={isReload}
+                isReload={this.props.chartsReload}
                 isBrushEnd={isBrushEnd}
                 handleBrushEnd={handleBrushEnd}
                 title="大五人格"

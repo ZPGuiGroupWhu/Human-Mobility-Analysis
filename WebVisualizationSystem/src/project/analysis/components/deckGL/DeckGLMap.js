@@ -8,12 +8,13 @@ import { Switch, Slider, Radio, Button } from 'antd';
 import './DeckGLMap.css';
 import '@/project/border-style.scss';
 import { eventEmitter } from '@/common/func/EventEmitter';
+import Timer from '../timePlayer/Timer';
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 // react-router
-import {withRouter} from 'react-router';
+import { withRouter } from 'react-router';
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiMjAxNzMwMjU5MDE1NyIsImEiOiJja3FqM3RjYmIxcjdyMnhsbmR0bHo2ZGVpIn0.wNBmzyxhzCMx9PhIH3rwCA';//MAPBOX密钥
 const initOpacity = 0.8;
@@ -648,10 +649,11 @@ class DeckGLMap extends Component {
             <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} />
           </div>
           {
-          Object.keys(this.props.selectedTraj).length ? 
-          <Button type="primary" block onClick={() => {this.props.history.push('/select/predict')}}>目的地预测</Button> : null
+            Object.keys(this.props.selectedTraj).length ?
+              <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
           }
         </div>
+        <Timer getSelectData={this.getSelectData} getTripsLayer={this.getTripsLayer} getIconLayer={this.getIconLayer} />
       </div>
     )
   }

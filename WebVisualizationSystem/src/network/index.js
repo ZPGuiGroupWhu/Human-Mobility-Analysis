@@ -11,3 +11,9 @@ export const getUserODs = () => {
     url: `/getUserODs`
   })
 }
+
+export const getOceanScoreAll = () => {
+  return baseRequest({
+    url: `/ocean_score_all`,
+  })
+}

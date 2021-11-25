@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { getOceanScoreAll } from '@/network';
 
 const initialState = {
   curId: -1, // box-chart 实例唯一标识
@@ -10,10 +11,19 @@ const initialState = {
   selectedByCalendar: [], // 日历筛选结果
 }
 
+// 根据 url 地址获取数据
 const fetchData = createAsyncThunk('select/fetchData', async function (url) {
   const resObj = await axios.get(url);
   return resObj.data;
 });
+
+// 获取全部大五人格数据
+const fetchOceanScoreAll = createAsyncThunk('select/fetchOceanScoreAll', async function () {
+  console.log(1);
+  const data = await getOceanScoreAll();
+  console.log(data);
+  return data;
+})
 
 const selectReducer = createSlice({
   name: 'select',
@@ -33,6 +43,7 @@ const selectReducer = createSlice({
     },
   },
   extraReducers: {
+    // fetchData
     [fetchData.pending]: (state) => {
       state.reqStatus = 'loading';
     },
@@ -43,12 +54,25 @@ const selectReducer = createSlice({
     [fetchData.rejected]: (state, action) => {
       state.reqStatus = 'failed';
       throw new Error(action.error.message);
-    }
+    },
+    // fetchOceanScoreAll
+    [fetchOceanScoreAll.pending]: (state) => {
+      state.reqStatus = 'loading';
+    },
+    [fetchOceanScoreAll.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.reqStatus = 'succeeded';
+    },
+    [fetchOceanScoreAll.rejected]: (state, action) => {
+      state.reqStatus = 'failed';
+      throw new Error(action.error.message);
+    },
   }
 });
 
 export {
   fetchData,
+  fetchOceanScoreAll,
 };
 
 export const { setSelectedUsers, setSelectedByCharts, setSelectedByCalendar, setCurId } = selectReducer.actions;

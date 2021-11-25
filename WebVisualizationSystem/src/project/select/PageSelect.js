@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { ReloadOutlined } from '@ant-design/icons';
 // react-redux
 import { connect } from 'react-redux';
-import { fetchData, setSelectedUsers } from '@/app/slice/selectSlice';
+import { fetchData, fetchOceanScoreAll, setSelectedUsers } from '@/app/slice/selectSlice';
 import Drawer from '@/components/drawer/Drawer';
 
 
@@ -59,8 +59,11 @@ class PageSelect extends Component {
   };
 
   componentDidMount() {
-    // 请求数据
+    // 请求数据(伪)
     this.props.fetchData(`${process.env.PUBLIC_URL}/mock/ocean_score.json`);
+
+    // 请求数据(真)
+    // this.props.fetchOceanScoreAll();
 
     //返回各组件的边界位置，用于日历、map等组件的布局
     const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
@@ -125,6 +128,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     fetchData: (url) => dispatch(fetchData(url)),
+    fetchOceanScoreAll: () => dispatch(fetchOceanScoreAll()),
     setSelectedUsers: (payload) => dispatch(setSelectedUsers(payload)),
   }
 }

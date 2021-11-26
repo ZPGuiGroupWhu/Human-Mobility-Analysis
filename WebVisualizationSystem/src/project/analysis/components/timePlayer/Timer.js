@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Radio } from 'antd';
+import { Radio, message } from 'antd';
 
 let timer = null;
 export default function Timer(props) {
@@ -7,13 +7,13 @@ export default function Timer(props) {
     getSelectData,
     getTripsLayer,
     getIconLayer,
+    getScatterPlotLayer,
   } = props;
 
   const clearTimer = (timer) => {
     if (timer) {
       clearInterval(timer);
       timer = null;
-      console.log(timer);
     }
   }
 
@@ -21,11 +21,13 @@ export default function Timer(props) {
     trajs: [],
     OPt: [],
     DPt: [],
+    histDPts: [],
   })
   useEffect(() => {
     getTripsLayer(info.trajs);
     getIconLayer(true, info.OPt);
     getIconLayer(false, info.DPt);
+    info.histDPts.length && getScatterPlotLayer(info.histDPts);
   }, [info])
 
   useEffect(() => {
@@ -41,10 +43,14 @@ export default function Timer(props) {
     if (curSelected === value) {
       return;
     }
+    setInfo(prev => ({
+      ...prev,
+      histDPts: [],
+    }))
     setCurSelected(value);
     switch (value) {
       case 'day':
-        dayTimer(getSelectData);
+        dayTimer(getSelectData, 2000);
         break;
       case 'week':
         weekTimer(getSelectData);
@@ -57,6 +63,10 @@ export default function Timer(props) {
     }
   }
 
+  const showTimeMessage = (info, wait) => {
+    message.success(`星期 ${info?.weekday ?? '*'}, ${info?.hour ?? '*'} 点`, (wait - 500) / 1000);
+  }
+
   const dayTimer = (fn, wait = 1000) => {
     let startDate = '2018-01-01';
     let endDate = '2018-01-01';
@@ -65,14 +75,18 @@ export default function Timer(props) {
 
     let i = 0;
     let [selectONodes, selectDNodes, selectTrajs] = fn(startDate, endDate);
-    console.log(selectONodes, selectDNodes, selectTrajs);
     let lens = selectTrajs.length;
     timer = setInterval(() => {
-      setInfo({
-        trajs: [selectTrajs[i]],
-        OPt: [selectONodes[i]],
-        DPt: [selectDNodes[i]]
-      })
+      showTimeMessage(selectTrajs[i], wait);
+      setInfo(prev => {
+        let histDPts = prev.histDPts;
+        return {
+          trajs: [selectTrajs[i]],
+          OPt: [selectONodes[i]],
+          DPt: [selectDNodes[i]],
+          histDPts: selectDNodes[i] ? [...histDPts, selectDNodes[i]] : [...histDPts],
+        }
+      });
       i++;
       if (i >= lens) {
         startDate = addDateTime(startDate, 1);
@@ -93,11 +107,12 @@ export default function Timer(props) {
 
     let [selectONodes, selectDNodes, selectTrajs] = fn(startDate, endDate);
     timer = setInterval(() => {
-      setInfo({
+      setInfo(prev => ({
+        ...prev,
         trajs: selectTrajs,
         OPt: [selectONodes[0]],
         DPt: [selectDNodes[selectDNodes.length - 1]],
-      })
+      }))
       startDate = addDateTime(startDate, 1);
       endDate = addDateTime(endDate, 1);
       [selectONodes, selectDNodes, selectTrajs] = fn(startDate, endDate);
@@ -112,11 +127,12 @@ export default function Timer(props) {
 
     let [selectONodes, selectDNodes, selectTrajs] = fn(startDate, endDate);
     timer = setInterval(() => {
-      setInfo({
+      setInfo(prev => ({
+        ...prev,
         trajs: selectTrajs,
         OPt: [selectONodes[0]],
         DPt: [selectDNodes[selectDNodes.length - 1]],
-      })
+      }))
       startDate = addDateTime(startDate, 7);
       endDate = addDateTime(endDate, 7);
       [selectONodes, selectDNodes, selectTrajs] = fn(startDate, endDate);

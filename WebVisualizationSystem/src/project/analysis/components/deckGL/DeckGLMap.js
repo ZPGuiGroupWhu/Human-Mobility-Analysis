@@ -2,7 +2,7 @@ import React, { Component, useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { StaticMap } from 'react-map-gl';
 import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
-import { ArcLayer, IconLayer } from '@deck.gl/layers';
+import { ArcLayer, IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
 import { Switch, Slider, Radio, Button } from 'antd';
 import './DeckGLMap.css';
@@ -62,6 +62,7 @@ class DeckGLMap extends Component {
       iconLayerOneD: null,//选中轨迹D点的icon图层
       tripsOpacity: initOpacity,//轨迹初始透明度
       iconOpacity: 256,//icon图标图层初始化透明度
+      scatterPlotLayer: null, // 点图层
     }
   }
 
@@ -128,7 +129,10 @@ class DeckGLMap extends Component {
         //组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
         selectTrajs.push({
           id: this.props.userData[i].id, date: this.props.userData[i].date, data: path,
-          spd: this.props.userData[i].spd, azimuth: this.props.userData[i].azimuth, importance: importance
+          spd: this.props.userData[i].spd, azimuth: this.props.userData[i].azimuth, importance: importance,
+          // 新添加了细粒度时间特征
+          weekday: this.props.userData[i].weekday + 1,
+          hour: this.props.userData[i].hour,
         });
       }
     }
@@ -432,6 +436,33 @@ class DeckGLMap extends Component {
       iconLayerOneD: null,
     })
   };
+
+  getScatterPlotLayer = (data) => {
+    let isEmpty = (!data || data.length === 0)
+    let scatterPlotLayer = isEmpty ? null : (
+      new ScatterplotLayer({
+        id: 'scatterplot-layer',
+        data,
+        pickable: true,
+        opacity: 0.8,
+        stroked: true,
+        filled: true,
+        radiusScale: 6,
+        radiusMinPixels: 1,
+        radiusMaxPixels: 100,
+        lineWidthMinPixels: 1,
+        getPosition: d => d?.COORDINATES,
+        // getRadius: d => Math.sqrt(d.exits),
+        getRadius: d => 10,
+        getFillColor: d => [255, 0, 0],
+        getLineColor: d => [0, 0, 0]
+      })
+    )
+    this.setState({
+      scatterPlotLayer,
+    })
+  }
+
   // 可视化筛选的轨迹
   showSelectTraj = (start, end) => {
     this.setState({
@@ -541,6 +572,7 @@ class DeckGLMap extends Component {
     this.getArcLayerOne();//初始化单条OD图层
     this.geticonLayerOneOD();//初始化单条OD的icon图层
     this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
+    this.getScatterPlotLayer();
   };
 
   // 根据日期选择轨迹，监听函数
@@ -611,17 +643,19 @@ class DeckGLMap extends Component {
             bearing: 0
           }}
           controller={true}
-          layers={[this.gridLayerShow && !this.heatMapLayerShow ? this.state.gridLayer : null,
-          this.heatMapLayerShow && this.gridLayerShow ? this.state.heatMapLayer : null,
-          this.heatMapLayerShow && this.speedLayerShow ? this.state.heatMapLayerSPD : null,
-          this.speedLayerShow && !this.heatMapLayerShow ? this.state.speedLayer : null,
-          this.tripsLayerShow ? this.state.tripsLayer : null,
-          this.iconLayerOShow ? this.state.iconLayerO : null,
-          this.iconLayerDShow ? this.state.iconLayerD : null,
-          this.arcLayerOneShow ? this.state.arcLayerOne : null,
-          this.tripsLayerOneShow ? this.state.tripsLayerOne : null,
-          this.iconLayerOneOShow ? this.state.iconLayerOneO : null,
-          this.iconLayerOneDShow ? this.state.iconLayerOneD : null,
+          layers={[
+            this.gridLayerShow && !this.heatMapLayerShow ? this.state.gridLayer : null,
+            this.heatMapLayerShow && this.gridLayerShow ? this.state.heatMapLayer : null,
+            this.heatMapLayerShow && this.speedLayerShow ? this.state.heatMapLayerSPD : null,
+            this.speedLayerShow && !this.heatMapLayerShow ? this.state.speedLayer : null,
+            this.tripsLayerShow ? this.state.tripsLayer : null,
+            this.iconLayerOShow ? this.state.iconLayerO : null,
+            this.iconLayerDShow ? this.state.iconLayerD : null,
+            this.arcLayerOneShow ? this.state.arcLayerOne : null,
+            this.tripsLayerOneShow ? this.state.tripsLayerOne : null,
+            this.iconLayerOneOShow ? this.state.iconLayerOneO : null,
+            this.iconLayerOneDShow ? this.state.iconLayerOneD : null,
+            this.state.scatterPlotLayer,
           ]}>
           <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />
           {this._renderTooltip()}
@@ -653,7 +687,12 @@ class DeckGLMap extends Component {
               <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
           }
         </div>
-        <Timer getSelectData={this.getSelectData} getTripsLayer={this.getTripsLayer} getIconLayer={this.getIconLayer} />
+        <Timer
+          getSelectData={this.getSelectData}
+          getTripsLayer={this.getTripsLayer}
+          getIconLayer={this.getIconLayer}
+          getScatterPlotLayer={this.getScatterPlotLayer}
+        />
       </div>
     )
   }

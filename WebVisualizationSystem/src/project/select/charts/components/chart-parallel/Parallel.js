@@ -24,7 +24,7 @@ class Parallel extends Component {
   //   { index: 2, text: '神经质性' },
   //   { index: 3, text: '尽责性' },
   // ];
-  schema = this.props.keys.map((item, idx) => ({index: idx, text: item}));
+  schema = this.props.keys.map((item, idx) => ({ index: idx, text: item }));
   newKeys = [...this.props.keys, '人员编号'];
 
   // 选框样式
@@ -79,12 +79,11 @@ class Parallel extends Component {
         }
       }
     ],
-    parallelAxis: [
-      { dim: 0, name: this.schema[0].text, areaSelectStyle: this.areaSelectStyle, },
-      { dim: 1, name: this.schema[1].text, areaSelectStyle: this.areaSelectStyle, },
-      { dim: 2, name: this.schema[2].text, areaSelectStyle: this.areaSelectStyle, },
-      { dim: 3, name: this.schema[3].text, areaSelectStyle: this.areaSelectStyle, },
-    ],
+    parallelAxis: this.schema.map((item, idx) => ({
+      dim: idx,
+      name: item.text,
+      areaSelectStyle: this.areaSelectStyle
+    })),
     parallel: {
       left: '10%',
       right: '13%',
@@ -125,7 +124,7 @@ class Parallel extends Component {
 
   handleData = (data) => {
     return Object.values(data).map(item => {
-      return this.newKeys.map(key => item[key])
+      return this.newKeys.map((key, idx, arr) => item[key])
     })
   }
 

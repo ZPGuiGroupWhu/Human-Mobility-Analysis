@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Select, Button, Descriptions } from 'antd';
 import { withRouter } from 'react-router';
+import _ from "lodash";
 // 样式
 import '../bmap.scss';
 // 伪数据
@@ -9,13 +10,13 @@ import personalityData from './components/tableDrawer/radar/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
 import Drawer from '@/components/drawer/Drawer';
-import BottomCalendar from './components/calendar/BottomCalendar'
 import TableDrawer from "./components/tableDrawer/TableDrawer";
 import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
-import _ from "lodash";
 import { BlockOutlined } from "@ant-design/icons";
+import BtmDrawer from './components/btmDrawer/BtmDrawer';
+
 
 
 
@@ -179,7 +180,13 @@ class PageAnalysis extends Component {
           height={170}
           type='bottom'
           initVisible={true}
-          render={() => (this.state.date ? <BottomCalendar data={this.state.date} eventName={this.EVENTNAME} /> : null)}
+          render={
+            () => <BtmDrawer
+              // Bottom Calendar
+              date={this.state.date}
+              EVENTNAME={this.EVENTNAME}
+            />
+          }
           id={2}
           curId={this.state.curId}
           setCurId={this.setCurId}

@@ -454,7 +454,7 @@ class DeckGLMap extends Component {
         getPosition: d => d?.COORDINATES,
         // getRadius: d => Math.sqrt(d.exits),
         getRadius: d => 10,
-        getFillColor: d => [255, 0, 0],
+        getFillColor: d => [249, 231, 159],
         getLineColor: d => [0, 0, 0]
       })
     )

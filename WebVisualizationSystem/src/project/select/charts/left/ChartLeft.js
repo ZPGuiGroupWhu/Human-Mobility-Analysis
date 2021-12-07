@@ -32,14 +32,14 @@ class ChartLeft extends Component {
                 render={
                   ({ data, xAxisName, yAxisName, handleBrushEnd, isReload }) => (
                     !this.props.width ? null : // width 为 0 时，无法绘制，因此要监听 width 变化
-                    <Histogram
-                      height="250px"
-                      data={data}
-                      isReload={isReload}
-                      xAxisName={xAxisName}
-                      yAxisName={yAxisName}
-                      handleBrushEnd={handleBrushEnd}
-                    />
+                      <Histogram
+                        height="250px"
+                        data={data}
+                        isReload={isReload}
+                        xAxisName={xAxisName}
+                        yAxisName={yAxisName}
+                        handleBrushEnd={handleBrushEnd}
+                      />
                   )
                 }
               >
@@ -54,14 +54,14 @@ class ChartLeft extends Component {
                 render={
                   ({ data, xAxisName, yAxisName, handleBrushEnd, isReload }) => (
                     !this.props.width ? null :
-                    <Scatter
-                      height="250px"
-                      data={data}
-                      isReload={isReload}
-                      xAxisName={xAxisName}
-                      yAxisName={yAxisName}
-                      handleBrushEnd={handleBrushEnd}
-                    />
+                      <Scatter
+                        height="250px"
+                        data={data}
+                        isReload={isReload}
+                        xAxisName={xAxisName}
+                        yAxisName={yAxisName}
+                        handleBrushEnd={handleBrushEnd}
+                      />
                   )
                 }
               >
@@ -75,12 +75,12 @@ class ChartLeft extends Component {
                 render={
                   ({ data, handleBrushEnd }) => (
                     !this.props.width ? null :
-                    <Parallel
-                      height="250px"
-                      data={data}
-                      keys={this.groupThreeKey}
-                      handleBrushEnd={handleBrushEnd}
-                    />
+                      <Parallel
+                        height="250px"
+                        data={data}
+                        keys={this.groupThreeKey}
+                        handleBrushEnd={handleBrushEnd}
+                      />
                   )
                 }
               >

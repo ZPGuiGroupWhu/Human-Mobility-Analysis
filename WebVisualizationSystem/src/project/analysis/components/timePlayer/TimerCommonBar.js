@@ -2,7 +2,7 @@ import React, {useRef, useEffect} from 'react';
 import * as echarts from 'echarts';
 import './TimerLine.scss';
 
-let myChart = null;
+
 export default function TimerCommonBar(props) {
   const {
     type='day',
@@ -12,6 +12,7 @@ export default function TimerCommonBar(props) {
     acIdx,
   } = props;
   const ref = useRef(null);
+  const myChart = useRef(null);
 
   const option = {
     // 位置
@@ -61,12 +62,17 @@ export default function TimerCommonBar(props) {
 
   // init echarts
   useEffect(() => {
-    myChart = echarts.init(ref.current);
-    myChart.setOption(option)
+    myChart.current = echarts.init(ref.current);
+    myChart.current.setOption(option)
     return () => {
-      myChart.dispose();
+      myChart.current.dispose();
     }
   }, [])
+
+  useEffect(() => {
+    option.series[0].data = data
+    myChart.current.setOption(option)
+  }, [data])
 
 
   useEffect(() => {
@@ -74,7 +80,7 @@ export default function TimerCommonBar(props) {
       return (idx === acIdx - 1) ? {value: item, itemStyle: {color: '#F46400'}} : item
     })
     option.series[0].data = empData
-    myChart.setOption(option);
+    myChart.current.setOption(option);
   }, [acIdx])
 
   return (

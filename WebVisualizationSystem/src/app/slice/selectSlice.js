@@ -19,7 +19,6 @@ const fetchData = createAsyncThunk('select/fetchData', async function (url) {
 
 // 获取全部大五人格数据
 const fetchOceanScoreAll = createAsyncThunk('select/fetchOceanScoreAll', async function () {
-  console.log(1);
   const data = await getOceanScoreAll();
   console.log(data);
   return data;

@@ -8,6 +8,7 @@ export default function ShoppingCart(props) {
     selectTrajs,
     ShenZhen,
     isSelected,  // 当前组件是否被选中展示，若不选中则隐藏但不删除 DOM，见 style 设置
+    handleDeleteSelectTraj,
   } = props;
 
   return (
@@ -18,7 +19,7 @@ export default function ShoppingCart(props) {
       <div className='shopping-cart-ctn'>
         {/* 首先加载canvas，在其渲染完成后，调用onAfterRender回调，存储为image，并替换canvas */}
         {selectTrajs.length ?
-          selectTrajs.map((item, idx) => {
+          selectTrajs.map((item) => {
             // deckgl 数据组织
             const OD = [{
               O: item.data[0],
@@ -30,7 +31,16 @@ export default function ShoppingCart(props) {
               path: item.data,
               color: [254, 137, 20],
             }];
-            return <SingleCard key={idx} OD={OD} path={path} ShenZhen={ShenZhen} />
+            return (
+              <SingleCard
+                key={item.id}
+                id={item.id}
+                OD={OD}
+                path={path}
+                ShenZhen={ShenZhen}
+                handleDeleteSelectTraj={handleDeleteSelectTraj}
+              />
+            )
           })
           : null}
       </div>

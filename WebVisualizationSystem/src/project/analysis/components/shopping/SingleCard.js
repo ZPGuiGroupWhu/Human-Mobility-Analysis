@@ -1,30 +1,37 @@
 import React, { useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
+import { Button } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
+import './SingleCard.scss';
 
 
 export default function SingleCard(props) {
   const {
-    OD,
-    path,
-    ShenZhen,
+    id, // 数据id标识
+    OD, // OD 数据
+    path, // 路径数据
+    ShenZhen, // 深圳 JSON 数据
+    handleDeleteSelectTraj, // 删除方法
     width = '150px',
   } = props;
 
   const mapStyle = {
     width,
-    height: '100%',
-    flexShrink: 0,
-    position: 'relative',
-    margin: '0 5px',
-    border: '1px solid #fff',
-    boxSizing: 'border-box',
   }
 
   const [imgUrl, setImgUrl] = useState('');
 
   return (
-    <div style={mapStyle}>
+    <div style={mapStyle} className="single-card-ctn">
+      <div className="button-group">
+        <Button
+          ghost
+          icon={<CloseOutlined />}
+          size='small'
+          onClick={() => handleDeleteSelectTraj(id)}
+        ></Button>
+      </div>
       {
         // 由于浏览器对于 Canvas Webgl Context 有个数限制，一般为 8-16 个，超出个数限制则报错。
         // 解决方法就是等待 Canvas 完全渲染后(注意不是 Canvas 挂载完成)，将 Canvas 保存为图片地址，然后将 Canvas 对象替换为 <img />
@@ -71,11 +78,11 @@ export default function SingleCard(props) {
             ]}
             // 渲染完成后执行(注意区别于onLoad，onLoad意味着节点加载完成，但并不意味着完成canvas渲染)
             // 接受参数 {gl: WebGL2d}
-            onAfterRender={({gl}) => {
+            onAfterRender={({ gl }) => {
               let imgUrl = gl.canvas.toDataURL('image/webgl');  // Canvas -> Image Url
               setImgUrl(imgUrl);
             }}
-            >
+          >
           </DeckGL>
       }
     </div>

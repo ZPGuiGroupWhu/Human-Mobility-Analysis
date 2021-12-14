@@ -4,13 +4,12 @@ import { ArcLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
 import { Button } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import './SingleCard.scss';
+import eventBus, { RENDERTRAJBYCART } from '@/app/eventBus';
 
 
 export default function SingleCard(props) {
   const {
-    id, // 数据id标识
-    OD, // OD 数据
-    path, // 路径数据
+    data,
     ShenZhen, // 深圳 JSON 数据
     handleDeleteSelectTraj, // 删除方法
     width = '150px',
@@ -20,7 +19,18 @@ export default function SingleCard(props) {
     width,
   }
 
-  const [imgUrl, setImgUrl] = useState('');
+  const [imgUrl, setImgUrl] = useState('');  // 图片 URL
+
+  const OD = [{
+    O: data.data[0],
+    D: data.data.slice(-1)[0],
+    sourceColor: [252, 252, 46],
+    targetColor: [255, 77, 41],
+  }];
+  const path = [{
+    path: data.data,
+    color: [254, 137, 20],
+  }];
 
   return (
     <div style={mapStyle} className="single-card-ctn">
@@ -29,14 +39,27 @@ export default function SingleCard(props) {
           ghost
           icon={<CloseOutlined />}
           size='small'
-          onClick={() => handleDeleteSelectTraj(id)}
+          onClick={() => handleDeleteSelectTraj(data.id)}
         ></Button>
       </div>
       {
         // 由于浏览器对于 Canvas Webgl Context 有个数限制，一般为 8-16 个，超出个数限制则报错。
         // 解决方法就是等待 Canvas 完全渲染后(注意不是 Canvas 挂载完成)，将 Canvas 保存为图片地址，然后将 Canvas 对象替换为 <img />
         imgUrl ?
-          <img src={imgUrl} alt="Canvas PNG" style={{ width: '100%', height: '100%' }} /> :
+          <img
+            src={imgUrl}
+            alt="Canvas PNG"
+            style={{ width: '100%', height: '100%' }}
+            onClick={() => {
+              const params = [
+                [{COORDINATES: OD[0].O}],
+                [{COORDINATES: OD[0].D}],
+                [{O: OD[0].O, D: OD[0].D}],
+                [{path: path[0].path}],
+              ]
+              eventBus.emit(RENDERTRAJBYCART, ...params )
+            }}
+          /> :
           <DeckGL
             initialViewState={{
               longitude: ((OD[0].O)[0] + (OD[0].D)[0]) / 2,
@@ -81,6 +104,7 @@ export default function SingleCard(props) {
             onAfterRender={({ gl }) => {
               let imgUrl = gl.canvas.toDataURL('image/webgl');  // Canvas -> Image Url
               setImgUrl(imgUrl);
+              gl.getExtension('WEBGL_lose_context').loseContext(); // 手动丢弃上下文，回收占用的 webgl core
             }}
           >
           </DeckGL>

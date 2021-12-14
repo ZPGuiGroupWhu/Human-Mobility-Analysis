@@ -20,23 +20,10 @@ export default function ShoppingCart(props) {
         {/* 首先加载canvas，在其渲染完成后，调用onAfterRender回调，存储为image，并替换canvas */}
         {selectTrajs.length ?
           selectTrajs.map((item) => {
-            // deckgl 数据组织
-            const OD = [{
-              O: item.data[0],
-              D: item.data.slice(-1)[0],
-              sourceColor: [252, 252, 46],
-              targetColor: [255, 77, 41],
-            }];
-            const path = [{
-              path: item.data,
-              color: [254, 137, 20],
-            }];
             return (
               <SingleCard
                 key={item.id}
-                id={item.id}
-                OD={OD}
-                path={path}
+                data={item}
                 ShenZhen={ShenZhen}
                 handleDeleteSelectTraj={handleDeleteSelectTraj}
               />

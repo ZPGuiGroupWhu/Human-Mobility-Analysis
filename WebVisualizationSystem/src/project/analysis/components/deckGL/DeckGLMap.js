@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import DeckGL from '@deck.gl/react';
 import { StaticMap } from 'react-map-gl';
 import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
@@ -9,12 +9,17 @@ import './DeckGLMap.css';
 import '@/project/border-style.scss';
 import { eventEmitter } from '@/common/func/EventEmitter';
 import Timer from '../timePlayer/Timer';
+// lodash
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 // react-router
 import { withRouter } from 'react-router';
+// events-eventBus
+import eventBus, { GETLAYERS, TRAJBYCLICK } from '@/app/eventBus';
+
+
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiMjAxNzMwMjU5MDE1NyIsImEiOiJja3FqM3RjYmIxcjdyMnhsbmR0bHo2ZGVpIn0.wNBmzyxhzCMx9PhIH3rwCA';//MAPBOX密钥
 const initOpacity = 0.8;
@@ -239,7 +244,6 @@ class DeckGLMap extends Component {
 
   //对应新json格式：轨迹点击事件
   clickInfo = (info) => {
-    console.log(info);
     this.setState({
       tripsOpacity: 0.02,
       iconOpacity: 50
@@ -249,6 +253,9 @@ class DeckGLMap extends Component {
       if (id === null) {
         console.log('no trajectory!')
       } else {
+        // 传递点击选择的轨迹数据
+        eventBus.emit(TRAJBYCLICK, info.object)
+        
         // console.log(id);
         //存储点击的OD点信息和轨迹信息
         const tempOD = [];

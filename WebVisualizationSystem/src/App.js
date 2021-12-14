@@ -8,6 +8,8 @@ import { Provider } from 'react-redux';
 // 样式导入
 import './App.scss';
 
+window.cancelList = {};
+
 function App() {
   return (
     <Provider store={store}>

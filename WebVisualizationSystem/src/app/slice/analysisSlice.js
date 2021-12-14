@@ -4,7 +4,6 @@ const initialState = {
   hourCount: [],
   monthCount: [],
   weekdayCount: [],
-  trajs: [],
 }
 
 const analysisReducer = createSlice({

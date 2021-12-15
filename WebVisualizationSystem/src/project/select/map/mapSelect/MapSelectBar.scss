@@ -1,0 +1,19 @@
+.map-select-bar {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  height: 200px;
+  
+  .map-select-function {
+    height: 100%;
+    width: 100%;
+  }
+  .map-box-title {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 100%;
+    width: 100%;
+  }
+}

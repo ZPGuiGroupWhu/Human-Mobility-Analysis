@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import * as echarts from 'echarts';
 import { debounce } from '@/common/func/debounce';
 import { eventEmitter } from '@/common/func/EventEmitter';
-import _ from 'lodash';
+import _, { forEach } from 'lodash';
 // react-redux
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedByCalendar } from '@/app/slice/selectSlice';
@@ -277,16 +277,20 @@ export default function Calendar(props) {
   //返回所有筛选的用户
   function getUsers(obj, times) {
     let users = [];
-    for (let i = 0; i < times.length; i++) {
+    for (let i = 0; i < times.length; i++) { // 对每一段日期分别查找用户
       let start = +echarts.number.parseDate(times[i].start);
       let end = +echarts.number.parseDate(times[i].end);
       let dayTime = 3600 * 24 * 1000;
-      for (let time = start; time <= end; time += dayTime) {
+      for (let time = start; time <= end; time += dayTime) { // 对每段日期下的每一天分别查找用户
         const date = echarts.format.formatTime('yyyy-MM-dd', time);
-        users = Array.from(new Set(users.concat(Reflect.get(obj, date).users)))//对每个日期下符合要求的用户求并集
+        users.push(Reflect.get(obj, date).users.map(item => +item)); // 将每个日期下的用户加入到users数组中
       }
     }
-    return users;
+    let finalUsers = users.reduce((prev, cur) => {
+      if(prev.length === 0) return [...cur]; // 解决初始数组为[]的情况
+      return Array.from(new Set(prev.filter(item => cur.includes(item)))) // 对每一个日期下的用户集合求交集
+    },[])
+    return finalUsers;
   }
 
   // 记录框选的日期范围
@@ -372,7 +376,7 @@ export default function Calendar(props) {
       let userIDs = getUsers(data, timePeriod);
       // eventEmitter.emit('getUsers', {userIDs});
       //将数据传递到setSelectedByCalendar数组中
-      dispatch(setSelectedByCalendar(userIDs.map(item => +item)))
+      dispatch(setSelectedByCalendar(userIDs));
     };
     const mouseUp = (params) => {
       if (isdown.current) { //如果点击的是不可选取的内容，则isdown不会变为true，也就不存在mouseUp功能

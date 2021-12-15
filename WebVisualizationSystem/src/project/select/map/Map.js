@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react'
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import _ from 'lodash';
+import _, { max } from 'lodash';
 import "./Map.scss";
 //测试数据
 import regionJson from './regionJson/Shenzhen';
@@ -10,7 +10,6 @@ import userLocations from '../charts/bottom/jsonData/userLoctionCounts';
 import { connect } from 'react-redux';
 
 let myMap = null;
-
 class Map extends Component {
   constructor(props) {
     super(props);
@@ -41,9 +40,10 @@ class Map extends Component {
     const option = {
       tooltip: {
         formatter: function (params) {// 说明某日出行用户数量
-          return '经度: ' + params.value[0] + '<br />'
+          return '用户编号: ' + params.value[3] + '<br/>'
+            + '经度: ' + params.value[0] + '<br />'
             + '纬度: ' + params.value[1] + '<br />'
-            + '出行次数：' + params.value[2];
+            + '出行次数: ' + params.value[2];
         },
       },
       // 鼠标悬浮的字体样式
@@ -58,9 +58,11 @@ class Map extends Component {
         show: this.state.visualMap,
         left: this.props.leftWidth,
         bottom: this.props.bottomHeight,
+        dimension: 4, // 使用第5个纬度: id_num, 实现不同用户的颜色不同
         itemWidth: 15, // 颜色条宽度
         itemHeight: 100, // 颜色条高度
-        max: 400, //最大值
+        max: 0, //最大值, 初始化为0，后续每次选取用户时会更新
+        min: 1, // 最小值，永远为1
         realtime: true, //拖拽时是否实时更新
         calculable: true, //拖拽时是否显示手柄
         inRange: { //颜色数组
@@ -73,6 +75,7 @@ class Map extends Component {
       },
       // geo3D地图
       geo3D: {
+        show: true,
         map: 'Shenzhen',
         regionHeight: 1.5, // 三维模型区域高度
         // 行政区边界
@@ -98,10 +101,10 @@ class Map extends Component {
           // antoRotateDirection: 'ccw',//逆时针
           // autoRotateSpeed: 2, //旋转速度，即一秒转2度
           // autoRotateAfterStill: 5, //鼠标交互事件5s后继续开始动画
-          panMouseButton: 'left',//左键移动地图
           rotateMouseButton: 'right',//右键旋转地图
           rotateSensitivity: 1,//旋转操作的灵敏度
-          panSensitivity: 0.7,//平移操作的灵敏度
+          panMouseButton: 'left',//左键移动地图
+          panSensitivity: 1,//平移操作的灵敏度, 设置为0则无法平移
           zoomSensitivity: 1//缩放操作的灵敏度
         },
         // 灯光设置
@@ -146,7 +149,8 @@ class Map extends Component {
       },
       series: [{
         type: 'bar3D',
-        name: '柱子',
+        show: false,
+        name: 'bar3D',
         coordinateSystem: 'geo3D',//坐标系
         shading: 'lambert',// 三维图形的着色效果
         data: [],
@@ -180,28 +184,31 @@ class Map extends Component {
       // 多发生在点击清空按钮后，因此需要将bar图层的数据设置为空
       myMap.setOption({
         series: [{
-          name: '柱子',
+          name: 'bar3D',
           data: [],
         }]
       });
     } else {//后续这一部分，可以用一个函数来代替，this.XXX(){retuan data}
       // 获取用户id数组
       let data = [];
+      let id_num = 1; // id => num 映射，每个用户的轨迹对应一个相同值，作为visualMap的颜色表示编号。
       for (let i = 0; i < barData.length; i++) {
         for (let j = 0; j < barData[i].locations.length; j++) {
-          data.push([barData[i].locations[j].lnglat[0], barData[i].locations[j].lnglat[1], barData[i].locations[j].count])
+          data.push([barData[i].locations[j].lnglat[0], barData[i].locations[j].lnglat[1], barData[i].locations[j].count, barData[i].id, id_num])
         }
+        id_num += 1; // 下一个用户的颜色编号是上一个用户颜色编号+1
       }
-
       myMap.setOption({
+        visualMap: {
+          max: id_num
+        },
         series: [{
-          name: '柱子',
+          name: 'bar3D',
           data: data,
         }]
       });
     }
   };
-
 
   showVisualMap = () => {
     this.setState({
@@ -221,7 +228,7 @@ class Map extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     //prevProps获取到的leftWidth是0，在PageSelect页面componentDidMount获取到leftWidth值后，重新初始化
-    if (!_.isEqual(prevProps.leftWidth, this.props.leftWidth) || !_.isEqual(prevProps.bottomHeight, this.props.bottomHeight)) {
+    if (!_.isEqual(prevProps.leftWidth, this.props.leftWidth) || !_.isEqual(prevProps.bottomHeight, this.props.bottomHeight)|| !_.isEqual(prevProps.rightWidth, this.props.rightWidth)) {
       this.initMap();
     }
     //只要this.props.selectedUsers中的值改变，就会在地图上重新渲染
@@ -262,4 +269,5 @@ const mapStateToProps = (state) => ({
   selectedUsers: state.select.selectedUsers,
 })
 
-export default connect(mapStateToProps)(Map);
+
+export default connect(mapStateToProps, null)(Map);

@@ -9,6 +9,7 @@ const initialState = {
   selectedUsers: [], // 筛选得到的用户编号数组(交集)
   selectedByCharts: [], // 图表筛选结果
   selectedByCalendar: [], // 日历筛选结果
+  selectedByMap: [], // 地图筛选结果
 }
 
 // 根据 url 地址获取数据
@@ -36,6 +37,9 @@ const selectReducer = createSlice({
     },
     setSelectedByCalendar: (state, action) => {
       state.selectedByCalendar = action.payload;
+    },
+    setSelectedByMap: (state, action) => {
+      state.selectedByMap = action.payload;
     },
     setCurId: (state, action) => {
       state.curId = action.payload;
@@ -74,6 +78,6 @@ export {
   fetchOceanScoreAll,
 };
 
-export const { setSelectedUsers, setSelectedByCharts, setSelectedByCalendar, setCurId } = selectReducer.actions;
+export const { setSelectedUsers, setSelectedByCharts, setSelectedByCalendar, setSelectedByMap, setCurId } = selectReducer.actions;
 
 export default selectReducer.reducer;

@@ -72,7 +72,7 @@ class MapSelectBar extends Component {
           max: 5,
           min: 1,
         },
-        tooltip:{
+        tooltip: {
           show: false
         }
       },
@@ -80,10 +80,10 @@ class MapSelectBar extends Component {
         itemSize: 15,
         itemGap: 8,
         showTitle: true,
-        right: 5, 
+        right: 5,
         feature: {
-          brush:{
-            title:{
+          brush: {
+            title: {
               rect: '矩形选择',
               polygon: '任意形状选择',
               keep: '是否多选',
@@ -108,10 +108,10 @@ class MapSelectBar extends Component {
         transformable: false, //选择框是否可以平移
         throttleType: 'debounce',
         throttleDelay: 300,
-        inBrush:{ // 选中特效
+        inBrush: { // 选中特效
           colorAlpha: 1
         },
-        outOfBrush:{ // 未被选中特效
+        outOfBrush: { // 未被选中特效
           colorAlpha: 0.8
         },
       },
@@ -159,8 +159,8 @@ class MapSelectBar extends Component {
         id_num += 1;
       }
       myMap.setOption({
-        visualMap:{
-            max: id_num
+        visualMap: {
+          max: id_num
         },
         series: [{
           name: 'scatter2D',
@@ -184,7 +184,7 @@ class MapSelectBar extends Component {
     }
     // 通过index映射为用户编号
     const payload = Array.from(new Set(brushComponent.selected[0].dataIndex.map(
-      (index, item) => { return data[item][3]})));
+      (index, item) => { return data[item][3] })));
     console.log(payload);
     this.props.setSelectedByMap(payload); //更新Map筛选出的用户集
   };
@@ -195,15 +195,15 @@ class MapSelectBar extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     //prevProps获取到的rightWidth是0，在PageSelect页面componentDidMount获取到rightWidth值后，重新初始化
-    if (!_.isEqual(prevProps.rightWidth, this.props.rightWidth)){
+    if (!_.isEqual(prevProps.rightWidth, this.props.rightWidth)) {
       this.initMap();
     }
     //只要this.props.selectedUsers中的值改变，就会在地图上重新渲染
     if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers)) {
       let usersData = this.getUserData(this.props.selectedUsers);
-      this.updateMap(usersData);  
+      this.updateMap(usersData);
     }
-    if(prevProps.mapReload !== this.props.mapReload){
+    if (prevProps.mapReload !== this.props.mapReload) {
       this.props.setSelectedByMap([]);
     }
   }
@@ -211,20 +211,20 @@ class MapSelectBar extends Component {
 
   render() {
     return (
-        <div
-          className="map-select-bar tech-border"
-          style={{
-            right: this.props.right + 5,
-            bottom: this.props.bottom + 5
-          }}>              
-           <div className='map-box-title'>
-                <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'中国深圳2D'}</span>
-              </div>
-            <div className='map-select-function' ref={this.mapRef}>
+      <div
+        className="map-select-bar tech-border"
+        style={{
+          right: this.props.right + 5,
+          bottom: this.props.bottom + 5
+        }}>
+        <div className='map-box-title'>
+          <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'中国深圳2D'}</span>
+        </div>
+        <div className='map-select-function' ref={this.mapRef}>
 
-            </div>
-          </div>
- 
+        </div>
+      </div>
+
     );
   }
 }

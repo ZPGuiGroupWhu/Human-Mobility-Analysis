@@ -1,0 +1,18 @@
+.single-card-ctn {
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  margin: 0 5px;
+  border: 1px solid #fff;
+  box-sizing: border-box;
+
+  .button-group {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  img {
+    cursor: pointer;
+  }
+}

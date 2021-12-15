@@ -30,12 +30,17 @@ const options = [
 ]
 
 export default function TimerLine(props) {
+  const {
+    getTripsLayer,
+    getIconLayer,
+  } = props;
+
   const hourCount = useSelector(state => state.analysis.hourCount);
   const weekdayCount = useSelector(state => state.analysis.weekdayCount);
 
   return (
     <div className='timer-line-ctn'>
-      <TController />
+      <TController getTripsLayer={getTripsLayer} getIconLayer={getIconLayer}/>
       <TimerCommonBar {...options[0]} data={hourCount} />
       <TimerCommonBar {...options[1]} data={weekdayCount} />
     </div>

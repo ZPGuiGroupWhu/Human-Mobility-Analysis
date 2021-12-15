@@ -54,6 +54,9 @@ class PageAnalysis extends Component {
       flag: true,
       option: initlabel,
       curId: 2, // 当前激活抽屉id
+
+      // deckgl 图层渲染方法
+      layers: {}
     }
   };
 

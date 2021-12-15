@@ -8,9 +8,10 @@ import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 import ODs from './ODs.json'
 import ShenZhen from './ShenZhen.json'
 import $ from 'jquery';
+import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
-var _ = require('lodash');
+
 
 class Footer extends Component {
   constructor(props) {

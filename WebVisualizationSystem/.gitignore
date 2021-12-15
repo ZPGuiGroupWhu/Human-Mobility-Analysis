@@ -24,6 +24,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# lock
+/package-lock.json
+
 # test data
 /src/project/analysis/components/deckGL/399313.json
 /src/project/select/footer/ODs.json

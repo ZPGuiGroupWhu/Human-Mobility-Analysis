@@ -1,5 +1,5 @@
 // 第三方库
-import React, { useRef, useEffect, useState, useContext, useReducer } from 'react';
+import React, { useRef, useEffect, useState, useReducer } from 'react';
 import * as echarts from 'echarts'; // ECharts
 import 'echarts/extension/bmap/bmap';
 import _ from 'lodash'; // lodash

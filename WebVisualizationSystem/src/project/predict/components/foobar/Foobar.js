@@ -3,17 +3,14 @@ import "./Foobar.scss";
 import PredictFrame from './predict-frame/PredictFrame';
 import PoiFrame from './poi-frame/PoiFrame';
 import ModelFrame from './model-frame/ModelFrame';
+import HistAndCur from './model-frame/HistAndCur';
 
 const Model1 = (props) => {
   return (
     <div>1</div>
   )
 }
-const Model2 = (props) => {
-  return (
-    <div>2</div>
-  )
-}
+
 const Model3 = (props) => {
   return (
     <div>3</div>
@@ -38,8 +35,8 @@ const Foobar = (props) => {
       component: <Model1 />
     },
     {
-      name: 'model2',
-      component: <Model2 />
+      name: '历史-当前',
+      component: <HistAndCur />
     },
     {
       name: 'model3',

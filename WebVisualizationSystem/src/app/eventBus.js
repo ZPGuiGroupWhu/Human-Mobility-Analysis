@@ -3,5 +3,4 @@ export default new EventEmitter();
 
 // Event Names
 export const GETLAYERS = 'getLayers';
-export const TRAJBYCLICK = 'trajByClick';
 export const RENDERTRAJBYCART = 'renderTrajByCart'

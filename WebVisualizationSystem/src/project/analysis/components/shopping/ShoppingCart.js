@@ -2,14 +2,15 @@ import React from 'react';
 import '../Content.scss';
 import './ShoppingCart.scss';
 import SingleCard from './SingleCard';
+import {useSelector} from 'react-redux';
 
 export default function ShoppingCart(props) {
   const {
-    selectTrajs,
     ShenZhen,
     isSelected,  // 当前组件是否被选中展示，若不选中则隐藏但不删除 DOM，见 style 设置
-    handleDeleteSelectTraj,
   } = props;
+
+  const selectTrajs = useSelector(state => state.analysis.selectTrajs);
 
   return (
     // <SingleCard> 组件可以将一个 Canvas 转为 Image 展示
@@ -25,7 +26,6 @@ export default function ShoppingCart(props) {
                 key={item.id}
                 data={item}
                 ShenZhen={ShenZhen}
-                handleDeleteSelectTraj={handleDeleteSelectTraj}
               />
             )
           })

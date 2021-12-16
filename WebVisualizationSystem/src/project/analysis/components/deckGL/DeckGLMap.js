@@ -14,10 +14,11 @@ import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
+import { addSelectTrajs } from '@/app/slice/analysisSlice';
 // react-router
 import { withRouter } from 'react-router';
 // events-eventBus
-import eventBus, { GETLAYERS, TRAJBYCLICK, RENDERTRAJBYCART } from '@/app/eventBus';
+import eventBus, { GETLAYERS, RENDERTRAJBYCART } from '@/app/eventBus';
 
 
 
@@ -90,7 +91,6 @@ class DeckGLMap extends Component {
     }
   }
   componentWillUnmount() {
-    eventBus.removeAllListeners(TRAJBYCLICK);
     eventBus.removeAllListeners(RENDERTRAJBYCART);
   }
 
@@ -347,7 +347,7 @@ class DeckGLMap extends Component {
           id,
           data: tempTraj,
         } 
-        eventBus.emit(TRAJBYCLICK, infoData)
+        this.props.addSelectTrajs(infoData);
 
         // 地图渲染
         this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath, this.state.selectDate.start, this.state.selectDate.end);  
@@ -722,6 +722,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedTraj: (payload) => dispatch(setSelectedTraj(payload)),
+  addSelectTrajs: (payload) => dispatch(addSelectTrajs(payload)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(DeckGLMap));

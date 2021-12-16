@@ -14,6 +14,7 @@ let myMap = null;
 class MapSelectBar extends Component {
   constructor(props) {
     super(props);
+    this.state={}
   }
   mapRef = createRef();
 
@@ -105,9 +106,9 @@ class MapSelectBar extends Component {
       brush: { // 地图选择框
         toolbox: ['rect', 'polygon', 'keep', 'clear'],
         geoIndex: 'all',
-        transformable: false, //选择框是否可以平移
-        throttleType: 'debounce',
-        throttleDelay: 300,
+        transformable: false, // 选择框是否可以平移
+        throttleType: 'debounce', // 选择后渲染
+        throttleDelay: 600, // 选择后的0.6s渲染
         inBrush: { // 选中特效
           colorAlpha: 1
         },
@@ -184,8 +185,8 @@ class MapSelectBar extends Component {
     }
     // 通过index映射为用户编号
     const payload = Array.from(new Set(brushComponent.selected[0].dataIndex.map(
-      (index, item) => { return data[item][3] })));
-    console.log(payload);
+      item => { return data[item][3] })));
+    console.log('map selected users:', payload);
     this.props.setSelectedByMap(payload); //更新Map筛选出的用户集
   };
 
@@ -205,6 +206,10 @@ class MapSelectBar extends Component {
     }
     if (prevProps.mapReload !== this.props.mapReload) {
       this.props.setSelectedByMap([]);
+      myMap.dispatchAction({
+        type: 'brush',
+        areas: [], // 点击reload同时清除选择框
+      })
     }
   }
 

@@ -18,7 +18,6 @@ class BtmDrawer extends Component {
     ];
     this.state = {
       value: 1,
-      selectTrajs: [],
       ShenZhen: null, // 深圳json边界
     }
   }

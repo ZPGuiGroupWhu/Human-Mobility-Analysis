@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
-import { eventEmitter } from '@/common/func/EventEmitter'; // 发布订阅
+import eventBus, { SELECTTRAJID } from '@/app/eventBus'; // 发布订阅
 import { withMouse } from '@/components/drawer/withMouse'; // 高阶函数-监听鼠标位置
 // 逻辑分离
 import { useCreate } from '@/project/predict/function/useCreate'; // 
@@ -31,16 +31,31 @@ function PagePredict(props) {
   // 当前展开的抽屉 id
   const [drawerId, setDrawerId] = useState(2);
 
-  const res = useSelector(state => state.predict.selectedTraj);
+  const trajs = useSelector(state => state.analysis.selectTrajs); // redux 存储的所选轨迹集合
+  const curShowTrajId = useSelector(state => state.analysis.curShowTrajId); // 当前展示的轨迹 id
   const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
   useEffect(() => {
-    if (Object.keys(res).length) {
-      const data = transcoords(res.data); // 坐标纠偏
-      const traj = _.cloneDeep(res); // 深拷贝，返回 immutable 对象
-      Reflect.set(traj, 'data', data);
-      setSelectedTraj(traj);
+    if (trajs.length && curShowTrajId !== -1) {
+      const traj = trajs.find(item => item.id === curShowTrajId);
+      const data = transcoords(traj.data);
+      setSelectedTraj({
+        id: traj.id,
+        data,
+      });
     }
-  }, [res]);
+  }, [trajs, curShowTrajId]);
+
+
+  // const res = useSelector(state => state.predict.selectedTraj);
+  // const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
+  // useEffect(() => {
+  //   if (Object.keys(res).length) {
+  //     const data = transcoords(res.data); // 坐标纠偏
+  //     const traj = _.cloneDeep(res); // 深拷贝，返回 immutable 对象
+  //     Reflect.set(traj, 'data', data);
+  //     setSelectedTraj(traj);
+  //   }
+  // }, [res]);
 
   const ref = useRef(null); // 容器 ref 对象
   // 首次进入页面，创建 echarts 实例

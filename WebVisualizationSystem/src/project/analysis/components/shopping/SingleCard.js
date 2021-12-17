@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
 import { Button } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import './SingleCard.scss';
-import eventBus, { RENDERTRAJBYCART } from '@/app/eventBus';
-import {useDispatch} from 'react-redux';
-import {delSelectTraj, addImgUrl2SelectTraj} from '@/app/slice/analysisSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {delSelectTraj, addImgUrl2SelectTraj, setCurShowTrajId} from '@/app/slice/analysisSlice';
 
 
 export default function SingleCard(props) {
@@ -22,7 +21,12 @@ export default function SingleCard(props) {
     width,
   }
 
+  const curActiveId = useSelector(state => state.analysis.curShowTrajId); // 当前的激活id
   const [imgUrl, setImgUrl] = useState('');  // 图片 URL
+  const [isActive, setActive] = useState(false); // 当前卡片是否处于激活状态
+  useEffect(() => {
+    setActive(data.id === curActiveId)
+  }, [curActiveId])
 
   const OD = [{
     O: data.data[0],
@@ -36,7 +40,7 @@ export default function SingleCard(props) {
   }];
 
   return (
-    <div style={mapStyle} className="single-card-ctn">
+    <div style={mapStyle} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
       <div className="button-group">
         <Button
           ghost
@@ -55,13 +59,7 @@ export default function SingleCard(props) {
             alt="Canvas PNG"
             style={{ width: '100%', height: '100%' }}
             onClick={() => {
-              const params = [
-                [{COORDINATES: OD[0].O}],
-                [{COORDINATES: OD[0].D}],
-                [{O: OD[0].O, D: OD[0].D}],
-                [{path: path[0].path}],
-              ]
-              eventBus.emit(RENDERTRAJBYCART, ...params )
+              dispatch(setCurShowTrajId(data.id))
             }}
           /> :
           <DeckGL

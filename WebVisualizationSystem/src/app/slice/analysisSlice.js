@@ -5,6 +5,7 @@ const initialState = {
   monthCount: [],
   weekdayCount: [],
   selectTrajs: [],  // 添加到“轨迹列表”中的轨迹数据集合
+  curShowTrajId: -1, // 当前展示的轨迹id
 }
 
 const analysisReducer = createSlice({
@@ -34,6 +35,9 @@ const analysisReducer = createSlice({
         }
         return item;
       });
+    },
+    setCurShowTrajId: (state, action) => {
+      state.curShowTrajId = action.payload;
     }
   }
 })
@@ -42,7 +46,8 @@ export const {
   setAll,
   addSelectTrajs,
   delSelectTraj,
-  addImgUrl2SelectTraj
+  addImgUrl2SelectTraj,
+  setCurShowTrajId,
 } = analysisReducer.actions;
 
 export default analysisReducer.reducer;

@@ -1,0 +1,20 @@
+.week-hour-calendar-ctn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    margin: 0 0 0 110px;
+    border: 0px solid white;
+    border-radius: 10px;
+    padding: 5px 15px;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+    color: rgb(252, 250, 250);
+    .week-hour-calendar {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 500px;
+        height: 100%;
+    }
+}

@@ -1,25 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
 import { Button } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import './SingleCard.scss';
-import eventBus, { RENDERTRAJBYCART } from '@/app/eventBus';
+import {useDispatch, useSelector} from 'react-redux';
+import {delSelectTraj, addImgUrl2SelectTraj, setCurShowTrajId} from '@/app/slice/analysisSlice';
 
 
 export default function SingleCard(props) {
   const {
     data,
     ShenZhen, // 深圳 JSON 数据
-    handleDeleteSelectTraj, // 删除方法
     width = '150px',
   } = props;
+
+  const dispatch = useDispatch();
 
   const mapStyle = {
     width,
   }
 
+  const curActiveId = useSelector(state => state.analysis.curShowTrajId); // 当前的激活id
   const [imgUrl, setImgUrl] = useState('');  // 图片 URL
+  const [isActive, setActive] = useState(false); // 当前卡片是否处于激活状态
+  useEffect(() => {
+    setActive(data.id === curActiveId)
+  }, [curActiveId])
 
   const OD = [{
     O: data.data[0],
@@ -33,31 +40,26 @@ export default function SingleCard(props) {
   }];
 
   return (
-    <div style={mapStyle} className="single-card-ctn">
+    <div style={mapStyle} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
       <div className="button-group">
         <Button
           ghost
           icon={<CloseOutlined />}
           size='small'
-          onClick={() => handleDeleteSelectTraj(data.id)}
+          onClick={() => dispatch(delSelectTraj(data.id))}
         ></Button>
       </div>
       {
         // 由于浏览器对于 Canvas Webgl Context 有个数限制，一般为 8-16 个，超出个数限制则报错。
         // 解决方法就是等待 Canvas 完全渲染后(注意不是 Canvas 挂载完成)，将 Canvas 保存为图片地址，然后将 Canvas 对象替换为 <img />
-        imgUrl ?
+        // 因为在数据中缓存了 imgUrl，因此，若发现数据中存在 imgUrl，直接调用图片地址即可。
+        (data.imgUrl || imgUrl) ?
           <img
-            src={imgUrl}
+            src={data.imgUrl || imgUrl}
             alt="Canvas PNG"
             style={{ width: '100%', height: '100%' }}
             onClick={() => {
-              const params = [
-                [{COORDINATES: OD[0].O}],
-                [{COORDINATES: OD[0].D}],
-                [{O: OD[0].O, D: OD[0].D}],
-                [{path: path[0].path}],
-              ]
-              eventBus.emit(RENDERTRAJBYCART, ...params )
+              dispatch(setCurShowTrajId(data.id))
             }}
           /> :
           <DeckGL
@@ -105,6 +107,8 @@ export default function SingleCard(props) {
               let imgUrl = gl.canvas.toDataURL('image/webgl');  // Canvas -> Image Url
               setImgUrl(imgUrl);
               gl.getExtension('WEBGL_lose_context').loseContext(); // 手动丢弃上下文，回收占用的 webgl core
+
+              dispatch(addImgUrl2SelectTraj({id: data.id, imgUrl}));  // 将 imgUrl 添加到轨迹数据对象中，下次直接加载图像
             }}
           >
           </DeckGL>

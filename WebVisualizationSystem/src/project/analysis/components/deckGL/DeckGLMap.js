@@ -14,10 +14,9 @@ import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
+import { addSelectTrajs, setCurShowTrajId } from '@/app/slice/analysisSlice';
 // react-router
 import { withRouter } from 'react-router';
-// events-eventBus
-import eventBus, { GETLAYERS, TRAJBYCLICK, RENDERTRAJBYCART } from '@/app/eventBus';
 
 
 
@@ -75,10 +74,6 @@ class DeckGLMap extends Component {
     this.getLayers();
     this.addDateSelectListener();
     this.clear();
-    // Events 注册
-    eventBus.on(RENDERTRAJBYCART, (O, D, OD, path) => {
-      this.layerRenderAfterSelect(O, D, OD, path, this.state.selectDate.start, this.state.selectDate.end);
-    })
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.userData !== this.props.userData) {
@@ -88,10 +83,25 @@ class DeckGLMap extends Component {
       this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
       this.showSelectOD(this.state.selectDate.start, this.state.selectDate.end);
     }
+    if (!_.isEqual(prevProps.curShowTrajId, this.props.curShowTrajId)) {
+      this.handleCurTrajId(this.props.selectTrajs, this.props.curShowTrajId, this.state.selectDate.start, this.state.selectDate.end)
+    }
   }
-  componentWillUnmount() {
-    eventBus.removeAllListeners(TRAJBYCLICK);
-    eventBus.removeAllListeners(RENDERTRAJBYCART);
+
+  // 依据当前轨迹 id 展示
+  handleCurTrajId = (selectTrajs, curShowTrajId, start, end) => {
+    if (selectTrajs.length && curShowTrajId !== -1) {
+      const trajs = selectTrajs.find(item => item.id === curShowTrajId);
+      const O = trajs.data[0], D = trajs.data.slice(-1)[0];
+      const params = [
+        [{ COORDINATES: O }],
+        [{ COORDINATES: D }],
+        [{ O, D }],
+        [{ path: trajs.data }],
+      ];
+      this.layerRenderAfterSelect(...params, start, end);
+    }
+
   }
 
 
@@ -346,11 +356,11 @@ class DeckGLMap extends Component {
         const infoData = {
           id,
           data: tempTraj,
-        } 
-        eventBus.emit(TRAJBYCLICK, infoData)
+        }
+        this.props.addSelectTrajs(infoData);
 
         // 地图渲染
-        this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath, this.state.selectDate.start, this.state.selectDate.end);  
+        this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath, this.state.selectDate.start, this.state.selectDate.end);
 
         // 存储轨迹 info.object = [id:XX, date:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
         this.props.setSelectedTraj(info.object);
@@ -361,6 +371,9 @@ class DeckGLMap extends Component {
           newRoutes[2].status = true;
           return newRoutes;
         })
+
+        // 更新当前展示轨迹的 id
+        this.props.setCurShowTrajId(infoData.id);
       }
     })
   };
@@ -718,10 +731,14 @@ class DeckGLMap extends Component {
 
 const mapStateToProps = (state) => ({
   selectedTraj: state.predict.selectedTraj,
+  curShowTrajId: state.analysis.curShowTrajId,
+  selectTrajs: state.analysis.selectTrajs,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedTraj: (payload) => dispatch(setSelectedTraj(payload)),
+  addSelectTrajs: (payload) => dispatch(addSelectTrajs(payload)),
+  setCurShowTrajId: (id) => dispatch(setCurShowTrajId(id)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(DeckGLMap));

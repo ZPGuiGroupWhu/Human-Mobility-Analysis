@@ -7,36 +7,55 @@ import { useSelector } from 'react-redux';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
-import { eventEmitter } from '@/common/func/EventEmitter'; // 发布订阅
+import eventBus, { SELECTTRAJID } from '@/app/eventBus'; // 发布订阅
 import { withMouse } from '@/components/drawer/withMouse'; // 高阶函数-监听鼠标位置
 // 逻辑分离
 import { useCreate } from '@/project/predict/function/useCreate'; // 
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
 import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
 // 通用组件
-import Drawer from '@/components/drawer/Drawer'; // 左侧抽屉
+import Drawer from '@/components/drawer/Drawer'; // 抽屉
 // 自定义组件
-import Foobar from './components/foobar/Foobar'; // 底部功能栏
+import Foobar from './components/foobar/Foobar'; // 左侧功能栏
 import EChartbar from './components/charts/EChartbar'; // EChart 侧边栏
 import RelationChart from './components/charts/relation-chart/RelationChart'; // EChart关系折线图
 import Doughnut from './components/charts/doughnut-chart/Doughnut'; // Echarts 环形统计图
 import Tooltip from '@/components/tooltip/Tooltip'; // 自定义悬浮框
 import ScatterTooltip from './components/scatter-tooltip/ScatterTooltip'; // 点-tooltip
+import BtmDrawer from './components/btmDrawer/BtmDrawer'; // 底部抽屉
 // 样式
 import '@/project/bmap.scss';
 
 
 function PagePredict(props) {
-  const res = useSelector(state => state.predict.selectedTraj);
+  // 当前展开的抽屉 id
+  const [drawerId, setDrawerId] = useState(2);
+
+  const trajs = useSelector(state => state.analysis.selectTrajs); // redux 存储的所选轨迹集合
+  const curShowTrajId = useSelector(state => state.analysis.curShowTrajId); // 当前展示的轨迹 id
   const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
   useEffect(() => {
-    if (Object.keys(res).length) {
-      const data = transcoords(res.data); // 坐标纠偏
-      const traj = _.cloneDeep(res); // 深拷贝，返回 immutable 对象
-      Reflect.set(traj, 'data', data);
-      setSelectedTraj(traj);
+    if (trajs.length && curShowTrajId !== -1) {
+      const traj = trajs.find(item => item.id === curShowTrajId);
+      const data = transcoords(traj.data);
+      setSelectedTraj({
+        id: traj.id,
+        data,
+      });
     }
-  }, [res]);
+  }, [trajs, curShowTrajId]);
+
+
+  // const res = useSelector(state => state.predict.selectedTraj);
+  // const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
+  // useEffect(() => {
+  //   if (Object.keys(res).length) {
+  //     const data = transcoords(res.data); // 坐标纠偏
+  //     const traj = _.cloneDeep(res); // 深拷贝，返回 immutable 对象
+  //     Reflect.set(traj, 'data', data);
+  //     setSelectedTraj(traj);
+  //   }
+  // }, [res]);
 
   const ref = useRef(null); // 容器 ref 对象
   // 首次进入页面，创建 echarts 实例
@@ -255,6 +274,7 @@ function PagePredict(props) {
     });
   }, [chart, highlightData])
 
+
   return (
     <>
       {/* bmap 容器 */}
@@ -276,8 +296,23 @@ function PagePredict(props) {
             setPoiField={poiDispatch} // poi配置项更新回调
           />
         )}
+        id={1}
+        curId={drawerId}
+        setCurId={setDrawerId}
         width={200}
         type='left'
+      />
+      {/* Bottom-Drawer */}
+      <Drawer
+        height={170}
+        type='bottom'
+        initVisible={true}
+        render={
+          () => (<BtmDrawer />)
+        }
+        id={2}
+        curId={drawerId}
+        setCurId={setDrawerId}
       />
       <Tooltip
         top={tooltip.top}

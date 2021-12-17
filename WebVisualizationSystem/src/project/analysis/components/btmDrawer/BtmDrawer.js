@@ -5,7 +5,6 @@ import WeekHourCalendar from '../calendar/WeekHourCalendar';
 import TimerLine from '../timePlayer/TimerLine';
 import ShoppingCart from '../shopping/ShoppingCart';
 import './BtmDrawer.scss';
-import eventBus, { TRAJBYCLICK } from '@/app/eventBus';
 import axios from 'axios';
 import _ from 'lodash';
 
@@ -20,7 +19,6 @@ class BtmDrawer extends Component {
     ];
     this.state = {
       value: 1,
-      selectTrajs: [],
       ShenZhen: null, // 深圳json边界
     }
   }
@@ -31,30 +29,7 @@ class BtmDrawer extends Component {
     })
   }
 
-  // 删除指定 id 的轨迹数据
-  handleDeleteSelectTraj = (id) => {
-    this.setState(prev => {
-      let prevValue = _.cloneDeep(prev);
-      let newValue = prevValue.selectTrajs.filter((item) => (item.id !== id))
-      return {
-        selectTrajs: newValue
-      }
-    })
-  }
-
   componentDidMount() {
-    // 注册鼠标点击监听
-    eventBus.on(TRAJBYCLICK, (data) => {
-      this.setState(prev => {
-        let prevValue = _.cloneDeep(prev)
-        // 根据 id 判断是否重复选择
-        if (prev.selectTrajs.some((item) => (item.id === data.id))) {
-          return prev
-        } else {
-          return { selectTrajs: [...prevValue.selectTrajs, data] }
-        }
-      })
-    })
     // 深圳 json 数据
     axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => {
       this.setState({ ShenZhen: data.data })
@@ -75,10 +50,8 @@ class BtmDrawer extends Component {
         {this.state.value === 2 && <WeekHourCalendar />}
         {this.state.value === 3 && <TimerLine />}
         <ShoppingCart
-          selectTrajs={this.state.selectTrajs}
           ShenZhen={this.state.ShenZhen}
           isSelected={this.state.value === 4}
-          handleDeleteSelectTraj={this.handleDeleteSelectTraj}
         />
       </>
     );

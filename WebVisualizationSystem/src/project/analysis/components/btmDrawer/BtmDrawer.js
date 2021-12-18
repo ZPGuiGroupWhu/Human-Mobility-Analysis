@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Radio, Space } from 'antd';
 import BottomCalendar from '../calendar/BottomCalendar';
-import WeekHourCalendar from '../calendar/WeekHourCalendar';
+import WeekHourCalendar from '../WeekAndHour/WeekHourCalendar';
 import TimerLine from '../timePlayer/TimerLine';
 import ShoppingCart from '../shopping/ShoppingCart';
 import './BtmDrawer.scss';
 import axios from 'axios';
 import _ from 'lodash';
+import CalendarWindow from '../WeekAndHour/CalendarWindow';
 
 class BtmDrawer extends Component {
   constructor(props) {
@@ -47,7 +48,7 @@ class BtmDrawer extends Component {
           </Radio.Group>
         </div>
         {this.state.value === 1 && this.props.date ? <BottomCalendar data={this.props.date} eventName={this.props.EVENTNAME} /> : null}
-        {this.state.value === 2 && <WeekHourCalendar />}
+        {this.state.value === 2 && <CalendarWindow />}
         {this.state.value === 3 && <TimerLine />}
         <ShoppingCart
           ShenZhen={this.state.ShenZhen}

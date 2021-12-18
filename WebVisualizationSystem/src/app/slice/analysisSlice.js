@@ -4,6 +4,7 @@ const initialState = {
   hourCount: [],
   monthCount: [],
   weekdayCount: [],
+  calendarData: [], // 存储 某几个月下的 week-hour 数据
   selectTrajs: [],  // 添加到“轨迹列表”中的轨迹数据集合
   curShowTrajId: -1, // 当前展示的轨迹id
 }
@@ -12,10 +13,13 @@ const analysisReducer = createSlice({
   name: 'analysis',
   initialState,
   reducers: {
-    setAll: (state, action) => {
+    setBarData: (state, action) => {
       Object.keys(state).forEach((item, idx) => {
         state[item] = action.payload[item]
       })
+    },
+    setCalendarData: (state, action) => {
+      state.calendarData = action.payload;
     },
     addSelectTrajs: (state, action) => {
       const data = action.payload;
@@ -38,12 +42,13 @@ const analysisReducer = createSlice({
     },
     setCurShowTrajId: (state, action) => {
       state.curShowTrajId = action.payload;
-    }
+    },
   }
 })
 
 export const {
-  setAll,
+  setBarData,
+  setCalendarData,
   addSelectTrajs,
   delSelectTraj,
   addImgUrl2SelectTraj,

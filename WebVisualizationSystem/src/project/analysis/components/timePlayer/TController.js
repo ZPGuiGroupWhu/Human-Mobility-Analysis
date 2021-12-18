@@ -4,7 +4,7 @@ import { PlayCircleOutlined, PauseCircleOutlined, CloseCircleOutlined } from '@a
 import './TimerLine.scss';
 import { getUserTrajByTime } from '@/network';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAll } from '@/app/slice/analysisSlice';
+import { setBarData } from '@/app/slice/analysisSlice';
 
 export default function TController(props) {
   const dispatch = useDispatch()
@@ -47,7 +47,7 @@ export default function TController(props) {
           monthMin: month[0],
           monthMax: month[1],
         })
-        dispatch(setAll(data));
+        dispatch(setBarData(data));
       } catch (err) {
         console.log(err);
       }

@@ -19,7 +19,6 @@ import BtmDrawer from './components/btmDrawer/BtmDrawer';
 
 
 
-
 /**
  * props
  * @param {number[] | string} initCenter - 初始中心经纬度 | 城市名（如‘深圳市’）

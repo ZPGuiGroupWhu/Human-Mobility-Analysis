@@ -13,8 +13,8 @@ const analysisReducer = createSlice({
   name: 'analysis',
   initialState,
   reducers: {
-    setBarData: (state, action) => {
-      Object.keys(state).forEach((item, idx) => {
+    setAll: (state, action) => {
+      ['hourCount', 'monthCount', 'weekdayCount'].forEach((item, idx) => {
         state[item] = action.payload[item]
       })
     },

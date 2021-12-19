@@ -8,7 +8,6 @@ import { Switch, Slider, Radio, Button } from 'antd';
 import './DeckGLMap.css';
 import '@/project/border-style.scss';
 import { eventEmitter } from '@/common/func/EventEmitter';
-import Timer from '../timePlayer/Timer';
 // lodash
 import _ from 'lodash';
 // react-redux
@@ -131,15 +130,11 @@ class DeckGLMap extends Component {
 
   // 对应新json格式：根据日期筛选可视化的轨迹
   getSelectData = (start, end) => {
-    let selectONodes = [];
-    let selectDNodes = [];
     let selectTrajs = [];
     let startTimeStamp = Date.parse(start);
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < this.props.userData.length; i++) {
       if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp) {
-        selectONodes.push({ id: this.props.userData[i].id, COORDINATES: this.props.userData[i].origin });//存储OD点数据
-        selectDNodes.push({ id: this.props.userData[i].id, COORDINATES: this.props.userData[i].destination });
         let path = [];//存储选择的所有轨迹
         let importance = [];//存储对应轨迹每个位置的重要程度
         for (let j = 0; j < this.props.userData[i].lngs.length; j++) {
@@ -152,15 +147,19 @@ class DeckGLMap extends Component {
         }
         //组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
         selectTrajs.push({
-          id: this.props.userData[i].id, date: this.props.userData[i].date, data: path,
-          spd: this.props.userData[i].spd, azimuth: this.props.userData[i].azimuth, importance: importance,
+          id: this.props.userData[i].id, 
+          date: this.props.userData[i].date, 
+          data: path,
+          spd: this.props.userData[i].spd, 
+          azimuth: this.props.userData[i].azimuth, 
+          importance: importance,
           // 新添加了细粒度时间特征
           weekday: this.props.userData[i].weekday + 1,
           hour: this.props.userData[i].hour,
         });
       }
     }
-    return [selectONodes, selectDNodes, selectTrajs]//返回选择轨迹的OD点和轨迹信息
+    return selectTrajs  //返回选择的轨迹信息 (OD信息直接读取Trajs的首尾坐标)
   };
 
   //构建OD弧段图层
@@ -317,11 +316,11 @@ class DeckGLMap extends Component {
       })
     });
     // Opacity改变，重新绘制其他轨迹
-    const [selectONodes, selectDNodes, selectTrajs] = this.getSelectData(startDate, endDate);
+    const selectTrajs = this.getSelectData(startDate, endDate);
     // this.getIconLayer(selectOdNodes);
     this.getTripsLayer(selectTrajs);
-    this.getIconLayer(true, selectONodes);
-    this.getIconLayer(false, selectDNodes);
+    this.getIconLayer(true, selectTrajs);
+    this.getIconLayer(false, selectTrajs);
   }
   //对应新json格式：轨迹点击事件
   clickInfo = (info) => {
@@ -353,11 +352,7 @@ class DeckGLMap extends Component {
         const tempPath = [{ path: tempTraj }];
 
         // 传递点击选择的轨迹数据
-        const infoData = {
-          id,
-          data: tempTraj,
-        }
-        this.props.addSelectTrajs(infoData);
+        this.props.addSelectTrajs(info.object);
 
         // 地图渲染
         this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath, this.state.selectDate.start, this.state.selectDate.end);
@@ -373,7 +368,7 @@ class DeckGLMap extends Component {
         })
 
         // 更新当前展示轨迹的 id
-        this.props.setCurShowTrajId(infoData.id);
+        this.props.setCurShowTrajId(info.object.id);
       }
     })
   };
@@ -424,7 +419,7 @@ class DeckGLMap extends Component {
           getIcon: d => 'marker',
           sizeScale: 20,
           onClick: info => this.clickInfo(info),
-          getPosition: d => d.COORDINATES,
+          getPosition: d => d.data[0],  // 轨迹第一个点坐标
           getSize: d => 1,
           getColor: d => [175, 238, 238, this.state.iconOpacity],
         })
@@ -442,7 +437,7 @@ class DeckGLMap extends Component {
           getIcon: d => 'marker',
           sizeScale: 20,
           onClick: info => this.clickInfo(info),
-          getPosition: d => d.COORDINATES,
+          getPosition: d => d.data[d.data.length - 1],  // 轨迹最后一个点坐标
           getSize: d => 1,
           getColor: d => [255, 69, 0, this.state.iconOpacity],
         })
@@ -499,7 +494,7 @@ class DeckGLMap extends Component {
     this.setState({
       tripsOpacity: initOpacity
     }, () => {
-      const selectTrajs = this.getSelectData(start, end)[2];
+      const selectTrajs = this.getSelectData(start, end);
       this.getTripsLayer(selectTrajs);
     });
   };
@@ -508,9 +503,9 @@ class DeckGLMap extends Component {
     this.setState({
       iconOpacity: 256
     }, () => {
-      const [selectONodes, selectDNodes, selectTrajs] = this.getSelectData(start, end);
-      this.getIconLayer(true, selectONodes);
-      this.getIconLayer(false, selectDNodes);
+      const selectTrajs = this.getSelectData(start, end);
+      this.getIconLayer(true, selectTrajs);
+      this.getIconLayer(false, selectTrajs);
     })
   };
   changeGridOrSpeed = (event) => {//切换图层
@@ -718,12 +713,6 @@ class DeckGLMap extends Component {
               <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
           }
         </div>
-        <Timer
-          getSelectData={this.getSelectData}
-          getTripsLayer={this.getTripsLayer}
-          getIconLayer={this.getIconLayer}
-          getScatterPlotLayer={this.getScatterPlotLayer}
-        />
       </div>
     )
   }

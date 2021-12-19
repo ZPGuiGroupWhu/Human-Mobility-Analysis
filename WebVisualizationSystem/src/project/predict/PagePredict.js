@@ -37,25 +37,13 @@ function PagePredict(props) {
   useEffect(() => {
     if (trajs.length && curShowTrajId !== -1) {
       const traj = trajs.find(item => item.id === curShowTrajId);
-      const data = transcoords(traj.data);
+      const data = transcoords(traj.data);  // 坐标纠偏
       setSelectedTraj({
-        id: traj.id,
+        ..._.cloneDeep(traj),
         data,
       });
     }
   }, [trajs, curShowTrajId]);
-
-
-  // const res = useSelector(state => state.predict.selectedTraj);
-  // const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
-  // useEffect(() => {
-  //   if (Object.keys(res).length) {
-  //     const data = transcoords(res.data); // 坐标纠偏
-  //     const traj = _.cloneDeep(res); // 深拷贝，返回 immutable 对象
-  //     Reflect.set(traj, 'data', data);
-  //     setSelectedTraj(traj);
-  //   }
-  // }, [res]);
 
   const ref = useRef(null); // 容器 ref 对象
   // 首次进入页面，创建 echarts 实例

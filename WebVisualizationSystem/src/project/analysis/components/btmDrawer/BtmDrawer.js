@@ -15,8 +15,7 @@ class BtmDrawer extends Component {
     this.radioContents = [
       { id: 1, text: '日历' },
       { id: 2, text: '时间窗口' },
-      { id: 3, text: '时间轴' },
-      { id: 4, text: '购物车' },
+      { id: 3, text: '购物车' },
     ];
     this.state = {
       value: 1,
@@ -49,10 +48,9 @@ class BtmDrawer extends Component {
         </div>
         {this.state.value === 1 && this.props.date ? <BottomCalendar data={this.props.date} eventName={this.props.EVENTNAME} /> : null}
         {this.state.value === 2 && <CalendarWindow />}
-        {this.state.value === 3 && <TimerLine />}
         <ShoppingCart
           ShenZhen={this.state.ShenZhen}
-          isSelected={this.state.value === 4}
+          isSelected={this.state.value === 3}
         />
       </>
     );

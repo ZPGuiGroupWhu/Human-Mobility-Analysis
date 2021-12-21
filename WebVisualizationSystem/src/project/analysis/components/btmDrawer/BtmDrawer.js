@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { Radio, Space } from 'antd';
 import BottomCalendar from '../calendar/BottomCalendar';
-import WeekHourCalendar from '../WeekAndHour/WeekHourCalendar';
-import TimerLine from '../timePlayer/TimerLine';
 import ShoppingCart from '../shopping/ShoppingCart';
 import './BtmDrawer.scss';
 import axios from 'axios';
@@ -46,7 +44,10 @@ class BtmDrawer extends Component {
             </Space>
           </Radio.Group>
         </div>
-        {this.state.value === 1 && this.props.date ? <BottomCalendar data={this.props.date} eventName={this.props.EVENTNAME} /> : null}
+        {
+          (this.state.value === 1 && this.props.dataloadStatus && Object.keys(this.props.date).length) ?
+            <BottomCalendar data={this.props.date} eventName={this.props.EVENTNAME} /> : null
+        }
         {this.state.value === 2 && <CalendarWindow />}
         <ShoppingCart
           ShenZhen={this.state.ShenZhen}

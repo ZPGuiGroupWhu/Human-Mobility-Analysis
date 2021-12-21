@@ -1,7 +1,6 @@
 // 组件导入
 import React from 'react';
 import Main from '@/project/Main';
-import TestPage from '@/network/TestPage';
 // react-redux
 import store from './app/store';
 import { Provider } from 'react-redux';
@@ -14,7 +13,6 @@ function App() {
   return (
     <Provider store={store}>
       <Main />
-      <TestPage />
     </Provider>
   );
 }

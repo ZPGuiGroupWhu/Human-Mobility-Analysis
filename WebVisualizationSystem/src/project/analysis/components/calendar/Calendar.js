@@ -7,8 +7,8 @@ import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
 
 
-let myChart = null;
 export default function Calendar(props) {
+  const myChart = useRef(null);
   const {
     data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     eventName, // 注册事件名
@@ -137,8 +137,8 @@ export default function Calendar(props) {
   // 初始化 ECharts 实例对象
   useEffect(() => {
     if (!ref.current) return () => { };
-    myChart = echarts.init(ref.current);
-    myChart.setOption(option);
+    myChart.current = echarts.init(ref.current);
+    myChart.current.setOption(option);
   }, [ref])
 
 
@@ -183,7 +183,7 @@ export default function Calendar(props) {
     if (!data) return () => { };
     const format = formatData(data);
     const counts = format.map(item => (item[1]))
-    myChart.setOption({
+    myChart.current.setOption({
       visualMap: {
         min: Math.min(...counts),
         max: Math.max(...counts)
@@ -204,9 +204,9 @@ export default function Calendar(props) {
   useEffect(() => {
     const wait = 100;
 
-    if (!myChart) return () => { };
+    if (!myChart.current) return () => { };
     // 鼠标按下事件
-    myChart.on('mousedown', (params) => {
+    myChart.current.on('mousedown', (params) => {
       dispatch(setSelectedTraj({}));
       if (isdown.current) return;
       // console.log(params.data);
@@ -249,7 +249,7 @@ export default function Calendar(props) {
     const mouseMove = (params) => {
       action.mousedown && selectDate(params);
     }
-    myChart.on('mousemove', mouseMove);
+    myChart.current.on('mousemove', mouseMove);
 
     // 鼠标抬起事件
     const mouseUp = (params) => {
@@ -272,19 +272,19 @@ export default function Calendar(props) {
       eventEmitter.emit(eventName, { start, end });
       console.log(start, end);
     }
-    myChart.on('mouseup', mouseUp)
+    myChart.current.on('mouseup', mouseUp)
 
     return () => {
-      myChart.off('mousemove', mouseMove);
-      myChart.off('mouseup', mouseUp);
+      myChart.current.off('mousemove', mouseMove);
+      myChart.current.off('mouseup', mouseUp);
     }
-  }, [myChart, date, action])
+  }, [myChart.current, date, action])
 
 
   // 高亮筛选部分
   useEffect(() => {
     if (!date.start || !date.end) return () => { }
-    myChart?.setOption({
+    myChart.current?.setOption({
       series: [{
         name: '高亮',
         data: highLightData(data, date.start, date.end),
@@ -295,7 +295,7 @@ export default function Calendar(props) {
   // 筛选轨迹的日期标记部分
   useEffect(() => {
     if (!data) return () => { }
-    myChart?.setOption({
+    myChart.current?.setOption({
       series: [{
         name: 'select',
         data: highlightSelectedTrajectoryDate(data, state.selectedTraj)
@@ -318,7 +318,7 @@ export default function Calendar(props) {
     })
     // 清除高亮
     setTimeout(() => {
-      myChart?.setOption({
+      myChart.current?.setOption({
         series: [{
           name: '高亮',
           data: [],

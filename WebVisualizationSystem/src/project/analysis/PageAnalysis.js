@@ -5,7 +5,7 @@ import _ from "lodash";
 // 样式
 import '../bmap.scss';
 // 伪数据
-import userData from './components/deckGL/399313.json'
+// import userData from './components/deckGL/399313.json'
 import personalityData from './components/tableDrawer/radar/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
@@ -16,6 +16,8 @@ import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
 import { BlockOutlined } from "@ant-design/icons";
 import BtmDrawer from './components/btmDrawer/BtmDrawer';
+// 网络请求
+import { getUserTraj } from '@/network';
 
 
 
@@ -54,10 +56,21 @@ class PageAnalysis extends Component {
       option: initlabel,
       curId: 2, // 当前激活抽屉id
 
-      // deckgl 图层渲染方法
-      layers: {}
+      userData: [], // 请求的数据
+      dataloadStatus: false, // 数据是否加载完毕
     }
   };
+
+  componentDidMount() {
+    const reqUserData = async () => {
+      let data = await getUserTraj('399313');
+      this.setState({
+        userData: data,
+        dataloadStatus: true,
+      })
+    }
+    reqUserData();
+  }
 
   getTrajCounts = (count) => {
     this.setState({
@@ -90,7 +103,8 @@ class PageAnalysis extends Component {
     return (
       <>
         <DeckGLMap
-          userData={userData}
+          // userData={this.state.userData.length ? this.state.userData : userData}
+          userData={this.state.userData}
           getTrajCounts={this.getTrajCounts}
           eventName={this.EVENTNAME}
           setRoutes={this.props.setRoutes}
@@ -185,6 +199,7 @@ class PageAnalysis extends Component {
           render={
             () => <BtmDrawer
               // Bottom Calendar
+              dataloadStatus={this.state.dataloadStatus}
               date={this.state.date}
               EVENTNAME={this.EVENTNAME}
             />

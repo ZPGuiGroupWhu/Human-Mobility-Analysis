@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
-import { Button } from 'antd';
+import { Button, Checkbox } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import './SingleCard.scss';
-import {useDispatch, useSelector} from 'react-redux';
-import {delSelectTraj, addImgUrl2SelectTraj, setCurShowTrajId} from '@/app/slice/analysisSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { delSelectTraj, addImgUrl2SelectTraj, setCurShowTrajId } from '@/app/slice/analysisSlice';
 
 
 export default function SingleCard(props) {
@@ -13,6 +13,8 @@ export default function SingleCard(props) {
     data,
     ShenZhen, // 深圳 JSON 数据
     width = '150px',
+    setChecks,
+    glbChecked,
   } = props;
 
   const dispatch = useDispatch();
@@ -39,15 +41,31 @@ export default function SingleCard(props) {
     color: [254, 137, 20],
   }];
 
+  // 状态受控
+  const [checked, setChecked] = useState(false);
+  // 监听全选操作
+  useEffect(() => {
+    setChecked(glbChecked);
+  }, [glbChecked])
+  // 标记操作 - 将id添加到标记数组
+  const onCheckBoxChange = (status, id) => {
+    if (status) {
+      setChecks(prev => ([...prev, id]))
+    } else {
+      setChecks(prev => (prev.filter(item => (item !== id))))
+    }
+  }
+
   return (
     <div style={mapStyle} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
       <div className="button-group">
-        <Button
-          ghost
-          icon={<CloseOutlined />}
-          size='small'
-          onClick={() => dispatch(delSelectTraj(data.id))}
-        ></Button>
+        <Checkbox
+          checked={checked}
+          onChange={(e) => { 
+            onCheckBoxChange(e.target.checked, data.id);
+            setChecked(e.target.checked);
+          }}
+        ></Checkbox>
       </div>
       {
         // 由于浏览器对于 Canvas Webgl Context 有个数限制，一般为 8-16 个，超出个数限制则报错。
@@ -108,7 +126,7 @@ export default function SingleCard(props) {
               setImgUrl(imgUrl);
               gl.getExtension('WEBGL_lose_context').loseContext(); // 手动丢弃上下文，回收占用的 webgl core
 
-              dispatch(addImgUrl2SelectTraj({id: data.id, imgUrl}));  // 将 imgUrl 添加到轨迹数据对象中，下次直接加载图像
+              dispatch(addImgUrl2SelectTraj({ id: data.id, imgUrl }));  // 将 imgUrl 添加到轨迹数据对象中，下次直接加载图像
             }}
           >
           </DeckGL>

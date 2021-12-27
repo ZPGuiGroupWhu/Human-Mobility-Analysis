@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../Content.scss';
 import './ShoppingCart.scss';
 import SingleCard from './SingleCard';
-import {useSelector} from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { Button } from 'antd';
+import { delSelectTraj, clearSelectTraj } from '@/app/slice/analysisSlice';
 
 export default function ShoppingCart(props) {
   const {
@@ -11,6 +13,20 @@ export default function ShoppingCart(props) {
   } = props;
 
   const selectTrajs = useSelector(state => state.analysis.selectTrajs);
+  const dispatch = useDispatch();
+
+
+  // 存储多选框结果 - trajectory id
+  const [checks, setChecks] = useState([]);  // 标记数组
+  const [glbChecked, setGlbChecked] = useState(false);  // 全选
+
+  // 标记数组为空时，重置全选功能
+  useEffect(() => {
+    if (!checks.length) {
+      setGlbChecked(false)
+    }
+  }, [checks.length])
+
 
   return (
     // <SingleCard> 组件可以将一个 Canvas 转为 Image 展示
@@ -26,10 +42,50 @@ export default function ShoppingCart(props) {
                 key={item.id}
                 data={item}
                 ShenZhen={ShenZhen}
+                setChecks={setChecks}
+                glbChecked={glbChecked}
               />
             )
           })
           : null}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <Button
+          disabled={!checks.length}
+          size='small'
+          onClick={() => {
+            dispatch(delSelectTraj(checks));
+            setChecks([]);
+          }}
+        >删除</Button>
+        <Button
+          size='small'
+          onClick={() => {
+            dispatch(clearSelectTraj());
+            setChecks([]);
+          }}
+        >清空</Button>
+        {
+          !glbChecked ?
+            (
+              <Button
+                size='small'
+                onClick={() => {
+                  setChecks(selectTrajs.map(item => item.id))
+                  setGlbChecked(true);
+                }}
+              >全选</Button>
+            ) :
+            (
+              <Button
+                size='small'
+                onClick={() => {
+                  setChecks([]);
+                  setGlbChecked(false);
+                }}
+              >取消</Button>
+            )
+        }
       </div>
     </div>
   )

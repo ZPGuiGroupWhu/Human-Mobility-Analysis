@@ -29,8 +29,13 @@ const analysisReducer = createSlice({
     },
     delSelectTraj: (state, action) => {
       const id = action.payload;
-      state.selectTrajs = state.selectTrajs.filter((item) => (item.id !== id))
+      if (Array.isArray(id)) {
+        state.selectTrajs = state.selectTrajs.filter((item) => (!id.includes(item.id)))
+      } else {
+        state.selectTrajs = state.selectTrajs.filter((item) => (item.id !== id))
+      }
     },
+    clearSelectTraj: (state, action) => { state.selectTrajs = [] },
     addImgUrl2SelectTraj: (state, action) => {
       const { id, imgUrl } = action.payload;
       state.selectTrajs = state.selectTrajs.map(item => {
@@ -51,6 +56,7 @@ export const {
   setCalendarData,
   addSelectTrajs,
   delSelectTraj,
+  clearSelectTraj,
   addImgUrl2SelectTraj,
   setCurShowTrajId,
 } = analysisReducer.actions;

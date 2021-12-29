@@ -4,6 +4,7 @@ import * as echarts from 'echarts'; // ECharts
 import 'echarts/extension/bmap/bmap';
 import _ from 'lodash'; // lodash
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
@@ -23,6 +24,7 @@ import Doughnut from './components/charts/doughnut-chart/Doughnut'; // Echarts �
 import Tooltip from '@/components/tooltip/Tooltip'; // 自定义悬浮框
 import ScatterTooltip from './components/scatter-tooltip/ScatterTooltip'; // 点-tooltip
 import BtmDrawer from './components/btmDrawer/BtmDrawer'; // 底部抽屉
+import ShoppingDrawer from '../analysis/components/shopping/ShoppingDrawer';
 // 样式
 import '@/project/bmap.scss';
 
@@ -262,6 +264,12 @@ function PagePredict(props) {
     });
   }, [chart, highlightData])
 
+  // 请求ShenZhen.json
+  const [ShenZhen, setShenZhen] = useState(null);
+  useEffect(() => {
+    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data))
+  }, [])
+
 
   return (
     <>
@@ -291,7 +299,7 @@ function PagePredict(props) {
         type='left'
       />
       {/* Bottom-Drawer */}
-      <Drawer
+      {/* <Drawer
         height={170}
         type='bottom'
         initVisible={true}
@@ -301,7 +309,7 @@ function PagePredict(props) {
         id={2}
         curId={drawerId}
         setCurId={setDrawerId}
-      />
+      /> */}
       <Tooltip
         top={tooltip.top}
         left={tooltip.left}
@@ -331,6 +339,7 @@ function PagePredict(props) {
           onHighlight={onHighlight}
         />
       </EChartbar>
+      <ShoppingDrawer ShenZhen={ShenZhen} />
     </>
   )
 }

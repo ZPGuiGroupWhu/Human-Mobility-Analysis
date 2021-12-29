@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { Radio, Space } from 'antd';
 import BottomCalendar from '../calendar/BottomCalendar';
-import ShoppingCart from '../shopping/ShoppingCart';
 import './BtmDrawer.scss';
-import axios from 'axios';
 import _ from 'lodash';
 import CalendarWindow from '../WeekAndHour/CalendarWindow';
 
@@ -13,11 +11,9 @@ class BtmDrawer extends Component {
     this.radioContents = [
       { id: 1, text: '日历' },
       { id: 2, text: '时间窗口' },
-      { id: 3, text: '购物车' },
     ];
     this.state = {
       value: 1,
-      ShenZhen: null, // 深圳json边界
     }
   }
 
@@ -27,12 +23,7 @@ class BtmDrawer extends Component {
     })
   }
 
-  componentDidMount() {
-    // 深圳 json 数据
-    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => {
-      this.setState({ ShenZhen: data.data })
-    })
-  }
+
 
   render() {
     return (
@@ -49,10 +40,6 @@ class BtmDrawer extends Component {
             <BottomCalendar data={this.props.date} eventName={this.props.EVENTNAME} /> : null
         }
         {this.state.value === 2 && <CalendarWindow />}
-        <ShoppingCart
-          ShenZhen={this.state.ShenZhen}
-          isSelected={this.state.value === 3}
-        />
       </>
     );
   }

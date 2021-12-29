@@ -16,8 +16,10 @@ import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
 import { BlockOutlined } from "@ant-design/icons";
 import BtmDrawer from './components/btmDrawer/BtmDrawer';
+import ShoppingDrawer from './components/shopping/ShoppingDrawer';
 // 网络请求
 import { getUserTraj } from '@/network';
+import axios from 'axios';
 
 
 
@@ -58,6 +60,7 @@ class PageAnalysis extends Component {
 
       userData: [], // 请求的数据
       dataloadStatus: false, // 数据是否加载完毕
+      ShenZhen: null, // 深圳json边界
     }
   };
 
@@ -70,6 +73,10 @@ class PageAnalysis extends Component {
       })
     }
     reqUserData();
+    // 深圳 json 数据
+    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => {
+      this.setState({ ShenZhen: data.data })
+    })
   }
 
   getTrajCounts = (count) => {
@@ -208,6 +215,7 @@ class PageAnalysis extends Component {
           curId={this.state.curId}
           setCurId={this.setCurId}
         />
+        <ShoppingDrawer ShenZhen={this.state.ShenZhen} />
       </>
     )
   }

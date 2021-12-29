@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Radio, Space } from 'antd';
 import './BtmDrawer.scss';
 import _ from 'lodash';
-import ShoppingCart from '@/project/analysis/components/shopping/ShoppingCart'; // 购物车
 
 class BtmDrawer extends Component {
   constructor(props) {
@@ -31,7 +30,7 @@ class BtmDrawer extends Component {
             </Space>
           </Radio.Group>
         </div>
-        <ShoppingCart isSelected={this.state.value === 1} />
+        {/* <ShoppingCart isSelected={this.state.value === 1} /> */}
       </>
     );
   }

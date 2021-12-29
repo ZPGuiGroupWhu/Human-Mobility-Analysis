@@ -1,27 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
-import { Button, Checkbox } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
+import { Checkbox } from 'antd';
 import './SingleCard.scss';
 import { useDispatch, useSelector } from 'react-redux';
-import { delSelectTraj, addImgUrl2SelectTraj, setCurShowTrajId } from '@/app/slice/analysisSlice';
+import { addImgUrl2SelectTraj, setCurShowTrajId } from '@/app/slice/analysisSlice';
 
 
 export default function SingleCard(props) {
   const {
     data,
     ShenZhen, // 深圳 JSON 数据
-    width = '150px',
+    width,
     setChecks,
     glbChecked,
   } = props;
 
   const dispatch = useDispatch();
-
-  const mapStyle = {
-    width,
-  }
 
   const curActiveId = useSelector(state => state.analysis.curShowTrajId); // 当前的激活id
   const [imgUrl, setImgUrl] = useState('');  // 图片 URL
@@ -57,11 +52,11 @@ export default function SingleCard(props) {
   }
 
   return (
-    <div style={mapStyle} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
+    <div style={{width: width, height: width}} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
       <div className="button-group">
         <Checkbox
           checked={checked}
-          onChange={(e) => { 
+          onChange={(e) => {
             onCheckBoxChange(e.target.checked, data.id);
             setChecked(e.target.checked);
           }}
@@ -92,7 +87,7 @@ export default function SingleCard(props) {
             getCursor={({ isDragging }) => 'default'}
             layers={[
               new GeoJsonLayer({
-                id: 'ShenZHen',
+                id: 'ShenZhen',
                 data: ShenZhen,
                 lineWidthMinPixels: 1,
                 getFillColor: [52, 52, 52], // 填充颜色

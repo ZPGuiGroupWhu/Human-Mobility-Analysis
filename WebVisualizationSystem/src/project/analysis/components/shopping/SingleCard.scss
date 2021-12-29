@@ -7,6 +7,16 @@
     position: absolute;
     right: 0;
     top: 0;
+
+    padding: 0 2px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
   }
 
   img {

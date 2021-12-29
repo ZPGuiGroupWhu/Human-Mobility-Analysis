@@ -15,6 +15,8 @@ export default function SingleCard(props) {
     setChecks,
     glbChecked,
   } = props;
+  const [year, month, day] = data.date.split('-'); // 年、月、日
+  const trajId = data.id.split('_')[1]; // 轨迹 ID
 
   const dispatch = useDispatch();
 
@@ -54,6 +56,7 @@ export default function SingleCard(props) {
   return (
     <div style={{width: width, height: width}} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
       <div className="button-group">
+        <span style={isActive ? {fontWeight: 'bold', color: 'rgb(0, 247, 255)'} : {}}>{`${year}/${month}/${day} ${trajId}`}</span>
         <Checkbox
           checked={checked}
           onChange={(e) => {

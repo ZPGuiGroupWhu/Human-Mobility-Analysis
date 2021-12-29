@@ -32,7 +32,7 @@ export const useCreate = ({ ref, initCenter, initZoom }) => {
       const chart = echarts.init(ref.current);
       chart.setOption(option);
       bmap.current = getBMapInstance(chart);
-      bmap.current.centerAndZoom(initCenter, initZoom);
+      // bmap.current.centerAndZoom(initCenter, initZoom);
       return chart;
     });
   }, [])

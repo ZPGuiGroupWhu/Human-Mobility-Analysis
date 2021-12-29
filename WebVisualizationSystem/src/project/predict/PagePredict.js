@@ -8,12 +8,12 @@ import axios from 'axios';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
-import eventBus, { SELECTTRAJID } from '@/app/eventBus'; // 发布订阅
 import { withMouse } from '@/components/drawer/withMouse'; // 高阶函数-监听鼠标位置
 // 逻辑分离
-import { useCreate } from '@/project/predict/function/useCreate'; // 
+import { useCreate } from '@/project/predict/function/useCreate';
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
 import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
+import { useFeatureLayer } from '@/project/predict/function/useFeatureLayer'; // 特征热力图层展示
 // 通用组件
 import Drawer from '@/components/drawer/Drawer'; // 抽屉
 // 自定义组件
@@ -23,13 +23,18 @@ import RelationChart from './components/charts/relation-chart/RelationChart'; //
 import Doughnut from './components/charts/doughnut-chart/Doughnut'; // Echarts 环形统计图
 import Tooltip from '@/components/tooltip/Tooltip'; // 自定义悬浮框
 import ScatterTooltip from './components/scatter-tooltip/ScatterTooltip'; // 点-tooltip
-import BtmDrawer from './components/btmDrawer/BtmDrawer'; // 底部抽屉
 import ShoppingDrawer from '../analysis/components/shopping/ShoppingDrawer';
 // 样式
 import '@/project/bmap.scss';
 
 
 function PagePredict(props) {
+  // 请求ShenZhen.json
+  const [ShenZhen, setShenZhen] = useState(null);
+  useEffect(() => {
+    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data))
+  }, [])
+
   // 当前展开的抽屉 id
   const [drawerId, setDrawerId] = useState(2);
 
@@ -249,7 +254,7 @@ function PagePredict(props) {
     searchCompleteResult,
   } = usePoiSearch(bmap, selectedTraj);
 
-
+  // 统计图表-地图 联动高亮
   const [highlightData, setHighlightData] = useState([]);
   function onHighlight(idx) {
     setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
@@ -264,11 +269,8 @@ function PagePredict(props) {
     });
   }, [chart, highlightData])
 
-  // 请求ShenZhen.json
-  const [ShenZhen, setShenZhen] = useState(null);
-  useEffect(() => {
-    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data))
-  }, [])
+  const spdLayerData = useFeatureLayer(chart, selectedTraj, 'spd', '速度热力图层');
+  const azmLayerData = useFeatureLayer(chart, selectedTraj, 'azimuth', '转向角热力图层');
 
 
   return (
@@ -298,18 +300,6 @@ function PagePredict(props) {
         width={200}
         type='left'
       />
-      {/* Bottom-Drawer */}
-      {/* <Drawer
-        height={170}
-        type='bottom'
-        initVisible={true}
-        render={
-          () => (<BtmDrawer />)
-        }
-        id={2}
-        curId={drawerId}
-        setCurId={setDrawerId}
-      /> */}
       <Tooltip
         top={tooltip.top}
         left={tooltip.left}
@@ -339,6 +329,7 @@ function PagePredict(props) {
           onHighlight={onHighlight}
         />
       </EChartbar>
+      {/* 购物车候选列表 */}
       <ShoppingDrawer ShenZhen={ShenZhen} />
     </>
   )

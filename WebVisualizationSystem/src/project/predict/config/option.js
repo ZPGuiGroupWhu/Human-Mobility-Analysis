@@ -18,14 +18,36 @@ export const option = {
   animation: false,
   visualMap: [
     {
+      // 速度热力图层 visualMap
       type: 'continuous',
       min: 0, // 视觉映射最小值
-      max: 100, // 视觉映射最大值
+      max: 40, // 视觉映射最大值
       seriesIndex: 0, // 映射的数据
       dimension: 2, // 映射数据的维度
       inRange: {
         color: ['#71ae46', '#96b744', '#c4cc38', '#ebe12a', '#eab026', '#e3852b', '#d85d2a', '#ce2626', '#ac2026'],
-        opacity: [0.5, 0.9],
+      },
+      // 颜色条控件
+      show: false,
+      calculable: true, // 拖拽手柄显示
+      handleSize: '100%', // 手柄大小
+      itemWidth: 20, // 宽度
+      itemHeight: 40, // 高度
+      left: 'left',
+      top: 'top',
+    },
+    {
+      // 转向角热力图层 visualMap
+      type: 'continuous',
+      min: 0, // 视觉映射最小值
+      max: 2, // 视觉映射最大值
+      seriesIndex: 1, // 映射的数据
+      dimension: 2, // 映射数据的维度
+      inRange: {
+        // color: ['#71ae46', '#96b744', '#c4cc38', '#ebe12a', '#eab026', '#e3852b', '#d85d2a', '#ce2626', '#ac2026'],
+        color: 'red',
+        colorAlpha: 0.2,
+        symbolSize: [2, 10]
       },
       // 颜色条控件
       show: false,
@@ -39,12 +61,22 @@ export const option = {
   ],
   series: [
     {
+      // 利用密集轨迹点表示
       name: '速度热力图层',
-      type: 'heatmap',
+      type: 'scatter',
       coordinateSystem: 'bmap',
       data: [],
-      pointSize: 5, // 点大小
-      blurSize: 6, // 点模糊大小
+      symbolSize: 2, // 像素大小
+      z: 4,
+    },
+    {
+      // 利用密集轨迹点表示
+      name: '转向角热力图层',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      data: [],
+      symbolSize: 2, // 像素大小
+      z: 3,
     },
     {
       name: '静态单轨迹',
@@ -60,27 +92,26 @@ export const option = {
         cap: 'round',
         join: 'round',
       },
-      zlevel: 998,
     }, {
       name: '动态单轨迹',
       type: "lines",
       coordinateSystem: "bmap",
       polyline: true,
       data: [],
+      animation: false,
       lineStyle: {
         width: 0,
-        color: '#FB8C00',
+        color: '#00f7ff',
         cap: 'round',
         join: 'round',
       },
       effect: {
         constantSpeed: 100,
-        // period: 1,
         show: true,
-        trailLength: 0.8,
+        trailLength: 0.3,
         symbolSize: 5,
       },
-      zlevel: 999,
+      zlevel: 1,
     }, {
       name: '出发地',
       type: 'effectScatter',
@@ -109,7 +140,6 @@ export const option = {
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
-      zlevel: 1000,
     }, {
       name: '目的地',
       type: 'effectScatter',
@@ -135,7 +165,6 @@ export const option = {
         length2: 20,
       },
       data: [],
-      zlevel: 1000,
     }, {
       name: '当前点',
       type: 'effectScatter',
@@ -147,7 +176,6 @@ export const option = {
       coordinateSystem: 'bmap',
       symbolSize: 5,
       data: [],
-      zlevel: 1000,
     }, {
       name: '当前预测点',
       type: 'effectScatter',
@@ -162,7 +190,6 @@ export const option = {
         color: destColor,
       },
       data: [],
-      zlevel: 1003,
     }, {
       // 历史预测点集合
       name: '历史预测点',
@@ -174,7 +201,6 @@ export const option = {
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
-      zlevel: 1001,
     }, {
       // 历史预测点集合的路径
       name: '历史预测轨迹',
@@ -198,7 +224,6 @@ export const option = {
           opacity: 1,
         },
       },
-      zlevel: 1002
     }, {
       name: '高亮点',
       type: 'effectScatter',
@@ -210,7 +235,6 @@ export const option = {
       coordinateSystem: 'bmap',
       symbolSize: 8,
       data: [],
-      zlevel: 1000,
     }
   ]
 }

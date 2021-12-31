@@ -230,6 +230,16 @@ export default function WeekHourCalendar(props) {
         return data;
     }
 
+    // 清除高亮 => 可提供给清空按钮 和 月份slider
+    function clearHighLight(){
+        myChart.current?.setOption({
+            series: [{
+                name: 'highLight',
+                data: []
+            }]
+        })
+    }
+
     // 记录框选的日期范围
     const [time, setTime] = useState({ start: '', end: '' });
     // 记录鼠标状态

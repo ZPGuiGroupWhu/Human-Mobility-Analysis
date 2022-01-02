@@ -6,6 +6,18 @@ export const getUserTraj = (id) => {
   })
 }
 
+export const getUserTrajCount = (id) => {
+  return baseRequest({
+    url: `/getUserTrajCount?id=${id}`
+  })
+}
+
+export const getUserTrajInChunk = (id,chunkSize,chunkNum) => {
+  return baseRequest({
+    url: `/getUserTrajInChunk?id=${id}&chunkNum=${chunkNum}&chunkSize=${chunkSize}`
+  })
+}
+
 export const getUserODs = () => {
   return baseRequest({
     url: `/getUserODs`

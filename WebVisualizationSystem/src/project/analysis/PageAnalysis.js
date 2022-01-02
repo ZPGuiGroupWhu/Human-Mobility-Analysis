@@ -18,7 +18,7 @@ import { BlockOutlined } from "@ant-design/icons";
 import BtmDrawer from './components/btmDrawer/BtmDrawer';
 import ShoppingDrawer from './components/shopping/ShoppingDrawer';
 // 网络请求
-import { getUserTraj } from '@/network';
+import { getUserTraj,getUserTrajInChunk,getUserTrajCount } from '@/network';
 import axios from 'axios';
 
 
@@ -66,11 +66,28 @@ class PageAnalysis extends Component {
 
   componentDidMount() {
     const reqUserData = async () => {
-      let data = await getUserTraj('399313');
+      let user='399313'
+      let chunkSize=100;
+      let userCount=await getUserTrajCount(user)
+      userCount=userCount[user]
+      for(let i=0;i<userCount/chunkSize;i++){
+        let getdata=await getUserTrajInChunk(user,chunkSize,i);
+        let data = [].concat(this.state.userData)
+        for(let j=0;j<getdata.length;j++){
+          data.push(getdata[j])
+        }
+        this.setState({
+          userData: data,
+        })
+      }
       this.setState({
-        userData: data,
         dataloadStatus: true,
       })
+      // let data = await getUserTraj(user);
+      // this.setState({
+      //   userData: data,
+      //   dataloadStatus: true,
+      // })
     }
     reqUserData();
     // 深圳 json 数据

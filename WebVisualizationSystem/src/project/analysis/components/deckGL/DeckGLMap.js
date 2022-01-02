@@ -697,7 +697,7 @@ class DeckGLMap extends Component {
             <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="3D">三维</Radio.Button>
             <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Heat">热力图</Radio.Button>
           </Radio.Group><br />
-          格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={50} step={50} defaultValue={100} onChange={(value) => this.changeGridWidth(value)} />
+          格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={100} step={50} defaultValue={300} onChange={(value) => this.changeGridWidth(value)} />
         </div><br />
         <div className={`moudle`}>
           <div className='text-button'>

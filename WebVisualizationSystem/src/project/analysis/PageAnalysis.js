@@ -67,7 +67,7 @@ class PageAnalysis extends Component {
   componentDidMount() {
     const reqUserData = async () => {
       let user='399313'
-      let chunkSize=100;
+      let chunkSize=1000;
       let userCount=await getUserTrajCount(user)
       userCount=userCount[user]
       for(let i=0;i<userCount/chunkSize;i++){

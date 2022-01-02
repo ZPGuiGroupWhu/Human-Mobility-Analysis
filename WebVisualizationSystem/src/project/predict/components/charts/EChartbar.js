@@ -1,17 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import "./EChartbar.scss";
 
 const EChartbar = (props) => {
-  useEffect(()=>{
-    const toLeft = {
-      origin: 'right',
-      distance: '100px',
-    }
-    window.ScrollReveal().reveal('.echart-bar-ctn', toLeft);
-  }, [])
 
   return (
-    <div className="echart-bar-ctn load-hidden">
+    <div className="echart-bar-ctn">
       {props.children}
     </div>
   )

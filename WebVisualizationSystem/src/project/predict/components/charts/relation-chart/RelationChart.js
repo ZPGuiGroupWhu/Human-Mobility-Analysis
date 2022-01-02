@@ -20,6 +20,7 @@ function RelationChart(props) {
       color: '#fff', // 字体颜色
     },
     title: {
+      show: false,
       text: titleText,
       right: 15,
       top: 15,
@@ -39,6 +40,7 @@ function RelationChart(props) {
       }
     },
     legend: {
+      show: false,
       data: legendData,
       left: 10,
       top: 15,
@@ -69,12 +71,12 @@ function RelationChart(props) {
     grid: [{
       left: 40,
       right: 20,
-      top: '23%',
+      top: '18%',
       height: '30%',
     }, {
       left: 40,
       right: 20,
-      top: '57%',
+      top: '53%',
       height: '30%',
     }],
     xAxis: [
@@ -204,8 +206,8 @@ function RelationChart(props) {
     <div
       ref={ref}
       style={{
-        width: '320px',
-        height: '320px',
+        width: '250px',
+        height: '250px',
         borderRadius: '5px',
         backgroundColor: 'rgba(0, 0, 0, .7)',
         ...props.style,

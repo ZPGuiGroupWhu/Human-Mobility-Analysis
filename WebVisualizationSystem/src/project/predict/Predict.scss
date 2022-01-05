@@ -1,0 +1,23 @@
+.predict-layout {
+  height: 100%;
+  display: flex;
+  transition: all .5s ease;
+
+  .predict-main-content {
+    height: 100%;
+    flex: 1 1;
+    position: relative;
+  }
+
+  .predict-minor-content {
+    height: 100%;
+    border-left: 1px solid rgba(59, 255, 245, 0.589);
+
+    .predict-switch-button-container {
+      display: inline;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}

@@ -5,6 +5,7 @@ import 'echarts/extension/bmap/bmap';
 import _ from 'lodash'; // lodash
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import eventBus, { HISTACTION } from '@/app/eventBus';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
@@ -29,10 +30,15 @@ import '@/project/bmap.scss';
 
 
 function PagePredict(props) {
-  // 请求ShenZhen.json
-  const [ShenZhen, setShenZhen] = useState(null);
+
+  const [ShenZhen, setShenZhen] = useState(null); // 存放 ShenZhen.json 数据
+  const [histTrajs, setHistTrajs] = useState(null); // 存放历史轨迹数据
   useEffect(() => {
-    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data))
+    axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data)); // 请求ShenZhen.json
+    eventBus.on(HISTACTION, (histTrajs) => {
+      console.log(histTrajs);
+      console.log(1);
+    })
   }, [])
 
   // 当前展开的抽屉 id
@@ -269,6 +275,7 @@ function PagePredict(props) {
     });
   }, [chart, highlightData])
 
+  // 当前轨迹(速度/转向角)图层展示
   const spdLayerData = useFeatureLayer(chart, selectedTraj, 'spd', '速度热力图层');
   const azmLayerData = useFeatureLayer(chart, selectedTraj, 'azimuth', '转向角热力图层');
 
@@ -330,7 +337,9 @@ function PagePredict(props) {
         />
       </EChartbar>
       {/* 购物车候选列表 */}
-      <ShoppingDrawer ShenZhen={ShenZhen} />
+      <ShoppingDrawer
+        ShenZhen={ShenZhen}
+      />
     </>
   )
 }

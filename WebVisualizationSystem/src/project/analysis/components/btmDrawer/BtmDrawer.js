@@ -13,7 +13,7 @@ class BtmDrawer extends Component {
       { id: 2, text: '时间窗口' },
     ];
     this.state = {
-      value: 1,
+      value: 2,
     }
   }
 

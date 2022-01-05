@@ -5,7 +5,7 @@ import BreadCrumb from '@/components/bread-crumb/BreadCrumb.js';
 import Layout from '@/components/layout/Layout';
 import PageAnalysis from '@/project/analysis/PageAnalysis';
 import PageSelect from '@/project/select/PageSelect';
-import PagePredict from '@/project/predict/PagePredict';
+import Predict from '@/project/predict/Predict';
 // 自定义 Hook 导入
 import { useResize } from '@/common/hooks/useResize';
 // 图片
@@ -46,7 +46,7 @@ function Main() {
                 <PageSelect {...initParams} setRoutes={setRoutes} />
               </Route>
               <Route exact path='/select/analysis' render={() => <PageAnalysis {...initParams} setRoutes={setRoutes} />} />
-              <Route path='/select/predict' render={() => <PagePredict {...initParams} />} />
+              <Route path='/select/predict' component={Predict} />
               {/* 若均未匹配，重定向至首页 */}
               <Redirect to='/select' />
             </Switch>

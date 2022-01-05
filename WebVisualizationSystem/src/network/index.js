@@ -41,3 +41,9 @@ export const getUserTrajByTime = (params) => {
     params,
   }, 'getUserTrajByTime')
 }
+
+export const getUserHistoryTraj = (id, days) => {
+  return baseRequest({
+    url: `/getUserHistoryTraj?days=${days}&trajId=${id}`
+  })
+}

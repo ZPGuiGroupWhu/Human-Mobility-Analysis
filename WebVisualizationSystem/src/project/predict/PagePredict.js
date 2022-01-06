@@ -3,7 +3,6 @@ import React, { useRef, useEffect, useState, useReducer } from 'react';
 import * as echarts from 'echarts'; // ECharts
 import 'echarts/extension/bmap/bmap';
 import _ from 'lodash'; // lodash
-import { useSelector } from 'react-redux';
 import axios from 'axios';
 import eventBus, { HISTACTION } from '@/app/eventBus';
 // 通用函数
@@ -33,12 +32,30 @@ import '@/project/bmap.scss';
 function PagePredict(props) {
 
   const [ShenZhen, setShenZhen] = useState(null); // 存放 ShenZhen.json 数据
-  const [histTrajs, setHistTrajs] = useState(null); // 存放历史轨迹数据
+  const [histTrajs, setHistTrajs] = useState([]); // 存放历史轨迹数据
   useEffect(() => {
     axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data)); // 请求ShenZhen.json
+    // 获取前N天历史轨迹数据：数据组织+坐标纠偏
     eventBus.on(HISTACTION, (histTrajs) => {
-      console.log(histTrajs);
-      console.log(1);
+      if (histTrajs.length) {
+        let res = histTrajs.map((traj) => {
+          const obj = {
+            data: [],
+            spd: traj.spd,
+            azm: traj.azimuth,
+            dis: traj.dis,
+          };
+          const lens = traj.spd.length;
+          for (let i = 0; i < lens; i++) {
+            obj.data.push([traj.lngs[i], traj.lats[i]]);
+          }
+          obj.data = transcoords(obj.data)
+          return obj;
+        })
+        setHistTrajs(res);
+      } else {
+        setHistTrajs([]);
+      }
     })
   }, [])
 
@@ -236,6 +253,22 @@ function PagePredict(props) {
       drawTraj(chart, data);
     }
   }, [chart, selectedTraj])
+
+
+  // 前N天历史轨迹展示
+  useEffect(() => {
+    if (chart) {
+      console.log(histTrajs);
+      chart.setOption({
+        series: [{
+          name: '前N天历史静态多轨迹',
+          data: histTrajs.map(traj => ({
+            coords: traj.data,
+          })),
+        }]
+      })
+    }
+  }, [chart, histTrajs])
 
   // 轨迹预测: 开始 / 暂停 / 清除
   const { predictDispatch } = usePredict(chart, selectedTraj, { drawOD, drawTraj, drawCurpt });

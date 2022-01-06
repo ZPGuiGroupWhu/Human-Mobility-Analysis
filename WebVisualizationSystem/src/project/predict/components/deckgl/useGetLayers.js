@@ -59,7 +59,7 @@ export function useGetLayers(selectedTraj, visible) {
       visible: spdShow,
       pickable: true,
       extruded: true,//是否显示为3D效果
-      cellSize: 100,//格网宽度，默认为100m
+      cellSize: 50,//格网宽度，默认为100m
       elevationScale: 1,
       elevationAggregation: 'MAX',// 选用速度最大值作为权重
       colorAggregation: 'MAX',
@@ -83,7 +83,8 @@ export function useGetLayers(selectedTraj, visible) {
     if (!selectedTraj) return () => { };
     let arr = [];
     for (let i = 0; i < selectedTraj.data.length; i++) {
-      arr.push([...selectedTraj.data[i], selectedTraj.azimuth[i] || 1e-6]);
+      // azimuth 取 0 导致 grid 渲染有问题，目前解决方案为：统一为 azimuth 加上基底
+      arr.push([...selectedTraj.data[i], (10 + selectedTraj.azimuth[i] * 10)]);
     }
     const data = arr.map(item => ({ COORDINATES: [item[0], item[1]], AZM: item[2] }));
     setAzmLayer(new GPUGridLayer({
@@ -92,7 +93,7 @@ export function useGetLayers(selectedTraj, visible) {
       visible: azmShow,
       pickable: true,
       extruded: true,//是否显示为3D效果
-      cellSize: 200,//格网宽度，默认为100m
+      cellSize: 50,//格网宽度，默认为100m
       elevationScale: 1,
       elevationAggregation: 'MAX',// 选用最大值作为权重
       colorAggregation: 'MAX',

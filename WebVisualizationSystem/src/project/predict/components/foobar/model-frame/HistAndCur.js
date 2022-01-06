@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Button, InputNumber, Space } from 'antd';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import './HistAndCur.scss';
 import eventBus, { HISTACTION } from '@/app/eventBus';
-import {getUserHistoryTraj} from '@/network';
+import { getUserHistoryTraj } from '@/network';
 
 export default function HistAndCur(props) {
   const curShowTrajId = useSelector(state => state.analysis.curShowTrajId); // 当前展示的轨迹 id
@@ -19,11 +19,20 @@ export default function HistAndCur(props) {
   const [dayNum, setDayNum] = useState(defaultDayValue);
   const onInputChange = val => { setDayNum(val) }
 
-  // 数据请求 & 分发
-  const handleHistData = async (id, days) => {
-    let data = await getUserHistoryTraj(id, days);
-    handleDataCommit(data);
-  }
+  // 数据请求
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    async function fetchData(id, days) {
+      try {
+        let data = await getUserHistoryTraj(id, days);
+        setData(data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    isShow && fetchData(curShowTrajId, dayNum);
+  }, [isShow, curShowTrajId, dayNum])
+
   // 数据分发
   const handleDataCommit = (data) => {
     eventBus.emit(HISTACTION, data);
@@ -51,7 +60,7 @@ export default function HistAndCur(props) {
           size={'middle'}
           onClick={(e) => {
             showOnOff(e);
-            handleHistData(curShowTrajId, dayNum);
+            handleDataCommit(!isShow ? data : []);
           }}
         >
           {isShow ? '隐藏' : '展示'}

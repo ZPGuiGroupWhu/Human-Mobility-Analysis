@@ -235,6 +235,20 @@ export const option = {
       coordinateSystem: 'bmap',
       symbolSize: 8,
       data: [],
+    }, {
+      name: '前N天历史静态多轨迹',
+      type: 'lines',
+      coordinateSystem: 'bmap',
+      polyline: true,
+      data: [],
+      silent: true,
+      lineStyle: {
+        color: '#E0F7FA',
+        opacity: 0.8,
+        width: 3,
+        cap: 'round',
+        join: 'round',
+      },
     }
   ]
 }

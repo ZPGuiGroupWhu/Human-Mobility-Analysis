@@ -15,6 +15,7 @@ import { useCreate } from '@/project/predict/function/useCreate';
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
 import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
 import { useFeatureLayer } from '@/project/predict/function/useFeatureLayer'; // 特征热力图层展示
+import { useSingleTraj } from '@/project/predict/function/useSingleTraj'; // 从候选轨迹中选择一条轨迹
 // 通用组件
 import Drawer from '@/components/drawer/Drawer'; // 抽屉
 // 自定义组件
@@ -44,19 +45,7 @@ function PagePredict(props) {
   // 当前展开的抽屉 id
   const [drawerId, setDrawerId] = useState(2);
 
-  const trajs = useSelector(state => state.analysis.selectTrajs); // redux 存储的所选轨迹集合
-  const curShowTrajId = useSelector(state => state.analysis.curShowTrajId); // 当前展示的轨迹 id
-  const [selectedTraj, setSelectedTraj] = useState(null); // 存放单轨迹数据
-  useEffect(() => {
-    if (trajs.length && curShowTrajId !== -1) {
-      const traj = trajs.find(item => item.id === curShowTrajId);
-      const data = transcoords(traj.data);  // 坐标纠偏
-      setSelectedTraj({
-        ..._.cloneDeep(traj),
-        data,
-      });
-    }
-  }, [trajs, curShowTrajId]);
+  const selectedTraj = useSingleTraj(true); // 从候选列表中选取一条轨迹(用于展示)
 
   const ref = useRef(null); // 容器 ref 对象
   // 首次进入页面，创建 echarts 实例

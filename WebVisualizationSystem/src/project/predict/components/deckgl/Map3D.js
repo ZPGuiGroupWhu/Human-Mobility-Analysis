@@ -50,6 +50,7 @@ export default function Map3D(props) {
   const initGridLayerVisible = {
     spdShow: false,
     azmShow: false,
+    disShow: false,
   }
   const gridLayerVisibleReducer = (state, action) => {
     switch (action.type) {
@@ -73,13 +74,13 @@ export default function Map3D(props) {
   const onGridLayerChange = (e) => {
     switch (e.target.value) {
       case 'spd':
-        gridLayerVisibleDispatch({type: 'spd'});
+        gridLayerVisibleDispatch({ type: 'spd' });
         break;
       case 'azm':
-        gridLayerVisibleDispatch({type: 'azm'});
+        gridLayerVisibleDispatch({ type: 'azm' });
         break;
       case 'none':
-        gridLayerVisibleDispatch({type: 'none'});
+        gridLayerVisibleDispatch({ type: 'none' });
         break;
       default:
         break;
@@ -91,10 +92,10 @@ export default function Map3D(props) {
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <Radio.Group size={"small"} style={{ width: '100%' }} buttonStyle="solid" onChange={onGridLayerChange} defaultValue="none">
-        <Radio.Button style={{ width: '33.3%', textAlign: 'center' }} value="spd">速度</Radio.Button>
-        <Radio.Button style={{ width: '33.3%', textAlign: 'center' }} value="azm" >转向角</Radio.Button>
-        <Radio.Button style={{ width: '33.3%', textAlign: 'center' }} value="none">关闭</Radio.Button>
+      <Radio.Group size={"small"} style={{ width: '100%', display: 'flex' }} buttonStyle="solid" onChange={onGridLayerChange} defaultValue="none">
+        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="spd">速度</Radio.Button>
+        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="azm" >转向角</Radio.Button>
+        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="none">关闭</Radio.Button>
       </Radio.Group>
       {/* deckgl-react-mapbox: https://deck.gl/docs/api-reference/mapbox/overview#using-with-react */}
       <section style={{ position: 'absolute', inset: `${radioHeight}px 0 0 0` }}>

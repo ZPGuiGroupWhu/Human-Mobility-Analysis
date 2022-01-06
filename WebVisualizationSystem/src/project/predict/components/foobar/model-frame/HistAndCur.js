@@ -34,9 +34,10 @@ export default function HistAndCur(props) {
   }, [isShow, curShowTrajId, dayNum])
 
   // 数据分发
-  const handleDataCommit = (data) => {
-    eventBus.emit(HISTACTION, data);
-  }
+  useEffect(() => {
+    if (!data.length) return () => {};
+    eventBus.emit(HISTACTION, isShow ? data : [])
+  }, [isShow, data])
 
 
   return (
@@ -60,7 +61,6 @@ export default function HistAndCur(props) {
           size={'middle'}
           onClick={(e) => {
             showOnOff(e);
-            handleDataCommit(!isShow ? data : []);
           }}
         >
           {isShow ? '隐藏' : '展示'}

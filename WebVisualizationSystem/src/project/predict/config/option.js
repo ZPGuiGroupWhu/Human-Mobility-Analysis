@@ -243,7 +243,7 @@ export const option = {
       data: [],
       silent: true,
       lineStyle: {
-        color: '#E0F7FA',
+        color: '#FFED0F',
         opacity: 0.8,
         width: 3,
         cap: 'round',

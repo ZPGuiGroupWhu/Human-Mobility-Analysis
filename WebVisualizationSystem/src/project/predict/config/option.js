@@ -92,6 +92,7 @@ export const option = {
         cap: 'round',
         join: 'round',
       },
+      z: 2,
     }, {
       name: '动态单轨迹',
       type: "lines",
@@ -249,6 +250,7 @@ export const option = {
         cap: 'round',
         join: 'round',
       },
+      z: 1,
     }
   ]
 }

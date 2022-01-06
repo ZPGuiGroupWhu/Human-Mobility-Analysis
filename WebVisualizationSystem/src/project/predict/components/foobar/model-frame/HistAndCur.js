@@ -17,7 +17,7 @@ export default function HistAndCur(props) {
   // 展示的天数
   const defaultDayValue = 1;
   const [dayNum, setDayNum] = useState(defaultDayValue);
-  const onInputChange = val => { setDayNum(val) }
+  const onInputChange = val => { setDayNum(val || 0) }
 
   // 数据请求
   const [data, setData] = useState([]);

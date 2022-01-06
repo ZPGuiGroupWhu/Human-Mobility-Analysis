@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { GPUGridLayer } from '@deck.gl/aggregation-layers';
-import { PathLayer } from '@deck.gl/layers';
+import { PathLayer, ArcLayer } from '@deck.gl/layers';
 
-export function useGetLayers(selectedTraj, visible) {
+export function useGetLayers(selectedTraj, histTrajs, visible) {
   const { spdShow, azmShow } = visible;
 
   // path-layer
-  const [pathLayer, setPathLayer] = useState(null);
+  const [curPathLayer, setCurPathLayer] = useState(null);
+  const [curArcLayer, setCurArcLayer] = useState(null);
   useEffect(() => {
     /**
      * Data format:
@@ -25,8 +26,8 @@ export function useGetLayers(selectedTraj, visible) {
       name: selectedTraj.id,
       color: [59, 255, 245],
     }];
-    setPathLayer(new PathLayer({
-      id: 'path-layer',
+    setCurPathLayer(new PathLayer({
+      id: 'cur-path-layer',
       data,
       pickable: true,
       widthScale: 20,
@@ -34,6 +35,30 @@ export function useGetLayers(selectedTraj, visible) {
       getPath: d => d.path,
       getColor: d => d.color,
       getWidth: d => 5,
+    }))
+    const OD = [{
+      from: {
+        type: 'major',
+        name: 'origin',
+        coordinates: selectedTraj.data[0],
+      },
+      to: {
+        type: 'major',
+        name: 'destination',
+        coordinates: selectedTraj.data.slice(-1)[0],
+      }
+    }]
+    setCurArcLayer(new ArcLayer({
+      id: 'cur-arc-layer',
+      data: OD,
+      visible: true,
+      pickable: true,
+      getStrokeWidth: 20,
+      widthScale: 2,
+      getSourcePosition: d => d.from.coordinates,
+      getTargetPosition: d => d.to.coordinates,
+      getSourceColor: [42, 255, 0],
+      getTargetColor: [0, 143, 255]
     }))
   }, [selectedTraj]);
 
@@ -103,16 +128,79 @@ export function useGetLayers(selectedTraj, visible) {
     }))
   }, [selectedTraj, azmShow]);
 
+
+  // hist D sequences arc-layers
+  const [histArcLayer, setHistArcLayer] = useState(null);
+  useEffect(() => {
+    /**
+     * Data format:
+     * [
+     * {
+     *   "from": {
+     *     "type": "major",
+     *     "name": "San Francisco Int'l",
+     *     "abbrev": "SFO",
+     *     "coordinates": [
+     *       -122.38347034444931,
+     *       37.61702508680534
+     *     ]
+     *   },
+     *   "to": {
+     *     "type": "major",
+     *     "name": "Liverpool John Lennon",
+     *     "abbrev": "LPL",
+     *     "coordinates": [
+     *       -2.858620657849378,
+     *       53.3363751054422
+     *     ]
+     *   }
+     *   ...
+     * ]
+     */
+    const Ds = histTrajs.map(item => (item.destination));
+    let data = []
+    for (let i=0; i<Ds.length-1; i++) {
+      data.push({
+        from: {
+          type: 'major',
+          name: 'origin',
+          coordinates: Ds[i],
+        },
+        to: {
+          type: 'major',
+          name: 'destination',
+          coordinates: Ds[i + 1],
+        }
+      })
+    }
+    setHistArcLayer(new ArcLayer({
+      id: 'hist-arc-layer',
+      data,
+      visible: true,
+      pickable: true,
+      getStrokeWidth: 20,
+      widthScale: 2,
+      getSourcePosition: d => d.from.coordinates,
+      getTargetPosition: d => d.to.coordinates,
+      getSourceColor: [255, 240, 0],
+      getTargetColor: [255, 35, 0]
+    }))
+  }, [histTrajs])
+
   return {
     ids: [
-      'path-layer',
+      'cur-path-layer',
+      'cur-arc-layer',
       'gpu-grid-layer-speed',
       'gpu-grid-layer-azimuth',
+      'hist-arc-layer',
     ],
     layers: [
-      pathLayer,
+      curPathLayer,
+      curArcLayer,
       spdLayer,
       azmLayer,
+      histArcLayer,
     ]
   }
 }

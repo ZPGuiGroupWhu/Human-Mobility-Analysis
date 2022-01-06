@@ -258,7 +258,6 @@ function PagePredict(props) {
   // 前N天历史轨迹展示
   useEffect(() => {
     if (chart) {
-      console.log(histTrajs);
       chart.setOption({
         series: [{
           name: '前N天历史静态多轨迹',

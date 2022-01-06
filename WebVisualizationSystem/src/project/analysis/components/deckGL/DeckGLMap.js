@@ -1,21 +1,24 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import DeckGL from '@deck.gl/react';
 import { StaticMap } from 'react-map-gl';
 import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
 import { ArcLayer, IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
-import { Switch, Slider, Radio, Button } from 'antd';
-import './DeckGLMap.css';
-import '@/project/border-style.scss';
-import { eventEmitter } from '@/common/func/EventEmitter';
-// lodash
 import _ from 'lodash';
+import { Switch, Slider, Radio, Button, Input, Tooltip } from 'antd';
+import { CopyOutlined, SearchOutlined } from '@ant-design/icons';
+import { withRouter } from 'react-router';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import { addSelectTrajs, setCurShowTrajId } from '@/app/slice/analysisSlice';
-// react-router
-import { withRouter } from 'react-router';
+// 函数
+import { eventEmitter } from '@/common/func/EventEmitter';
+import { copyText } from '@/common/func/copyText.js';
+import { getOneTraj } from '@/network';
+// 样式
+import './DeckGLMap.css';
+import '@/project/border-style.scss';
 
 
 
@@ -25,6 +28,7 @@ const initOpacity = 0.8;
 class DeckGLMap extends Component {
   constructor(props) {
     super(props);
+    this.inputRef = React.createRef(); // 文本框ref对象
     this.trajNodes = [];//轨迹点集合
     this.trajCounts = {};//每天的轨迹数目
     this.OdNodes = [];//OD点集合
@@ -66,6 +70,7 @@ class DeckGLMap extends Component {
       tripsOpacity: initOpacity,//轨迹初始透明度
       iconOpacity: 256,//icon图标图层初始化透明度
       scatterPlotLayer: null, // 点图层
+      trajIdForSearch: '', // 定向查找输入的轨迹编号字符串
     }
   }
 
@@ -127,7 +132,31 @@ class DeckGLMap extends Component {
     this.props.getTrajCounts(this.trajCounts)
   };
 
-
+  dataFormat = (traj) => {
+    let path = []; // 组织为经纬度数组
+    let importance = []; // 存储对应轨迹每个位置的重要程度
+    for (let j = 0; j < traj.lngs.length; j++) {
+      path.push([traj.lngs[j], traj.lats[j]]);
+      // 计算重要程度，判断speed是否为0
+      importance.push(
+        traj.spd[j] === 0 ?
+          traj.azimuth[j] * traj.dis[j] / 0.00001 :
+          traj.azimuth[j] * traj.dis[j] / traj.spd[j]);
+    }
+    // 组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
+    let res = {
+      id: traj.id,
+      date: traj.date,
+      data: path,
+      spd: traj.spd,
+      azimuth: traj.azimuth,
+      importance: importance,
+      // 新添加了细粒度时间特征
+      weekday: traj.weekday + 1,
+      hour: traj.hour,
+    };
+    return res;
+  }
   // 对应新json格式：根据日期筛选可视化的轨迹
   getSelectData = (start, end) => {
     let selectTrajs = [];
@@ -135,28 +164,7 @@ class DeckGLMap extends Component {
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < this.props.userData.length; i++) {
       if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp) {
-        let path = [];//存储选择的所有轨迹
-        let importance = [];//存储对应轨迹每个位置的重要程度
-        for (let j = 0; j < this.props.userData[i].lngs.length; j++) {
-          path.push([this.props.userData[i].lngs[j], this.props.userData[i].lats[j]]);
-          // 计算重要程度，判断speed是否为0
-          importance.push(
-            this.props.userData[i].spd[j] === 0 ?
-              this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / 0.00001 :
-              this.props.userData[i].azimuth[j] * this.props.userData[i].dis[j] / this.props.userData[i].spd[j]);
-        }
-        //组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
-        selectTrajs.push({
-          id: this.props.userData[i].id, 
-          date: this.props.userData[i].date, 
-          data: path,
-          spd: this.props.userData[i].spd, 
-          azimuth: this.props.userData[i].azimuth, 
-          importance: importance,
-          // 新添加了细粒度时间特征
-          weekday: this.props.userData[i].weekday + 1,
-          hour: this.props.userData[i].hour,
-        });
+        selectTrajs.push(this.dataFormat(this.props.userData[i]));
       }
     }
     return selectTrajs  //返回选择的轨迹信息 (OD信息直接读取Trajs的首尾坐标)
@@ -351,15 +359,8 @@ class DeckGLMap extends Component {
         }
         const tempPath = [{ path: tempTraj }];
 
-        // 传递点击选择的轨迹数据
-        this.props.addSelectTrajs(info.object);
-
         // 地图渲染
         this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath, this.state.selectDate.start, this.state.selectDate.end);
-
-        // 存储轨迹 info.object = [id:XX, date:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
-        this.props.setSelectedTraj(info.object);
-        console.log(info.object)
         // 激活“目的地预测”跳转导航
         this.props.setRoutes(prev => {
           const newRoutes = _.cloneDeep(prev);
@@ -367,7 +368,15 @@ class DeckGLMap extends Component {
           return newRoutes;
         })
 
-        // 更新当前展示轨迹的 id
+        /**
+         * redux-trajs存储
+         * info.object = [id:XX, date:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
+         */
+        // 1.传递点击选择的轨迹数据
+        this.props.addSelectTrajs(info.object);
+        // 2.存储轨迹
+        this.props.setSelectedTraj(info.object);
+        // 3.更新当前展示轨迹的 id
         this.props.setCurShowTrajId(info.object.id);
       }
     })
@@ -657,6 +666,25 @@ class DeckGLMap extends Component {
       </div>
     );
   }
+
+  // 存储输入文本框内的轨迹编号字符串
+  onSearchTraj = (e) => {
+    this.setState({
+      trajIdForSearch: e.target.value,
+    })
+  }
+  // 查找指定的轨迹编号，并保存数据
+  handleSearchTraj = async () => {
+    let data = await getOneTraj(this.state.trajIdForSearch);
+    data = this.dataFormat(data);
+    // 1.传递点击选择的轨迹数据
+    this.props.addSelectTrajs(data);
+    // 2.存储轨迹
+    this.props.setSelectedTraj(data);
+    // 3.更新当前展示轨迹的 id
+    this.props.setCurShowTrajId(data.id);
+  }
+
   render() {
     return (
       <div>
@@ -698,6 +726,30 @@ class DeckGLMap extends Component {
             <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Heat">热力图</Radio.Button>
           </Radio.Group><br />
           格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={100} step={50} defaultValue={300} onChange={(value) => this.changeGridWidth(value)} />
+        </div><br />
+        <div className={`moudle`}>
+          <Input.Group compact>
+            <Input
+              style={{ width: 120 }}
+              defaultValue=""
+              ref={this.inputRef}
+              onChange={this.onSearchTraj}
+            />
+            <Tooltip title="copy traj_id">
+              <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
+            </Tooltip>
+            <Tooltip title="search and select">
+              <Button
+                icon={<SearchOutlined />}
+                onClick={(e) => { this.handleSearchTraj() }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    this.handleSearchTraj()
+                  }
+                }}
+              />
+            </Tooltip>
+          </Input.Group>
         </div><br />
         <div className={`moudle`}>
           <div className='text-button'>

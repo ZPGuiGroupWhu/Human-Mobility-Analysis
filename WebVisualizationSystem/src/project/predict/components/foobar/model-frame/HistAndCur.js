@@ -44,7 +44,7 @@ export default function HistAndCur(props) {
     <div className="hist-cur-row">
       <Space>
         <InputNumber
-          min={1}
+          min={0}
           max={28}
           keyboard={true}
           controls={false}

@@ -1,36 +1,41 @@
 import { baseRequest, baseRequestWithCancel } from './base';
 
+// 获取指定用户编号的个体轨迹数据集
 export const getUserTraj = (id) => {
   return baseRequest({
     url: `/getUserTraj?id=${id}`
   })
 }
 
+// 获取个体轨迹数据集的轨迹条数
 export const getUserTrajCount = (id) => {
   return baseRequest({
     url: `/getUserTrajCount?id=${id}`
   })
 }
 
+// 分块获取个体轨迹数据
 export const getUserTrajInChunk = (id,chunkSize,chunkNum) => {
   return baseRequest({
     url: `/getUserTrajInChunk?id=${id}&chunkNum=${chunkNum}&chunkSize=${chunkSize}`
   })
 }
 
+// 获取轨迹OD
 export const getUserODs = () => {
   return baseRequest({
     url: `/getUserODs`
   })
 }
 
+// 获取个体大五人格信息
 export const getOceanScoreAll = () => {
   return baseRequest({
     url: `/ocean_score_all`,
   })
 }
 
-
+// 获取个体轨迹集的时间统计特征
 export const getUserTrajByTime = (params) => {
   if (window.cancelList.hasOwnProperty('getUserTrajByTime')) {
     window.cancelList.getUserTrajByTime()
@@ -42,8 +47,17 @@ export const getUserTrajByTime = (params) => {
   }, 'getUserTrajByTime')
 }
 
+// 获取个体历史前N天的轨迹数据
 export const getUserHistoryTraj = (id, days) => {
   return baseRequest({
     url: `/getUserHistoryTraj?days=${days}&trajId=${id}`
+  })
+}
+
+
+// 获取指定轨迹编号的轨迹
+export const getOneTraj = (trajId) => {
+  return baseRequest({
+    url: `/getOneTraj?trajId=${trajId}`
   })
 }

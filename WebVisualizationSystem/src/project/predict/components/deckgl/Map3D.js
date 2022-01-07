@@ -130,6 +130,15 @@ export default function Map3D(props) {
             />
           )}
         </DeckGL>
+        {/* 当前轨迹标签 */}
+        <span
+          style={{
+            position: 'absolute',
+            top: '5px',
+            left: '5px',
+            color: '#fff',
+            fontWeight: 'bold'
+          }}>{selectedTraj.id}</span>
       </section>
     </div>
   )

@@ -31,6 +31,7 @@ const options = [
 ]
 
 export default function CalendarWindow(props) {
+  const {userData} = props;
   // 获取公共数组中的日历数据、hour统计数据、week统计数据
   const calendarData = useSelector(state => state.analysis.calendarData);
   const hourCount = useSelector(state => state.analysis.hourCount);
@@ -39,7 +40,7 @@ export default function CalendarWindow(props) {
   return (
     <div className='calendar-window-ctn'>
       <SliderControl />
-      <WeekHourCalendar data = {calendarData}/>
+      <WeekHourCalendar calendarData = {calendarData} userData={userData}/>
       <StatisticsBar {...options[0]} data={hourCount} />
       <StatisticsBar {...options[1]} data={weekdayCount} />
     </div>

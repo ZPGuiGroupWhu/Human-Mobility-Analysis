@@ -4,16 +4,23 @@ import { debounce } from '@/common/func/debounce';
 import { eventEmitter } from '@/common/func/EventEmitter';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
+import { setTimeSelectResult } from '@/app/slice/analysisSlice';
+
 import _ from 'lodash';
 
 
 export default function Calendar(props) {
   const myChart = useRef(null);
   const {
-    data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
+    timeData, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
+    userData, // 轨迹数据
     eventName, // 注册事件名
   } = props;
-  const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
+  const year = str2date(Object.keys(timeData)[0]).getFullYear(); // 数据年份
+  const originDate = {
+    start: '2018-01-01',
+    end: '2018-12-31',
+  };
 
   // 获取筛选的轨迹数据
   const state = useSelector(state => state.predict);
@@ -180,8 +187,8 @@ export default function Calendar(props) {
   }
 
   useEffect(() => {
-    if (!data) return () => { };
-    const format = formatData(data);
+    if (!timeData) return () => { };
+    const format = formatData(timeData);
     const counts = format.map(item => (item[1]))
     myChart.current.setOption({
       visualMap: {
@@ -192,8 +199,44 @@ export default function Calendar(props) {
         data: format,
       }
     })
-  }, [data])
+  }, [timeData])
 
+  function dataFormat(traj) {
+    let path = []; // 组织为经纬度数组
+    let importance = []; // 存储对应轨迹每个位置的重要程度
+    for (let j = 0; j < traj.lngs.length; j++) {
+      path.push([traj.lngs[j], traj.lats[j]]);
+      // 计算重要程度，判断speed是否为0
+      importance.push(
+        traj.spd[j] === 0 ?
+          traj.azimuth[j] * traj.dis[j] / 0.00001 :
+          traj.azimuth[j] * traj.dis[j] / traj.spd[j]);
+    }
+    // 组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
+    let res = {
+      id: traj.id,
+      date: traj.date,
+      data: path,
+      spd: traj.spd,
+      azimuth: traj.azimuth,
+      importance: importance,
+      // 新添加了细粒度时间特征
+      weekday: traj.weekday + 1,
+      hour: traj.hour,
+    };
+    return res;
+  }
+  function getSelectDataByDate(start, end) {
+    let selectTrajs = [];
+    let startTimeStamp = Date.parse(start);
+    let endTimeStamp = Date.parse(end);
+    for (let i = 0; i < userData.length; i++) {
+      if (startTimeStamp <= Date.parse(userData[i].date) && Date.parse(userData[i].date) <= endTimeStamp) {
+        selectTrajs.push(dataFormat(userData[i]));
+      }
+    }
+    return selectTrajs  //返回选择的轨迹信息 (OD信息直接读取Trajs的首尾坐标)
+  }
 
   // 记录框选的日期范围
   const [date, setDate] = useState({ start: '', end: '' });
@@ -269,7 +312,8 @@ export default function Calendar(props) {
       // 触发 eventEmitter 中的注册事件，传递选择的日期范围
       // start: yyyy-MM-dd
       // end: yyyy-MM-dd
-      eventEmitter.emit(eventName, { start, end });
+      const timeSelectedReuslt = getSelectDataByDate(start, end);
+      dispatch(setTimeSelectResult(timeSelectedReuslt));
       console.log(start, end);
     }
     myChart.current.on('mouseup', mouseUp)
@@ -287,44 +331,40 @@ export default function Calendar(props) {
     myChart.current?.setOption({
       series: [{
         name: '高亮',
-        data: highLightData(data, date.start, date.end),
+        data: highLightData(timeData, date.start, date.end),
       }]
     })
-  }, [data, date])
+  }, [timeData, date])
 
   // 筛选轨迹的日期标记部分
   useEffect(() => {
-    if (!data) return () => { }
+    if (!timeData) return () => { }
     myChart.current?.setOption({
       series: [{
         name: 'select',
-        data: highlightSelectedTrajectoryDate(data, state.selectedTraj)
+        data: highlightSelectedTrajectoryDate(timeData, state.selectedTraj)
       }]
     })
-  }, [data, state.selectedTraj])
+  }, [timeData, state.selectedTraj])
 
 
   // 清除高亮和标记
   useEffect(() => {
-    const start = date2str(new Date(year, 0, 1), '-');
-    const end = date2str(new Date(year + 1, 0, 0), '-');
-    // 重新渲染全部轨迹
-    setDate(() => {
-      eventEmitter.emit(eventName, { start, end });
-      return {
-        start,
-        end,
-      }
-    })
     // 清除高亮
     setTimeout(() => {
       myChart.current?.setOption({
         series: [{
           name: '高亮',
           data: [],
+        },{
+          name: 'select',
+          data: []
         }]
       });
-    }, 0)
+    }, 0);
+    // 初始轨迹数据
+    let originTrajs = getSelectDataByDate(originDate.start, originDate.end);
+    dispatch(setTimeSelectResult(originTrajs));
   }, [props.clear])
 
   return (

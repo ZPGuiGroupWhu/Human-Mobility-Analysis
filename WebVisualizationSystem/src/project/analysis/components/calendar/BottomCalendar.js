@@ -8,7 +8,7 @@ export default function BottomCalendar(props) {
   const [clear, setClear] = useState({});
   return (
     <div className="bottom-calendar-ctn">
-      <Calendar data={props.data} eventName={props.eventName} clear={clear} />
+      <Calendar timeData={props.timeData} userData={props.userData} eventName={props.eventName} clear={clear} />
       <Button
             ghost
             size='small'

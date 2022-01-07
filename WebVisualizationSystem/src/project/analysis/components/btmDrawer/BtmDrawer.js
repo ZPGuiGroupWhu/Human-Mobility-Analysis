@@ -37,9 +37,9 @@ class BtmDrawer extends Component {
         </div>
         {
           (this.state.value === 1 && this.props.dataloadStatus && Object.keys(this.props.date).length) ?
-            <BottomCalendar data={this.props.date} eventName={this.props.EVENTNAME} /> : null
+            <BottomCalendar timeData={this.props.date} userData = {this.props.userData} eventName={this.props.EVENTNAME} /> : null
         }
-        {this.state.value === 2 && <CalendarWindow />}
+        {this.state.value === 2 && <CalendarWindow userData = {this.props.userData}/>}
       </>
     );
   }

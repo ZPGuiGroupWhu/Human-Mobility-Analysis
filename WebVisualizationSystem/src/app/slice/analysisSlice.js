@@ -5,6 +5,7 @@ const initialState = {
   monthCount: [],
   weekdayCount: [],
   calendarData: [], // 存储 某几个月下的 week-hour 数据
+  timeSelectResult: [], // 存储时间筛选的轨迹集  
   selectTrajs: [],  // 添加到“轨迹列表”中的轨迹数据集合
   curShowTrajId: -1, // 当前展示的轨迹id
 }
@@ -20,6 +21,10 @@ const analysisReducer = createSlice({
     },
     setCalendarData: (state, action) => {
       state.calendarData = action.payload;
+    },
+    setTimeSelectResult: (state, action) => {
+      state.timeSelectResult = action.payload;
+      console.log(state.timeSelectResult)
     },
     addSelectTrajs: (state, action) => {
       const data = action.payload;
@@ -54,6 +59,7 @@ const analysisReducer = createSlice({
 export const {
   setBarData,
   setCalendarData,
+  setTimeSelectResult,
   addSelectTrajs,
   delSelectTraj,
   clearSelectTraj,

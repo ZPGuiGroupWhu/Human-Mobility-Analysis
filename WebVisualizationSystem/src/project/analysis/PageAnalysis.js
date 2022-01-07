@@ -224,6 +224,7 @@ class PageAnalysis extends Component {
             () => <BtmDrawer
               // Bottom Calendar
               dataloadStatus={this.state.dataloadStatus}
+              userData = {this.state.userData}
               date={this.state.date}
               EVENTNAME={this.EVENTNAME}
             />

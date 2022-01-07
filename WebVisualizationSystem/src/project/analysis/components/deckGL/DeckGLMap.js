@@ -11,7 +11,7 @@ import { withRouter } from 'react-router';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
-import { addSelectTrajs, setCurShowTrajId } from '@/app/slice/analysisSlice';
+import { addSelectTrajs, setCurShowTrajId, setTimeSelectResult } from '@/app/slice/analysisSlice';
 // 函数
 import { eventEmitter } from '@/common/func/EventEmitter';
 import { copyText } from '@/common/func/copyText.js';
@@ -23,7 +23,8 @@ import '@/project/border-style.scss';
 
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiMjAxNzMwMjU5MDE1NyIsImEiOiJja3FqM3RjYmIxcjdyMnhsbmR0bHo2ZGVpIn0.wNBmzyxhzCMx9PhIH3rwCA';//MAPBOX密钥
-const initOpacity = 0.8;
+const tripInitOpacity = 0.8;
+const iconInitOpacity = 256;
 
 class DeckGLMap extends Component {
   constructor(props) {
@@ -56,7 +57,7 @@ class DeckGLMap extends Component {
       hoveredMessage: null,//悬浮框内的信息
       pointerX: null,//悬浮框的位置
       pointerY: null,
-      selectDate: {
+      originDate: {
         start: '2018-01-01',
         end: '2018-12-31',
       },
@@ -67,33 +68,32 @@ class DeckGLMap extends Component {
       tripsLayerOne: null,//选中轨迹图层
       iconLayerOneO: null,//选中轨迹O点的icon图层
       iconLayerOneD: null,//选中轨迹D点的icon图层
-      tripsOpacity: initOpacity,//轨迹初始透明度
-      iconOpacity: 256,//icon图标图层初始化透明度
+      tripsOpacity: tripInitOpacity,//轨迹初始透明度
+      iconOpacity: iconInitOpacity,//icon图标图层初始化透明度
       scatterPlotLayer: null, // 点图层
       trajIdForSearch: '', // 定向查找输入的轨迹编号字符串
     }
   }
 
   componentDidMount() {
+    console.log(this.props.userData)
     this.getLayers();
-    this.addDateSelectListener();
-    this.clear();
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.userData !== this.props.userData) {
       this.getLayers();
     }
-    if (!_.isEqual(prevState.selectDate, this.state.selectDate)) {
-      this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
-      this.showSelectOD(this.state.selectDate.start, this.state.selectDate.end);
+    if (!_.isEqual(prevProps.timeSelectResult, this.props.timeSelectResult)){
+      this.showSelectTraj(this.props.timeSelectResult);
+      this.showSelectOD(this.props.timeSelectResult);
     }
     if (!_.isEqual(prevProps.curShowTrajId, this.props.curShowTrajId)) {
-      this.handleCurTrajId(this.props.selectTrajs, this.props.curShowTrajId, this.state.selectDate.start, this.state.selectDate.end)
+      this.handleCurTrajId(this.props.selectTrajs, this.props.curShowTrajId)
     }
   }
 
   // 依据当前轨迹 id 展示
-  handleCurTrajId = (selectTrajs, curShowTrajId, start, end) => {
+  handleCurTrajId = (selectTrajs, curShowTrajId) => {
     if (selectTrajs.length && curShowTrajId !== -1) {
       const trajs = selectTrajs.find(item => item.id === curShowTrajId);
       const O = trajs.data[0], D = trajs.data.slice(-1)[0];
@@ -103,11 +103,10 @@ class DeckGLMap extends Component {
         [{ O, D }],
         [{ path: trajs.data }],
       ];
-      this.layerRenderAfterSelect(...params, start, end);
+      this.layerRenderAfterSelect(...params);
     }
 
   }
-
 
   getTrajNodes = () => {
     // console.log(this.props.userData)
@@ -157,8 +156,8 @@ class DeckGLMap extends Component {
     };
     return res;
   }
-  // 对应新json格式：根据日期筛选可视化的轨迹
-  getSelectData = (start, end) => {
+
+  getSelectDataByDate = (start, end) => {
     let selectTrajs = [];
     let startTimeStamp = Date.parse(start);
     let endTimeStamp = Date.parse(end);
@@ -168,7 +167,7 @@ class DeckGLMap extends Component {
       }
     }
     return selectTrajs  //返回选择的轨迹信息 (OD信息直接读取Trajs的首尾坐标)
-  };
+  }
 
   //构建OD弧段图层
   getArcLayer = () => {
@@ -267,9 +266,7 @@ class DeckGLMap extends Component {
     })
   };
 
-
-
-  layerRenderAfterSelect = (O, D, OD, path, startDate, endDate) => {
+  layerRenderAfterSelect = (O, D, OD, path) => {
     this.setState({
       iconLayerOneO: new IconLayer({
         id: 'icon-layer-one-O',
@@ -324,17 +321,15 @@ class DeckGLMap extends Component {
       })
     });
     // Opacity改变，重新绘制其他轨迹
-    const selectTrajs = this.getSelectData(startDate, endDate);
-    // this.getIconLayer(selectOdNodes);
-    this.getTripsLayer(selectTrajs);
-    this.getIconLayer(true, selectTrajs);
-    this.getIconLayer(false, selectTrajs);
+    this.getTripsLayer(this.props.timeSelectResult);
+    this.getIconLayer(true, this.props.timeSelectResult);
+    this.getIconLayer(false, this.props.timeSelectResult);
   }
   //对应新json格式：轨迹点击事件
   clickInfo = (info) => {
     this.setState({
-      tripsOpacity: 0.02,
-      iconOpacity: 50
+      tripsOpacity: 0.05,
+      iconOpacity: 0
     }, () => {
       let id = info.object ? info.object.id : null;
       // 绘制OD弧线
@@ -358,9 +353,8 @@ class DeckGLMap extends Component {
           }
         }
         const tempPath = [{ path: tempTraj }];
-
         // 地图渲染
-        this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath, this.state.selectDate.start, this.state.selectDate.end);
+        this.layerRenderAfterSelect(tempO, tempD, tempOD, tempPath);
         // 激活“目的地预测”跳转导航
         this.props.setRoutes(prev => {
           const newRoutes = _.cloneDeep(prev);
@@ -404,7 +398,6 @@ class DeckGLMap extends Component {
         shadowEnabled: false,
         highlightColor: [256, 0, 0, 256],
         onClick: info => this.clickInfo(info),
-        // onHover: info => this.highlightTraj(info)
       })
     })
   };
@@ -499,23 +492,26 @@ class DeckGLMap extends Component {
   }
 
   // 可视化筛选的轨迹
-  showSelectTraj = (start, end) => {
+  showSelectTraj = (selectTrajs) => {
     this.setState({
-      tripsOpacity: initOpacity
+      tripsOpacity: tripInitOpacity,
+      // 清除单条高亮轨迹
+      arcLayerOne: null,
+      tripsLayerOne: null,
+      iconLayerOneO: null,
+      iconLayerOneD: null
     }, () => {
-      const selectTrajs = this.getSelectData(start, end);
       this.getTripsLayer(selectTrajs);
     });
   };
   // 可视化筛选轨迹的OD点
-  showSelectOD = (start, end) => {
+  showSelectOD = (selectTrajs) => {
     this.setState({
-      iconOpacity: 256
+      iconOpacity: iconInitOpacity,
     }, () => {
-      const selectTrajs = this.getSelectData(start, end);
       this.getIconLayer(true, selectTrajs);
       this.getIconLayer(false, selectTrajs);
-    })
+    });
   };
   changeGridOrSpeed = (event) => {//切换图层
     if (event.target.value == "Grid") {
@@ -586,15 +582,15 @@ class DeckGLMap extends Component {
     this.getTripsLayerOne();
     this.getArcLayerOne();
     this.geticonLayerOneOD();
-    this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
+    this.showSelectTraj(this.props.timeSelectResult);
   };
   //显示和关闭OD点icon图层
   changeIconLayerShow = () => {
     this.iconChecked = !this.iconChecked;
     this.iconLayerOShow = !this.iconLayerOShow;
     this.iconLayerDShow = !this.iconLayerDShow;
-    this.showSelectOD(this.state.selectDate.start, this.state.selectDate.end);
-  };
+    this.showSelectOD(this.props.timeSelectResult);
+  };1
 
   getLayers = () => {//获取所有图层
     this.getTrajNodes();//获取所有轨迹点的集合
@@ -606,54 +602,11 @@ class DeckGLMap extends Component {
     this.getTripsLayerOne();//初始化单条高亮轨迹图层
     this.getArcLayerOne();//初始化单条OD图层
     this.geticonLayerOneOD();//初始化单条OD的icon图层
-    this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
+    // 初始化轨迹数据
+    let originTrajs = this.getSelectDataByDate(this.state.originDate.start, this.state.originDate.end);
+    this.showSelectTraj(originTrajs);
     this.getScatterPlotLayer();
   };
-
-  // 根据日期选择轨迹，监听函数
-  addDateSelectListener() {
-    eventEmitter.on(this.props.eventName, ({ start, end }) => {
-      this.setState({
-        selectDate: {
-          start,
-          end,
-        },
-        // 清除单条高亮轨迹
-        arcLayerOne: null,
-        tripsLayerOne: null,
-        iconLayerOneO: null,
-        iconLayerOneD: null
-      })
-    })
-  };
-
-  /**
-   * ！！！此处按钮点击会卡顿，可能存在一定问题，之后此处有待修改！！！
-   */
-
-  // 清除, 点击清除按钮时，需要显示所有的轨迹
-  clear() {
-    eventEmitter.on('clearAnalysisHighlight', ({ clear }) => {
-      if (clear === true) {
-        this.setState({
-          // 设置为全年时间
-          selectDate: {
-            start: '2018-01-01',
-            end: '2018-12-31',
-          },
-          // 清除高亮轨迹
-          arcLayerOne: null,
-          tripsLayerOne: null,
-          iconLayerOneO: null,
-          iconLayerOneD: null,
-        }, () => {
-          // 重新绘制
-          this.showSelectTraj(this.state.selectDate.start, this.state.selectDate.end);
-          this.showSelectOD(this.state.selectDate.start, this.state.selectDate.end);
-        })
-      }
-    })
-  }
 
   sliderToolTipFormatter = (value) => {
     return `${value}m`
@@ -774,12 +727,14 @@ const mapStateToProps = (state) => ({
   selectedTraj: state.predict.selectedTraj,
   curShowTrajId: state.analysis.curShowTrajId,
   selectTrajs: state.analysis.selectTrajs,
+  timeSelectResult: state.analysis.timeSelectResult,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedTraj: (payload) => dispatch(setSelectedTraj(payload)),
   addSelectTrajs: (payload) => dispatch(addSelectTrajs(payload)),
   setCurShowTrajId: (id) => dispatch(setCurShowTrajId(id)),
+  setTimeSelectResult: (payload) => dispatch(setTimeSelectResult(payload))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(DeckGLMap));

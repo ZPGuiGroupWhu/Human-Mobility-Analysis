@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import _ from 'lodash';
+import _, { get, set } from 'lodash';
 import './CalendarWindow.scss';
 import { useSelector, useDispatch } from 'react-redux';
 import { debounce } from '@/common/func/debounce';
+import { setTimeSelectResult } from '@/app/slice/analysisSlice';
 
 let myChart = null;
 let timePeriod = [];//存储需要高亮的时间段
 const timeInterval = 24; // 一天24h, 作为间隔
 
 export default function WeekHourCalendar(props) {
-    // heatmap 数据
-    const { data } = props;
+    // heatmap 数据、 user轨迹数据
+    const { calendarData, userData } = props;
 
     // 获取analysis公共状态
     const state = useSelector(state => state.analysis);
@@ -176,10 +177,10 @@ export default function WeekHourCalendar(props) {
             },
             series: [{
                 name: 'week-hour',
-                data: data
+                data: calendarData
             }]
         })
-    }, [data])
+    }, [calendarData])
 
 
     // 根据筛选的起始日期与终止日期，高亮数据
@@ -231,13 +232,86 @@ export default function WeekHourCalendar(props) {
     }
 
     // 清除高亮 => 可提供给清空按钮 和 月份slider
-    function clearHighLight(){
+    function clearHighLight() {
         myChart.current?.setOption({
             series: [{
                 name: 'highLight',
                 data: []
             }]
         })
+    }
+
+    //校正时间顺序
+    function ReserveTime(start, end) {
+        if (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0]) {
+            [start, end] = [end, start]
+        }
+        return [start, end]
+    }
+
+    // 重新组织数据
+    function dataFormat(traj) {
+        let path = []; // 组织为经纬度数组
+        let importance = []; // 存储对应轨迹每个位置的重要程度
+        for (let j = 0; j < traj.lngs.length; j++) {
+            path.push([traj.lngs[j], traj.lats[j]]);
+            // 计算重要程度，判断speed是否为0
+            importance.push(
+                traj.spd[j] === 0 ?
+                    traj.azimuth[j] * traj.dis[j] / 0.00001 :
+                    traj.azimuth[j] * traj.dis[j] / traj.spd[j]);
+        }
+        // 组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
+        let res = {
+            id: traj.id,
+            date: traj.date,
+            data: path,
+            spd: traj.spd,
+            azimuth: traj.azimuth,
+            importance: importance,
+            // 新添加了细粒度时间特征
+            weekday: traj.weekday + 1,
+            hour: traj.hour,
+        };
+        return res;
+    }
+
+    // 获取筛选的轨迹数据
+    function getSelectDataByWeekAndHour(start, end) {
+        const timeInterval = 24; // 一天24h, 作为间隔
+        let selectTrajs = [];
+        let [startWeek, startHour] = [...Object.values(start)];
+        let [endWeek, endHour] = [...Object.values(end)];
+        // 开始的week-hour时间
+        let startTime = startWeek * timeInterval + startHour;
+        // 结束的week-hour时间
+        let endTime = endWeek * timeInterval + endHour;
+        console.log(startTime, endTime)
+        _.forEach(userData, (item) => {
+            let weekday = item.weekday;
+            let hour = item.hour;
+            let time = weekday * timeInterval + hour
+            if (startTime <= time && time <= endTime) {
+                // console.log(item)
+                selectTrajs.push(dataFormat(item))
+            }
+        })
+        return selectTrajs;
+    }
+
+    // week-hour 日历 和 轨迹中的 周一到周日的形势不一样
+    // 前者是 周日6，周一5，周二4，...周六0
+    // 后者是 周一0，周二1，周三2，...周日6
+    function getSelectedPeriod(start, end){ // start[hour,week,count],end[hour,week,count]
+        let startObj = {
+            weekday: (start[1] === 6) ? 6 : 5 - start[1],
+            hour: start[0] + 1
+        };
+        let endObj = {
+            weekday: (end[1] === 6) ? 6 : 5 - end[1],
+            hour: end[0] + 1
+        }
+        return [startObj, endObj]
     }
 
     // 记录框选的日期范围
@@ -256,7 +330,7 @@ export default function WeekHourCalendar(props) {
             if (isdown.current) return;
             // 已触发，添加标记
             isdown.current = true;
-            // params.data : (string | number)[] such as ['yyyy-MM-dd', 20]
+            // params.data : (number | number | number)[] such as [0, 0, 20]
             setAction(prev => {
                 return {
                     ...prev,
@@ -267,7 +341,6 @@ export default function WeekHourCalendar(props) {
                 start: params.data || params.value,
                 end: params.data || params.value,
             });
-            // console.log('timePeriod_Down:', timePeriod)
         };
         myChart.on('mousedown', mouseDown);
         // 鼠标移动事件
@@ -281,10 +354,12 @@ export default function WeekHourCalendar(props) {
                         mousemove: true,
                     }
                 ));
+                let [start, end] = ReserveTime(time.start, params.data || params.value)
                 setTime(prev => (
                     {
                         ...prev,
-                        end: params.data || params.value,
+                        start: start,
+                        end: end
                     }
                 ))
             },
@@ -305,18 +380,12 @@ export default function WeekHourCalendar(props) {
             let start = time.start, end = time.end;
             // 校正时间顺序
             (
-                (start[1] * timeInterval + start[0] > end[1] * timeInterval + end[0])
+                (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0])
             ) && ([start, end] = [end, start]);
-
             console.log(start, end);
-
-            // //每次选择完则向timePeriod中添加本次筛选的日期，提供给下一次渲染。
-            // timePeriod.push({ start: start, end: end });
-            // //返回筛选后符合要求的所有用户id信息，传递给其他页面。
-            // let userIDs = getUsers(data, timePeriod);
-            // // eventEmitter.emit('getUsers', {userIDs});
-            // //将数据传递到setSelectedByCalendar数组中
-            // dispatch(setSelectedByCalendar(userIDs));
+            // 将数据传递到timeSelectResult数组中
+            const timeSelectedReuslt = getSelectDataByWeekAndHour(...getSelectedPeriod(start, end));
+            dispatch(setTimeSelectResult(timeSelectedReuslt));
         };
         const mouseUp = (params) => {
             if (isdown.current) { //如果点击的是不可选取的内容，则isdown不会变为true，也就不存在mouseUp功能
@@ -340,10 +409,10 @@ export default function WeekHourCalendar(props) {
         myChart?.setOption({
             series: [{
                 name: 'highLight',
-                data: highLightCalendar(data, time.start, time.end)
+                data: highLightCalendar(calendarData, time.start, time.end)
             }]
         });
-    }, [data, time]);
+    }, [calendarData, time]);
 
 
     // // 日历重置

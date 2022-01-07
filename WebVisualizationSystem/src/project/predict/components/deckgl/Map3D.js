@@ -138,7 +138,7 @@ export default function Map3D(props) {
             left: '5px',
             color: '#fff',
             fontWeight: 'bold'
-          }}>{selectedTraj.id}</span>
+          }}>{selectedTraj?.id}</span>
       </section>
     </div>
   )

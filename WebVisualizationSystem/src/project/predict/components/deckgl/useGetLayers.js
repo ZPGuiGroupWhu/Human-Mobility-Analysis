@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { GPUGridLayer } from '@deck.gl/aggregation-layers';
-import { PathLayer, ArcLayer } from '@deck.gl/layers';
+import { PathLayer, ArcLayer, TextLayer } from '@deck.gl/layers';
 
 export function useGetLayers(selectedTraj, histTrajs, visible) {
   const { spdShow, azmShow } = visible;
@@ -130,7 +130,7 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
 
 
   // hist D sequences arc-layers
-  const [histArcLayer, setHistArcLayer] = useState(null);
+  const [histDArcLayer, setHistDArcLayer] = useState(null);
   useEffect(() => {
     /**
      * Data format:
@@ -159,7 +159,7 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
      */
     const Ds = histTrajs.map(item => (item.destination));
     let data = []
-    for (let i=0; i<Ds.length-1; i++) {
+    for (let i = 0; i < Ds.length - 1; i++) {
       data.push({
         from: {
           type: 'major',
@@ -173,10 +173,10 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
         }
       })
     }
-    setHistArcLayer(new ArcLayer({
-      id: 'hist-arc-layer',
+    setHistDArcLayer(new ArcLayer({
+      id: 'hist-d-arc-layer',
       data,
-      visible: true,
+      visible:true,
       pickable: true,
       getStrokeWidth: 20,
       widthScale: 2,
@@ -187,20 +187,106 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
     }))
   }, [histTrajs])
 
+
+  // hist OD sequences arc-layers
+  const [histODArcLayer, setHistODArcLayer] = useState(null);
+  useEffect(() => {
+    /**
+     * Data format:
+     * [
+     * {
+     *   "from": {
+     *     "type": "major",
+     *     "name": "San Francisco Int'l",
+     *     "abbrev": "SFO",
+     *     "coordinates": [
+     *       -122.38347034444931,
+     *       37.61702508680534
+     *     ]
+     *   },
+     *   "to": {
+     *     "type": "major",
+     *     "name": "Liverpool John Lennon",
+     *     "abbrev": "LPL",
+     *     "coordinates": [
+     *       -2.858620657849378,
+     *       53.3363751054422
+     *     ]
+     *   }
+     *   ...
+     * ]
+     */
+    const data = histTrajs.map(item => ({
+      from: {
+        type: 'major',
+        name: 'origin',
+        coordinates: item.origin,
+      },
+      to: {
+        type: 'major',
+        name: 'destination',
+        coordinates: item.destination,
+      }
+    }));
+    setHistODArcLayer(new ArcLayer({
+      id: 'hist-od-arc-layer',
+      data,
+      visible: false,
+      pickable: true,
+      getStrokeWidth: 20,
+      widthScale: 2,
+      getSourcePosition: d => d.from.coordinates,
+      getTargetPosition: d => d.to.coordinates,
+      getSourceColor: [255, 240, 0],
+      getTargetColor: [255, 35, 0]
+    }))
+  }, [histTrajs])
+
+
+  // hist D sequences text-layer
+  const [histTextLayer, setHistTextLayer] = useState(null);
+  useEffect(() => {
+    /**
+     * Data format:
+     * [
+     *   {name: 'Colma (COLM)', address: '365 D Street, Colma CA 94014', coordinates: [-122.466233, 37.684638]},
+     *   ...
+     * ]
+     */
+    const data = histTrajs.map((item, idx) => ({ name: idx.toString(), coordinates: item.destination }));
+    setHistTextLayer(new TextLayer({
+      id: 'hist-text-layer',
+      data,
+      visible: false,
+      pickable: true,
+      getPosition: d => d.coordinates,
+      getText: d => d.name,
+      getSize: 10,
+      getAngle: 0,
+      getColor: [255, 255, 255],
+      getTextAnchor: 'end',
+      getAlignmentBaseline: 'center'
+    }))
+  }, [histTrajs])
+
   return {
     ids: [
       'cur-path-layer',
       'cur-arc-layer',
       'gpu-grid-layer-speed',
       'gpu-grid-layer-azimuth',
-      'hist-arc-layer',
+      'hist-d-arc-layer',
+      'hist-od-arc-layer',
+      'hist-text-layer',
     ],
     layers: [
       curPathLayer,
       curArcLayer,
       spdLayer,
       azmLayer,
-      histArcLayer,
+      histDArcLayer,
+      histODArcLayer,
+      histTextLayer,
     ]
   }
 }

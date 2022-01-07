@@ -686,7 +686,7 @@ class DeckGLMap extends Component {
               style={{ width: 120 }}
               defaultValue=""
               ref={this.inputRef}
-              onChange={this.onSearchTraj}
+              onChange={_.debounce(this.onSearchTraj, 500)}
             />
             <Tooltip title="copy traj_id">
               <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />

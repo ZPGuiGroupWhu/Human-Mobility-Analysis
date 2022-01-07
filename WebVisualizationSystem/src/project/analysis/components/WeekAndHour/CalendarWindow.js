@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './CalendarWindow.scss';
+import { Button } from 'antd';
+import { RedoOutlined } from '@ant-design/icons';
 import {useSelector} from 'react-redux';
 import SliderControl from './SliderController';
 import WeekHourCalendar from './WeekHourCalendar';
@@ -37,10 +39,34 @@ export default function CalendarWindow(props) {
   const hourCount = useSelector(state => state.analysis.hourCount);
   const weekdayCount = useSelector(state => state.analysis.weekdayCount);
 
+  const [clear, setClear] = useState({});
+  const [monthRange, setMonthRange] = useState([]);
+  // 获取slider的月份数据
+  function getMonthRange(month){
+    setMonthRange(month);
+  }
+  // 是否清空高亮选框
+  function getClear(clear){
+    setClear(clear);
+  }
+
   return (
     <div className='calendar-window-ctn'>
-      <SliderControl />
-      <WeekHourCalendar calendarData = {calendarData} userData={userData}/>
+      <SliderControl getMonthRange={getMonthRange} getClear={getClear}/>
+      <WeekHourCalendar calendarData = {calendarData} userData={userData} monthRange={monthRange} clear={clear}/>
+      <Button
+            ghost
+            size='small'
+            type='default'
+            icon={<RedoOutlined style={{ color: '#fff' }} />}
+            onClick={() => {setClear({})}} // 清除筛选
+            style={{
+              position: 'absolute',
+              top: '10px',
+              left: '715px',
+              zIndex: '99' //至于顶层
+            }}
+          />
       <StatisticsBar {...options[0]} data={hourCount} />
       <StatisticsBar {...options[1]} data={weekdayCount} />
     </div>

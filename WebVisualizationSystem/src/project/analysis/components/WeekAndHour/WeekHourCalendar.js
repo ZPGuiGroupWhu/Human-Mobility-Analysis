@@ -5,14 +5,18 @@ import './CalendarWindow.scss';
 import { useSelector, useDispatch } from 'react-redux';
 import { debounce } from '@/common/func/debounce';
 import { setTimeSelectResult } from '@/app/slice/analysisSlice';
+import { init } from 'echarts';
 
 let myChart = null;
-let timePeriod = [];//存储需要高亮的时间段
 const timeInterval = 24; // 一天24h, 作为间隔
 
 export default function WeekHourCalendar(props) {
-    // heatmap 数据、 user轨迹数据
-    const { calendarData, userData } = props;
+    // heatmap 数据、 user轨迹数据, slider month数据， clear标记
+    const { 
+        calendarData, 
+        userData, 
+        monthRange, 
+        clear} = props;
 
     // 获取analysis公共状态
     const state = useSelector(state => state.analysis);
@@ -33,7 +37,7 @@ export default function WeekHourCalendar(props) {
     })()
 
     // 纵轴label
-    const weekLabel = ['周六', '周五', '周四', '周三', '周二', '周一', '周日']
+    const weekLabel = ['周日', '周六', '周五', '周四', '周三', '周二', '周一']
 
     // 参数设置
     const option = {
@@ -231,16 +235,6 @@ export default function WeekHourCalendar(props) {
         return data;
     }
 
-    // 清除高亮 => 可提供给清空按钮 和 月份slider
-    function clearHighLight() {
-        myChart.current?.setOption({
-            series: [{
-                name: 'highLight',
-                data: []
-            }]
-        })
-    }
-
     //校正时间顺序
     function ReserveTime(start, end) {
         if (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0]) {
@@ -288,10 +282,11 @@ export default function WeekHourCalendar(props) {
         let endTime = endWeek * timeInterval + endHour;
         console.log(startTime, endTime)
         _.forEach(userData, (item) => {
+            let month = parseInt(item.date.split('-')[1]);
             let weekday = item.weekday;
             let hour = item.hour;
             let time = weekday * timeInterval + hour
-            if (startTime <= time && time <= endTime) {
+            if (startTime <= time && time <= endTime && monthRange[0] <= month && month <= monthRange[1]){ 
                 // console.log(item)
                 selectTrajs.push(dataFormat(item))
             }
@@ -300,20 +295,32 @@ export default function WeekHourCalendar(props) {
     }
 
     // week-hour 日历 和 轨迹中的 周一到周日的形势不一样
-    // 前者是 周日6，周一5，周二4，...周六0
+    // 前者是 周一6，周二5，周二4，...周日0
     // 后者是 周一0，周二1，周三2，...周日6
     function getSelectedPeriod(start, end){ // start[hour,week,count],end[hour,week,count]
         let startObj = {
-            weekday: (start[1] === 6) ? 6 : 5 - start[1],
+            weekday:6 - start[1],
             hour: start[0] + 1
         };
         let endObj = {
-            weekday: (end[1] === 6) ? 6 : 5 - end[1],
+            weekday: 6 - start[1],
             hour: end[0] + 1
         }
         return [startObj, endObj]
     }
 
+    // 根据slider的month范围决定初始化的tripsLayer的轨迹集
+    function getInitTrajs(start, end){
+        let initTrajs = [];
+        _.forEach(userData, (item) => {
+            let month = parseInt(item.date.split('-')[1]);
+            if(start <= month && month <= end){
+                initTrajs.push(dataFormat(item))
+            }
+        })
+        console.log(initTrajs)
+        return initTrajs;
+    }
     // 记录框选的日期范围
     const [time, setTime] = useState({ start: '', end: '' });
     // 记录鼠标状态
@@ -414,19 +421,20 @@ export default function WeekHourCalendar(props) {
         });
     }, [calendarData, time]);
 
-
-    // // 日历重置
-    // useEffect(() => {
-    //     myChart?.setOption({
-    //         series: [{
-    //             name: 'highLight',
-    //             data: [],
-    //         }]
-    //     });
-    //     //清空setSelectedByCalendar数组
-    //     dispatch(setSelectedByCalendar([]));
-    //     timePeriod = [];
-    // }, [props.calendarReload])
+    // 日历重置
+    useEffect(() => {
+        setTimeout(() => { // 清除高亮
+            myChart?.setOption({
+                series: [{
+                    name: 'highLight',
+                    data: []
+                }]
+            })
+        }, 500);
+        //初始化timeSelectResult : 存储slider筛选月份的轨迹集
+        let initTrajs = getInitTrajs(monthRange[0], monthRange[1]);
+        dispatch(setTimeSelectResult(initTrajs));
+    }, [clear])
 
     return (
         <div className='week-hour-calendar'

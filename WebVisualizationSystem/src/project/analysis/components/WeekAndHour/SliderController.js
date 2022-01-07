@@ -9,6 +9,7 @@ import { setBarData } from '@/app/slice/analysisSlice';
 export default function SliderControl(props) {
     const dispatch = useDispatch()
 
+    const {getMonthRange, getClear} = props;
     // 时间范围，后续只需要更新month范围...
     const [hour, setHour] = useState([0, 23]);
     const [weekday, setWeekday] = useState([0, 6]);
@@ -18,6 +19,12 @@ export default function SliderControl(props) {
     async function onSliderAfterChange(value) {
         setMonth(value);
     }
+
+    // 返回month数据
+    useEffect(() => { // slider改变月份的话就会返回month
+        getMonthRange(month);
+        getClear({}); // slider滑动就会清空高亮选框
+    }, [month])
 
     // 数据请求
     useEffect(() => {
@@ -49,15 +56,11 @@ export default function SliderControl(props) {
             for (let item of items) {
                 weekday_hours_data.push(item.hourCount)
             }
-            // 周6 -> 周1，周6为最后一天，放在最下面一排，因此周6的数据对应放在最前面
-            for (let i = 0; i < weekday_hours_data.length - 1; i++) {
+            // 周日为最后一天，放在最下面一排，因此周日的数据对应放在最前面
+            for (let i = 0; i < weekday_hours_data.length; i++) {
                 for (let j = 0; j < weekday_hours_data[i].length; j++) {
-                    loadData.push([i, j, weekday_hours_data[weekday_hours_data.length - 2 - i][j]])
+                    loadData.push([i, j, weekday_hours_data[weekday_hours_data.length - 1 - i][j]])
                 }
-            }
-            // 每周以周日为起始，放在最上面一排，因此周日的数据对应放在最后
-            for (let i = 0; i < weekday_hours_data[6].length; i++) {
-                loadData.push([6, i, weekday_hours_data[6][i]]);
             }
             // 重新组织数据
             loadData = loadData.map(item => {

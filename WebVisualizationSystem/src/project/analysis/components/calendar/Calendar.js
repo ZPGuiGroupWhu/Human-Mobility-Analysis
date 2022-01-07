@@ -14,7 +14,6 @@ export default function Calendar(props) {
   const {
     timeData, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     userData, // 轨迹数据
-    eventName, // 注册事件名
   } = props;
   const year = str2date(Object.keys(timeData)[0]).getFullYear(); // 数据年份
   const originDate = {

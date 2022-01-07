@@ -30,7 +30,7 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
       id: 'cur-path-layer',
       data,
       pickable: true,
-      widthScale: 20,
+      widthScale: 10,
       widthMinPixels: 2,
       getPath: d => d.path,
       getColor: d => d.color,

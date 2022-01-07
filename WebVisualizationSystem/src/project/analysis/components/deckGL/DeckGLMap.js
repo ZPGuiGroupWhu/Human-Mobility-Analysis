@@ -82,7 +82,7 @@ class DeckGLMap extends Component {
     if (prevProps.userData !== this.props.userData) {
       this.getLayers();
     }
-    if (!_.isEqual(prevProps.timeSelectResult, this.props.timeSelectResult)){
+    if (!_.isEqual(prevProps.timeSelectResult, this.props.timeSelectResult)) {
       this.showSelectTraj(this.props.timeSelectResult);
       this.showSelectOD(this.props.timeSelectResult);
     }
@@ -589,7 +589,7 @@ class DeckGLMap extends Component {
     this.iconLayerOShow = !this.iconLayerOShow;
     this.iconLayerDShow = !this.iconLayerDShow;
     this.showSelectOD(this.props.timeSelectResult);
-  };1
+  }; 1
 
   getLayers = () => {//获取所有图层
     this.getTrajNodes();//获取所有轨迹点的集合
@@ -627,14 +627,18 @@ class DeckGLMap extends Component {
   }
   // 查找指定的轨迹编号，并保存数据
   handleSearchTraj = async () => {
-    let data = await getOneTraj(this.state.trajIdForSearch);
-    data = this.dataFormat(data);
-    // 1.传递点击选择的轨迹数据
-    this.props.addSelectTrajs(data);
-    // 2.存储轨迹
-    this.props.setSelectedTraj(data);
-    // 3.更新当前展示轨迹的 id
-    this.props.setCurShowTrajId(data.id);
+    try {
+      let data = await getOneTraj(this.state.trajIdForSearch);
+      data = this.dataFormat(data);
+      // 1.传递点击选择的轨迹数据
+      this.props.addSelectTrajs(data);
+      // 2.存储轨迹
+      this.props.setSelectedTraj(data);
+      // 3.更新当前展示轨迹的 id
+      this.props.setCurShowTrajId(data.id);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   render() {
@@ -685,7 +689,13 @@ class DeckGLMap extends Component {
               style={{ width: 120 }}
               defaultValue=""
               ref={this.inputRef}
-              onChange={this.onSearchTraj}
+              onChange={_.debounce(this.onSearchTraj, 500)}
+              onKeyDown={(e) => {
+                console.log(e.keyCode);
+                if (e.keyCode === 13) {
+                  this.handleSearchTraj()
+                }
+              }}
             />
             <Tooltip title="copy traj_id">
               <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
@@ -694,11 +704,6 @@ class DeckGLMap extends Component {
               <Button
                 icon={<SearchOutlined />}
                 onClick={(e) => { this.handleSearchTraj() }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    this.handleSearchTraj()
-                  }
-                }}
               />
             </Tooltip>
           </Input.Group>

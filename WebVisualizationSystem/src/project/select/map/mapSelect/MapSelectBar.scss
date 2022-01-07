@@ -4,15 +4,35 @@
   flex-direction: column;
   width: 250px;
   height: 200px;
-  
-  .map-select-function {
-    height: 100%;
+
+  .title-bar {
+    float: left;
     width: 100%;
+    height: 20px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    .map-box-title {
+      width: 100%;
+      height: 20px;
+      margin-left: 5px;
+      color: #fff;
+      display: inline-block;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+    .map-box-switch {
+      display: inline-block;
+      line-height: 20px;
+      // 指针样式
+      cursor: pointer;
+    }
   }
-  .map-box-title {
-    position: absolute;
-    top: 10px;
-    left: 10px;
+  .map-select-function {
     height: 100%;
     width: 100%;
   }

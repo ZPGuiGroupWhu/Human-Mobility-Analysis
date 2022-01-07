@@ -3,6 +3,12 @@ import * as echarts from 'echarts'
 import _ from 'lodash';
 import './MapSelectBar.scss';
 import '@/project/border-style.scss';
+import {
+  CompressOutlined,
+  ExpandOutlined,
+} from '@ant-design/icons';
+import { Space } from 'antd';
+import Hover from '../../charts/common/Hover';
 //测试数据
 import regionJson from '../regionJson/Shenzhen';
 import userLocations from '@/project/select/charts/bottom/jsonData/userLoctionCounts';
@@ -12,12 +18,26 @@ import { setSelectedByMap } from '@/app/slice/selectSlice';
 
 let myMap = null;
 class MapSelectBar extends Component {
+  // icon 通用配置
+  iconStyle = {
+    fontSize: '13px',
+    color: '#fff',
+  }
   constructor(props) {
     super(props);
-    this.state={}
+    this.state = {
+      isVisible: true
+    }
   }
   mapRef = createRef();
 
+  // 内容展开与关闭
+  setChartVisible = () =>{
+    this.setState(prev => ({
+      isVisible: !prev.isVisible
+    }))
+  }
+  
   // 组织用户-top5位置数据：{id1:[{lnglat:[], count:XX}, {lnglat:[], count:XX},...], id2:[{lnglat:[], count:XX}, {lnglat:[], count:XX},...] ....}
   getUserData = (selectedUsers) => {
     //重新组织数据形式，便于后续筛选
@@ -68,7 +88,7 @@ class MapSelectBar extends Component {
         aspectScale: 0.8, // 地图长宽比
         zoom: 1.2, // 地图缩放比例
         nameMap: '中国深圳2D',
-        top: '25%', // 距离容器顶端位置
+        top: '15%', // 距离容器顶端位置
         scaleLimit: {
           max: 5,
           min: 1,
@@ -81,7 +101,7 @@ class MapSelectBar extends Component {
         itemSize: 15,
         itemGap: 8,
         showTitle: true,
-        right: 5,
+        right: -5,
         feature: {
           brush: {
             title: {
@@ -222,11 +242,46 @@ class MapSelectBar extends Component {
           right: this.props.right + 5,
           bottom: this.props.bottom + 5
         }}>
-        <div className='map-box-title'>
-          <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'中国深圳2D'}</span>
+        <div className='title-bar'>
+          <div className='map-box-title'>
+            <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'中国深圳2D'}</span>
+          </div>
+          <div className='map-box-switch'>
+            <Space>
+              {
+                this.state.isVisible ?
+                  <Hover>
+                    {
+                      ({ isHovering }) => (
+                        <CompressOutlined
+                          style={{
+                            ...this.iconStyle,
+                            color: isHovering ? '#05f8d6' : '#fff'
+                          }}
+                          onClick={this.setChartVisible}
+                        />
+                      )
+                    }
+                  </Hover>
+                  :
+                  <Hover>
+                    {
+                      ({ isHovering }) => (
+                        <ExpandOutlined
+                          style={{
+                            ...this.iconStyle,
+                            color: isHovering ? '#05f8d6' : '#fff'
+                          }}
+                          onClick={this.setChartVisible}
+                        />
+                      )
+                    }
+                  </Hover>
+              }
+            </Space>
+          </div>
         </div>
         <div className='map-select-function' ref={this.mapRef}>
-
         </div>
       </div>
 

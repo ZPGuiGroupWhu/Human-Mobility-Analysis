@@ -54,19 +54,15 @@ export default function CalendarWindow(props) {
     <div className='calendar-window-ctn'>
       <SliderControl getMonthRange={getMonthRange} getClear={getClear}/>
       <WeekHourCalendar calendarData = {calendarData} userData={userData} monthRange={monthRange} clear={clear}/>
-      <Button
+      <div className= 'clear-button'>
+        <Button 
             ghost
             size='small'
             type='default'
             icon={<RedoOutlined style={{ color: '#fff' }} />}
             onClick={() => {setClear({})}} // 清除筛选
-            style={{
-              position: 'absolute',
-              top: '10px',
-              left: '715px',
-              zIndex: '99' //至于顶层
-            }}
           />
+      </div>   
       <StatisticsBar {...options[0]} data={hourCount} />
       <StatisticsBar {...options[1]} data={weekdayCount} />
     </div>

@@ -76,7 +76,6 @@ class DeckGLMap extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props.userData)
     this.getLayers();
   }
   componentDidUpdate(prevProps, prevState) {

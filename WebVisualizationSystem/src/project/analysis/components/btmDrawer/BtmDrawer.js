@@ -4,13 +4,15 @@ import BottomCalendar from '../calendar/BottomCalendar';
 import './BtmDrawer.scss';
 import _ from 'lodash';
 import CalendarWindow from '../WeekAndHour/CalendarWindow';
+import CharacterWindow from '../characterSelect/CharacterWindow';
 
 class BtmDrawer extends Component {
   constructor(props) {
     super(props);
     this.radioContents = [
-      { id: 1, text: '日历' },
-      { id: 2, text: '时间窗口' },
+      { id: 1, text: '日历筛选' },
+      { id: 2, text: '星期筛选' },
+      { id: 3, text: '特征筛选' }
     ];
     this.state = {
       value: 2,
@@ -40,6 +42,7 @@ class BtmDrawer extends Component {
             <BottomCalendar timeData={this.props.date} userData = {this.props.userData} eventName={this.props.EVENTNAME} /> : null
         }
         {this.state.value === 2 && <CalendarWindow userData = {this.props.userData}/>}
+        {this.state.value === 3 && <CharacterWindow />}
       </>
     );
   }

@@ -80,6 +80,7 @@ class PageAnalysis extends Component {
           userData: data,
         })
       }
+      console.log(this.state.userData)
       this.setState({
         dataloadStatus: true,
       })

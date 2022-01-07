@@ -272,6 +272,8 @@ export default function WeekHourCalendar(props) {
 
     // 获取筛选的轨迹数据
     function getSelectDataByWeekAndHour(start, end) {
+        console.log('start:', start);
+        console.log('end:', end);
         const timeInterval = 24; // 一天24h, 作为间隔
         let selectTrajs = [];
         let [startWeek, startHour] = [...Object.values(start)];
@@ -280,7 +282,7 @@ export default function WeekHourCalendar(props) {
         let startTime = startWeek * timeInterval + startHour;
         // 结束的week-hour时间
         let endTime = endWeek * timeInterval + endHour;
-        console.log(startTime, endTime)
+        // console.log(startTime, endTime)
         _.forEach(userData, (item) => {
             let month = parseInt(item.date.split('-')[1]);
             let weekday = item.weekday;
@@ -318,7 +320,6 @@ export default function WeekHourCalendar(props) {
                 initTrajs.push(dataFormat(item))
             }
         })
-        console.log(initTrajs)
         return initTrajs;
     }
     // 记录框选的日期范围

@@ -23,6 +23,7 @@ import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
 import { setFinalSelected } from '@/app/slice/analysisSlice';
+import { setCalendarSelected, setCharacterSelected } from '../../app/slice/analysisSlice';
 
 
 
@@ -60,7 +61,6 @@ class PageAnalysis extends Component {
       flag: true,
       option: initlabel,
       curId: 2, // 当前激活抽屉id
-
       userData: [], // 请求的数据
       dataloadStatus: false, // 数据是否加载完毕
       ShenZhen: null, // 深圳json边界
@@ -94,6 +94,16 @@ class PageAnalysis extends Component {
     })
   }
 
+  // 初始化筛选数组
+  initData = (data) => {
+    let selectedData = [];
+    _.forEach(data, (item) => {
+      selectedData.push(item.id)
+    })
+    this.props.setCalendarSelected(selectedData);
+    this.props.setCharacterSelected(selectedData)
+  }
+
   // 取不同筛选结果的交集
   handleIntersection = (...params) => {
     // 若存在元素不为数组类型，则报错
@@ -101,12 +111,8 @@ class PageAnalysis extends Component {
     if (type) {
       throw new Error('param should be Array Type');
     }
-
-    let result = params.reduce((prev, cur) => {
-      if (prev.length === 0) return [...cur];
-      if (cur.length === 0) return [...prev];
-      return Array.from(new Set(prev.filter(item => cur.includes(item))))
-    }, []);
+    // 返回交集数据
+    const result = Array.from(new Set(params[0].filter(item => params[1].includes(item))))
     this.props.setFinalSelected(result);
   };
 
@@ -131,13 +137,12 @@ class PageAnalysis extends Component {
       this.setState({
         dataloadStatus: true,
       })
-      // let data = await getUserTraj(user);
-      // this.setState({
-      //   userData: data,
-      //   dataloadStatus: true,
-      // })
+      // 初始化数据
+      this.initData(this.state.userData)
+
     }
     reqUserData();
+    
     // 深圳 json 数据
     axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => {
       this.setState({ ShenZhen: data.data })
@@ -277,6 +282,8 @@ const mapStateToProps = (state) => {
 }
 const mapDispatchToProps = (dispatch) => {
   return {
+    setCalendarSelected: (payload) => dispatch(setCalendarSelected(payload)),
+    setCharacterSelected: (payload) => dispatch(setCharacterSelected(payload)),
     setFinalSelected: (payload) => dispatch(setFinalSelected(payload))
   }
 }

@@ -171,7 +171,6 @@ export default function WeekHourCalendar(props) {
         window.onresize = myChart.resize;
     }, [ref]);
 
-
     // 绘制 week-hour heatmap
     useEffect(() => {
         myChart.setOption({

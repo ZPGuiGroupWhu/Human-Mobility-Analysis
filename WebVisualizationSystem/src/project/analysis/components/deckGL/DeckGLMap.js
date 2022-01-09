@@ -613,9 +613,7 @@ class DeckGLMap extends Component {
     this.getTripsLayerOne();//初始化单条高亮轨迹图层
     this.getArcLayerOne();//初始化单条OD图层
     this.geticonLayerOneOD();//初始化单条OD的icon图层
-    // 初始化轨迹数据
-    let originTrajs = this.returnSelectTrajs(this.getSelectIdsByDate(this.state.originDate.start, this.state.originDate.end));
-    this.showSelectTraj(originTrajs);
+    this.showSelectTraj(this.props.finalSelected);
     this.getScatterPlotLayer();
   };
 

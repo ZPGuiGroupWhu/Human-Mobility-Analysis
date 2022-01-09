@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import './CharacterWindow.scss';
-import { Button } from 'antd';
-import { RedoOutlined } from '@ant-design/icons';
+import ParallelChart from './ParallelChart';
 
 
 export default function CalendarWindow(props) {
-
+  const {userData} = props; // 用户的轨迹数据
 
   return (
-    <div className='calendar-window-ctn'>
-      
+    <div className='character-window-ctn'>
+      <ParallelChart data = {userData}/>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-.calendar-window-ctn {
+.character-window-ctn {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -10,4 +10,10 @@
     background-color: rgba(0, 0, 0, 0.4);
     z-index: 1;
     color: rgb(252, 250, 250);
+
+    .character-parallel {
+        padding-left: 5px ;
+        width: 500px;
+        height: 100%;
+    }
 }

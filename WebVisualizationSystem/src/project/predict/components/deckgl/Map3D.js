@@ -94,7 +94,7 @@ export default function Map3D(props) {
   }, [])
 
   // ids & deckgl-layers
-  const { ids, layers } = useGetLayers(selectedTraj, histTrajs, gridLayerVisible);
+  const { ids, layers, tooltipInfo } = useGetLayers(selectedTraj, histTrajs, gridLayerVisible);
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -119,7 +119,8 @@ export default function Map3D(props) {
           glOptions={{
             stencil: true
           }}
-          layers={layers}>
+          layers={layers}
+        >
           {glContext && (
             <StaticMap
               ref={mapRef}
@@ -138,8 +139,21 @@ export default function Map3D(props) {
             left: '5px',
             color: '#fff',
             fontWeight: 'bold'
-          }}>{selectedTraj?.id}</span>
+          }}>{selectedTraj?.id}
+        </span>
+        <div style={{
+          position: 'absolute',
+          zIndex: 999,
+          pointerEvents: 'none',
+          left: tooltipInfo.x,
+          top: tooltipInfo.y,
+          color: '#fff',
+          backgroundColor: 'rgba(100,100,100,0.5)', "whiteSpace": "pre"
+        }}
+        >
+          {!tooltipInfo.data ? tooltipInfo.data : (`出发日期: ${tooltipInfo.data.from.time.split(' ')[0]}\n出发时刻:${tooltipInfo.data.from.time.split(' ')[1]}\n到达时刻:${tooltipInfo.data.to.time.split(' ')[1]}`)}
+        </div>
       </section>
-    </div>
+    </div >
   )
 }

@@ -4,6 +4,7 @@ import { PathLayer, ArcLayer, TextLayer } from '@deck.gl/layers';
 
 export function useGetLayers(selectedTraj, histTrajs, visible) {
   const { spdShow, azmShow } = visible;
+  const [tooltipInfo, setTooltipInfo] = useState({data: '', x: 0, y: 0});
 
   // path-layer
   const [curPathLayer, setCurPathLayer] = useState(null);
@@ -158,17 +159,20 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
      * ]
      */
     const Ds = histTrajs.map(item => (item.destination));
+    const DsTimeStamp = histTrajs.map(item => (`${item.date} ${item.time}`));
     let data = []
     for (let i = 0; i < Ds.length - 1; i++) {
       data.push({
         from: {
           type: 'major',
           name: 'origin',
+          time: DsTimeStamp[i],
           coordinates: Ds[i],
         },
         to: {
           type: 'major',
           name: 'destination',
+          time: DsTimeStamp[i + 1],
           coordinates: Ds[i + 1],
         }
       })
@@ -176,7 +180,16 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
     setHistDArcLayer(new ArcLayer({
       id: 'hist-d-arc-layer',
       data,
-      visible:true,
+      visible: true,
+      onHover: function (info, event) {
+        // console.log(info);
+        const { object, x, y } = info;
+        setTooltipInfo({
+          data: object ? object : '',
+          x,
+          y,
+        })
+      },
       pickable: true,
       getStrokeWidth: 20,
       widthScale: 2,
@@ -287,6 +300,7 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
       histDArcLayer,
       histODArcLayer,
       histTextLayer,
-    ]
+    ],
+    tooltipInfo,
   }
 }

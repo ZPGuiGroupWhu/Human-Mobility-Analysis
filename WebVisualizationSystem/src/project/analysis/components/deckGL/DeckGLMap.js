@@ -330,9 +330,9 @@ class DeckGLMap extends Component {
       })
     });
     // Opacity改变，重新绘制其他轨迹
-    this.getTripsLayer(this.props.finalSelected);
-    this.getIconLayer(true, this.props.finalSelected);
-    this.getIconLayer(false, this.props.finalSelected);
+    this.getTripsLayer(this.returnSelectTrajs(this.props.finalSelected));
+    this.getIconLayer(true, this.returnSelectTrajs(this.props.finalSelected));
+    this.getIconLayer(false, this.returnSelectTrajs(this.props.finalSelected));
   }
   //对应新json格式：轨迹点击事件
   clickInfo = (info) => {

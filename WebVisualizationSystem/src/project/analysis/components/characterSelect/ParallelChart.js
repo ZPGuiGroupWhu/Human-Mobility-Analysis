@@ -58,7 +58,6 @@ export default function ParallelChart(props) {
     function onAxisAreaSelected(params) {
         let series0 = myChart.getModel().getSeries()[0];
         let indices0 = series0.getRawIndicesByActiveState('active');
-        // console.log(indices0)
         const payload = indices0.map(item => {
             let trajId = [userId, item].join('_'); // 字符串拼接得到轨迹编号
             return trajId;

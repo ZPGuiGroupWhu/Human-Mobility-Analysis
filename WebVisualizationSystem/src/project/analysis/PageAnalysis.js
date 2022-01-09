@@ -20,6 +20,9 @@ import ShoppingDrawer from './components/shopping/ShoppingDrawer';
 // 网络请求
 import { getUserTraj,getUserTrajInChunk,getUserTrajCount } from '@/network';
 import axios from 'axios';
+// react-redux
+import { connect } from 'react-redux';
+import { setFinalSelected } from '@/app/slice/analysisSlice';
 
 
 
@@ -64,6 +67,50 @@ class PageAnalysis extends Component {
     }
   };
 
+  getTrajCounts = (count) => {
+    this.setState({
+      date: count,
+    })
+  };
+
+  // select下拉框改变值
+  optionChange = (value) => {
+    // console.log(value);
+    this.setState({
+      option: value
+    })
+  };
+  // Button按钮切换flag的值，从而确定显示词云图还是数据表格
+  switchData = (event) => {
+    this.setState({
+      flag: !this.state.flag
+    })
+  };
+
+  // Drawer 互斥逻辑
+  setCurId = (id) => {
+    this.setState({
+      curId: id,
+    })
+  }
+
+  // 取不同筛选结果的交集
+  handleIntersection = (...params) => {
+    // 若存在元素不为数组类型，则报错
+    let type = params.some(item => !Array.isArray(item));
+    if (type) {
+      throw new Error('param should be Array Type');
+    }
+
+    let result = params.reduce((prev, cur) => {
+      if (prev.length === 0) return [...cur];
+      if (cur.length === 0) return [...prev];
+      return Array.from(new Set(prev.filter(item => cur.includes(item))))
+    }, []);
+    this.props.setFinalSelected(result);
+  };
+
+  
   componentDidMount() {
     const reqUserData = async () => {
       let user='399313'
@@ -97,33 +144,15 @@ class PageAnalysis extends Component {
     })
   }
 
-  getTrajCounts = (count) => {
-    this.setState({
-      date: count,
-    })
-  };
-
-  // select下拉框改变值
-  optionChange = (value) => {
-    // console.log(value);
-    this.setState({
-      option: value
-    })
-  };
-  // Button按钮切换flag的值，从而确定显示词云图还是数据表格
-  switchData = (event) => {
-    this.setState({
-      flag: !this.state.flag
-    })
-  };
-
-  // Drawer 互斥逻辑
-  setCurId = (id) => {
-    this.setState({
-      curId: id,
-    })
+  // 更新筛选交集的轨迹编号
+  componentDidUpdate(prevProps, prevState) {
+    if(
+      !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
+      !_.isEqual(prevProps.characterSelected, this.props.characterSelected)
+    ){
+      this.handleIntersection(this.props.calendarSelected, this.props.characterSelected);
+    }
   }
-
   render() {
     return (
       <>
@@ -240,4 +269,15 @@ class PageAnalysis extends Component {
   }
 }
 
-export default withRouter(PageAnalysis)
+const mapStateToProps = (state) => {
+  return {
+    calendarSelected: state.analysis.calendarSelected,
+    characterSelected: state.analysis.characterSelected,
+  }
+}
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setFinalSelected: (payload) => dispatch(setFinalSelected(payload))
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);

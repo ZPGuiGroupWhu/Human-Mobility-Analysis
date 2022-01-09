@@ -11,7 +11,7 @@ import { withRouter } from 'react-router';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
-import { addSelectTrajs, setCurShowTrajId, setTimeSelectResult } from '@/app/slice/analysisSlice';
+import { addSelectTrajs, setCurShowTrajId } from '@/app/slice/analysisSlice';
 // 函数
 import { eventEmitter } from '@/common/func/EventEmitter';
 import { copyText } from '@/common/func/copyText.js';
@@ -82,9 +82,9 @@ class DeckGLMap extends Component {
     if (prevProps.userData !== this.props.userData) {
       this.getLayers();
     }
-    if (!_.isEqual(prevProps.timeSelectResult, this.props.timeSelectResult)) {
-      this.showSelectTraj(this.props.timeSelectResult);
-      this.showSelectOD(this.props.timeSelectResult);
+    if (!_.isEqual(prevProps.finalSelected, this.props.finalSelected)) {
+      this.showSelectTraj(this.props.finalSelected);
+      this.showSelectOD(this.props.finalSelected);
     }
     if (!_.isEqual(prevProps.curShowTrajId, this.props.curShowTrajId)) {
       this.handleCurTrajId(this.props.selectTrajs, this.props.curShowTrajId)
@@ -156,16 +156,26 @@ class DeckGLMap extends Component {
     return res;
   }
 
-  getSelectDataByDate = (start, end) => {
-    let selectTrajs = [];
+  getSelectIdsByDate = (start, end) => {
+    let selectTrajIds = [];
     let startTimeStamp = Date.parse(start);
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < this.props.userData.length; i++) {
       if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp) {
-        selectTrajs.push(this.dataFormat(this.props.userData[i]));
+        selectTrajIds.push(this.props.userData[i].id);
       }
     }
-    return selectTrajs  //返回选择的轨迹信息 (OD信息直接读取Trajs的首尾坐标)
+    return selectTrajIds  //返回选择的轨迹编号
+  }
+
+  returnSelectTrajs = (selectTrajIds) => {
+    let selectTrajs = [];
+    _.forEach(this.props.userData, (item) => {
+      if(selectTrajIds.includes(item.id)){
+        selectTrajs.push(this.dataFormat(item));
+      }
+    })
+    return selectTrajs; // 返回选择的轨迹信息
   }
 
   //构建OD弧段图层
@@ -320,9 +330,9 @@ class DeckGLMap extends Component {
       })
     });
     // Opacity改变，重新绘制其他轨迹
-    this.getTripsLayer(this.props.timeSelectResult);
-    this.getIconLayer(true, this.props.timeSelectResult);
-    this.getIconLayer(false, this.props.timeSelectResult);
+    this.getTripsLayer(this.props.finalSelected);
+    this.getIconLayer(true, this.props.finalSelected);
+    this.getIconLayer(false, this.props.finalSelected);
   }
   //对应新json格式：轨迹点击事件
   clickInfo = (info) => {
@@ -491,7 +501,8 @@ class DeckGLMap extends Component {
   }
 
   // 可视化筛选的轨迹
-  showSelectTraj = (selectTrajs) => {
+  showSelectTraj = (selectTrajIds) => {
+    const selectTrajs = this.returnSelectTrajs(selectTrajIds);
     this.setState({
       tripsOpacity: tripInitOpacity,
       // 清除单条高亮轨迹
@@ -504,7 +515,8 @@ class DeckGLMap extends Component {
     });
   };
   // 可视化筛选轨迹的OD点
-  showSelectOD = (selectTrajs) => {
+  showSelectOD = (selectTrajIds) => {
+    const selectTrajs = this.returnSelectTrajs(selectTrajIds);
     this.setState({
       iconOpacity: iconInitOpacity,
     }, () => {
@@ -581,15 +593,15 @@ class DeckGLMap extends Component {
     this.getTripsLayerOne();
     this.getArcLayerOne();
     this.geticonLayerOneOD();
-    this.showSelectTraj(this.props.timeSelectResult);
+    this.showSelectTraj(this.props.finalSelected);
   };
   //显示和关闭OD点icon图层
   changeIconLayerShow = () => {
     this.iconChecked = !this.iconChecked;
     this.iconLayerOShow = !this.iconLayerOShow;
     this.iconLayerDShow = !this.iconLayerDShow;
-    this.showSelectOD(this.props.timeSelectResult);
-  }; 1
+    this.showSelectOD(this.props.finalSelected);
+  }; 
 
   getLayers = () => {//获取所有图层
     this.getTrajNodes();//获取所有轨迹点的集合
@@ -602,7 +614,7 @@ class DeckGLMap extends Component {
     this.getArcLayerOne();//初始化单条OD图层
     this.geticonLayerOneOD();//初始化单条OD的icon图层
     // 初始化轨迹数据
-    let originTrajs = this.getSelectDataByDate(this.state.originDate.start, this.state.originDate.end);
+    let originTrajs = this.returnSelectTrajs(this.getSelectIdsByDate(this.state.originDate.start, this.state.originDate.end));
     this.showSelectTraj(originTrajs);
     this.getScatterPlotLayer();
   };
@@ -731,14 +743,13 @@ const mapStateToProps = (state) => ({
   selectedTraj: state.predict.selectedTraj,
   curShowTrajId: state.analysis.curShowTrajId,
   selectTrajs: state.analysis.selectTrajs,
-  timeSelectResult: state.analysis.timeSelectResult,
+  finalSelected: state.analysis.finalSelected,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedTraj: (payload) => dispatch(setSelectedTraj(payload)),
   addSelectTrajs: (payload) => dispatch(addSelectTrajs(payload)),
   setCurShowTrajId: (id) => dispatch(setCurShowTrajId(id)),
-  setTimeSelectResult: (payload) => dispatch(setTimeSelectResult(payload))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(DeckGLMap));

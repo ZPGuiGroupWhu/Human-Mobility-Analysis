@@ -37,7 +37,7 @@ class MapSelectBar extends Component {
       isVisible: !prev.isVisible
     }))
   }
-  
+
   // 组织用户-top5位置数据：{id1:[{lnglat:[], count:XX}, {lnglat:[], count:XX},...], id2:[{lnglat:[], count:XX}, {lnglat:[], count:XX},...] ....}
   getUserData = (selectedUsers) => {
     //重新组织数据形式，便于后续筛选
@@ -246,7 +246,9 @@ class MapSelectBar extends Component {
           <div className='map-box-title'>
             <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'中国深圳2D'}</span>
           </div>
+
           <div className='map-box-switch'>
+            {/* 地图框选界面内容的开关动画尚未完成 */}
             <Space>
               {
                 this.state.isVisible ?
@@ -281,6 +283,7 @@ class MapSelectBar extends Component {
             </Space>
           </div>
         </div>
+
         <div className='map-select-function' ref={this.mapRef}>
         </div>
       </div>

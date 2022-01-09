@@ -4,9 +4,8 @@ import { debounce } from '@/common/func/debounce';
 import { eventEmitter } from '@/common/func/EventEmitter';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
-import { setTimeSelectResult } from '@/app/slice/analysisSlice';
-
 import _ from 'lodash';
+import { setCalendarSelected } from '../../../../app/slice/analysisSlice';
 
 
 export default function Calendar(props) {
@@ -200,41 +199,16 @@ export default function Calendar(props) {
     })
   }, [timeData])
 
-  function dataFormat(traj) {
-    let path = []; // 组织为经纬度数组
-    let importance = []; // 存储对应轨迹每个位置的重要程度
-    for (let j = 0; j < traj.lngs.length; j++) {
-      path.push([traj.lngs[j], traj.lats[j]]);
-      // 计算重要程度，判断speed是否为0
-      importance.push(
-        traj.spd[j] === 0 ?
-          traj.azimuth[j] * traj.dis[j] / 0.00001 :
-          traj.azimuth[j] * traj.dis[j] / traj.spd[j]);
-    }
-    // 组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
-    let res = {
-      id: traj.id,
-      date: traj.date,
-      data: path,
-      spd: traj.spd,
-      azimuth: traj.azimuth,
-      importance: importance,
-      // 新添加了细粒度时间特征
-      weekday: traj.weekday + 1,
-      hour: traj.hour,
-    };
-    return res;
-  }
-  function getSelectDataByDate(start, end) {
-    let selectTrajs = [];
+  function getSelectIdsByDate(start, end) {
+    let selectTrajIds = [];
     let startTimeStamp = Date.parse(start);
     let endTimeStamp = Date.parse(end);
     for (let i = 0; i < userData.length; i++) {
       if (startTimeStamp <= Date.parse(userData[i].date) && Date.parse(userData[i].date) <= endTimeStamp) {
-        selectTrajs.push(dataFormat(userData[i]));
+        selectTrajIds.push(userData[i].id);
       }
     }
-    return selectTrajs  //返回选择的轨迹信息 (OD信息直接读取Trajs的首尾坐标)
+    return selectTrajIds  //返回选择的轨迹编号
   }
 
   // 记录框选的日期范围
@@ -311,8 +285,8 @@ export default function Calendar(props) {
       // 触发 eventEmitter 中的注册事件，传递选择的日期范围
       // start: yyyy-MM-dd
       // end: yyyy-MM-dd
-      const timeSelectedReuslt = getSelectDataByDate(start, end);
-      dispatch(setTimeSelectResult(timeSelectedReuslt));
+      const timeSelectedReuslt = getSelectIdsByDate(start, end);
+      dispatch(setCalendarSelected(timeSelectedReuslt));
       console.log(start, end);
     }
     myChart.current.on('mouseup', mouseUp)
@@ -362,8 +336,8 @@ export default function Calendar(props) {
       });
     }, 0);
     // 初始轨迹数据
-    let originTrajs = getSelectDataByDate(originDate.start, originDate.end);
-    dispatch(setTimeSelectResult(originTrajs));
+    let originTrajs = getSelectIdsByDate(originDate.start, originDate.end);
+    dispatch(setCalendarSelected(originTrajs));
   }, [props.clear])
 
   return (

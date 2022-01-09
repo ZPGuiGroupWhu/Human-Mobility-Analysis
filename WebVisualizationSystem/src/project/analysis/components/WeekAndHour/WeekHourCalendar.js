@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import _, { get, set } from 'lodash';
+import _ from 'lodash';
 import './CalendarWindow.scss';
 import { useSelector, useDispatch } from 'react-redux';
 import { debounce } from '@/common/func/debounce';
-import { setTimeSelectResult } from '@/app/slice/analysisSlice';
-import { init } from 'echarts';
+import { setCalendarSelected } from '@/app/slice/analysisSlice';
 
 let myChart = null;
 const timeInterval = 24; // 一天24h, 作为间隔
@@ -243,39 +242,12 @@ export default function WeekHourCalendar(props) {
         return [start, end]
     }
 
-    // 重新组织数据
-    function dataFormat(traj) {
-        let path = []; // 组织为经纬度数组
-        let importance = []; // 存储对应轨迹每个位置的重要程度
-        for (let j = 0; j < traj.lngs.length; j++) {
-            path.push([traj.lngs[j], traj.lats[j]]);
-            // 计算重要程度，判断speed是否为0
-            importance.push(
-                traj.spd[j] === 0 ?
-                    traj.azimuth[j] * traj.dis[j] / 0.00001 :
-                    traj.azimuth[j] * traj.dis[j] / traj.spd[j]);
-        }
-        // 组织数据, 包括id、date(用于后续选择轨迹时在calendar上标记)、data(轨迹）、spd（轨迹点速度）、azimuth（轨迹点转向角）、importance（轨迹点重要程度）
-        let res = {
-            id: traj.id,
-            date: traj.date,
-            data: path,
-            spd: traj.spd,
-            azimuth: traj.azimuth,
-            importance: importance,
-            // 新添加了细粒度时间特征
-            weekday: traj.weekday + 1,
-            hour: traj.hour,
-        };
-        return res;
-    }
-
-    // 获取筛选的轨迹数据
-    function getSelectDataByWeekAndHour(start, end) {
+    // 获取筛选的轨迹ids
+    function getSelectIdsByWeekAndHour(start, end) {
         console.log('start:', start);
         console.log('end:', end);
         const timeInterval = 24; // 一天24h, 作为间隔
-        let selectTrajs = [];
+        let selectTrajIds = [];
         let [startWeek, startHour] = [...Object.values(start)];
         let [endWeek, endHour] = [...Object.values(end)];
         // 开始的week-hour时间
@@ -290,13 +262,13 @@ export default function WeekHourCalendar(props) {
             let time = weekday * timeInterval + hour
             if (startTime <= time && time <= endTime && monthRange[0] <= month && month <= monthRange[1]){ 
                 // console.log(item)
-                selectTrajs.push(dataFormat(item))
+                selectTrajIds.push(item.id)
             }
         })
-        return selectTrajs;
+        return selectTrajIds;
     }
 
-    // week-hour 日历 和 轨迹中的 周一到周日的形势不一样
+    // week-hour 日历 和 轨迹中的 周一到周日的形式不一样
     // 前者是 周一6，周二5，周二4，...周日0
     // 后者是 周一0，周二1，周三2，...周日6
     function getSelectedPeriod(start, end){ // start[hour,week,count],end[hour,week,count]
@@ -312,15 +284,15 @@ export default function WeekHourCalendar(props) {
     }
 
     // 根据slider的month范围决定初始化的tripsLayer的轨迹集
-    function getInitTrajs(start, end){
-        let initTrajs = [];
+    function getInitTrajIds(start, end){
+        let initTrajIds = [];
         _.forEach(userData, (item) => {
             let month = parseInt(item.date.split('-')[1]);
             if(start <= month && month <= end){
-                initTrajs.push(dataFormat(item))
+                initTrajIds.push(item.id)
             }
         })
-        return initTrajs;
+        return initTrajIds;
     }
     // 记录框选的日期范围
     const [time, setTime] = useState({ start: '', end: '' });
@@ -391,9 +363,9 @@ export default function WeekHourCalendar(props) {
                 (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0])
             ) && ([start, end] = [end, start]);
             console.log(start, end);
-            // 将数据传递到timeSelectResult数组中
-            const timeSelectedReuslt = getSelectDataByWeekAndHour(...getSelectedPeriod(start, end));
-            dispatch(setTimeSelectResult(timeSelectedReuslt));
+            // 将数据传递到calendarData数组中
+            const timeSelectedReuslt = getSelectIdsByWeekAndHour(...getSelectedPeriod(start, end));
+            dispatch(setCalendarSelected(timeSelectedReuslt));
         };
         const mouseUp = (params) => {
             if (isdown.current) { //如果点击的是不可选取的内容，则isdown不会变为true，也就不存在mouseUp功能
@@ -432,9 +404,9 @@ export default function WeekHourCalendar(props) {
                 }]
             })
         }, 500);
-        //初始化timeSelectResult : 存储slider筛选月份的轨迹集
-        let initTrajs = getInitTrajs(monthRange[0], monthRange[1]);
-        dispatch(setTimeSelectResult(initTrajs));
+        //初始化calendarData : 存储slider筛选月份的轨迹集
+        let initTrajIds = getInitTrajIds(monthRange[0], monthRange[1]);
+        dispatch(setCalendarSelected(initTrajIds));
     }, [clear])
 
     return (

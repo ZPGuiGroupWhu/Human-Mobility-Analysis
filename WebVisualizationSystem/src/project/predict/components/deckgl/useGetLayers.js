@@ -181,6 +181,8 @@ export function useGetLayers(selectedTraj, histTrajs, visible) {
       id: 'hist-d-arc-layer',
       data,
       visible: true,
+      highlightColor: [255,255,255],
+      autoHighlight: true,
       onHover: function (info, event) {
         // console.log(info);
         const { object, x, y } = info;

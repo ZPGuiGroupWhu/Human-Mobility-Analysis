@@ -38,7 +38,7 @@ const options = [
 ]
 
 export default function CalendarWindow(props) {
-  const { userData, isVisible, clear} = props;
+  const { userData, isVisible, clear } = props;
   // 获取公共数组中的日历数据、hour统计数据、week统计数据
   const calendarData = useSelector(state => state.analysis.calendarData);
   const hourCount = useSelector(state => state.analysis.hourCount);
@@ -49,13 +49,16 @@ export default function CalendarWindow(props) {
   useEffect(() => {
     {
       (isVisible === false) ?
-      document.querySelector('.calendar-window-ctn').style.display = 'none' :
-      document.querySelector('.calendar-window-ctn').style.display = 'flex'
+        document.querySelector('.calendar-window-ctn').style.display = 'none' :
+        document.querySelector('.calendar-window-ctn').style.display = 'flex'
     }
   }, [isVisible])
 
   return (
     <div className='calendar-window-ctn'>
+      <div className='slider-title'>
+        <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'月份选择'}</span>
+      </div>
       <SliderControl />
       <WeekHourCalendar calendarData={calendarData} userData={userData} monthRange={monthRange} clear={clear} />
       <StatisticsBar {...options[0]} data={hourCount} />

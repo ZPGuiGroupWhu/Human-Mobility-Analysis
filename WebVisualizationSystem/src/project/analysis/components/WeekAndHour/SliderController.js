@@ -3,8 +3,7 @@ import { Slider } from 'antd';
 import './CalendarWindow.scss';
 import { getUserTrajByTime } from '@/network';
 import { useDispatch } from 'react-redux';
-import { setCalendarData } from '@/app/slice/analysisSlice';
-import { setBarData } from '@/app/slice/analysisSlice';
+import { setCalendarData, setMonthRange, setBarData } from '@/app/slice/analysisSlice';
 
 export default function SliderControl(props) {
     const dispatch = useDispatch()
@@ -15,16 +14,16 @@ export default function SliderControl(props) {
     const [weekday, setWeekday] = useState([0, 6]);
     const [month, setMonth] = useState([0, 11]);
 
+    // 初始化 monthRange
+    useEffect(() => {
+        dispatch(setMonthRange(month));
+    }, [])
+
     // 滑块回调监听
     async function onSliderAfterChange(value) {
         setMonth(value);
+        dispatch(setMonthRange(value));
     }
-
-    // 返回month数据
-    useEffect(() => { // slider改变月份的话就会返回month
-        getMonthRange(month);
-        getClear({}); // slider滑动就会清空高亮选框
-    }, [month])
 
     // 数据请求
     useEffect(() => {

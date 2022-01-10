@@ -15,7 +15,7 @@ export default function WeekHourCalendar(props) {
         calendarData, 
         userData, 
         monthRange, 
-        clear} = props;
+        clear } = props;
 
     // 获取analysis公共状态
     const state = useSelector(state => state.analysis);
@@ -282,17 +282,6 @@ export default function WeekHourCalendar(props) {
         return [startObj, endObj]
     }
 
-    // 根据slider的month范围决定初始化的tripsLayer的轨迹集
-    function getInitTrajIds(start, end){
-        let initTrajIds = [];
-        _.forEach(userData, (item) => {
-            let month = parseInt(item.date.split('-')[1]);
-            if(start <= month && month <= end){
-                initTrajIds.push(item.id)
-            }
-        })
-        return initTrajIds;
-    }
     // 记录框选的日期范围
     const [time, setTime] = useState({ start: '', end: '' });
     // 记录鼠标状态
@@ -403,9 +392,6 @@ export default function WeekHourCalendar(props) {
                 }]
             })
         }, 500);
-        //初始化calendarData : 存储slider筛选月份的轨迹集
-        let initTrajIds = getInitTrajIds(monthRange[0], monthRange[1]);
-        dispatch(setCalendarSelected(initTrajIds));
     }, [clear])
 
     return (

@@ -5,7 +5,7 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
-import { setCalendarSelected } from '../../../../app/slice/analysisSlice';
+import { setCalendarSelected } from '@/app/slice/analysisSlice';
 
 
 export default function Calendar(props) {
@@ -13,12 +13,9 @@ export default function Calendar(props) {
   const {
     timeData, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     userData, // 轨迹数据
+    clear // 清除标记
   } = props;
   const year = str2date(Object.keys(timeData)[0]).getFullYear(); // 数据年份
-  const originDate = {
-    start: '2018-01-01',
-    end: '2018-12-31',
-  };
 
   // 获取筛选的轨迹数据
   const state = useSelector(state => state.predict);
@@ -334,11 +331,8 @@ export default function Calendar(props) {
           data: []
         }]
       });
-    }, 0);
-    // 初始轨迹数据
-    let originTrajs = getSelectIdsByDate(originDate.start, originDate.end);
-    dispatch(setCalendarSelected(originTrajs));
-  }, [props.clear])
+    }, 500);
+  }, [clear])
 
   return (
     <div

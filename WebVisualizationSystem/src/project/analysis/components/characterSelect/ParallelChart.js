@@ -14,7 +14,8 @@ export default function ParallelChart(props) {
     const ref = useRef(null);
     // 获取chart数据
     const {
-        data
+        data,
+        clear
     } = props;
 
     // 获取被选择的用户编号
@@ -105,16 +106,12 @@ export default function ParallelChart(props) {
         },
         visualMap: [
             {
-                type: 'piecewise',
+                type: 'continuous',
                 min: 0,
-                max: 10,
-                splitNumber: 6,
+                max: 30,
+                splitNumber: 10,
                 show: false,
-                seriesIndex: 0,
-                dimension: 0,
-                inRange: {
-                    color: ['#D00000', '#DC2F02', '#E85D04', '#F48C06', '#FAA307', '#FFBA08']
-                }
+                dimension: 1,  
             }
         ],
         parallelAxis: characters.map((item) => ({
@@ -125,12 +122,12 @@ export default function ParallelChart(props) {
         parallel: {
             left: '10%',
             right: '13%',
-            bottom: '17%',
-            top: '13%',
+            bottom: '15%',
+            top: '5%',
             parallelAxisDefault: {
                 type: 'value',
                 nameLocation: 'start',
-                nameGap: 20,
+                nameGap: 10,
                 nameTextStyle: {
                     fontSize: 12,
                     color: '#fff',
@@ -147,7 +144,7 @@ export default function ParallelChart(props) {
                 },
                 axisLabel: {
                     formatter: (value) => (parseInt(value)),
-                }
+                },
             }
         },
         series: [
@@ -155,6 +152,8 @@ export default function ParallelChart(props) {
                 name: '特征筛选',
                 type: 'parallel',
                 lineStyle: lineStyle,
+                inactiveOpacity: 0.02,
+                realtime: true,
                 data: [],
             },
         ]
@@ -178,8 +177,8 @@ export default function ParallelChart(props) {
                 data: trajData
             }]
         })
-    }, [data, state.finalSelected])
-
+    }, [data])
+    
     return (
         <div className='character-parallel'
             ref={ref}

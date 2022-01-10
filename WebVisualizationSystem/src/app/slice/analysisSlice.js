@@ -5,6 +5,7 @@ const initialState = {
   monthCount: [],
   weekdayCount: [],
   calendarData: [], // 存储 某几个月下的 week-hour 数据
+  monthRange: [], // 存储 week-hour组件中slider选取的月份
   calendarSelected: [], // 存储 时间筛选的轨迹编号
   characterSelected: [], // 存储 特征筛选的轨迹编号
   finalSelected: [], // 存储 各种筛选后的轨迹编号，并集  
@@ -21,20 +22,23 @@ const analysisReducer = createSlice({
         state[item] = action.payload[item]
       })
     },
+    setMonthRange: (state, action) => {
+      state.monthRange = action.payload;
+    }, 
     setCalendarData: (state, action) => {
       state.calendarData = action.payload;
     },
     setCalendarSelected: (state, action) => {
       state.calendarSelected = action.payload;
-      console.log('calendarSelected:', action.payload)
+      // console.log('calendarSelected:', action.payload)
     },
     setCharacterSelected: (state, action) => {
       state.characterSelected = action.payload;
-      console.log('characterSelected:', action.payload)
+      // console.log('characterSelected:', action.payload)
     },
     setFinalSelected: (state, action) => {
       state.finalSelected = action.payload;
-      console.log('finalSelected:', action.payload)
+      // console.log('finalSelected:', action.payload)
     },
     addSelectTrajs: (state, action) => {
       const data = action.payload;
@@ -68,6 +72,7 @@ const analysisReducer = createSlice({
 
 export const {
   setBarData,
+  setMonthRange,
   setCalendarData,
   setCalendarSelected,
   setCharacterSelected,

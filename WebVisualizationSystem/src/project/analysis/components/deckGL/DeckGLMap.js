@@ -156,18 +156,6 @@ class DeckGLMap extends Component {
     return res;
   }
 
-  getSelectIdsByDate = (start, end) => {
-    let selectTrajIds = [];
-    let startTimeStamp = Date.parse(start);
-    let endTimeStamp = Date.parse(end);
-    for (let i = 0; i < this.props.userData.length; i++) {
-      if (startTimeStamp <= Date.parse(this.props.userData[i].date) && Date.parse(this.props.userData[i].date) <= endTimeStamp) {
-        selectTrajIds.push(this.props.userData[i].id);
-      }
-    }
-    return selectTrajIds  //返回选择的轨迹编号
-  }
-
   returnSelectTrajs = (selectTrajIds) => {
     let selectTrajs = [];
     _.forEach(this.props.userData, (item) => {

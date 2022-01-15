@@ -16,16 +16,22 @@ class BtmDrawer extends Component {
     ];
     this.state = {
       value: 2,
+      isVisible: [
+        false,
+        true,
+        false
+      ]
     }
   }
 
   onChange = (e) => {
-    this.setState({
-      value: e.target.value,
+    this.setState((prev) => {
+      return {
+        value: e.target.value,
+        isVisible: prev.isVisible.map((item, index) => { return index === e.target.value - 1 ? true : false })
+      }
     })
   }
-
-
 
   render() {
     return (
@@ -38,11 +44,14 @@ class BtmDrawer extends Component {
           </Radio.Group>
         </div>
         {
-          (this.state.value === 1 && this.props.dataloadStatus && Object.keys(this.props.date).length) ?
-            <BottomCalendar timeData={this.props.date} userData = {this.props.userData} eventName={this.props.EVENTNAME} /> : null
+          (this.props.dataloadStatus && Object.keys(this.props.date).length) ?
+            <BottomCalendar timeData={this.props.date} userData={this.props.userData} eventName={this.props.EVENTNAME} 
+            isVisible={this.state.isVisible[0]} clear={this.props.calendarReload}/> : null
         }
-        {this.state.value === 2 && <CalendarWindow userData = {this.props.userData}/>}
-        {this.state.value === 3 && <CharacterWindow userData = {this.props.userData}/>}
+        <CalendarWindow userData={this.props.userData} isVisible={this.state.isVisible[1]} clear={this.props.calendarReload}/>
+        {(this.props.dataloadStatus && Object.keys(this.props.date).length) ?
+          <CharacterWindow userData={this.props.userData} isVisible={this.state.isVisible[2]} clear={this.props.characterReload}/> : null
+        }
       </>
     );
   }

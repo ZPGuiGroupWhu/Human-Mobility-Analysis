@@ -2,10 +2,15 @@ import React, { useEffect, useState } from 'react';
 import './CalendarWindow.scss';
 import { Button } from 'antd';
 import { RedoOutlined } from '@ant-design/icons';
-import {useSelector} from 'react-redux';
+import _ from 'lodash';
+// components
 import SliderControl from './SliderController';
 import WeekHourCalendar from './WeekHourCalendar';
 import StatisticsBar from './StatisticsBar';
+import { getInitTrajIds } from '../dataHandleFunction/dataHandleFunction';
+// react-redux
+import { useDispatch, useSelector } from 'react-redux';
+import { setCalendarSelected } from '@/app/slice/analysisSlice';
 
 const options = [
   {
@@ -23,9 +28,9 @@ const options = [
     type: 'week',
     grid: {
       left: '15%',
-    top: '3%',
-    right: '2%',
-    bottom: '15%',
+      top: '3%',
+      right: '2%',
+      bottom: '15%',
     },
     xData: [...(new Array(8)).keys()].slice(1),
     // acIdx: 3,
@@ -33,36 +38,29 @@ const options = [
 ]
 
 export default function CalendarWindow(props) {
-  const {userData} = props;
+  const { userData, isVisible, clear } = props;
   // 获取公共数组中的日历数据、hour统计数据、week统计数据
   const calendarData = useSelector(state => state.analysis.calendarData);
   const hourCount = useSelector(state => state.analysis.hourCount);
   const weekdayCount = useSelector(state => state.analysis.weekdayCount);
+  const monthRange = useSelector(state => state.analysis.monthRange);
 
-  const [clear, setClear] = useState({});
-  const [monthRange, setMonthRange] = useState([]);
-  // 获取slider的月份数据
-  function getMonthRange(month){
-    setMonthRange(month);
-  }
-  // 是否清空高亮选框
-  function getClear(clear){
-    setClear(clear);
-  }
+  // 修改是否可见
+  useEffect(() => {
+    {
+      (isVisible === false) ?
+        document.querySelector('.calendar-window-ctn').style.display = 'none' :
+        document.querySelector('.calendar-window-ctn').style.display = 'flex'
+    }
+  }, [isVisible])
 
   return (
     <div className='calendar-window-ctn'>
-      <SliderControl getMonthRange={getMonthRange} getClear={getClear}/>
-      <WeekHourCalendar calendarData = {calendarData} userData={userData} monthRange={monthRange} clear={clear}/>
-      <div className= 'clear-button'>
-        <Button 
-            ghost
-            size='small'
-            type='default'
-            icon={<RedoOutlined style={{ color: '#fff' }} />}
-            onClick={() => {setClear({})}} // 清除筛选
-          />
-      </div>   
+      <div className='slider-title'>
+        <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'月份选择'}</span>
+      </div>
+      <SliderControl />
+      <WeekHourCalendar calendarData={calendarData} userData={userData} monthRange={monthRange} clear={clear} />
       <StatisticsBar {...options[0]} data={hourCount} />
       <StatisticsBar {...options[1]} data={weekdayCount} />
     </div>

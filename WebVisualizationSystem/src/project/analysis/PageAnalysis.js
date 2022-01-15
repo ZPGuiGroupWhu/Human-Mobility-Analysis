@@ -14,16 +14,18 @@ import TableDrawer from "./components/tableDrawer/TableDrawer";
 import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
-import { BlockOutlined } from "@ant-design/icons";
+import { BlockOutlined, ReloadOutlined } from "@ant-design/icons";
 import BtmDrawer from './components/btmDrawer/BtmDrawer';
 import ShoppingDrawer from './components/shopping/ShoppingDrawer';
+import FunctionBar from './components/function-bar/FunctionBar';
+import { getSelectIdsByDate, initData, getInitTrajIds } from './components/dataHandleFunction/dataHandleFunction';
 // 网络请求
 import { getUserTraj,getUserTrajInChunk,getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
 import { setFinalSelected } from '@/app/slice/analysisSlice';
-import { setCalendarSelected, setCharacterSelected } from '../../app/slice/analysisSlice';
+import { setCalendarSelected, setCharacterSelected } from '@/app/slice/analysisSlice';
 
 
 
@@ -57,6 +59,10 @@ class PageAnalysis extends Component {
     // date：筛选的日期、option：筛选的题项
     this.state = {
       rightWidth: 380,
+      originDate: {
+        start: '2018-01-01',
+        end: '2018-12-31',
+      },
       date: null,
       flag: true,
       option: initlabel,
@@ -64,8 +70,41 @@ class PageAnalysis extends Component {
       userData: [], // 请求的数据
       dataloadStatus: false, // 数据是否加载完毕
       ShenZhen: null, // 深圳json边界
+      calendarReload: {}, // 日历筛选重置
+      characterReload: {} // 特征筛选重置
     }
   };
+
+  functionBarItems = [
+    {
+      id: 0,
+      text: '日历重置',
+      icon: <ReloadOutlined />,
+      onClick: () => { 
+        let originTrajs = getSelectIdsByDate(this.state.userData, this.state.originDate.start, this.state.originDate.end);
+        this.props.setCalendarSelected(originTrajs);
+        this.setState({ calendarReload: {} }) },
+    }, {
+      id: 1,
+      text: '星期重置',
+      icon: <ReloadOutlined />,
+      onClick: () => { 
+        let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
+        this.props.setCalendarSelected(originalTrajs);
+        this.setState({ calendarReload: {} }) 
+      },
+    },
+    {
+      id: 2,
+      text: '特征重置',
+      icon: <ReloadOutlined />,
+      onClick: () => { 
+        let originalTrajs = initData(this.state.userData);
+        this.props.setCharacterSelected(originalTrajs);
+        this.setState({ characterReload: {} }) 
+      },
+    }
+  ]
 
   getTrajCounts = (count) => {
     this.setState({
@@ -103,6 +142,7 @@ class PageAnalysis extends Component {
     this.props.setCalendarSelected(selectedData);
     this.props.setCharacterSelected(selectedData)
   }
+
 
   // 取不同筛选结果的交集
   handleIntersection = (...params) => {
@@ -156,6 +196,13 @@ class PageAnalysis extends Component {
       !_.isEqual(prevProps.characterSelected, this.props.characterSelected)
     ){
       this.handleIntersection(this.props.calendarSelected, this.props.characterSelected);
+    }
+    if(!_.isEqual(prevProps.monthRange, this.props.monthRange)){
+      let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
+      this.props.setCalendarSelected(originalTrajs);
+      this.setState({ 
+        calendarReload: {} 
+      })
     }
   }
   render() {
@@ -251,6 +298,7 @@ class PageAnalysis extends Component {
           )}
           rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
         />
+        <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/>
         <Drawer
           height={170}
           type='bottom'
@@ -262,6 +310,8 @@ class PageAnalysis extends Component {
               userData = {this.state.userData}
               date={this.state.date}
               EVENTNAME={this.EVENTNAME}
+              calendarReload={this.state.calendarReload}
+              characterReload={this.state.characterReload}
             />
           }
           id={2}
@@ -276,6 +326,7 @@ class PageAnalysis extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    monthRange: state.analysis.monthRange,
     calendarSelected: state.analysis.calendarSelected,
     characterSelected: state.analysis.characterSelected,
   }

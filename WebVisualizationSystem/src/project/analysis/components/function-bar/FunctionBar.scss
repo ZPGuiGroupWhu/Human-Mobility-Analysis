@@ -1,0 +1,15 @@
+.function-bar-ctn {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 140px;  
+
+  .btn-ctn {
+    padding: 5px;
+
+    .ant-btn-primary {
+      border-color: #fff;
+      background-color: #1E3945;
+    }
+  }
+}

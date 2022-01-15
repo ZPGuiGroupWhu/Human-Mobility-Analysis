@@ -1,27 +1,23 @@
-import React, { useState } from 'react';
-import { Button } from 'antd';
-import { RedoOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
 import Calendar from './Calendar';
 import './BottomCalendar.scss';
 
 export default function BottomCalendar(props) {
-  const [clear, setClear] = useState({});
+
+  const { userData, timeData, eventName, isVisible, clear} = props;
+
+  // 修改是否可见
+  useEffect(() => {
+    {
+      (isVisible === false) ?
+      document.querySelector('.bottom-calendar-ctn').style.display = 'none' :
+      document.querySelector('.bottom-calendar-ctn').style.display = 'flex'
+    }
+  }, [isVisible])
+
   return (
     <div className="bottom-calendar-ctn">
-      <Calendar timeData={props.timeData} userData={props.userData} eventName={props.eventName} clear={clear} />
-      <Button
-            ghost
-            size='small'
-            type='default'
-            icon={<RedoOutlined style={{ color: '#fff' }} />}
-            onClick={() => {setClear({})}} // 清除筛选
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              zIndex: '99' //至于顶层
-            }}
-          />
+      <Calendar timeData={timeData} userData={userData} eventName={eventName} clear={clear} />
     </div>
   )
 }

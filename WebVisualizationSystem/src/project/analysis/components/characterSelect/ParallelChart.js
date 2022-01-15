@@ -159,16 +159,14 @@ export default function ParallelChart(props) {
     ]
   };
 
-  // 当 data改变或者 finalSelected改变时
+  // 初始化 ECharts 实例对象
   useEffect(() => {
-    let trajData = handleData(data);
-    myChart?.setOption({
-      series: [{
-        name: '特征筛选',
-        data: trajData
-      }]
-    })
-  }, [data, state.finalSelected])
+    if (!ref.current) return () => { };
+    myChart = echarts.init(ref.current);
+    myChart.setOption(option);
+    myChart.on('axisareaselected', onAxisAreaSelected);
+    window.onresize = myChart.resize;
+  }, [ref])
 
   // 当 data改变或者 finalSelected改变时
   useEffect(() => {

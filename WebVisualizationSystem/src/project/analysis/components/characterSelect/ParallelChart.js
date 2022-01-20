@@ -3,9 +3,6 @@ import _ from 'lodash';
 import './CharacterWindow.scss';
 // ECharts
 import * as echarts from 'echarts';
-// react-redux
-import { useDispatch, useSelector } from 'react-redux';
-import { setCharacterSelected } from '@/app/slice/analysisSlice'
 
 let myChart = null;
 
@@ -14,16 +11,11 @@ export default function ParallelChart(props) {
   const ref = useRef(null);
   // 获取chart数据
   const {
+    returnSelectedResult,
     data,
-    clear
+    clear,
+    userId
   } = props;
-
-  // 获取被选择的用户编号
-  const userId = data[0].userid;
-
-  const [trajData, setTrajData] = useState([]);
-  const dispatch = useDispatch();
-  const state = useSelector(state => state.analysis);
 
   // 特征属性
   const characters = [
@@ -31,29 +23,6 @@ export default function ParallelChart(props) {
     { dim: 1, name: '速度均值' },
     { dim: 2, name: '转向角均值' }
   ];
-
-  // 计算平均值
-  function getAvg(arr) {
-    let sum = 0.0;
-    arr.forEach((item) => {
-      sum += parseFloat(item);
-    })
-    return sum / arr.length
-  }
-
-  // 处理数据
-  function handleData(data) {
-    const trajData = [];
-    _.forEach(data, (item, index) => {
-      if (state.finalSelected.includes(item.id)) {
-        let avgSpeed = getAvg(item.spd);
-        let avgAzimuth = getAvg(item.azimuth);
-        let totalDis = item.disTotal;
-        trajData.push([totalDis, avgSpeed, avgAzimuth]);
-      }
-    });
-    return trajData;
-  }
 
   // 刷选时更新characterSelected数组
   function onAxisAreaSelected(params) {
@@ -63,7 +32,8 @@ export default function ParallelChart(props) {
       let trajId = [userId, item].join('_'); // 字符串拼接得到轨迹编号
       return trajId;
     });
-    dispatch(setCharacterSelected(payload));
+    // 针对api自带的清除工具 如果清空 则返回所有的轨迹编号求交集，反之返回选择的轨迹编号
+    returnSelectedResult(payload.length === 0? [] : payload)
   };
 
   // 选框样式
@@ -153,6 +123,7 @@ export default function ParallelChart(props) {
         type: 'parallel',
         lineStyle: lineStyle,
         inactiveOpacity: 0.02,
+        activeOpacity: 1,
         realtime: true,
         data: [],
       },
@@ -170,13 +141,14 @@ export default function ParallelChart(props) {
 
   // 当 data改变或者 finalSelected改变时
   useEffect(() => {
-    let trajData = handleData(data);
-    myChart?.setOption({
-      series: [{
-        name: '特征筛选',
-        data: trajData
-      }]
-    })
+    setTimeout(() => {
+      myChart?.setOption({
+        series: [{
+          name: '特征筛选',
+          data: data
+        }]
+      })
+    }, 100)
   }, [data])
 
   return (

@@ -5,7 +5,7 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
 .select-page-ctn {
   position: relative;
   width: 100%;
-  height: calc(100vh - 80px); // header 70px + padding 10px
+  height: calc(100vh - 50px); // header 40px + padding 10px
 
   .center {
     width: 100%;

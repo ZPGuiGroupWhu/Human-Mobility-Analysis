@@ -13,6 +13,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { fetchData, fetchOceanScoreAll, setSelectedUsers } from '@/app/slice/selectSlice';
 import Drawer from '@/components/drawer/Drawer';
+import { setSelectedByMapClick } from '../../app/slice/selectSlice';
 
 
 class PageSelect extends Component {
@@ -30,9 +31,18 @@ class PageSelect extends Component {
     },
     {
       id: 2,
-      text: '地图重置',
+      text: '框选重置',
       icon: <ReloadOutlined />,
-      onClick: () => { this.setState({ mapReload: {} }) },
+      onClick: () => { this.setState({ mapBrushReload: {} }) },
+    },
+    {
+      id: 3,
+      text: '点击重置',
+      icon: <ReloadOutlined />,
+      onClick: () => { 
+        this.props.setSelectedByMapClick([]);
+        this.setState({ mapClickReload: {} }) 
+      },
     }
   ]
 
@@ -43,9 +53,10 @@ class PageSelect extends Component {
       rightWidth: 0, // footer左侧位置
       bottomHeight: 0, //底部内容高度
       bottomWidth: 0, //底部内容宽度
-      chartsReload: {},
-      calendarReload: {},
-      mapReload: {},
+      chartsReload: {}, // 图表重置
+      calendarReload: {}, // 日历重置
+      mapBrushReload: {}, // 地图框选重置
+      mapClickReload: {}, // 地图bar3D点击重置
     };
   }
 
@@ -89,9 +100,12 @@ class PageSelect extends Component {
     if (
       !_.isEqual(prevProps.selectedByCharts, this.props.selectedByCharts) ||
       !_.isEqual(prevProps.selectedByCalendar, this.props.selectedByCalendar) ||
-      !_.isEqual(prevProps.selectedByMap, this.props.selectedByMap)
+      !_.isEqual(prevProps.selectedByMapBrush, this.props.selectedByMapBrush) ||
+      !_.isEqual(prevProps.selectedByMapClick, this.props.selectedByMapClick)
     ) {
-      this.handleIntersection(this.props.selectedByCharts, this.props.selectedByCalendar, this.props.selectedByMap);
+      this.handleIntersection(
+        this.props.selectedByCharts, this.props.selectedByCalendar, 
+        this.props.selectedByMapBrush, this.props.selectedByMapClick);
     }
   }
 
@@ -123,7 +137,7 @@ class PageSelect extends Component {
           />
         </div>
         <FunctionBar functionBarItems={this.functionBarItems} left={this.state.leftWidth} />
-        <MapSelectBar right={this.state.rightWidth} bottom={this.state.bottomHeight} mapReload={this.state.mapReload} />
+        <MapSelectBar right={this.state.rightWidth} bottom={this.state.bottomHeight} mapBrushReload={this.state.mapBrushReload} />
       </div>
     )
   }
@@ -133,7 +147,8 @@ const mapStateToProps = (state) => {
   return {
     selectedByCharts: state.select.selectedByCharts,
     selectedByCalendar: state.select.selectedByCalendar,
-    selectedByMap: state.select.selectedByMap,
+    selectedByMapBrush: state.select.selectedByMapBrush,
+    selectedByMapClick: state.select.selectedByMapClick,
   }
 }
 
@@ -142,6 +157,7 @@ const mapDispatchToProps = (dispatch) => {
     fetchData: (url) => dispatch(fetchData(url)),
     fetchOceanScoreAll: () => dispatch(fetchOceanScoreAll()),
     setSelectedUsers: (payload) => dispatch(setSelectedUsers(payload)),
+    setSelectedByMapClick: (payload) => dispatch(setSelectedByMapClick(payload))
   }
 }
 

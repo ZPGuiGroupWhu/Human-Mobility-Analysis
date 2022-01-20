@@ -14,7 +14,7 @@ import regionJson from '../regionJson/Shenzhen';
 import userLocations from '@/project/select/charts/bottom/jsonData/userLoctionCounts';
 // react-redux
 import { connect } from 'react-redux';
-import { setSelectedByMap } from '@/app/slice/selectSlice';
+import { setSelectedByMapBrush } from '@/app/slice/selectSlice';
 
 let myMap = null;
 class MapSelectBar extends Component {
@@ -206,8 +206,8 @@ class MapSelectBar extends Component {
     // 通过index映射为用户编号
     const payload = Array.from(new Set(brushComponent.selected[0].dataIndex.map(
       item => { return data[item][3] })));
-    console.log('map selected users:', payload);
-    this.props.setSelectedByMap(payload); //更新Map筛选出的用户集
+    console.log('mapBrush selected users:', payload);
+    this.props.setSelectedByMapBrush(payload); //更新Map筛选出的用户集
   };
 
   componentDidMount() {
@@ -224,8 +224,8 @@ class MapSelectBar extends Component {
       let usersData = this.getUserData(this.props.selectedUsers);
       this.updateMap(usersData);
     }
-    if (prevProps.mapReload !== this.props.mapReload) {
-      this.props.setSelectedByMap([]);
+    if (prevProps.mapBrushReload !== this.props.mapBrushReload) {
+      this.props.setSelectedByMapBrush([]);
       myMap.dispatchAction({
         type: 'brush',
         areas: [], // 点击reload同时清除选择框
@@ -240,7 +240,7 @@ class MapSelectBar extends Component {
         className="map-select-bar tech-border"
         style={{
           right: this.props.right + 5,
-          bottom: this.props.bottom + 5
+          bottom: this.props.bottom + 20
         }}>
         <div className='title-bar'>
           <div className='map-box-title'>
@@ -297,7 +297,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setSelectedByMap: (payload) => dispatch(setSelectedByMap(payload)),
+  setSelectedByMapBrush: (payload) => dispatch(setSelectedByMapBrush(payload)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(MapSelectBar);

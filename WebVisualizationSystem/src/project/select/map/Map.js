@@ -8,6 +8,7 @@ import regionJson from './regionJson/Shenzhen';
 import userLocations from '../charts/bottom/jsonData/userLoctionCounts';
 // react-redux
 import { connect } from 'react-redux';
+import { setSelectedByMapClick } from '../../../app/slice/selectSlice';
 
 let myMap = null;
 class Map extends Component {
@@ -157,7 +158,6 @@ class Map extends Component {
         barSize: 0.4, //柱的大小
         minHeight: 1,//柱高的最小值
         maxHeight: 10, // 柱高的最大值
-        silent: false, //是否不响应鼠标事件，false为响应，反之为不响应
         itemStyle: {//柱条样式
           opacity: 1
         },
@@ -166,15 +166,27 @@ class Map extends Component {
           label: {//开启高亮，但不显示标签，以tooltips代替标签
             show: false,
           }
-        }
+        },
+        silent: false, //是否不响应鼠标事件，false为响应，反之为不响应
+        animation: true, // 动画设置
+        animationDurationUpdate: 1000,
+        animationEasingUpdate: 'quadraticIn',
       }]
     };
     // 注册地图到组件, 初始化实例对象
     echarts.registerMap('Shenzhen', regionJson);
     myMap = echarts.init(this.mapRef.current);
     myMap.setOption(option);
+    // 添加bar3D点击事件
+    myMap.on('click', this.clickBar3D);
     window.onresize = myMap.resize;
   };
+
+  // 地图bar3D点击事件
+  clickBar3D = (params) => {
+    let userId = [params.data[3]];
+    this.props.setSelectedByMapClick(userId);
+  }
 
   //更新地图
   updateMap = (barData) => {
@@ -210,17 +222,18 @@ class Map extends Component {
     }
   };
 
+  // 筛选之后 显示visualmap
   showVisualMap = () => {
     this.setState({
       visualMap: true,
     })
   }
+
   hiddenVisualMap = () => {
     this.setState({
       visualMap: false,
     })
   }
-
 
   componentDidMount() {
     this.initMap();
@@ -228,7 +241,7 @@ class Map extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     //prevProps获取到的leftWidth是0，在PageSelect页面componentDidMount获取到leftWidth值后，重新初始化
-    if (!_.isEqual(prevProps.leftWidth, this.props.leftWidth) || !_.isEqual(prevProps.bottomHeight, this.props.bottomHeight)|| !_.isEqual(prevProps.rightWidth, this.props.rightWidth)) {
+    if (!_.isEqual(prevProps.leftWidth, this.props.leftWidth) || !_.isEqual(prevProps.bottomHeight, this.props.bottomHeight) || !_.isEqual(prevProps.rightWidth, this.props.rightWidth)) {
       this.initMap();
     }
     //只要this.props.selectedUsers中的值改变，就会在地图上重新渲染
@@ -269,5 +282,9 @@ const mapStateToProps = (state) => ({
   selectedUsers: state.select.selectedUsers,
 })
 
+const mapDispatchToProps = (dispatch) => ({
+  setSelectedByMapClick: (payload) => dispatch(setSelectedByMapClick(payload)),
+})
 
-export default connect(mapStateToProps, null)(Map);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Map);

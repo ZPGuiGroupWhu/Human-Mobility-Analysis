@@ -1,0 +1,36 @@
+.eval-chart-container {
+  position: relative;
+  /* width: 420px; */
+  /* width: 250px; */
+  width: 100%;
+}
+.eval-chart-container button {
+  border: 0;
+  background-color: transparent;
+  z-index: 9999999;
+  position: absolute;
+  color: white;
+  display: inline-block;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 1000;
+  font-style: italic;
+}
+.eval-chart-container button:nth-child(1) {
+  top: 20px;
+  right: 0;
+}
+.eval-chart-container button:nth-child(2) {
+  top: 55px;
+  right: 0;
+}
+.eval-chart-container button:nth-child(3) {
+  top: 90px;
+  right: 0;
+}
+.eval-chart-container button:hover {
+  color: red;
+}

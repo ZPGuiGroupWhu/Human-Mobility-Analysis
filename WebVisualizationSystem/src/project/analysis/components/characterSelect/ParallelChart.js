@@ -33,7 +33,7 @@ export default function ParallelChart(props) {
       return trajId;
     });
     // 针对api自带的清除工具 如果清空 则返回所有的轨迹编号求交集，反之返回选择的轨迹编号
-    returnSelectedResult(payload.length === 0? [] : payload)
+    returnSelectedResult(payload.length === 0? '' : payload)
   };
 
   // 选框样式

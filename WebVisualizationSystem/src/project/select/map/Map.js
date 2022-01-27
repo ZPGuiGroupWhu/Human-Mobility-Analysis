@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react'
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import _, { max } from 'lodash';
+import _ from 'lodash';
 import "./Map.scss";
 //测试数据
 import regionJson from './regionJson/Shenzhen';

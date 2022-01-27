@@ -205,6 +205,7 @@ class PageAnalysis extends Component {
       })
     }
   }
+
   render() {
     return (
       <>

@@ -34,7 +34,7 @@ const analysisReducer = createSlice({
     },
     setCharacterSelected: (state, action) => {
       state.characterSelected = action.payload;
-      // console.log('characterSelected:', action.payload)
+      console.log('characterSelected:', action.payload)
     },
     setFinalSelected: (state, action) => {
       state.finalSelected = action.payload;

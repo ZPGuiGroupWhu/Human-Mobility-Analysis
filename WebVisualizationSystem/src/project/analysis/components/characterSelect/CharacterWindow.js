@@ -14,6 +14,7 @@ export default function CalendarWindow(props) {
 
   const [data, setData] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [result, setResult] = useState([]);
 
   // 被选择的用户编号
   const userId = userData[0].userid;
@@ -40,9 +41,13 @@ export default function CalendarWindow(props) {
 
   // 返回数据
   function returnSelectedResult(value){
-    // 针对api自带的清除工具 如果清空 则返回所有的轨迹编号求交集，反之返回选择的轨迹编号
-    (value.length === 0? dispatch(setCharacterSelected(allUsers)) : dispatch(setCharacterSelected(value)))
+    setResult(value);
   }
+
+  useEffect(() => {
+    // 针对api自带的清除工具 如果清空 则返回所有的轨迹编号求交集，反之返回选择的轨迹编号
+    (result === '' ? dispatch(setCharacterSelected(allUsers)) : dispatch(setCharacterSelected(result)));
+  }, [result])
 
   // 获取用户 初始的所有轨迹编号
   useEffect(() => {

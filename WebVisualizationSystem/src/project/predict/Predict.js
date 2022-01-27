@@ -4,6 +4,7 @@ import { SwapOutlined } from '@ant-design/icons';
 // 自定义组件
 import PagePredict from './PagePredict'; // BMap
 import Map3D from './components/deckgl/Map3D'; // DeckGL
+import EvalChart from './components/eval-chart/EvalChart';
 // 样式
 import './Predict.scss';
 
@@ -24,7 +25,9 @@ export default function Predict(props) {
           flex: `0 0 ${asideWidth}`,
         }}
       >
-        <section className='predict-reset-container'>剩余部分</section>
+        <section className='predict-reset-container'>
+          <EvalChart />
+        </section>
         {/* 轨迹3d展示 */}
         <section
           className='predict-map-3d-container'

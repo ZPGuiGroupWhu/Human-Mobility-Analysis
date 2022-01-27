@@ -8,7 +8,7 @@ import regionJson from './regionJson/Shenzhen';
 import userLocations from '../charts/bottom/jsonData/userLoctionCounts';
 // react-redux
 import { connect } from 'react-redux';
-import { setSelectedByMapClick } from '../../../app/slice/selectSlice';
+import { setSelectedByMapClick } from '@/app/slice/selectSlice';
 
 let myMap = null;
 class Map extends Component {

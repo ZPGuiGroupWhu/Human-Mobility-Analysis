@@ -3,7 +3,8 @@ import '../Content.scss';
 import './ShoppingDrawer.scss';
 import SingleCard from './SingleCard';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
+import { DeleteOutlined, CloseCircleOutlined, PlusSquareOutlined, MinusSquareOutlined } from '@ant-design/icons';
 import { delSelectTraj, clearSelectTraj } from '@/app/slice/analysisSlice';
 
 export default function ShoppingDrawer(props) {
@@ -11,7 +12,7 @@ export default function ShoppingDrawer(props) {
     ShenZhen, // ShenZhen.json
     // 抽屉大小
     drawerWidth = '170px',
-    drawerHeight = '380px',
+    drawerHeight = '360px',
     drawerPadding = '10px',
   } = props;
 
@@ -58,43 +59,59 @@ export default function ShoppingDrawer(props) {
       }}
     >
       <header className='shopping-drawer-header'>
-        <h1>候选列表</h1>
-        <Button
-          disabled={!checks.length}
-          size='small'
-          onClick={() => {
-            dispatch(delSelectTraj(checks));
-            setChecks([]);
-          }}
-        >删除</Button>
-        <Button
-          size='small'
-          onClick={() => {
-            dispatch(clearSelectTraj());
-            setChecks([]);
-          }}
-        >清空</Button>
-        {
-          !glbChecked ?
-            (
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <h1 style={{ display: 'inline-block' }}>{`候选(${checks.length}/${selectTrajs.length})`}</h1>
+          <span>
+            <Tooltip title="删除">
               <Button
+                icon={<DeleteOutlined />}
+                disabled={!checks.length}
                 size='small'
                 onClick={() => {
-                  setChecks(selectTrajs.map(item => item.id))
-                  setGlbChecked(true);
-                }}
-              >全选</Button>
-            ) :
-            (
-              <Button
-                size='small'
-                onClick={() => {
+                  dispatch(delSelectTraj(checks));
                   setChecks([]);
-                  setGlbChecked(false);
                 }}
-              >取消</Button>
-            )
-        }
+              ></Button>
+            </Tooltip>
+            <Tooltip title="清空">
+              <Button
+                icon={<CloseCircleOutlined />}
+                size='small'
+                onClick={() => {
+                  dispatch(clearSelectTraj());
+                  setChecks([]);
+                }}
+              ></Button>
+            </Tooltip>
+            {
+              !glbChecked ?
+                (
+                  <Tooltip title="全选">
+                    <Button
+                      icon={<PlusSquareOutlined />}
+                      size='small'
+                      onClick={() => {
+                        setChecks(selectTrajs.map(item => item.id))
+                        setGlbChecked(true);
+                      }}
+                    ></Button>
+                  </Tooltip>
+                ) :
+                (
+                  <Tooltip title="取消">
+                    <Button
+                      icon={<MinusSquareOutlined />}
+                      size='small'
+                      onClick={() => {
+                        setChecks([]);
+                        setGlbChecked(false);
+                      }}
+                    ></Button>
+                  </Tooltip>
+                )
+            }
+          </span>
+        </div>
       </header>
       <div className='shopping-drawer-main'>
         {/* 首先加载canvas，在其渲染完成后，调用onAfterRender回调，存储为image，并替换canvas */}

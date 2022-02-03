@@ -151,7 +151,7 @@ export default function Map3D(props) {
           backgroundColor: 'rgba(100,100,100,0.5)', "whiteSpace": "pre"
         }}
         >
-          {!tooltipInfo.data ? tooltipInfo.data : (`出发日期: ${tooltipInfo.data.from.time.split(' ')[0]}\n出发时刻:${tooltipInfo.data.from.time.split(' ')[1]}\n到达时刻:${tooltipInfo.data.to.time.split(' ')[1]}`)}
+          {!tooltipInfo.data ? tooltipInfo.data : (`历史数据集第${tooltipInfo.idx}条轨迹\n出发日期: ${tooltipInfo.data.from.time.split(' ')[0]}\n出发时刻:${tooltipInfo.data.from.time.split(' ')[1]}\n到达时刻:${tooltipInfo.data.to.time.split(' ')[1]}`)}
         </div>
       </section>
     </div >

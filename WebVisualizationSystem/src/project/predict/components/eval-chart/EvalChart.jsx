@@ -133,11 +133,6 @@ function EvalChart(props) {
 
   useEffect(() => {
     myChart.current = echarts.init(ref.current);
-    // console.log("echarts.init事件启动")
-    // window.addEventListener("resize", function () {
-    //   console.log("window.resize事件启动")
-    //   myChart.current.resize();
-    // })
     return () => {
       myChart.current.dispose();
       myChart.current = null;
@@ -145,12 +140,7 @@ function EvalChart(props) {
   }, [])
 
   useEffect(() => {
-    // console.log("由于data更新，驱动图表更新")
     myChart.current.setOption(option);
-    // return () => {
-    //   myChart.current.dispose();
-    //   myChart.current = null;
-    // }
   }, [data])
 
   function handle(index){

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import "./ModelFrame.scss";
 import "../css/common.css";
-import { Select, Button } from 'antd';
+import { Select, Button, Tooltip } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { PredictCtx } from '@/project/predict/Predict';
@@ -32,9 +32,9 @@ const ModelFrame = (props) => {
           }
         </Select>
         {
-          !modalVisible ? 
-          (<Button icon={<MenuUnfoldOutlined />} size='small' onClick={showModal}></Button>) : 
-          (<Button icon={<MenuFoldOutlined />} size='small' onClick={hideModal}></Button>)
+          !modalVisible ?
+            (<Tooltip title='模型介绍'><Button icon={<MenuUnfoldOutlined />} size='small' onClick={showModal}></Button></Tooltip>) :
+            (<Button icon={<MenuFoldOutlined />} size='small' onClick={hideModal}></Button>)
         }
       </div>
       {

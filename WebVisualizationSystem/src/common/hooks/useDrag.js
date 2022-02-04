@@ -32,7 +32,6 @@ export const useDrag = function (dom) {
         deltaX: (curMousePos.x - mousePos.x),
         deltaY: (curMousePos.y - mousePos.y),
       };
-      console.log(targetPos.x, targetPos.x + deltaMousePos.deltaX);
       dom.style.setProperty('left', `${targetPos.x + deltaMousePos.deltaX}px`);
       dom.style.setProperty('top', `${targetPos.y + deltaMousePos.deltaY}px`);
     }

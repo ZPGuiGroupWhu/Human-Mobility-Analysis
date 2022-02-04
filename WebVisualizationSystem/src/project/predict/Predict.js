@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'antd';
+import { Button, Skeleton } from 'antd';
 import { SwapOutlined } from '@ant-design/icons';
 // 自定义组件
 import PagePredict from './PagePredict'; // BMap
@@ -60,7 +60,11 @@ export default function Predict(props) {
           </div>
         </aside>
         {/* 弹窗 */}
-        <Modal isVisible={modalVisible} setVisible={setModalVisible} />
+        <Modal isVisible={modalVisible} setVisible={setModalVisible}>
+          <Skeleton active title={{width: '100px'}} paragraph={false} round loading />
+          <Skeleton.Image loading />
+          <Skeleton active paragraph={{rows: 4}} round loading />
+        </Modal>
       </div>
     </PredictCtx.Provider>
   )

@@ -18,12 +18,11 @@ export default function Modal(props) {
     width: '800px',
     height: '500px',
   }
-  const isDraggable = true;  // 是否可拖拽
 
   const onClose = () => { setVisible(false) }  // 销毁组件
 
-  const ref = useRef();
-  useDrag(ref.current);
+  const ref = useRef(); // 组件实例
+  useDrag(ref.current); // 附加拖拽功能
 
   return (
     <>
@@ -42,7 +41,7 @@ export default function Modal(props) {
               </button>
             </header>
             <section className='modal-main-content'>
-
+              {props.children}
             </section>
           </div >
         ) : null

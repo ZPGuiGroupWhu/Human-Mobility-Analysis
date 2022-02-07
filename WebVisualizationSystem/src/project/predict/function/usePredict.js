@@ -87,6 +87,26 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
     })
   }
 
+  // 距离误差展示
+  function showDistanceError(des, pre) {
+    chart.setOption({
+      series: [
+        {
+          name: '距离可视化',
+          data: [{
+            coords: [
+              pre,  // 起点
+              des,   // 终点
+            ],
+            // 统一的样式设置
+            lineStyle: {
+            }
+          }],
+        }
+      ]
+    })
+  }
+
   // 目的地预测动效计时器
   const timer = useRef(null);
 
@@ -160,6 +180,7 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
           let data = [...prev, mock];
           setTimeout(() => {
             histPredictTraj(data);
+            showDistanceError(traj?.data.slice(-1)[0], data.slice(-1)[0]);
           }, 50);
           return data;
         });
@@ -191,6 +212,7 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
           let data = [...prev, mock];
           setTimeout(() => {
             histPredictTraj(data);
+            showDistanceError(traj?.data.slice(-1)[0], data.slice(-1)[0]);
           }, 50);
           return (i === separationRes.length - 1) ? [] : data;
         });
@@ -218,7 +240,8 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
         coords: [],
       })
 
-      setHistPreres([])
+      setHistPreres([]);
+      showDistanceError([], []);
     }
   }, [trajPart, predict, traj, chart])
 

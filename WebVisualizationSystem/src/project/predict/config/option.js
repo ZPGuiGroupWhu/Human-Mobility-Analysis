@@ -251,6 +251,20 @@ export const option = {
         join: 'round',
       },
       z: 1,
+    }, {
+      name: '距离可视化',
+      type: 'lines',
+      coordinateSystem: 'bmap',
+      polyline: false,
+      data: [],
+      lineStyle: {
+        color: '#FFED0F',
+        opacity: 0.8,
+        width: 1,
+        type: 'dashed',
+        cap: 'round',
+        join: 'round',
+      },
     }
   ]
 }

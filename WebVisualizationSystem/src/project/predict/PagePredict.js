@@ -297,8 +297,8 @@ function PagePredict(props) {
   }, [chart, highlightData])
 
   // 当前轨迹(速度/转向角)图层展示
-  const spdLayerData = useFeatureLayer(chart, selectedTraj, 'spd', '速度热力图层');
-  const azmLayerData = useFeatureLayer(chart, selectedTraj, 'azimuth', '转向角热力图层');
+  // const spdLayerData = useFeatureLayer(chart, selectedTraj, 'spd', '速度热力图层');
+  // const azmLayerData = useFeatureLayer(chart, selectedTraj, 'azimuth', '转向角热力图层');
 
 
   return (

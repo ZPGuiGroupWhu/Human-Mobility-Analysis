@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Calendar from './components/Calendar';
-import { Button, Slider } from "antd";
-import { RedoOutlined } from "@ant-design/icons";
+import { Button, Slider, Tooltip } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
 import { eventEmitter } from "@/common/func/EventEmitter";
 import _ from 'lodash'
 //数据
@@ -17,6 +17,7 @@ class ChartBottom extends Component {
     this.state = {
       minCount: sliderMin,
       maxCount: sliderMax,
+      calendarReload: {}
     };
   }
 
@@ -50,6 +51,14 @@ class ChartBottom extends Component {
       maxCount: maxCount
     });
   };
+
+  // slider滑动回调函数 返回日期 以及 calendarReload标记，用于后续清除selectedByCalendar数据
+  onSliderAfterChange = async (value) => {
+    this.getCountRange(value)
+    this.setState({
+      calendarReload: {}
+    })
+  }
 
   // 加载组件前传递数据给calendar
   componentWillMount() {
@@ -103,11 +112,8 @@ class ChartBottom extends Component {
             tipFormatter={function (value) {
               return '当日出行总数: ' + value;
             }}
-            onChange={this.getCountRange}
-            onAfterChange={() => {
-              //清除高亮标记
-              let clear = true;
-              eventEmitter.emit('clearCalendarHighlight', { clear });
+            onAfterChange={(value) => {
+              this.onSliderAfterChange(value)
             }}
             marks={marks}
             style={{
@@ -117,15 +123,36 @@ class ChartBottom extends Component {
               left: this.props.bottomWidth - 35,
               top: 35,
               // bottom: -15,
-              zIndex: '9999' //至于顶层
+              zIndex: '2' //至于顶层
             }}
           />
+          <Tooltip title="还原">
+            <Button
+              ghost
+              disabled={false}
+              icon={<ReloadOutlined />}
+              size={'small'}
+              onClick={() => {
+                // calendarReload标记，用于后续清除selectedByCalendar数据
+                this.setState({
+                  calendarReload: {}
+                })
+              }}
+              style={{
+                display: 'inline-block',
+                position: 'absolute',
+                left: this.props.bottomWidth - 30,
+                top: 5,
+                zIndex: '2' //至于顶层
+              }}
+            />
+          </Tooltip>
         </div>
         <Calendar
           data={this.data}
           bottomHeight={this.props.bottomHeight}
           bottomWidth={this.props.bottomWidth + 10}
-          calendarReload={this.props.calendarReload}
+          calendarReload={this.state.calendarReload}
         />
       </>
     );

@@ -67,7 +67,7 @@ class Map extends Component {
         realtime: true, //拖拽时是否实时更新
         calculable: true, //拖拽时是否显示手柄
         inRange: { //颜色数组
-          color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+          color: ['#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d94e5d']
         },
         textStyle: {
           color: '#fff',
@@ -92,7 +92,7 @@ class Map extends Component {
           alpha: 40,//初始视角
           minAlpha: 30,//最小视角
           maxAlpha: 90,//最大视角
-          distance: 50,//视角到主体的初始距离
+          distance: 55,//视角到主体的初始距离
           minDistance: 5,//鼠标拉近的最小距离
           maxDistance: 150,//鼠标拉近的最大距离
           center: [-30, 5, 18],//视角中心点，初始化地图位置
@@ -112,11 +112,11 @@ class Map extends Component {
         light: {
           //太阳光参数
           main: {
-            intensity: 2,//光照强度
+            intensity: 1,//光照强度
             shadow: true,//阴影
             shadowQuality: 'high',//阴影质量
-            alpha: 60,// 光照角度
-            beta: 0,
+            alpha: 55,// 光照垂直角度
+            beta: 30, // 光照水平角度
           },
           //全局环境光
           ambient: {

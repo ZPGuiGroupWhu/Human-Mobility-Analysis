@@ -26,7 +26,8 @@ class MapSelectBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isVisible: true
+      isVisible: true,
+      mapBrushReload: {}
     }
   }
   mapRef = createRef();
@@ -79,7 +80,7 @@ class MapSelectBar extends Component {
         min: 1, // 最小值
         max: 0, // 最大用户颜色编号，每次选取数据后会更新用户的颜色编号，
         inRange: { //颜色数组
-          color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+          color: ['#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d94e5d']
         },
       },
       geo: {
@@ -107,9 +108,26 @@ class MapSelectBar extends Component {
             title: {
               rect: '矩形选择',
               polygon: '任意形状选择',
-              keep: '是否多选',
-              clear: '清除'
+              keep: '开启多选',
             }
+          },
+          // 清除还原 功能
+          myTool1: {
+            show: true,
+            title: '还原',
+              icon:
+                "M819.199242 238.932954l136.532575 0c9.421335 0 17.066098-7.644762 17.067994-17.066098l0-136.532575-34.134092 0L938.665719 174.927029C838.326316 64.646781 701.016372 0 563.20019 0 280.88245 0 51.20019 229.682261 51.20019 512s229.682261 512 512 512c160.289736 0 308.325479-72.977903 406.118524-200.225656l-27.067616-20.78799c-91.272624 118.749781-229.445258 186.879554-379.050907 186.879554-263.509197 0-477.865908-214.356711-477.865908-477.865908S299.689097 34.134092 563.20019 34.134092c131.090991 0 262.003755 63.224764 356.406712 170.664771l-100.405764 0L819.201138 238.932954z",
+              onclick: () => { 
+                // 清除2D地图上的选kuang
+                myMap.dispatchAction({
+                  type: 'brush',
+                  areas: [], // 点击reload同时清除选择框
+                });
+                // 标记 用于后续清除顶层的selectedByMapBrush数组
+                this.setState({
+                  mapBrushReload: {}
+                })
+              },
           }
         },
         iconStyle: {
@@ -124,7 +142,7 @@ class MapSelectBar extends Component {
         }
       },
       brush: { // 地图选择框
-        toolbox: ['rect', 'polygon', 'keep', 'clear'],
+        toolbox: ['rect', 'polygon', 'keep'],
         geoIndex: 'all',
         transformable: false, // 选择框是否可以平移
         throttleType: 'debounce', // 选择后渲染
@@ -142,7 +160,7 @@ class MapSelectBar extends Component {
         coordinateSystem: 'geo',
         data: [],
         symbolSize: function (params) {
-          return (params[2] / 40);
+          return (params[2] / 50);
         },
         // tooltip: {
         //   show: true
@@ -224,12 +242,9 @@ class MapSelectBar extends Component {
       let usersData = this.getUserData(this.props.selectedUsers);
       this.updateMap(usersData);
     }
-    if (prevProps.mapBrushReload !== this.props.mapBrushReload) {
+    if (prevState.mapBrushReload !== this.state.mapBrushReload) {
+      // 清除顶层的selectedByMapBrush数组
       this.props.setSelectedByMapBrush([]);
-      myMap.dispatchAction({
-        type: 'brush',
-        areas: [], // 点击reload同时清除选择框
-      })
     }
   }
 

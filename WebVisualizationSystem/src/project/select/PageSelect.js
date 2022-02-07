@@ -13,7 +13,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { fetchData, fetchOceanScoreAll, setSelectedUsers } from '@/app/slice/selectSlice';
 import Drawer from '@/components/drawer/Drawer';
-import { setSelectedByMapClick } from '../../app/slice/selectSlice';
+import { setSelectedByMapClick } from '@/app/slice/selectSlice';
 
 
 class PageSelect extends Component {
@@ -23,25 +23,14 @@ class PageSelect extends Component {
       text: '图表重置',
       icon: <ReloadOutlined />,
       onClick: () => { this.setState({ chartsReload: {} }) },
-    }, {
+    },
+    {
       id: 1,
-      text: '日历重置',
-      icon: <ReloadOutlined />,
-      onClick: () => { this.setState({ calendarReload: {} }) },
-    },
-    {
-      id: 2,
-      text: '框选重置',
-      icon: <ReloadOutlined />,
-      onClick: () => { this.setState({ mapBrushReload: {} }) },
-    },
-    {
-      id: 3,
       text: '点击重置',
       icon: <ReloadOutlined />,
-      onClick: () => { 
+      onClick: () => {
         this.props.setSelectedByMapClick([]);
-        this.setState({ mapClickReload: {} }) 
+        this.setState({ mapClickReload: {} })
       },
     }
   ]
@@ -54,9 +43,8 @@ class PageSelect extends Component {
       bottomHeight: 0, //底部内容高度
       bottomWidth: 0, //底部内容宽度
       chartsReload: {}, // 图表重置
-      calendarReload: {}, // 日历重置
-      mapBrushReload: {}, // 地图框选重置
       mapClickReload: {}, // 地图bar3D点击重置
+      titleVisible: true
     };
   }
 
@@ -94,6 +82,13 @@ class PageSelect extends Component {
       bottomHeight: bottomHeight,
       bottomWidth: bottomWidth,
     })
+
+    // 10s后标题消失
+    setTimeout(() => {
+      this.setState({
+        titleVisible: false
+      })
+    }, 10000)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -104,23 +99,29 @@ class PageSelect extends Component {
       !_.isEqual(prevProps.selectedByMapClick, this.props.selectedByMapClick)
     ) {
       this.handleIntersection(
-        this.props.selectedByCharts, this.props.selectedByCalendar, 
+        this.props.selectedByCharts, this.props.selectedByCalendar,
         this.props.selectedByMapBrush, this.props.selectedByMapClick);
+    };
+    if (!_.isEqual(prevState.titleVisible, this.state.titleVisible)) {
+      document.querySelector('.center-title').style.display = 'none' // 隐藏标题
+      this.setState({}) // 重新渲染
     }
   }
 
   render() {
     return (
       <div className="select-page-ctn">
+        <div className='center-title'>
+          <span>{'用户出行位置Top5地图'}</span>
+        </div>
         <div className="center">
-          <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight} rightWidth={this.state.rightWidth}/>
+          <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight} rightWidth={this.state.rightWidth} />
           <div className="inner">
             <div className="top-bracket"></div>
             <div className="bottom">
               <Bottom
                 bottomHeight={this.state.bottomHeight}
                 bottomWidth={this.state.bottomWidth}
-                calendarReload={this.state.calendarReload}
               />
             </div>
           </div>
@@ -137,7 +138,7 @@ class PageSelect extends Component {
           />
         </div>
         <FunctionBar functionBarItems={this.functionBarItems} left={this.state.leftWidth} />
-        <MapSelectBar right={this.state.rightWidth} bottom={this.state.bottomHeight} mapBrushReload={this.state.mapBrushReload} />
+        <MapSelectBar right={this.state.rightWidth} bottom={this.state.bottomHeight} />
       </div>
     )
   }

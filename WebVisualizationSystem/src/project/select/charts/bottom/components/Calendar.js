@@ -414,35 +414,17 @@ export default function Calendar(props) {
       }]
     })
   }, [data, state.selectedByCharts]);
-  /**
-   *清除高亮
-   * 对应组件调用 eventEmitter.emit('clearCalendarHighlight) 可清除高亮
-   * 清除高亮的同时，也是清除日历筛选的数据，即清空setSelectedByCalendar数组
-   */
-  useEffect(() => {
-    eventEmitter.on('clearCalendarHighlight', ({ clear }) => {
-      if (clear === true) {
-        myChart?.setOption({
-          series: [{
-            name: '高亮',
-            data: [],
-          }]
-        });
-        //清空setSelectedByCalendar数组
-        dispatch(setSelectedByCalendar([]));
-        timePeriod = [];
-      }
-    })
-  }, []);
 
   // 日历重置
   useEffect(() => {
-    myChart?.setOption({
-      series: [{
-        name: '高亮',
-        data: [],
-      }]
-    });
+    setTimeout (() =>{
+      myChart?.setOption({
+        series: [{
+          name: '高亮',
+          data: [],
+        }]
+      });
+    }, 600)
     //清空setSelectedByCalendar数组
     dispatch(setSelectedByCalendar([]));
     timePeriod = [];

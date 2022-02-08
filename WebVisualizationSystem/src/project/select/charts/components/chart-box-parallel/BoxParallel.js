@@ -11,7 +11,12 @@ import Hover from '../../common/Hover';
 import ChartParallel from './ChartParallel';
 // react-redux
 import { connect } from 'react-redux';
-import { setCurId, setSelectedByCharts } from '@/app/slice/selectSlice';
+import { 
+  setCurId, 
+  setSelectedByCharts, 
+  setSelectedByHistogram, 
+  setSelectedByParallel, 
+  setSelectedByScatter  } from '@/app/slice/selectSlice';
 
 
 class BoxParallel extends Component {
@@ -89,7 +94,9 @@ class BoxParallel extends Component {
       yAxis: this.defaultYAxis,
     });
     if (!this.handleEmptyArray(this.props.selectedByCharts)) {
-      this.props.setSelectedByCharts([]);
+      this.props.setSelectedByHistogram([]);
+      this.props.setSelectedByScatter([]);
+      this.props.setSelectedByParallel([]);
     }
   }
 
@@ -175,6 +182,9 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setCurId: (payload) => dispatch(setCurId(payload)),
+    setSelectedByHistogram: (payload) => dispatch(setSelectedByHistogram(payload)),
+    setSelectedByScatter: (payload) => dispatch(setSelectedByScatter(payload)),
+    setSelectedByParallel: (payload) => dispatch(setSelectedByParallel(payload)),
     setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload))
   }
 }

@@ -3,7 +3,7 @@ import * as echarts from 'echarts';
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
-import { setSelectedByCharts } from '@/app/slice/selectSlice';
+import { setSelectedByHistogram } from '@/app/slice/selectSlice';
 
 class Histogram extends Component {
   ref = React.createRef(null);
@@ -29,13 +29,23 @@ class Histogram extends Component {
             lineX: '横轴框选',
             lineY: '纵轴框选',
             keep: '开启多选',
-            clear: '还原',
-          },
-          // 更换icon图标
-          icon: {
-            clear: "M819.199242 238.932954l136.532575 0c9.421335 0 17.066098-7.644762 17.067994-17.066098l0-136.532575-34.134092 0L938.665719 174.927029C838.326316 64.646781 701.016372 0 563.20019 0 280.88245 0 51.20019 229.682261 51.20019 512s229.682261 512 512 512c160.289736 0 308.325479-72.977903 406.118524-200.225656l-27.067616-20.78799c-91.272624 118.749781-229.445258 186.879554-379.050907 186.879554-263.509197 0-477.865908-214.356711-477.865908-477.865908S299.689097 34.134092 563.20019 34.134092c131.090991 0 262.003755 63.224764 356.406712 170.664771l-100.405764 0L819.201138 238.932954z",
           }
         },
+        // 清除还原 功能
+        myTool1: {
+          show: true,
+          title: '还原',
+          icon:
+            "M819.199242 238.932954l136.532575 0c9.421335 0 17.066098-7.644762 17.067994-17.066098l0-136.532575-34.134092 0L938.665719 174.927029C838.326316 64.646781 701.016372 0 563.20019 0 280.88245 0 51.20019 229.682261 51.20019 512s229.682261 512 512 512c160.289736 0 308.325479-72.977903 406.118524-200.225656l-27.067616-20.78799c-91.272624 118.749781-229.445258 186.879554-379.050907 186.879554-263.509197 0-477.865908-214.356711-477.865908-477.865908S299.689097 34.134092 563.20019 34.134092c131.090991 0 262.003755 63.224764 356.406712 170.664771l-100.405764 0L819.201138 238.932954z",
+          onclick: () => {
+            // 清除顶层的selectedByHistogram数组
+            this.props.setSelectedByHistogram([]);
+            // 标记reload
+            this.setState({
+              brushReload: {}
+            });
+          },
+        }
       },
       iconStyle: {
         color: '#fff', // icon 图形填充颜色
@@ -50,7 +60,7 @@ class Histogram extends Component {
     },
     // 框选工具配置
     brush: {
-      toolbox: ['lineX', 'lineY', 'keep', 'clear'],
+      toolbox: ['lineX', 'lineY', 'keep'],
       xAxisIndex: 0,
       throttleType: 'debounce',
       throttleDelay: 300,
@@ -159,6 +169,7 @@ class Histogram extends Component {
     super(props);
     this.state = {
       data: null,
+      brushReload: {}
     }
   }
 
@@ -187,7 +198,7 @@ class Histogram extends Component {
     const payload = brushComponent.selected[0].dataIndex.map(item => {
       return this.state.data[item][2].map(item => item[2]); // dim=3: 人员编号
     }).flat(Infinity) // 刷选索引映射到数据维度
-    this.props.setSelectedByCharts(payload);
+    this.props.setSelectedByHistogram(payload);
   }
 
   onBrushEnd = (params) => {
@@ -209,6 +220,7 @@ class Histogram extends Component {
         data: this.handleData(this.props.data, 0)(),
       });
     }
+
     // 数据驱动
     if (!_.isEqual(prevState.data, this.state.data)) {
       Reflect.set(this.option.series[0], 'data', this.state.data);
@@ -220,6 +232,20 @@ class Histogram extends Component {
       this.chart.setOption(this.option);
     }
 
+    // 单个 自身的还原按钮 清除
+    if (prevState.brushReload !== this.state.brushReload) {
+      // 清除选框
+      this.chart.dispatchAction({
+        type: 'brush',
+        areas: [],
+      })
+    }
+
+    /**
+     * 涉及到this.props.isReload的整体清除 => 此部分暂时保留，以供后续需要
+     */
+    
+    // 整体清除
     if (prevProps.isReload !== this.props.isReload) {
       // 清除选框
       this.chart.dispatchAction({
@@ -244,7 +270,7 @@ class Histogram extends Component {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
+    setSelectedByHistogram: (payload) => dispatch(setSelectedByHistogram(payload)),
   }
 }
 

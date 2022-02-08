@@ -3,7 +3,7 @@ import * as echarts from 'echarts';
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
-import { setSelectedByCharts } from '@/app/slice/selectSlice';
+import { setSelectedByParallel } from '@/app/slice/selectSlice';
 
 
 class Parallel extends Component {
@@ -144,7 +144,7 @@ class Parallel extends Component {
     let series0 = this.chart.getModel().getSeries()[0];
     let indices0 = series0.getRawIndicesByActiveState('active');
     const payload = indices0.map(item => this.state.data[item][this.newKeys.findIndex(key => key === '人员编号')]);
-    this.props.setSelectedByCharts(payload);
+    this.props.setSelectedByParallel(payload);
     // 联动其他图层
     this.props.handleBrushEnd();
   }
@@ -165,7 +165,9 @@ class Parallel extends Component {
 
     if (!_.isEqual(prevState.data, this.state.data)) {
       Reflect.set(this.option.series[0], 'data', this.state.data);
-      this.chart.setOption(this.option);
+      setTimeout(() => { // 延迟缓冲，避免坐标轴框选显示问题
+        this.chart.setOption(this.option);
+      }, 800)
     }
   }
 
@@ -184,7 +186,7 @@ class Parallel extends Component {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
+    setSelectedByParallel: (payload) => dispatch(setSelectedByParallel(payload)),
   }
 }
 

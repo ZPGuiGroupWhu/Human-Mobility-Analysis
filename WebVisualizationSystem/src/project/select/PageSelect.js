@@ -11,9 +11,8 @@ import _ from 'lodash';
 import { ReloadOutlined } from '@ant-design/icons';
 // react-redux
 import { connect } from 'react-redux';
-import { fetchData, fetchOceanScoreAll, setSelectedUsers } from '@/app/slice/selectSlice';
+import { fetchData, fetchOceanScoreAll, setSelectedUsers, setSelectedByMapClick, setSelectedByCharts } from '@/app/slice/selectSlice';
 import Drawer from '@/components/drawer/Drawer';
-import { setSelectedByMapClick } from '@/app/slice/selectSlice';
 
 
 class PageSelect extends Component {
@@ -44,7 +43,7 @@ class PageSelect extends Component {
       bottomWidth: 0, //底部内容宽度
       chartsReload: {}, // 图表重置
       mapClickReload: {}, // 地图bar3D点击重置
-      titleVisible: true
+      titleVisible: true // title 初始化 可见
     };
   }
 
@@ -61,7 +60,7 @@ class PageSelect extends Component {
       if (cur.length === 0) return [...prev];
       return Array.from(new Set(prev.filter(item => cur.includes(item))))
     }, []);
-    this.props.setSelectedUsers(result);
+    return result;
   };
 
   componentDidMount() {
@@ -92,16 +91,31 @@ class PageSelect extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (
+    if ( // 求出三个列表最终筛选的用户
+      !_.isEqual(prevProps.selectedByHistogram, this.props.selectedByHistogram) ||
+      !_.isEqual(prevProps.selectedByScatter, this.props.selectedByScatter) ||
+      !_.isEqual(prevProps.selectedByParallel, this.props.selectedByParallel)
+    ) {
+      const result = this.handleIntersection(
+        this.props.selectedByHistogram, 
+        this.props.selectedByScatter,
+        this.props.selectedByParallel);
+      this.props.setSelectedByCharts(result);
+    };
+
+    if ( // 求出最终选择的用户
       !_.isEqual(prevProps.selectedByCharts, this.props.selectedByCharts) ||
       !_.isEqual(prevProps.selectedByCalendar, this.props.selectedByCalendar) ||
       !_.isEqual(prevProps.selectedByMapBrush, this.props.selectedByMapBrush) ||
       !_.isEqual(prevProps.selectedByMapClick, this.props.selectedByMapClick)
     ) {
-      this.handleIntersection(
+      const result = this.handleIntersection(
         this.props.selectedByCharts, this.props.selectedByCalendar,
         this.props.selectedByMapBrush, this.props.selectedByMapClick);
+      this.props.setSelectedUsers(result);
     };
+
+    // 是否隐藏标题
     if (!_.isEqual(prevState.titleVisible, this.state.titleVisible)) {
       document.querySelector('.center-title').style.display = 'none' // 隐藏标题
       this.setState({}) // 重新渲染
@@ -112,7 +126,7 @@ class PageSelect extends Component {
     return (
       <div className="select-page-ctn">
         <div className='center-title'>
-          <span>{'用户出行位置Top5地图'}</span>
+          <span>{'2019年深圳市私家车用户出行位置Top5地图'}</span>
         </div>
         <div className="center">
           <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight} rightWidth={this.state.rightWidth} />
@@ -146,6 +160,9 @@ class PageSelect extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    selectedByHistogram: state.select.selectedByHistogram,
+    selectedByScatter: state.select.selectedByScatter,
+    selectedByParallel: state.select.selectedByParallel,
     selectedByCharts: state.select.selectedByCharts,
     selectedByCalendar: state.select.selectedByCalendar,
     selectedByMapBrush: state.select.selectedByMapBrush,
@@ -157,6 +174,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchData: (url) => dispatch(fetchData(url)),
     fetchOceanScoreAll: () => dispatch(fetchOceanScoreAll()),
+    setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
     setSelectedUsers: (payload) => dispatch(setSelectedUsers(payload)),
     setSelectedByMapClick: (payload) => dispatch(setSelectedByMapClick(payload))
   }

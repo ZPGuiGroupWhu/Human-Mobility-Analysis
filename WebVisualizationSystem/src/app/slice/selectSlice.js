@@ -7,7 +7,10 @@ const initialState = {
   reqStatus: '',
   data: null, // chart 图表数据源
   selectedUsers: [], // 筛选得到的用户编号数组(交集)
-  selectedByCharts: [], // 图表筛选结果
+  selectedByHistogram: [],
+  selectedByScatter: [],
+  selectedByParallel: [],
+  selectedByCharts: [], // 图表筛选结果, 三个结果的交集
   selectedByCalendar: [], // 日历筛选结果
   selectedByMapBrush: [], // 地图筛选结果
   selectedByMapClick: [], // 地图点击结果
@@ -33,8 +36,20 @@ const selectReducer = createSlice({
     setSelectedUsers: (state, action) => {
       state.selectedUsers = action.payload;
     },
+    setSelectedByHistogram: (state, action) => {
+      state.selectedByHistogram = action.payload;
+      // console.log('histogram', state.selectedByHistogram, 'scatter:', state.selectedByScatter, 'charts:', state.selectedByCharts)
+    },
+    setSelectedByScatter: (state, action) => {
+      state.selectedByScatter = action.payload;
+    },
+    setSelectedByParallel: (state, action) => {
+      state.selectedByParallel = action.payload;
+      // console.log('parallel', state.selectedByParallel)
+    },
     setSelectedByCharts: (state, action) => {
       state.selectedByCharts = action.payload;
+      // console.log('charts', state.selectedByCharts)
     },
     setSelectedByCalendar: (state, action) => {
       state.selectedByCalendar = action.payload;
@@ -84,11 +99,14 @@ export {
 
 export const { 
   setSelectedUsers, 
+  setSelectedByHistogram,
+  setSelectedByScatter,
+  setSelectedByParallel,
   setSelectedByCharts, 
   setSelectedByCalendar, 
   setSelectedByMapBrush,
   setSelectedByMapClick, 
-  setCurId 
+  setCurId,
 } = selectReducer.actions;
 
 export default selectReducer.reducer;

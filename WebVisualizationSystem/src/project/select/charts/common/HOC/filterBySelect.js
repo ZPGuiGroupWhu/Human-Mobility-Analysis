@@ -72,11 +72,13 @@ export const filterBySelect = (...params) => WrappedComponent => {
 
       // selectedUsers 发生变化时，触发图表数据更新
       if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers)) {
-        // 数据更新时机：当前筛选图表在进一步筛选时更新，联动图表在刷选结束时更新
+        // 数据更新时机：当前筛选图表在一定延迟后更新，联动图表在刷选结束时更新，从而实现同步刷新
         if (this.props.curId === this.id) {
-          if (this.props.isAxisChange !== prevProps.isAxisChange) {
-            this.updateData();
-          }
+          // if (this.props.isAxisChange === prevProps.isAxisChange) {
+            setTimeout(() => {
+              this.updateData();
+            }, 200) 
+          // }
         } else {
           this.updateData();
         }

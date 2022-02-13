@@ -3,6 +3,7 @@ import "./PoiFrame.scss";
 import "../css/common.css";
 import { Switch, Slider, Input, Radio } from 'antd';
 import _ from 'lodash';
+import FoldPanel from '@/components/fold-panel/FoldPanel';
 
 const PoiFrame = (props) => {
   const { state, setState, poiInfo, setPoiInfo } = props;
@@ -12,66 +13,78 @@ const PoiFrame = (props) => {
     { label: '终点', value: 'end' },
   ]
   return (
-    <div className="poi-frame-ctn universal-frame-style">
-      <div className="item-ctn swtich-ctn">
-        <span>{`POI查询`}</span>
-        <Switch
-          size="middle"
-          checkedChildren="开启"
-          unCheckedChildren="关闭"
-          checked={state}
-          onChange={setState}
-        />
-      </div>
-      <div className="item-ctn">
-        <div style={{ width: '100px' }}>{`半径(${poiInfo.radius} 米)`}</div>
-        <Slider
-          min={1}
-          max={500}
-          defaultValue={poiInfo.radius}
-          disabled={!state}
-          onChange={
-            _.debounce(
-              (value) => setPoiInfo({ type: 'radius', payload: value }),
-              200,
-              { trailing: true }
-            )
-          }
-          tooltipPlacement='left'
-          tooltipVisible={false}
-          style={{ width: '80px' }}
-        />
-      </div>
-      <div className="item-ctn">
-        <span>{`关键词`}</span>
-        <Input
-          placeholder='POI关键词'
-          disabled={!state}
-          onChange={
-            _.debounce(
-              (e) => { setPoiInfo({ type: 'keyword', payload: e.target.value }) },
-              500,
-              { trailing: true }
-            )
-          }
-          allowClear
-          size='middle'
-          style={{ width: '100px' }}
-        />
-      </div>
-      <Radio.Group
-        name='poiSearch'
-        defaultValue={poiInfo.description}
-        disabled={!state}
-        onChange={(e) => { setPoiInfo({ type: 'description', payload: e.target.value }); }}
-      >
-        {radioOptions.map((item, idx) => {
-          return (
-            <Radio value={item.value} key={idx}>{item.label}</Radio>
-          )
-        })}
-      </Radio.Group>
-    </div>
+    <FoldPanel
+      width='100%'
+      renderEntryComponent={(setFold) => (
+        <div className="poi-frame-entry">
+          <span className='poi-frame-span'>{`POI查询`}</span>
+          <Switch
+            size="middle"
+            checkedChildren="开启"
+            unCheckedChildren="关闭"
+            checked={state}
+            onChange={() => {
+              setState(prev => !prev);
+              setFold(prev => !prev);
+            }}
+          />
+        </div>
+      )}
+      renderExpandComponent={() => (
+        <div className='poi-frame-expand'>
+          <div className="poi-frame-expand-row">
+            <span className='poi-frame-span' style={{marginRight:'3px'}}>{`半径(${poiInfo.radius} 米)`}</span>
+            <Slider
+              min={1}
+              max={500}
+              defaultValue={poiInfo.radius}
+              disabled={!state}
+              onChange={
+                _.debounce(
+                  (value) => setPoiInfo({ type: 'radius', payload: value }),
+                  200,
+                  { trailing: true }
+                )
+              }
+              tooltipPlacement='left'
+              tooltipVisible={false}
+              style={{ width: '80px' }}
+            />
+          </div>
+          <div className="poi-frame-expand-row">
+            <span className='poi-frame-span' style={{marginRight:'15px'}}>{`关键词`}</span>
+            <Input
+              placeholder='POI关键词'
+              disabled={!state}
+              onChange={
+                _.debounce(
+                  (e) => { setPoiInfo({ type: 'keyword', payload: e.target.value }) },
+                  500,
+                  { trailing: true }
+                )
+              }
+              allowClear
+              size='middle'
+              style={{ width: '120px' }}
+            />
+          </div>
+          <div className="poi-frame-expand-row">
+            <Radio.Group
+              name='poiSearch'
+              defaultValue={poiInfo.description}
+              disabled={!state}
+              onChange={(e) => { setPoiInfo({ type: 'description', payload: e.target.value }); }}
+            >
+              {radioOptions.map((item, idx) => {
+                return (
+                  <Radio value={item.value} key={idx}>{item.label}</Radio>
+                )
+              })}
+            </Radio.Group>
+          </div>
+        </div>
+      )}
+    />
   )
 }
 

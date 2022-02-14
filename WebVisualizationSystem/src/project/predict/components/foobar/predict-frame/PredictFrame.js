@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import "./PredictFrame.scss";
-import "../css/common.css";
+import '../common.css';
 import { Button, Tooltip } from 'antd';
 import { PlayCircleOutlined, PauseCircleOutlined, StopOutlined } from '@ant-design/icons';
 
@@ -17,9 +17,9 @@ export default function PredictFrame(props) {
   const iconSize = { fontSize: '13px' }
 
   return (
-    <div className="predict-frame-ctn universal-frame-style">
+    <div className="predict-frame-ctn">
       <div className='predict-button-group'>
-        <strong style={{ color: '#fff' }}>功能 </strong>
+        <span className='common-span-style'>功能 </span>
         <Tooltip title='开始预测'>
           <Button
             className='predict-frame-button'
@@ -66,7 +66,7 @@ export default function PredictFrame(props) {
           </Button>
         </Tooltip>
       </div>
-      {props.result ? <span style={{ color: '#fff' }}><strong>预测误差: </strong>{`${props.result}米`}</span> : null}
+      {props.result ? <span><strong>预测误差: </strong>{`${props.result}米`}</span> : null}
     </div>
   )
 }

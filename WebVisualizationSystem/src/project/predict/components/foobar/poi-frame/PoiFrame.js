@@ -1,6 +1,6 @@
 import React from 'react';
 import "./PoiFrame.scss";
-import "../css/common.css";
+import "../common.css";
 import { Switch, Slider, Input, Radio } from 'antd';
 import _ from 'lodash';
 import FoldPanel from '@/components/fold-panel/FoldPanel';
@@ -17,7 +17,7 @@ const PoiFrame = (props) => {
       width='100%'
       renderEntryComponent={(setFold) => (
         <div className="poi-frame-entry">
-          <span className='poi-frame-span'>{`POI查询`}</span>
+          <span className='common-span-style'>{`POI查询`}</span>
           <Switch
             size="middle"
             checkedChildren="开启"
@@ -33,7 +33,7 @@ const PoiFrame = (props) => {
       renderExpandComponent={() => (
         <div className='poi-frame-expand'>
           <div className="poi-frame-expand-row">
-            <span className='poi-frame-span' style={{marginRight:'3px'}}>{`半径(${poiInfo.radius} 米)`}</span>
+            <span className='common-span-style' style={{marginRight:'3px'}}>{`半径(${poiInfo.radius} 米)`}</span>
             <Slider
               min={1}
               max={500}
@@ -52,7 +52,7 @@ const PoiFrame = (props) => {
             />
           </div>
           <div className="poi-frame-expand-row">
-            <span className='poi-frame-span' style={{marginRight:'15px'}}>{`关键词`}</span>
+            <span className='common-span-style' style={{marginRight:'15px'}}>{`关键词`}</span>
             <Input
               placeholder='POI关键词'
               disabled={!state}

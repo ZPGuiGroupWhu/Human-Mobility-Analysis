@@ -172,7 +172,7 @@ class MyDrawer extends Component {
           }}
           getContainer={() => (document.querySelector(this.props.nodeCSSName))}
         >
-          {this.props.render()}
+          {this.props.render(this.state.drawerVisible)}
         </Drawer>
         <Button
           ghost

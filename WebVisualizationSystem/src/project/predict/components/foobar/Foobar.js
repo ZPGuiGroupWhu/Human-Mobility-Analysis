@@ -19,6 +19,7 @@ const Model3 = (props) => {
 
 const Foobar = (props) => {
   const {
+    isVisible,
     // 预测
     onPredictDispatch,
     // poi查询
@@ -45,7 +46,7 @@ const Foobar = (props) => {
 
   return (
     <div className="foobar-ctn">
-      <PoiFrame state={poi} setState={onPoi} poiInfo={poiField} setPoiInfo={setPoiField} />
+      <PoiFrame isVisible={isVisible} state={poi} setState={onPoi} poiInfo={poiField} setPoiInfo={setPoiField} />
       <ModelFolder options={options} onPredictDispatch={onPredictDispatch} />
     </div>
   )

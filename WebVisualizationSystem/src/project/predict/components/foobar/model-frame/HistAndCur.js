@@ -58,7 +58,7 @@ export default function HistAndCur(props) {
           type="primary"
           shape="round"
           icon={isShow ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-          size={'middle'}
+          size={'small'}
           onClick={(e) => {
             showOnOff(e);
           }}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import "./PoiFrame.scss";
 import "../common.css";
 import { Switch, Slider, Input, Radio } from 'antd';
@@ -6,15 +6,31 @@ import _ from 'lodash';
 import FoldPanel from '@/components/fold-panel/FoldPanel';
 
 const PoiFrame = (props) => {
-  const { state, setState, poiInfo, setPoiInfo } = props;
+  const { isVisible, state, setState, poiInfo, setPoiInfo } = props;
   // POI查询-多选框-选项
   const radioOptions = [
     { label: '起点', value: 'start' },
     { label: '终点', value: 'end' },
   ]
+
+  const [prevState, setPrevState] = useState(state);
+
+  useEffect(() => {
+    if (!isVisible) {
+      // 抽屉折叠，则关闭poi检索，同时保留关闭前的poi检索状态
+      setPrevState(state);
+      setState(false);
+    } else {
+      // 抽屉展开，恢复之前保留的poi检索状态
+      setState(prevState);
+    }
+  }, [isVisible])
+
   return (
     <FoldPanel
       width='100%'
+      id='poi-frame'
+      className='common-margin-bottom'
       renderEntryComponent={(setFold) => (
         <div className="poi-frame-entry">
           <span className='common-span-style'>{`POI查询`}</span>

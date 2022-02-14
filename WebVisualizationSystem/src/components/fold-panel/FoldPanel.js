@@ -6,6 +6,8 @@ export default function FoldPanel(props) {
     width,
     renderEntryComponent,
     renderExpandComponent,
+    className = '',
+    id,
   } = props;
 
   const [isFold, setFold] = useState(true); // 是否处于折叠状态
@@ -24,7 +26,7 @@ export default function FoldPanel(props) {
   }, [isFold])
 
   return (
-    <div className='fold-panel' style={{width, height}}>
+    <div id={id} className={className.length ? `fold-panel ${className}` : 'fold-panel'} style={{width, height}}>
       <section className='fold-panel-entry' ref={entry}>
         {renderEntryComponent(setFold)}
       </section>

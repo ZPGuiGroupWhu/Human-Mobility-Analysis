@@ -27,38 +27,6 @@ export default function Predict(props) {
         <div className='predict-main-content'>
           <PagePredict />
         </div>
-        {/* 侧边栏 */}
-        <aside
-          className='predict-minor-content'
-          style={{
-            flex: `0 0 ${asideWidth}`,
-          }}
-        >
-          <section className='predict-reset-container'>
-            <EvalChart />
-          </section>
-          {/* 轨迹3d展示 */}
-          <section
-            className='predict-map-3d-container'
-            style={{
-              flex: `0 0 ${asideWidth}`,
-            }}
-          >
-            <Map3D />
-          </section>
-          <div className='predict-switch-button-container'>
-            {/* 侧边栏可视按钮 */}
-            <Button
-              size='middle'
-              type='primary'
-              shape='circle'
-              icon={<SwapOutlined />}
-              onClick={(e) => {
-                setAsideVisible(prev => !prev);
-              }}
-            ></Button>
-          </div>
-        </aside>
         {/* 弹窗 */}
         <Modal isVisible={modalVisible} setVisible={setModalVisible}>
           <Skeleton active title={{width: '100px'}} paragraph={false} round loading />

@@ -3,12 +3,8 @@ import "./Foobar.scss";
 import PoiFrame from './poi-frame/PoiFrame';
 import HistAndCur from './model-frame/HistAndCur';
 import ModelFolder from './model-folder/ModelFolder';
+import SYZ from './model-frame/SYZ';
 
-const Model1 = (props) => {
-  return (
-    <div>1</div>
-  )
-}
 
 const Model3 = (props) => {
   return (
@@ -31,8 +27,8 @@ const Foobar = (props) => {
 
   const options = [
     {
-      name: 'model1',
-      component: <Model1 />
+      name: 'LSI-LSTM',
+      component: <SYZ />
     },
     {
       name: '历史-当前',

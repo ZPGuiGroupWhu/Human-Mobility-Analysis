@@ -358,15 +358,6 @@ function PagePredict(props) {
 
       {/* EChart 图表 */}
       <EChartbar>
-        {/* 1. POI检索环形统计图 */}
-        {/* <Doughnut
-          data={searchCompleteResult}
-          autoplay={true}
-          autoplayInterval={2000}
-          style={{
-            display: poiDisabled && searchCompleteResult ? '' : 'none',
-          }}
-        /> */}
         {/* 2. 速度/转向角关系图 */}
         <RelationChart
           titleText='时间 - 速度/转向角'

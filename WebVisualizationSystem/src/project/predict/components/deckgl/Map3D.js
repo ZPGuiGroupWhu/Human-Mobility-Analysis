@@ -5,7 +5,7 @@ import { MapboxLayer } from '@deck.gl/mapbox';
 import { Radio } from 'antd';
 // 函数
 import { mapboxCenterAndZoom } from '@/common/func/mapboxCenterAndZoom';
-import eventBus, { HISTACTION } from '@/app/eventBus';
+import eventBus, { HISTACTION, SPDAZMACTION } from '@/app/eventBus';
 // Hooks
 import { useSingleTraj } from '@/project/predict/function/useSingleTraj';
 import { useGetLayers } from './useGetLayers';
@@ -33,12 +33,6 @@ export default function Map3D(props) {
   const selectedTraj = useSingleTraj(); // 从候选列表中选取一条轨迹(用于展示)
   const coords = useMemo(() => (selectedTraj ? selectedTraj.data : []), [selectedTraj]); // 轨迹坐标数组
 
-  const [radioHeight, setRadioHeight] = useState(0);
-  useLayoutEffect(() => {
-    const radioObj = document.querySelector('div.ant-radio-group.ant-radio-group-solid.ant-radio-group-small');
-    setRadioHeight(radioObj.offsetHeight);
-  }, [])
-
   // 坐标改变，mapbox 自适应 center & zoom
   useEffect(() => {
     if (mapRef.current && coords.length) {
@@ -47,64 +41,24 @@ export default function Map3D(props) {
   }, [coords])
 
 
-  // 图层可视状态管理
-  const initGridLayerVisible = {
-    spdShow: false,
-    azmShow: false,
-  }
-  const gridLayerVisibleReducer = (state, action) => {
-    switch (action.type) {
-      case 'spd':
-        return {
-          ...initGridLayerVisible,
-          spdShow: true,
-        }
-      case 'azm':
-        return {
-          ...initGridLayerVisible,
-          azmShow: true,
-        }
-      case 'none':
-        return { ...initGridLayerVisible }
-      default:
-        break;
-    }
-  }
-  const [gridLayerVisible, gridLayerVisibleDispatch] = useReducer(gridLayerVisibleReducer, initGridLayerVisible)
-  const onGridLayerChange = (e) => {
-    switch (e.target.value) {
-      case 'spd':
-        gridLayerVisibleDispatch({ type: 'spd' });
-        break;
-      case 'azm':
-        gridLayerVisibleDispatch({ type: 'azm' });
-        break;
-      case 'none':
-        gridLayerVisibleDispatch({ type: 'none' });
-        break;
-      default:
-        break;
-    }
-  }
-
   const [histTrajs, setHistTrajs] = useState([]); // 存放历史轨迹数据
+  const [gridLayerVisible, setGridLayerVisible] = useState({}); // 速度&转向角图层是否可视
   useEffect(() => {
     // 获取前N天历史轨迹数据：数据组织+坐标纠偏
     eventBus.on(HISTACTION, (histTrajs) => { setHistTrajs(histTrajs) });
+    // 速度/转向角按钮事件
+    eventBus.on(SPDAZMACTION, (val) => { setGridLayerVisible(val) });
   }, [])
+
+
 
   // ids & deckgl-layers
   const { ids, layers, tooltipInfo } = useGetLayers(selectedTraj, histTrajs, gridLayerVisible);
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <Radio.Group size={"small"} style={{ width: '100%', display: 'flex' }} buttonStyle="solid" onChange={onGridLayerChange} defaultValue="none">
-        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="spd">速度</Radio.Button>
-        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="azm" >转向角</Radio.Button>
-        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="none">关闭</Radio.Button>
-      </Radio.Group>
+    <div style={{ width: '100%', position: 'relative', paddingTop: '100%' }}>
       {/* deckgl-react-mapbox: https://deck.gl/docs/api-reference/mapbox/overview#using-with-react */}
-      <section style={{ position: 'absolute', inset: `${radioHeight}px 0 0 0` }}>
+      <section style={{ position: 'absolute', inset: '0' }}>
         <DeckGL
           ref={deckRef}
           initialViewState={{

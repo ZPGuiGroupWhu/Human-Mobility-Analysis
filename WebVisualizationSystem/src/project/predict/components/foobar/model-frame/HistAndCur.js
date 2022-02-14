@@ -39,6 +39,14 @@ export default function HistAndCur(props) {
     eventBus.emit(HISTACTION, isShow ? data : [])
   }, [isShow, data])
 
+  // 组件销毁前，取消当前组件操作所有产生的结果
+  useEffect(() => {
+    return () => {
+      setShow(false);
+      eventBus.emit(HISTACTION, [])
+    }
+  }, [])
+
 
   return (
     <div className="hist-cur-row">

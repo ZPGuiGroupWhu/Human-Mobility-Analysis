@@ -136,7 +136,9 @@ class Doughnut extends Component {
         this.props.autoplay && this.setCarousel(this.props.data); // 自动高亮
         this.myChart.current.off('mouseout', this.onDownplay); // 清除旧 mouseout 事件
         this.myChart.current.on('mouseout', { seriesName: 'POI分布' }, this.onDownplay); // 绑定新 mouseout 事件
-        this.myChart.current.resize();
+        setTimeout(() => {
+          this.myChart.current.resize();
+        }, 0)
       }
     }
   }

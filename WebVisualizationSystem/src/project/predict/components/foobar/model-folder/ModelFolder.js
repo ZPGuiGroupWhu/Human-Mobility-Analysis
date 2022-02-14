@@ -6,7 +6,8 @@ import './ModelFolder.scss';
 import '../common.css';
 import { PredictCtx } from '@/project/predict/Predict';
 import FoldPanel from '@/components/fold-panel/FoldPanel';
-import PredictFrame from '@/project/predict/components/foobar/predict-frame/PredictFrame'
+import PredictFrame from '@/project/predict/components/foobar/predict-frame/PredictFrame';
+import Map3D from '@/project/predict/components/deckgl/Map3D.js'; // DeckGL
 
 const ModelFrame = (props) => {
   const { Option } = Select;
@@ -50,6 +51,8 @@ const ModelFrame = (props) => {
 
           </div>
           <PredictFrame onPredictDispatch={onPredictDispatch} />
+          {/* 轨迹3d展示 */}
+          <Map3D />
         </div>
       )}
       renderExpandComponent={() => (

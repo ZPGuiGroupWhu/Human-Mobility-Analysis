@@ -46,11 +46,13 @@ class BtmDrawer extends Component {
         {
           (this.props.dataloadStatus && Object.keys(this.props.date).length) ?
             <BottomCalendar timeData={this.props.date} userData={this.props.userData} eventName={this.props.EVENTNAME} 
-            isVisible={this.state.isVisible[0]} clear={this.props.calendarReload}/> : null
+            isVisible={this.state.isVisible[0]} calendarReload={this.props.calendarReload} setCalendarReload={this.props.setCalendarReload}/> : null
         }
-        <CalendarWindow userData={this.props.userData} isVisible={this.state.isVisible[1]} clear={this.props.calendarReload}/>
+        <CalendarWindow userData={this.props.userData} isVisible={this.state.isVisible[1]} 
+              setCalendarReload={this.props.setCalendarReload} calendarReload={this.props.calendarReload}/>
         {(this.props.dataloadStatus && Object.keys(this.props.date).length) ?
-          <CharacterWindow userData={this.props.userData} isVisible={this.state.isVisible[2]} clear={this.props.characterReload}/> : null
+          <CharacterWindow userData={this.props.userData} isVisible={this.state.isVisible[2]} 
+          characterReload={this.props.characterReload}  setCharacterReload={this.props.setCharacterReload}/> : null
         }
       </>
     );

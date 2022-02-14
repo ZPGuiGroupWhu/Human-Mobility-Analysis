@@ -1,14 +1,15 @@
-import React, {useRef, useEffect} from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as echarts from 'echarts';
 import './CalendarWindow.scss';
 
 // hour、weekday的统计柱状图，参数 
 export default function StatisticsBar(props) {
   const {
-    type='day',
+    type = 'day',
     grid,
     xData,
     data,
+    isDay, // 判断是 天 还是 周，采用不同样式坐标轴
     // acIdx,
   } = props;
   const ref = useRef(null);
@@ -17,6 +18,12 @@ export default function StatisticsBar(props) {
   const option = {
     // 位置
     grid,
+    // tooltips
+    tooltip: {
+      formatter: function (params) {// 说明某日出行用户数量
+        return  params.name + '  出行次数: ' + params.data;
+      },
+    },
     // 轴配置
     xAxis: {
       type: 'category',
@@ -24,22 +31,36 @@ export default function StatisticsBar(props) {
       boundaryGap: true,
       // 标签
       axisLabel: {
-        color: '#fff', // 颜色
-        align: 'center', // 位置
-        alignWithLabel: true,
-        interval: 0, // 间隔
+        show: true,
+        interval: (isDay ? 1 : 0), // 间隔几个显示一次label
+        inside: false, // label显示在外侧
+        margin: 10,
+        color: "#ccc",
+        fontStyle: "normal",
+        fontWeight: "bold",
+        fontSize: 12
       },
-      axisTick: {
+      axisTick: { // 坐标轴刻度线style
+        alignWithLabel: true,
         interval: 0,
+        inside: false,
+        length: 3
       },
       max: xData.length - 1,
     },
     yAxis: {
       type: 'value',
+      name: '出行次数',
+      nameLocation: 'center', // 坐标轴名称显示位置
+      nameTextStyle: {
+        color: '#fff', // 文本颜色
+        fontSize: 12, // 文本大小
+      },
+      nameGap: 28, // 坐标轴名称与轴线距离
       axisLabel: {
         color: '#fff',
         align: 'center',
-        margin: 15,
+        margin: 13,
       },
     },
     series: [
@@ -54,8 +75,9 @@ export default function StatisticsBar(props) {
         // 柱状样式
         itemStyle: {
           color: '#40FFD9',  // 柱状颜色
-          borderRadius: [5, 5, 0 ,0],  // 柱状圆角半径
+          borderRadius: [5, 5, 0, 0],  // 柱状圆角半径
         },
+
       }
     ]
   };

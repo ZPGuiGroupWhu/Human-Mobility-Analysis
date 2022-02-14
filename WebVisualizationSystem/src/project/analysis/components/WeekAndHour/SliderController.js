@@ -7,8 +7,7 @@ import { setCalendarData, setMonthRange, setBarData } from '@/app/slice/analysis
 
 export default function SliderControl(props) {
     const dispatch = useDispatch()
-
-    const {getMonthRange, getClear} = props;
+    const { setCalendarReload } = props;
     // 时间范围，后续只需要更新month范围...
     const [hour, setHour] = useState([0, 23]);
     const [weekday, setWeekday] = useState([0, 6]);

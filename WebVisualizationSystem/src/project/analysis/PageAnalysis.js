@@ -156,6 +156,21 @@ class PageAnalysis extends Component {
     this.props.setFinalSelected(result);
   };
 
+  // 日历重置
+  setCalendarReload = () => {
+    let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
+    this.props.setCalendarSelected(originalTrajs);
+    this.setState({
+      calendarReload: {}
+    })
+  }
+
+  // 特征重置
+  setCharacterReload = () => {
+    let originalTrajs = initData(this.state.userData);
+    this.props.setCharacterSelected(originalTrajs);
+    this.setState({ characterReload: {} }) 
+  }
   
   componentDidMount() {
     const reqUserData = async () => {
@@ -179,7 +194,6 @@ class PageAnalysis extends Component {
       })
       // 初始化数据
       this.initData(this.state.userData)
-
     }
     reqUserData();
     
@@ -200,8 +214,8 @@ class PageAnalysis extends Component {
     if(!_.isEqual(prevProps.monthRange, this.props.monthRange)){
       let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
       this.props.setCalendarSelected(originalTrajs);
-      this.setState({ 
-        calendarReload: {} 
+      this.setState({
+        calendarReload: {}
       })
     }
   }
@@ -313,6 +327,8 @@ class PageAnalysis extends Component {
               EVENTNAME={this.EVENTNAME}
               calendarReload={this.state.calendarReload}
               characterReload={this.state.characterReload}
+              setCalendarReload={this.setCalendarReload}
+              setCharacterReload={this.setCharacterReload}
             />
           }
           id={2}

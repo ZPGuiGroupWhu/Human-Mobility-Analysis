@@ -13,9 +13,11 @@ export default function WeekHourCalendar(props) {
     // heatmap 数据、 user轨迹数据, slider month数据， clear标记
     const { 
         calendarData, 
-        userData, 
+        userData,
+        xLabel,
+        yLabel, 
         monthRange, 
-        clear } = props;
+        calendarReload } = props;
 
     // 获取analysis公共状态
     const state = useSelector(state => state.analysis);
@@ -29,20 +31,11 @@ export default function WeekHourCalendar(props) {
     const cellWidth = 16; // 1点-24点
     const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
 
-    // 横轴label
-    const hoursLabal = (function () {
-        let hours = [...Array(24)].map((item, index) => index + 1);
-        return hours.map(item => { return `${item}时` })
-    })()
-
-    // 纵轴label
-    const weekLabel = ['周日', '周六', '周五', '周四', '周三', '周二', '周一']
-
     // 参数设置
     const option = {
         tooltip: {
             formatter: function (params) {// 说明某日出行用户数量
-                return weekLabel[params.value[1]] + '  ' + params.value[0] + '点' + '  出行次数: ' + params.value[2];
+                return yLabel[params.value[1]] + '  ' + params.value[0] + '点' + '  出行次数: ' + params.value[2];
             },
         },
         grid: {
@@ -57,7 +50,7 @@ export default function WeekHourCalendar(props) {
         },
         xAxis: {
             type: 'category',
-            data: hoursLabal, // hours标签
+            data: xLabel, // hours标签
             zlevel: 1,
             splitArea: { // 不显示格网区域
                 show: false
@@ -89,7 +82,7 @@ export default function WeekHourCalendar(props) {
         },
         yAxis: {
             type: 'category',
-            data: weekLabel, // week标签
+            data: yLabel, // week标签
             splitArea: { // 不显示格网区域
                 show: false
             },
@@ -392,7 +385,7 @@ export default function WeekHourCalendar(props) {
                 }]
             })
         }, 500);
-    }, [clear])
+    }, [calendarReload])
 
     return (
         <div className='week-hour-calendar'

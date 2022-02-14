@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
 import { setCalendarSelected } from '@/app/slice/analysisSlice';
+import './BottomCalendar.scss';
 
 
 export default function Calendar(props) {
@@ -13,7 +14,7 @@ export default function Calendar(props) {
   const {
     timeData, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     userData, // 轨迹数据
-    clear // 清除标记
+    calendarReload // 清除标记
   } = props;
   const year = str2date(Object.keys(timeData)[0]).getFullYear(); // 数据年份
 
@@ -62,7 +63,7 @@ export default function Calendar(props) {
   }
   // 基于网页宽度，动态计算cell的宽度
   const clientWidth = document.body.clientWidth;
-  const cellWidth = (clientWidth - 310) / 55;
+  const cellWidth = (clientWidth - 310) / 50;
   // drawer高度170，减去top padding 20, bottom padding 10, 月份数字高度10，
   const cellHeight = (170 - 20 - 10 - 10) / 7;
   const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
@@ -97,8 +98,8 @@ export default function Calendar(props) {
     calendar: {
       top: 20,
       bottom: 10,
-      left: 30,
-      right: 80,
+      // left: 30,
+      // right: 80,
       cellSize: cellSize,
       range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
       itemStyle: {
@@ -332,10 +333,10 @@ export default function Calendar(props) {
         }]
       });
     }, 500);
-  }, [clear])
+  }, [calendarReload])
 
   return (
-    <div
+    <div className='calendar'
       ref={ref}
       style={{
         width: '100%',

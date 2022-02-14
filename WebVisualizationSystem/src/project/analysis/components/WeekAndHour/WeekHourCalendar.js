@@ -384,7 +384,7 @@ export default function WeekHourCalendar(props) {
                     data: []
                 }]
             })
-        }, 500);
+        }, 800);
     }, [calendarReload])
 
     return (

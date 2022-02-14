@@ -60,7 +60,7 @@ function PagePredict(props) {
   }, [])
 
   // 当前展开的抽屉 id
-  const [drawerId, setDrawerId] = useState(2);
+  const [drawerId, setDrawerId] = useState(1);
 
   const selectedTraj = useSingleTraj(true); // 从候选列表中选取一条轨迹(用于展示)
 

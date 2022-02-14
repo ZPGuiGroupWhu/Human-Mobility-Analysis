@@ -1,9 +1,8 @@
 import React from 'react';
 import "./Foobar.scss";
-import PredictFrame from './predict-frame/PredictFrame';
 import PoiFrame from './poi-frame/PoiFrame';
-import ModelFrame from './model-frame/ModelFrame';
 import HistAndCur from './model-frame/HistAndCur';
+import ModelFolder from './model-folder/ModelFolder';
 
 const Model1 = (props) => {
   return (
@@ -47,8 +46,7 @@ const Foobar = (props) => {
   return (
     <div className="foobar-ctn">
       <PoiFrame state={poi} setState={onPoi} poiInfo={poiField} setPoiInfo={setPoiField} />
-      <ModelFrame options={options} />
-      <PredictFrame onPredictDispatch={onPredictDispatch} />
+      <ModelFolder options={options} onPredictDispatch={onPredictDispatch} />
     </div>
   )
 }

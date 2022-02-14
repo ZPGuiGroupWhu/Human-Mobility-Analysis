@@ -313,7 +313,7 @@ class PageAnalysis extends Component {
           )}
           rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
         />
-        <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/>
+        {/* <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/> */}
         <Drawer
           height={170}
           type='bottom'

@@ -63,7 +63,7 @@ export default function Calendar(props) {
   }
   // 基于网页宽度，动态计算cell的宽度
   const clientWidth = document.body.clientWidth;
-  const cellWidth = (clientWidth - 310) / 50;
+  const cellWidth = (clientWidth - 310) / 51;
   // drawer高度170，减去top padding 20, bottom padding 10, 月份数字高度10，
   const cellHeight = (170 - 20 - 10 - 10) / 7;
   const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
@@ -83,7 +83,7 @@ export default function Calendar(props) {
       max: 100,
       calculable: true,
       orient: 'vertical',
-      left: 'right',
+      left: clientWidth - 220,
       top: 10,
       itemHeight: 130,
       textStyle: {
@@ -98,7 +98,7 @@ export default function Calendar(props) {
     calendar: {
       top: 20,
       bottom: 10,
-      // left: 30,
+      left: 30,
       // right: 80,
       cellSize: cellSize,
       range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)

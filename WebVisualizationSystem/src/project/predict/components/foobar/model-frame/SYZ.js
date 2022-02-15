@@ -1,8 +1,11 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { Radio } from 'antd';
 import eventBus, { SPDAZMACTION } from '@/app/eventBus';
+import RelationChart from '@/project/predict/components/charts/relation-chart/RelationChart.js'; // EChart关系折线图
 
 export default function SYZ(props) {
+  const {chart, selectedTraj} = props;
+
   // 图层可视状态管理
   const initGridLayerVisible = {
     spdShow: false,
@@ -46,7 +49,7 @@ export default function SYZ(props) {
   // 组件销毁前，取消当前组件操作所有产生的结果
   useEffect(() => {
     return () => {
-      gridLayerVisibleDispatch({type: 'none'});
+      gridLayerVisibleDispatch({ type: 'none' });
       eventBus.emit(SPDAZMACTION, gridLayerVisible)
     }
   }, [])
@@ -55,6 +58,21 @@ export default function SYZ(props) {
     eventBus.emit(SPDAZMACTION, gridLayerVisible)
   }, [gridLayerVisible])
 
+    // 统计图表-地图 联动高亮
+    const [highlightData, setHighlightData] = useState([]);
+    function onHighlight(idx) {
+      setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
+    }
+    useEffect(() => {
+      if (!chart) return () => { };
+      chart.setOption({
+        series: [{
+          name: '高亮点',
+          data: highlightData,
+        }]
+      });
+    }, [chart, highlightData])
+
   return (
     <>
       <Radio.Group size={"small"} style={{ width: '100%', display: 'flex' }} buttonStyle="solid" onChange={onGridLayerChange} defaultValue="none">
@@ -62,6 +80,15 @@ export default function SYZ(props) {
         <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="azm" >转向角</Radio.Button>
         <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="none">关闭</Radio.Button>
       </Radio.Group>
+      {/* 速度/转向角关系图 */}
+      <RelationChart
+        titleText='时间 - 速度/转向角'
+        legendData={['速度', '转向角']}
+        xAxisData={Array.from({ length: selectedTraj?.spd?.length })}
+        yAxis={['速度(km/h)', '转向角(rad)']}
+        data={[selectedTraj?.spd, selectedTraj?.azimuth]}
+        onHighlight={onHighlight}
+      />
     </>
   )
 }

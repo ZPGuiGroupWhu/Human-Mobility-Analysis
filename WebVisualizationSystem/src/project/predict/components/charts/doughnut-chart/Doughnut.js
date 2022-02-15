@@ -158,8 +158,8 @@ class Doughnut extends Component {
       <div
         ref={this.ref}
         style={{
-          width: `${+document.querySelector('#poi-frame')?.offsetHeight + 100}px` ?? '0px',
-          height: document.querySelector('#poi-frame')?.offsetHeight ?? '0px',
+          width: '260px',
+          height: '160px',
           ...this.props.style,
         }}
       ></div>

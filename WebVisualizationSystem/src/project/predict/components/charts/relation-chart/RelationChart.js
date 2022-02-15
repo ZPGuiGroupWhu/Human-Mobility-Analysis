@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as echarts from 'echarts'; // ECharts
 import PropTypes from 'prop-types';
 
@@ -12,6 +12,19 @@ function RelationChart(props) {
   } = props;
   const ref = useRef(null); // 容器对象
   const myChart = useRef(null); // ECharts实例
+  const relationChartRefCallback = useCallback(node => {
+    if (node !== null) {
+      ref.current = node;
+      // let observer = new MutationObserver((mutationsList) => {
+      //   const dom = mutationsList[0].target;
+      //   let obj = dom.getBoundingClientRect();
+      //   console.log(obj);
+      //   node.style.left = (obj.x + obj.width) + 'px';
+      //   node.style.top = (obj.y + obj.height) + 'px';
+      // });
+      // observer.observe(document.querySelector('#poi-frame'), {attributes: true});
+    }
+  }, [])
 
   // 静态配置项
   const option = {
@@ -69,13 +82,13 @@ function RelationChart(props) {
       }
     ],
     grid: [{
-      left: 40,
-      right: 20,
+      left: 30,
+      right: 10,
       top: '18%',
       height: '30%',
     }, {
-      left: 40,
-      right: 20,
+      left: 30,
+      right: 10,
       top: '53%',
       height: '30%',
     }],
@@ -127,10 +140,10 @@ function RelationChart(props) {
         name: legendData[0],
         type: 'line',
         lineStyle: {
-          width: 1.5,
+          width: 1,
         },
         coordinateSystem: 'cartesian2d',
-        symbolSize: 5,
+        symbolSize: 3,
         hoverAnimation: true,
         data: [],
       },
@@ -138,12 +151,12 @@ function RelationChart(props) {
         name: legendData[1],
         type: 'line',
         lineStyle: {
-          width: 1.5,
+          width: 1,
         },
         coordinateSystem: 'cartesian2d',
         xAxisIndex: 1,
         yAxisIndex: 1,
-        symbolSize: 5,
+        symbolSize: 3,
         hoverAnimation: true,
         data: [],
       }
@@ -151,6 +164,7 @@ function RelationChart(props) {
   }
 
   useEffect(() => {
+    console.log(ref.current);
     myChart.current = echarts.init(ref.current);
     return () => {
       myChart.current.dispose();
@@ -204,10 +218,10 @@ function RelationChart(props) {
 
   return (
     <div
-      ref={ref}
+      ref={relationChartRefCallback}
       style={{
-        width: '250px',
-        height: '250px',
+        width: '170px',
+        height: '220px',
         borderRadius: '5px',
         backgroundColor: 'rgba(0, 0, 0, .7)',
         ...props.style,

@@ -23,12 +23,15 @@ const Foobar = (props) => {
     onPoi,
     poiField,
     setPoiField,
+    // SYZ
+    selectedTraj,
+    chart,
   } = props;
 
   const options = [
     {
       name: 'LSI-LSTM',
-      component: <SYZ />
+      component: <SYZ selectedTraj={selectedTraj} chart={chart} />
     },
     {
       name: '历史-当前',

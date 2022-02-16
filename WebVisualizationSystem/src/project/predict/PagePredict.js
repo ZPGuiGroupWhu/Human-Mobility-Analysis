@@ -1,5 +1,5 @@
 // 第三方库
-import React, { useRef, useEffect, useState, useReducer } from 'react';
+import React, { useRef, useEffect, useState, useReducer, useCallback } from 'react';
 import * as echarts from 'echarts'; // ECharts
 import 'echarts/extension/bmap/bmap';
 import _ from 'lodash'; // lodash
@@ -19,7 +19,6 @@ import { useSingleTraj } from '@/project/predict/function/useSingleTraj'; // 从
 import Drawer from '@/components/drawer/Drawer'; // 抽屉
 // 自定义组件
 import Foobar from './components/foobar/Foobar'; // 左侧功能栏
-import EChartbar from './components/charts/EChartbar'; // EChart 侧边栏
 import RelationChart from './components/charts/relation-chart/RelationChart'; // EChart关系折线图
 import Doughnut from './components/charts/doughnut-chart/Doughnut'; // Echarts 环形统计图
 import Tooltip from '@/components/tooltip/Tooltip'; // 自定义悬浮框
@@ -30,7 +29,6 @@ import '@/project/bmap.scss';
 
 
 function PagePredict(props) {
-
   const [ShenZhen, setShenZhen] = useState(null); // 存放 ShenZhen.json 数据
   const [histTrajs, setHistTrajs] = useState([]); // 存放历史轨迹数据
   useEffect(() => {
@@ -281,20 +279,6 @@ function PagePredict(props) {
     searchCompleteResult,
   } = usePoiSearch(bmap, selectedTraj);
 
-  // 统计图表-地图 联动高亮
-  const [highlightData, setHighlightData] = useState([]);
-  function onHighlight(idx) {
-    setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
-  }
-  useEffect(() => {
-    if (!chart) return () => { };
-    chart.setOption({
-      series: [{
-        name: '高亮点',
-        data: highlightData,
-      }]
-    });
-  }, [chart, highlightData])
 
   // 当前轨迹(速度/转向角)图层展示
   // const spdLayerData = useFeatureLayer(chart, selectedTraj, 'spd', '速度热力图层');
@@ -311,8 +295,10 @@ function PagePredict(props) {
       ></div>
       {/* Left-Drawer */}
       <Drawer
-        render={() => (
+        render={(isVisible) => (
           <Foobar
+            // 抽屉是否可视
+            isVisible={isVisible}
             // 预测
             onPredictDispatch={predictDispatch}
             // poi 查询
@@ -320,6 +306,9 @@ function PagePredict(props) {
             onPoi={setPoiDisabled} // 开启/关闭 poi 查询
             poiField={poiState} // poi配置项
             setPoiField={poiDispatch} // poi配置项更新回调
+            // SYZ
+            chart={chart}
+            selectedTraj={selectedTraj}
           />
         )}
         id={1}
@@ -337,27 +326,22 @@ function PagePredict(props) {
       </Tooltip>
 
       {/* EChart 图表 */}
-      <EChartbar>
-        {/* 1. POI检索环形统计图 */}
-        <Doughnut
-          data={searchCompleteResult}
-          autoplay={true}
-          autoplayInterval={2000}
-          style={{
-            display: poiDisabled && searchCompleteResult ? '' : 'none',
-          }}
-        />
-        {/* 2. 速度/转向角关系图 */}
-        <RelationChart
-          titleText='时间 - 速度/转向角'
-          legendData={['速度', '转向角']}
-          xAxisData={Array.from({ length: selectedTraj?.spd?.length })}
-          yAxis={['速度(km/h)', '转向角(rad)']}
-          data={[selectedTraj?.spd, selectedTraj?.azimuth]}
-          onHighlight={onHighlight}
-        />
-      </EChartbar>
-      {/* 购物车候选列表 */}
+      {/* 1. POI检索环形统计图 */}
+      {
+        poiDisabled ? (
+          <Doughnut
+            data={searchCompleteResult}
+            autoplay={true}
+            autoplayInterval={2000}
+            style={{
+              position: 'absolute',
+              top: document.querySelector('#poi-frame').offsetTop,
+              left: document.querySelector('#poi-frame').offsetLeft + document.querySelector('#poi-frame').offsetWidth,
+            }}
+          />
+        ) : null
+      }
+
       <ShoppingDrawer
         ShenZhen={ShenZhen}
       />

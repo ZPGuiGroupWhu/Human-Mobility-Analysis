@@ -60,6 +60,8 @@ export const usePoiSearch = (bmap, traj) => {
         } catch (err) {
           console.log(err);
         }
+      } else {
+        setSearchCompleteResult(null);
       }
     }
     return () => {

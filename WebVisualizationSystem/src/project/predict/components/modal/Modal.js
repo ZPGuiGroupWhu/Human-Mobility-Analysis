@@ -5,6 +5,7 @@ import {
   MinusOutlined,
   FullscreenOutlined,
 } from '@ant-design/icons';
+import { Tooltip } from 'antd'
 import { useDrag } from '@/common/hooks/useDrag';
 
 export default function Modal(props) {
@@ -30,15 +31,21 @@ export default function Modal(props) {
         isVisible ? (
           <div style={style} className='modal-ctn' ref={ref} >
             <header className='modal-header-bar'>
-              <button className='macos-btn' style={{ backgroundColor: '#ffbf2b' }} onClick={onClose}>
-                <CloseOutlined className='macos-btn-icon' />
-              </button>
-              <button className='macos-btn' style={{ backgroundColor: '#24cc3d' }}>
-                <MinusOutlined className='macos-btn-icon' />
-              </button>
-              <button className='macos-btn' style={{ backgroundColor: '#FFFF00' }}>
-                <FullscreenOutlined className='macos-btn-icon' />
-              </button>
+              <Tooltip title='关闭'>
+                <button className='macos-btn' style={{ backgroundColor: '#ffbf2b' }} onClick={onClose}>
+                  {/* <CloseOutlined className='macos-btn-icon' /> */}
+                </button>
+              </Tooltip>
+              <Tooltip title='缩小'>
+                <button className='macos-btn' style={{ backgroundColor: '#24cc3d' }}>
+                  {/* <MinusOutlined className='macos-btn-icon' /> */}
+                </button>
+              </Tooltip>
+              <Tooltip title='全屏'>
+                <button className='macos-btn' style={{ backgroundColor: '#FFFF00' }}>
+                  {/* <FullscreenOutlined className='macos-btn-icon' /> */}
+                </button>
+              </Tooltip>
             </header>
             <section className='modal-main-content'>
               {props.children}

@@ -3,12 +3,8 @@ import "./Foobar.scss";
 import PoiFrame from './poi-frame/PoiFrame';
 import HistAndCur from './model-frame/HistAndCur';
 import ModelFolder from './model-folder/ModelFolder';
+import SYZ from './model-frame/SYZ';
 
-const Model1 = (props) => {
-  return (
-    <div>1</div>
-  )
-}
 
 const Model3 = (props) => {
   return (
@@ -19,6 +15,7 @@ const Model3 = (props) => {
 
 const Foobar = (props) => {
   const {
+    isVisible,
     // 预测
     onPredictDispatch,
     // poi查询
@@ -26,12 +23,15 @@ const Foobar = (props) => {
     onPoi,
     poiField,
     setPoiField,
+    // SYZ
+    selectedTraj,
+    chart,
   } = props;
 
   const options = [
     {
-      name: 'model1',
-      component: <Model1 />
+      name: 'LSI-LSTM',
+      component: <SYZ selectedTraj={selectedTraj} chart={chart} />
     },
     {
       name: '历史-当前',
@@ -45,7 +45,7 @@ const Foobar = (props) => {
 
   return (
     <div className="foobar-ctn">
-      <PoiFrame state={poi} setState={onPoi} poiInfo={poiField} setPoiInfo={setPoiField} />
+      <PoiFrame isVisible={isVisible} state={poi} setState={onPoi} poiInfo={poiField} setPoiInfo={setPoiField} />
       <ModelFolder options={options} onPredictDispatch={onPredictDispatch} />
     </div>
   )

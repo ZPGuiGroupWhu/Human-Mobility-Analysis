@@ -19,13 +19,16 @@ class Doughnut extends Component {
         top: 'middle',
         textStyle: {
           color: '#fff',
-        }
+        },
+        itemGap: 5,
+        align: 'left',
       },
       series: [
         {
           name: 'POI分布',
           type: 'pie',
-          radius: ['60%', '80%'], // Array<number|string> - [内半径，外半径]
+          radius: ['70%', '90%'], // Array<number|string> - [内半径，外半径]
+          center: ['35%', '50%'],
           avoidLabelOverlap: false,
           label: {
             show: false,
@@ -126,12 +129,16 @@ class Doughnut extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (!_.isEqual(this.props.data, prevProps.data)) {
+      console.log(this.props.data, prevProps.data);
       if (typeof this.props.data === 'object') {
         this.option.series[0].data = this.props.data;
         this.myChart.current.setOption(this.option);
         this.props.autoplay && this.setCarousel(this.props.data); // 自动高亮
         this.myChart.current.off('mouseout', this.onDownplay); // 清除旧 mouseout 事件
         this.myChart.current.on('mouseout', { seriesName: 'POI分布' }, this.onDownplay); // 绑定新 mouseout 事件
+        setTimeout(() => {
+          this.myChart.current.resize();
+        }, 0)
       }
     }
   }
@@ -151,8 +158,8 @@ class Doughnut extends Component {
       <div
         ref={this.ref}
         style={{
-          width: '350px',
-          height: '200px',
+          width: '260px',
+          height: '160px',
           ...this.props.style,
         }}
       ></div>

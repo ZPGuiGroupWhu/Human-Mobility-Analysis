@@ -20,7 +20,7 @@ export default function PredictFrame(props) {
     <div className="predict-frame-ctn">
       <div className='predict-button-group'>
         <span className='common-span-style'>功能 </span>
-        <Tooltip title='开始预测'>
+        <Tooltip title='开始预测' placement='bottom'>
           <Button
             className='predict-frame-button'
             onClick={
@@ -35,7 +35,7 @@ export default function PredictFrame(props) {
           >
           </Button>
         </Tooltip>
-        <Tooltip title='暂停预测'>
+        <Tooltip title='暂停预测' placement='bottom'>
           <Button
             className='predict-frame-button'
             onClick={
@@ -50,7 +50,7 @@ export default function PredictFrame(props) {
           >
           </Button>
         </Tooltip>
-        <Tooltip title='结束预测'>
+        <Tooltip title='结束预测' placement='bottom'>
           <Button
             className='predict-frame-button'
             onClick={

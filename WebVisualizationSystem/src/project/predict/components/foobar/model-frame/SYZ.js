@@ -4,7 +4,7 @@ import eventBus, { SPDAZMACTION } from '@/app/eventBus';
 import RelationChart from '@/project/predict/components/charts/relation-chart/RelationChart.js'; // EChart关系折线图
 
 export default function SYZ(props) {
-  const {chart, selectedTraj} = props;
+  const { chart, selectedTraj } = props;
 
   // 图层可视状态管理
   const initGridLayerVisible = {
@@ -58,20 +58,20 @@ export default function SYZ(props) {
     eventBus.emit(SPDAZMACTION, gridLayerVisible)
   }, [gridLayerVisible])
 
-    // 统计图表-地图 联动高亮
-    const [highlightData, setHighlightData] = useState([]);
-    function onHighlight(idx) {
-      setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
-    }
-    useEffect(() => {
-      if (!chart) return () => { };
-      chart.setOption({
-        series: [{
-          name: '高亮点',
-          data: highlightData,
-        }]
-      });
-    }, [chart, highlightData])
+  // 统计图表-地图 联动高亮
+  const [highlightData, setHighlightData] = useState([]);
+  function onHighlight(idx) {
+    setHighlightData((idx >= 0) ? [selectedTraj.data[idx]] : []);
+  }
+  useEffect(() => {
+    if (!chart) return () => { };
+    chart.setOption({
+      series: [{
+        name: '高亮点',
+        data: highlightData,
+      }]
+    });
+  }, [chart, highlightData])
 
   return (
     <>

@@ -11,12 +11,12 @@ const timeInterval = 24; // 一天24h, 作为间隔
 
 export default function WeekHourCalendar(props) {
     // heatmap 数据、 user轨迹数据, slider month数据， clear标记
-    const { 
-        calendarData, 
+    const {
+        calendarData,
         userData,
         xLabel,
-        yLabel, 
-        monthRange, 
+        yLabel,
+        monthRange,
         calendarReload } = props;
 
     // 获取analysis公共状态
@@ -43,7 +43,7 @@ export default function WeekHourCalendar(props) {
             show: true,
             left: '7%',
             top: '0%',
-            bottom: '10%',
+            bottom: '12%',
             borderColor: '#fff',
             borderWidth: 1,
             zlevel: 2,
@@ -115,9 +115,11 @@ export default function WeekHourCalendar(props) {
         visualMap: {
             calculable: true,
             orient: 'vertical',
-            right: 'right',
+            left: cellWidth * 26 + 50,
             min: 0,
             max: 0,
+            top: -5,
+            itemHeight: 130,
             itemWidth: 5,
             textStyle: {
                 color: '#fff',
@@ -252,7 +254,7 @@ export default function WeekHourCalendar(props) {
             let weekday = item.weekday;
             let hour = item.hour;
             let time = weekday * timeInterval + hour
-            if (startTime <= time && time <= endTime && monthRange[0] <= month && month <= monthRange[1]){ 
+            if (startTime <= time && time <= endTime && monthRange[0] <= month && month <= monthRange[1]) {
                 // console.log(item)
                 selectTrajIds.push(item.id)
             }
@@ -263,9 +265,9 @@ export default function WeekHourCalendar(props) {
     // week-hour 日历 和 轨迹中的 周一到周日的形式不一样
     // 前者是 周一6，周二5，周二4，...周日0
     // 后者是 周一0，周二1，周三2，...周日6
-    function getSelectedPeriod(start, end){ // start[hour,week,count],end[hour,week,count]
+    function getSelectedPeriod(start, end) { // start[hour,week,count],end[hour,week,count]
         let startObj = {
-            weekday:6 - start[1],
+            weekday: 6 - start[1],
             hour: start[0] + 1
         };
         let endObj = {

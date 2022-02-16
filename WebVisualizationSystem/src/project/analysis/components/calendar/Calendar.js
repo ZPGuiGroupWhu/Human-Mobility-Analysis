@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
 import { setCalendarSelected } from '@/app/slice/analysisSlice';
-import './BottomCalendar.scss';
+import '../foldContent/FoldContent.scss';
 
 
 export default function Calendar(props) {
@@ -63,9 +63,9 @@ export default function Calendar(props) {
   }
   // 基于网页宽度，动态计算cell的宽度
   const clientWidth = document.body.clientWidth;
-  const cellWidth = (clientWidth - 310) / 51;
+  const cellWidth = (clientWidth - 310) / 78;
   // drawer高度170，减去top padding 20, bottom padding 10, 月份数字高度10，
-  const cellHeight = (170 - 20 - 10 - 10) / 7;
+  const cellHeight = (200 - 40) / 7;
   const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
   const option = {
     // title: {
@@ -83,9 +83,10 @@ export default function Calendar(props) {
       max: 100,
       calculable: true,
       orient: 'vertical',
-      left: clientWidth - 220,
+      left: cellWidth * 52 + 50,
       top: 10,
       itemHeight: 130,
+      itemWidth: 15,
       textStyle: {
         color: '#fff',
       },
@@ -338,10 +339,6 @@ export default function Calendar(props) {
   return (
     <div className='calendar'
       ref={ref}
-      style={{
-        width: '100%',
-        height: '100%',
-      }}
     ></div>
   )
 }

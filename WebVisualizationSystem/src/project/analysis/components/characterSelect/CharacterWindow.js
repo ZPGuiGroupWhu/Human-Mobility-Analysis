@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import './CharacterWindow.scss';
+import '../foldContent/FoldContent.scss';
 import ParallelChart from './ParallelChart';
 import _ from 'lodash';
 // react-redux
 import { useDispatch, useSelector } from 'react-redux';
 import { setCharacterSelected } from '@/app/slice/analysisSlice'
 
-export default function CalendarWindow(props) {
-  const { userData, isVisible, clear } = props; // 用户的轨迹数据
+export default function CharacterWindow(props) {
+  const { userData, characterReload } = props; // 用户的轨迹数据
 
   const state = useSelector(state => state.analysis)
   const dispatch = useDispatch();
@@ -40,7 +40,7 @@ export default function CalendarWindow(props) {
   }
 
   // 返回数据
-  function returnSelectedResult(value){
+  function returnSelectedResult(value) {
     setResult(value);
   }
 
@@ -64,18 +64,7 @@ export default function CalendarWindow(props) {
     setData(data); // 更新状态
   }, [])
 
-  // 修改是否可见
-  useEffect(() => {
-    {
-      (isVisible === false) ?
-        document.querySelector('.character-window-ctn').style.display = 'none' :
-        document.querySelector('.character-window-ctn').style.display = 'flex'
-    }
-  }, [isVisible])
-
   return (
-    <div className='character-window-ctn'>
-      <ParallelChart returnSelectedResult={returnSelectedResult} data={data} clear={clear} userId={userId}/>
-    </div>
+      <ParallelChart returnSelectedResult={returnSelectedResult} data={data} characterReload={characterReload} userId={userId} />
   )
 }

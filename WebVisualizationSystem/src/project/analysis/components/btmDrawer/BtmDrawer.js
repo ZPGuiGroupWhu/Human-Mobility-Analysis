@@ -1,60 +1,67 @@
 import React, { Component } from 'react';
-import { Radio, Space } from 'antd';
-import BottomCalendar from '../calendar/BottomCalendar';
 import './BtmDrawer.scss';
+import { Button } from 'antd';
+import { UpSquareOutlined, DownSquareOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import CalendarWindow from '../WeekAndHour/CalendarWindow';
-import CharacterWindow from '../characterSelect/CharacterWindow';
+import FoldContent from '../foldContent/FoldContent';
+
 
 class BtmDrawer extends Component {
   constructor(props) {
     super(props);
-    this.radioContents = [
-      { id: 1, text: '日历筛选' },
-      { id: 2, text: '星期筛选' },
-      { id: 3, text: '特征筛选' }
-    ];
     this.state = {
+      bottomHeight: 200, // 判断button 位置
+      bottomBtnType: true, // 判断button 位置 和 样式
       value: 2,
-      isVisible: [
-        false,
-        true,
-        false
-      ]
     }
   }
 
-  onChange = (e) => {
-    this.setState((prev) => {
-      return {
-        value: e.target.value,
-        isVisible: prev.isVisible.map((item, index) => { return index === e.target.value - 1 ? true : false })
-      }
-    })
+  componentDidUpdate(prevState) { // 隐藏展开内容
+    if (!_.isEqual(prevState.bottomBtnType, this.state.bottomBtnType)) {
+      ((this.state.bottomBtnType === true) ?
+        document.querySelector('.fold-window').style.display = 'none' :
+        document.querySelector('.fold-window').style.display = ''
+      )
+    }
   }
 
   render() {
     return (
-      <>
-        <div className='btmdrw-radio btmdrw-moudle'>
-          <Radio.Group onChange={this.onChange} value={this.state.value}>
-            <Space direction="vertical">
-              {this.radioContents.map(item => (<Radio value={item.id}>{item.text}</Radio>))}
-            </Space>
-          </Radio.Group>
+      <div className='bottom-part'>
+        <div className='button'>
+          <Button
+            ghost={false}
+            disabled={this.props.dataloadStatus ? false : true}
+            icon={this.state.bottomBtnType ?
+              <UpSquareOutlined /> : <DownSquareOutlined />}
+            size={'small'}
+            onClick={() =>
+              this.setState({
+                bottomBtnType: !this.state.bottomBtnType,
+                bottomHeight: (!this.state.bottomBtnType ? 200 : 382) //  根据type判断位置
+              }, () => {
+                this.props.setBottomStyle(this.state.bottomHeight) // 返回给主页，用于设置drawer的宽和高
+              })
+            }
+          >{this.state.bottomBtnType ? '面板展开' : '面板收起'}</Button>
         </div>
-        {
-          (this.props.dataloadStatus && Object.keys(this.props.date).length) ?
-            <BottomCalendar timeData={this.props.date} userData={this.props.userData} eventName={this.props.EVENTNAME} 
-            isVisible={this.state.isVisible[0]} calendarReload={this.props.calendarReload} setCalendarReload={this.props.setCalendarReload}/> : null
-        }
-        <CalendarWindow userData={this.props.userData} isVisible={this.state.isVisible[1]} 
-              setCalendarReload={this.props.setCalendarReload} calendarReload={this.props.calendarReload}/>
-        {(this.props.dataloadStatus && Object.keys(this.props.date).length) ?
-          <CharacterWindow userData={this.props.userData} isVisible={this.state.isVisible[2]} 
-          characterReload={this.props.characterReload}  setCharacterReload={this.props.setCharacterReload}/> : null
-        }
-      </>
+        <div className='fold-window'>
+          <FoldContent
+            dataloadStatus={this.props.dataloadStatus}
+            userData={this.props.userData}
+            date={this.props.date}
+            calendarReload={this.props.calendarReload}
+            characterReload={this.props.characterReload}
+            setCalendarReload={this.props.setCalendarReload}
+            setCharacterReload={this.props.setCharacterReload} />
+        </div>
+        <div className='bottom-calendar'>
+          <CalendarWindow userData={this.props.userData} isVisible={true}
+            setCalendarReload={this.props.setCalendarReload} calendarReload={this.props.calendarReload} />
+        </div>
+
+      </div>
     );
   }
 }

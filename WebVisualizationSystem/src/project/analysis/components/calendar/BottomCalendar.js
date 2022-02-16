@@ -2,24 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Tooltip, Button } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import Calendar from './Calendar';
-import './BottomCalendar.scss';
+import '../foldContent/FoldContent.scss';
 
 export default function BottomCalendar(props) {
 
-  const { userData, timeData, eventName, isVisible, calendarReload, setCalendarReload} = props;
+  const { userData, timeData, eventName, calendarReload, setCalendarReload } = props;
 
-  // 修改是否可见
-  useEffect(() => {
-    {
-      (isVisible === false) ?
-      document.querySelector('.bottom-calendar-ctn').style.display = 'none' :
-      document.querySelector('.bottom-calendar-ctn').style.display = 'flex'
-    }
-  }, [isVisible])
 
   return (
-    <div className="bottom-calendar-ctn">
-      <Calendar timeData={timeData} userData={userData} eventName={eventName} calendarReload={calendarReload} />      
+    <>
+      <Calendar timeData={timeData} userData={userData} eventName={eventName} calendarReload={calendarReload} />
       <div className='reload-button'>
         <Tooltip title="还原">
           <Button
@@ -34,6 +26,6 @@ export default function BottomCalendar(props) {
           />
         </Tooltip>
       </div>
-    </div>
+    </>
   )
 }

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Select, Button, Descriptions } from 'antd';
 import { withRouter } from 'react-router';
-import _ from "lodash";
+import _, { divide } from "lodash";
 // 样式
 import '../bmap.scss';
+import './PageAnalysis.scss'
 // 伪数据
 // import userData from './components/deckGL/399313.json'
 import personalityData from './components/tableDrawer/radar/ocean_score.json'
@@ -20,13 +21,13 @@ import ShoppingDrawer from './components/shopping/ShoppingDrawer';
 import FunctionBar from './components/function-bar/FunctionBar';
 import { getSelectIdsByDate, initData, getInitTrajIds } from './components/dataHandleFunction/dataHandleFunction';
 // 网络请求
-import { getUserTraj,getUserTrajInChunk,getUserTrajCount } from '@/network';
+import { getUserTraj, getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
 import { setFinalSelected } from '@/app/slice/analysisSlice';
 import { setCalendarSelected, setCharacterSelected } from '@/app/slice/analysisSlice';
-
+import { getKeyThenIncreaseKey } from 'antd/lib/message';
 
 
 /**
@@ -58,6 +59,7 @@ class PageAnalysis extends Component {
     this.maskImage.src = "data:image/png;base64,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"
     // date：筛选的日期、option：筛选的题项
     this.state = {
+      bottomHeight: 200, // 控制底部面板展开/收缩按钮的位置
       rightWidth: 380,
       originDate: {
         start: '2018-01-01',
@@ -80,28 +82,29 @@ class PageAnalysis extends Component {
       id: 0,
       text: '日历重置',
       icon: <ReloadOutlined />,
-      onClick: () => { 
+      onClick: () => {
         let originTrajs = getSelectIdsByDate(this.state.userData, this.state.originDate.start, this.state.originDate.end);
         this.props.setCalendarSelected(originTrajs);
-        this.setState({ calendarReload: {} }) },
+        this.setState({ calendarReload: {} })
+      },
     }, {
       id: 1,
       text: '星期重置',
       icon: <ReloadOutlined />,
-      onClick: () => { 
+      onClick: () => {
         let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
         this.props.setCalendarSelected(originalTrajs);
-        this.setState({ calendarReload: {} }) 
+        this.setState({ calendarReload: {} })
       },
     },
     {
       id: 2,
       text: '特征重置',
       icon: <ReloadOutlined />,
-      onClick: () => { 
+      onClick: () => {
         let originalTrajs = initData(this.state.userData);
         this.props.setCharacterSelected(originalTrajs);
-        this.setState({ characterReload: {} }) 
+        this.setState({ characterReload: {} })
       },
     }
   ]
@@ -130,6 +133,13 @@ class PageAnalysis extends Component {
   setCurId = (id) => {
     this.setState({
       curId: id,
+    })
+  }
+
+  // 设置底部 Drawer 高度和按钮样式
+  setBottomStyle = (value) => {
+    this.setState({
+      bottomHeight:  value
     })
   }
 
@@ -169,19 +179,19 @@ class PageAnalysis extends Component {
   setCharacterReload = () => {
     let originalTrajs = initData(this.state.userData);
     this.props.setCharacterSelected(originalTrajs);
-    this.setState({ characterReload: {} }) 
+    this.setState({ characterReload: {} })
   }
-  
+
   componentDidMount() {
     const reqUserData = async () => {
-      let user='399313'
-      let chunkSize=1000;
-      let userCount=await getUserTrajCount(user)
-      userCount=userCount[user]
-      for(let i=0;i<userCount/chunkSize;i++){
-        let getdata=await getUserTrajInChunk(user,chunkSize,i);
+      let user = '399313'
+      let chunkSize = 1000;
+      let userCount = await getUserTrajCount(user)
+      userCount = userCount[user]
+      for (let i = 0; i < userCount / chunkSize; i++) {
+        let getdata = await getUserTrajInChunk(user, chunkSize, i);
         let data = [].concat(this.state.userData)
-        for(let j=0;j<getdata.length;j++){
+        for (let j = 0; j < getdata.length; j++) {
           data.push(getdata[j])
         }
         this.setState({
@@ -196,7 +206,7 @@ class PageAnalysis extends Component {
       this.initData(this.state.userData)
     }
     reqUserData();
-    
+
     // 深圳 json 数据
     axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => {
       this.setState({ ShenZhen: data.data })
@@ -205,13 +215,13 @@ class PageAnalysis extends Component {
 
   // 更新筛选交集的轨迹编号
   componentDidUpdate(prevProps, prevState) {
-    if(
+    if (
       !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
       !_.isEqual(prevProps.characterSelected, this.props.characterSelected)
-    ){
+    ) {
       this.handleIntersection(this.props.calendarSelected, this.props.characterSelected);
     }
-    if(!_.isEqual(prevProps.monthRange, this.props.monthRange)){
+    if (!_.isEqual(prevProps.monthRange, this.props.monthRange)) {
       let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
       this.props.setCalendarSelected(originalTrajs);
       this.setState({
@@ -222,7 +232,7 @@ class PageAnalysis extends Component {
 
   render() {
     return (
-      <>
+      <div className='analysis-page'>
         <DeckGLMap
           // userData={this.state.userData.length ? this.state.userData : userData}
           userData={this.state.userData}
@@ -314,29 +324,33 @@ class PageAnalysis extends Component {
           rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
         />
         {/* <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/> */}
+
         <Drawer
-          height={170}
+          height={this.state.bottomHeight}
           type='bottom'
           initVisible={true}
           render={
-            () => <BtmDrawer
-              // Bottom Calendar
-              dataloadStatus={this.state.dataloadStatus}
-              userData = {this.state.userData}
-              date={this.state.date}
-              EVENTNAME={this.EVENTNAME}
-              calendarReload={this.state.calendarReload}
-              characterReload={this.state.characterReload}
-              setCalendarReload={this.setCalendarReload}
-              setCharacterReload={this.setCharacterReload}
-            />
+            () =>
+              <BtmDrawer // Bottom Calendar
+                dataloadStatus={this.state.dataloadStatus}
+                userData={this.state.userData}
+                date={this.state.date}
+                EVENTNAME={this.EVENTNAME}
+                bottomBtnType={this.state.bottomBtnType}
+                bottomHeight={this.state.bottomHeight}
+                setBottomStyle={this.setBottomStyle}
+                calendarReload={this.state.calendarReload}
+                characterReload={this.state.characterReload}
+                setCalendarReload={this.setCalendarReload}
+                setCharacterReload={this.setCharacterReload}
+              />
           }
           id={2}
           curId={this.state.curId}
           setCurId={this.setCurId}
         />
         <ShoppingDrawer ShenZhen={this.state.ShenZhen} />
-      </>
+      </div>
     )
   }
 }

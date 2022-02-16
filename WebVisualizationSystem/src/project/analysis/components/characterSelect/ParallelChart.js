@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import './CharacterWindow.scss';
+import '../foldContent/FoldContent.scss';
 // ECharts
 import * as echarts from 'echarts';
 
@@ -13,7 +13,7 @@ export default function ParallelChart(props) {
   const {
     returnSelectedResult,
     data,
-    clear,
+    characterReload,
     userId
   } = props;
 
@@ -163,7 +163,7 @@ export default function ParallelChart(props) {
   }, [data])
 
   return (
-    <div className='character-parallel'
+    <div className='character-select'
       ref={ref}
     ></div>
   )

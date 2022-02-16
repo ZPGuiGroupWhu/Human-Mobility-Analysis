@@ -3,7 +3,7 @@
     justify-content: space-between;
     align-items: center;
     height: 100%;
-    margin: 0 0 0 110px;
+    margin: 0 55px 0 55px;
     border: 0px solid white;
     border-radius: 10px;
     padding: 5px 15px;
@@ -13,7 +13,7 @@
     .slider-title {
         width: 20px;
         height: 100%;
-        padding-left: 15px;
+        padding-left: 10px;
         display: flex;
         align-items: center;
         z-index: 2;
@@ -21,12 +21,15 @@
     .slider-controller {
         width: 30px;
         height: 150px;
-        padding-left: 10px;
+        padding-left: 5px;
         padding-bottom: 10px;
     }
     .week-hour-calendar {
-        padding-left: 20px ;
-        width: 500px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        padding-left: 10px ;
+        width: 510px;
         height: 100%;
     }
     .reload-button {
@@ -35,11 +38,17 @@
         z-index: 2 
     }
     .statistics-daybar {
+        display: flex;
+        align-items: center;
+        text-align: center;
         width: 500px;
         height: 100%;
     }
       
     .statistics-weekbar {
+        display: flex;
+        align-items: center;
+        text-align: center;
         width: 280px;
         height: 100%;
         padding-left: 10px;

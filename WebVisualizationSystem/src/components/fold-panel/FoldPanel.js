@@ -26,7 +26,7 @@ export default function FoldPanel(props) {
       // 每次高度发生变化时，都将组件滚动到合适的位置，展示全局
       // 300ms 后滚动，此时动画完成，可以正确获得高度
       setTimeout(() => {
-        ref.current.scrollIntoView({block: 'end'});
+        ref.current.scrollIntoView({behavior:'smooth', block: 'end'});
       }, 300)
     }
   }, [isFold])

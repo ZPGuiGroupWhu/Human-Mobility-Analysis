@@ -5,7 +5,7 @@ import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
 import { ArcLayer, IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
 import _ from 'lodash';
-import { Switch, Slider, Radio, Button, Input, Tooltip } from 'antd';
+import { Switch, Slider, Radio, Button, Input, Tooltip, Select } from 'antd';
 import { CopyOutlined, SearchOutlined } from '@ant-design/icons';
 import { withRouter } from 'react-router';
 // react-redux
@@ -15,7 +15,7 @@ import { addSelectTrajs, setCurShowTrajId } from '@/app/slice/analysisSlice';
 // 函数
 import { eventEmitter } from '@/common/func/EventEmitter';
 import { copyText } from '@/common/func/copyText.js';
-import { getOneTraj } from '@/network';
+import { getOneTraj, getUserTrajRegex } from '@/network';
 // 样式
 import './DeckGLMap.css';
 import '@/project/border-style.scss';
@@ -72,6 +72,7 @@ class DeckGLMap extends Component {
       iconOpacity: iconInitOpacity,//icon图标图层初始化透明度
       scatterPlotLayer: null, // 点图层
       trajIdForSearch: '', // 定向查找输入的轨迹编号字符串
+      trajIdForSelect: [], // 轨迹编号字符串的模糊检索结果
     }
   }
 
@@ -159,7 +160,7 @@ class DeckGLMap extends Component {
   returnSelectTrajs = (selectTrajIds) => {
     let selectTrajs = [];
     _.forEach(this.props.userData, (item) => {
-      if(selectTrajIds.includes(item.id)){
+      if (selectTrajIds.includes(item.id)) {
         selectTrajs.push(this.dataFormat(item));
       }
     })
@@ -589,7 +590,7 @@ class DeckGLMap extends Component {
     this.iconLayerOShow = !this.iconLayerOShow;
     this.iconLayerDShow = !this.iconLayerDShow;
     this.showSelectOD(this.props.finalSelected);
-  }; 
+  };
 
   getLayers = () => {//获取所有图层
     this.getTrajNodes();//获取所有轨迹点的集合
@@ -618,10 +619,15 @@ class DeckGLMap extends Component {
   }
 
   // 存储输入文本框内的轨迹编号字符串
-  onSearchTraj = (e) => {
-    this.setState({
-      trajIdForSearch: e.target.value,
-    })
+  handleChange = (value) => {
+    this.setState({ trajIdForSearch: value })
+  }
+  handleSearch = async (value) => {
+    let res = await getUserTrajRegex(this.props.userId, value);
+    this.setState({ trajIdForSelect: res });
+  }
+  handleSelect = (value) => {
+    this.setState({ trajIdForSearch: value }, () => {this.handleSearchTraj()});
   }
   // 查找指定的轨迹编号，并保存数据
   handleSearchTraj = async () => {
@@ -640,6 +646,8 @@ class DeckGLMap extends Component {
   }
 
   render() {
+    const options = this.state.trajIdForSelect.sort((a, b) => (a.split('_')[1] - b.split('_')[1]))
+      .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
     return (
       <div>
         <DeckGL
@@ -683,18 +691,21 @@ class DeckGLMap extends Component {
         </div><br />
         <div className={`moudle`}>
           <Input.Group compact>
-            <Input
-              style={{ width: 120 }}
-              defaultValue=""
-              ref={this.inputRef}
-              onChange={_.debounce(this.onSearchTraj, 500)}
-              onKeyDown={(e) => {
-                console.log(e.keyCode);
-                if (e.keyCode === 13) {
-                  this.handleSearchTraj()
-                }
-              }}
-            />
+            <Select
+              showSearch
+              value={this.state.value}
+              defaultActiveFirstOption={false}
+              showArrow={false}
+              filterOption={false}
+              onSearch={_.debounce(this.handleSearch, 500)}
+              onChange={_.debounce(this.handleChange, 500)}
+              onSelect={this.handleSelect}
+              notFoundContent={null}
+              listHeight={150}
+              style={{ width: '140px' }}
+            >
+              {options}
+            </Select>
             <Tooltip title="copy traj_id">
               <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
             </Tooltip>

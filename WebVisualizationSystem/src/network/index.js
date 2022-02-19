@@ -61,3 +61,12 @@ export const getOneTraj = (trajId) => {
     url: `/getOneTraj?trajId=${trajId}`
   })
 }
+
+
+// 轨迹编号模糊检索
+export const getUserTrajRegex = (userid, num) => {
+  console.log(userid, num);
+  return baseRequest({
+    url: `/getUserTrajRegex?id=${userid}&searchNum=${num}`
+  })
+}

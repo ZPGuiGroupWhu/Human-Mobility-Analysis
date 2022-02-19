@@ -93,7 +93,7 @@ const PoiFrame = (props) => {
             >
               {radioOptions.map((item, idx) => {
                 return (
-                  <Radio value={item.value} key={idx}>{item.label}</Radio>
+                  <Radio value={item.value} key={idx} style={{color: '#fff'}}>{item.label}</Radio>
                 )
               })}
             </Radio.Group>

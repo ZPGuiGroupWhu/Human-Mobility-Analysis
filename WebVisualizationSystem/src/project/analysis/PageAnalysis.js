@@ -234,6 +234,7 @@ class PageAnalysis extends Component {
     return (
       <div className='analysis-page'>
         <DeckGLMap
+          userId={399313}
           // userData={this.state.userData.length ? this.state.userData : userData}
           userData={this.state.userData}
           getTrajCounts={this.getTrajCounts}

@@ -35,7 +35,7 @@ export default function HistAndCur(props) {
 
   // 数据分发
   useEffect(() => {
-    if (!data.length) return () => {};
+    if (!data.length) return () => { };
     eventBus.emit(HISTACTION, isShow ? data : [])
   }, [isShow, data])
 
@@ -46,6 +46,7 @@ export default function HistAndCur(props) {
       eventBus.emit(HISTACTION, [])
     }
   }, [])
+
 
 
   return (

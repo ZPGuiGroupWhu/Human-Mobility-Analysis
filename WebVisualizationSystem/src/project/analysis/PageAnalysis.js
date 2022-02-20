@@ -20,6 +20,7 @@ import BtmDrawer from './components/btmDrawer/BtmDrawer';
 import ShoppingDrawer from './components/shopping/ShoppingDrawer';
 import FunctionBar from './components/function-bar/FunctionBar';
 import { getSelectIdsByDate, initData, getInitTrajIds } from './components/dataHandleFunction/dataHandleFunction';
+import FoldPanelSlider from '@/components/fold-panel-slider/FoldPanelSlider'
 // 网络请求
 import { getUserTraj, getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
@@ -139,7 +140,7 @@ class PageAnalysis extends Component {
   // 设置底部 Drawer 高度和按钮样式
   setBottomStyle = (value) => {
     this.setState({
-      bottomHeight:  value
+      bottomHeight: value
     })
   }
 
@@ -231,8 +232,13 @@ class PageAnalysis extends Component {
   }
 
   render() {
+    // Bottom Drawer Components
+
+
+
     return (
       <div className='analysis-page'>
+        {/* 主地图 */}
         <DeckGLMap
           userId={399313}
           // userData={this.state.userData.length ? this.state.userData : userData}
@@ -241,6 +247,7 @@ class PageAnalysis extends Component {
           eventName={this.EVENTNAME}
           setRoutes={this.props.setRoutes}
         />
+        {/* 右侧边栏 */}
         <TableDrawer
           id={1}
           curId={this.state.curId}
@@ -332,24 +339,30 @@ class PageAnalysis extends Component {
           initVisible={true}
           render={
             () =>
-              <BtmDrawer // Bottom Calendar
-                dataloadStatus={this.state.dataloadStatus}
-                userData={this.state.userData}
-                date={this.state.date}
-                EVENTNAME={this.EVENTNAME}
-                bottomBtnType={this.state.bottomBtnType}
-                bottomHeight={this.state.bottomHeight}
-                setBottomStyle={this.setBottomStyle}
-                calendarReload={this.state.calendarReload}
-                characterReload={this.state.characterReload}
-                setCalendarReload={this.setCalendarReload}
-                setCharacterReload={this.setCharacterReload}
+              // <BtmDrawer // Bottom Calendar
+              //   dataloadStatus={this.state.dataloadStatus}
+              //   userData={this.state.userData}
+              //   date={this.state.date}
+              //   EVENTNAME={this.EVENTNAME}
+              //   bottomBtnType={this.state.bottomBtnType}
+              //   bottomHeight={this.state.bottomHeight}
+              //   setBottomStyle={this.setBottomStyle}
+              //   calendarReload={this.state.calendarReload}
+              //   characterReload={this.state.characterReload}
+              //   setCalendarReload={this.setCalendarReload}
+              //   setCharacterReload={this.setCharacterReload}
+              // />
+              <FoldPanelSlider
+                style={{ width: '100%' }}
+                mainComponents={<div style={{width: '400px', height: '50px', backgroundColor: 'red'}}>123</div>}
+                minorComponents={<div style={{width: '400px', height: '50px', backgroundColor: 'white'}}>123</div>}
               />
           }
           id={2}
           curId={this.state.curId}
           setCurId={this.setCurId}
         />
+        {/* 购物车列表 */}
         <ShoppingDrawer ShenZhen={this.state.ShenZhen} />
       </div>
     )

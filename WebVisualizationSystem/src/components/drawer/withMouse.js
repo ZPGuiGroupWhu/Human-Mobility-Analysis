@@ -16,22 +16,22 @@ export const withMouse = (WrappedComponent) => {
     getMousePosition = (event) => {
       const vm = this;
       const e = event || window.event;
-      _.throttle(function () {
-        vm.setState({
-          top: e.clientY,
-          left: e.clientX,
-          right: window.innerWidth - e.clientX,
-          bottom: window.innerHeight - e.clientY,
-        })
-      }, 300, { leading: true })();
+      vm.setState({
+        top: e.clientY,
+        left: e.clientX,
+        right: window.innerWidth - e.clientX,
+        bottom: window.innerHeight - e.clientY,
+      });
     }
 
+    handleMouseMove = _.throttle(this.getMousePosition, 300, {leading: true});
+
     componentDidMount() {
-      window.addEventListener('mousemove', this.getMousePosition, false);
+      window.addEventListener('mousemove', this.handleMouseMove, false);
     }
 
     componentWillUnmount() {
-      window.removeEventListener('mousemove', this.getMousePosition, false);
+      window.removeEventListener('mousemove', this.handleMouseMove, false);
     }
 
     render() {

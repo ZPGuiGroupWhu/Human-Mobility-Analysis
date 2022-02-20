@@ -164,7 +164,6 @@ function RelationChart(props) {
   }
 
   useEffect(() => {
-    console.log(ref.current);
     myChart.current = echarts.init(ref.current);
     return () => {
       myChart.current.dispose();

@@ -619,16 +619,12 @@ class DeckGLMap extends Component {
   }
 
   // 存储输入文本框内的轨迹编号字符串
-  handleChange = (value) => {
-    this.setState({ trajIdForSearch: value })
-  }
-  handleSearch = async (value) => {
+  handleChange = _.debounce((value) => {this.setState({ trajIdForSearch: value });}, 500);
+  handleSearch = _.debounce(async (value) => {
     let res = await getUserTrajRegex(this.props.userId, value);
     this.setState({ trajIdForSelect: res });
-  }
-  handleSelect = (value) => {
-    this.setState({ trajIdForSearch: value }, () => {this.handleSearchTraj()});
-  }
+  }, 500); 
+  handleSelect = (value) => {this.setState({ trajIdForSearch: value }, () => {this.handleSearchTraj()});}
   // 查找指定的轨迹编号，并保存数据
   handleSearchTraj = async () => {
     try {
@@ -650,6 +646,7 @@ class DeckGLMap extends Component {
       .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
     return (
       <div>
+        {/* 主地图 */}
         <DeckGL
           initialViewState={{
             longitude: 114.17,
@@ -688,35 +685,7 @@ class DeckGLMap extends Component {
             <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Heat">热力图</Radio.Button>
           </Radio.Group><br />
           格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={100} step={50} defaultValue={300} onChange={(value) => this.changeGridWidth(value)} />
-        </div><br />
-        <div className={`moudle`}>
-          <Input.Group compact>
-            <Select
-              showSearch
-              value={this.state.value}
-              defaultActiveFirstOption={false}
-              showArrow={false}
-              filterOption={false}
-              onSearch={_.debounce(this.handleSearch, 500)}
-              onChange={_.debounce(this.handleChange, 500)}
-              onSelect={this.handleSelect}
-              notFoundContent={null}
-              listHeight={150}
-              style={{ width: '140px' }}
-            >
-              {options}
-            </Select>
-            <Tooltip title="copy traj_id">
-              <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
-            </Tooltip>
-            <Tooltip title="search and select">
-              <Button
-                icon={<SearchOutlined />}
-                onClick={(e) => { this.handleSearchTraj() }}
-              />
-            </Tooltip>
-          </Input.Group>
-        </div><br />
+        </div>
         <div className={`moudle`}>
           <div className='text-button'>
             <span>轨迹图层</span>
@@ -730,6 +699,34 @@ class DeckGLMap extends Component {
             Object.keys(this.props.selectedTraj).length ?
               <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
           }
+        </div><br />
+        <div className={`moudle`}>
+          <Input.Group compact>
+            <Select
+              showSearch
+              value={this.state.trajIdForSearch}
+              defaultActiveFirstOption={false}
+              showArrow={false}
+              filterOption={false}
+              onSearch={_.debounce(this.handleSearch, 500)}
+              onChange={_.debounce(this.handleChange, 500)}
+              onSelect={this.handleSelect}
+              notFoundContent={null}
+              listHeight={150}
+              style={{ width: '130px' }}
+            >
+              {options}
+            </Select>
+            <Tooltip title="copy traj_id">
+              <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
+            </Tooltip>
+            <Tooltip title="search and select">
+              <Button
+                icon={<SearchOutlined />}
+                onClick={(e) => { this.handleSearchTraj() }}
+              />
+            </Tooltip>
+          </Input.Group>
         </div>
       </div>
     )

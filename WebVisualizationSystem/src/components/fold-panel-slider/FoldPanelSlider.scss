@@ -1,0 +1,31 @@
+.fold-panel-slider-ctn {
+  position: absolute;
+  bottom: 0;
+  overflow: hidden;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #111;
+
+  .fold-panel-slider-content {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .minor {
+    transition: max-height .5s ease-in-out;
+  }
+  
+  .fold-panel-slider-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: pointer;
+  
+    &:hover {
+      background-color: red;
+    }
+  }
+}

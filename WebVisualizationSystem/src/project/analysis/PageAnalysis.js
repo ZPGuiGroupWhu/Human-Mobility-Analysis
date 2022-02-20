@@ -28,7 +28,6 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { setFinalSelected } from '@/app/slice/analysisSlice';
 import { setCalendarSelected, setCharacterSelected } from '@/app/slice/analysisSlice';
-import { getKeyThenIncreaseKey } from 'antd/lib/message';
 
 
 /**

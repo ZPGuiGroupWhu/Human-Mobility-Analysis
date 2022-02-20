@@ -675,79 +675,81 @@ class DeckGLMap extends Component {
         </DeckGL>
 
         {/* 功能栏 */}
-        <section className='analysis-function-bar moudle' style={{ width: '175px' }}>
-          <div className='moudle-white'>
-            <Radio.Group
-              size='small'
-              buttonStyle="solid"
-              onChange={this.changeGridOrSpeed}
-              defaultValue="Grid"
-              style={{ marginBottom: '5px' }}
-            >
-              <Radio.Button value="Grid" >点密度</Radio.Button>
-              <Radio.Button value="Speed">速度</Radio.Button>
-              <Radio.Button value="None">关闭</Radio.Button>
-            </Radio.Group>
-            <Radio.Group
-              size='small'
-              buttonStyle="solid"
-              onChange={this.change3D}
-              defaultValue="3D"
-              style={{ marginBottom: '5px' }}
-            >
-              <Radio.Button value="2D">二维</Radio.Button>
-              <Radio.Button value="3D">三维</Radio.Button>
-              <Radio.Button value="Heat">热力图</Radio.Button>
-            </Radio.Group>
-            <Slider
-              tipFormatter={this.sliderToolTipFormatter}
-              style={{ width: '93%' }}
-              max={500} min={100} step={50}
-              defaultValue={300}
-              onChange={(value) => this.changeGridWidth(value)}
-            />
-          </div>
-          <div className={`moudle-white`}>
-            <div className='text-button'>
-              <span>轨迹图层</span>
-              <Switch defaultChecked={true} onChange={this.changeTripsLayerShow} />
+        <div style={{ display: 'inline-block' }}>
+          <section className='analysis-function-bar moudle' style={{ width: '175px' }}>
+            <div className='moudle-white'>
+              <Radio.Group
+                size='small'
+                buttonStyle="solid"
+                onChange={this.changeGridOrSpeed}
+                defaultValue="Grid"
+                style={{ marginBottom: '5px' }}
+              >
+                <Radio.Button value="Grid" >点密度</Radio.Button>
+                <Radio.Button value="Speed">速度</Radio.Button>
+                <Radio.Button value="None">关闭</Radio.Button>
+              </Radio.Group>
+              <Radio.Group
+                size='small'
+                buttonStyle="solid"
+                onChange={this.change3D}
+                defaultValue="3D"
+                style={{ marginBottom: '5px' }}
+              >
+                <Radio.Button value="2D">二维</Radio.Button>
+                <Radio.Button value="3D">三维</Radio.Button>
+                <Radio.Button value="Heat">热力图</Radio.Button>
+              </Radio.Group>
+              <Slider
+                tipFormatter={this.sliderToolTipFormatter}
+                style={{ width: '93%' }}
+                max={500} min={100} step={50}
+                defaultValue={300}
+                onChange={(value) => this.changeGridWidth(value)}
+              />
             </div>
-            <div className='text-button'>
-              <span>OD图层</span>
-              <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} />
+            <div className={`moudle-white`}>
+              <div className='text-button'>
+                <span>轨迹图层</span>
+                <Switch defaultChecked={true} onChange={this.changeTripsLayerShow} />
+              </div>
+              <div className='text-button'>
+                <span>OD图层</span>
+                <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} />
+              </div>
+              {
+                Object.keys(this.props.selectedTraj).length ?
+                  <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
+              }
             </div>
-            {
-              Object.keys(this.props.selectedTraj).length ?
-                <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
-            }
-          </div>
-        </section>
-        <Input.Group compact>
-          <Select
-            showSearch
-            value={this.state.trajIdForSearch}
-            defaultActiveFirstOption={false}
-            showArrow={false}
-            filterOption={false}
-            onSearch={_.debounce(this.handleSearch, 500)}
-            onChange={_.debounce(this.handleChange, 500)}
-            onSelect={this.handleSelect}
-            notFoundContent={null}
-            listHeight={150}
-            style={{ width: '120px' }}
-          >
-            {options}
-          </Select>
-          <Tooltip title="拷贝编号">
-            <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
-          </Tooltip>
-          <Tooltip title="查询并选择">
-            <Button
-              icon={<SearchOutlined />}
-              onClick={(e) => { this.handleSearchTraj() }}
-            />
-          </Tooltip>
-        </Input.Group>
+          </section>
+          <Input.Group compact>
+            <Select
+              showSearch
+              value={this.state.trajIdForSearch}
+              defaultActiveFirstOption={false}
+              showArrow={false}
+              filterOption={false}
+              onSearch={_.debounce(this.handleSearch, 500)}
+              onChange={_.debounce(this.handleChange, 500)}
+              onSelect={this.handleSelect}
+              notFoundContent={null}
+              listHeight={150}
+              style={{ width: '120px' }}
+            >
+              {options}
+            </Select>
+            <Tooltip title="拷贝编号">
+              <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
+            </Tooltip>
+            <Tooltip title="查询并选择">
+              <Button
+                icon={<SearchOutlined />}
+                onClick={(e) => { this.handleSearchTraj() }}
+              />
+            </Tooltip>
+          </Input.Group>
+        </div>
       </>
     )
   }

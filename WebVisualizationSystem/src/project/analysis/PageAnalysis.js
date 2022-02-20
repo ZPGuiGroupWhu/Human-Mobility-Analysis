@@ -233,7 +233,8 @@ class PageAnalysis extends Component {
 
   render() {
     // Bottom Drawer Components
-
+    const Calendar = <div style={{width: '400px', height: '50px', backgroundColor: 'red'}}>123</div>
+    const Clen = <div style={{width: '200px', height: '50px', backgroundColor: 'blue'}}>123</div>
 
 
     return (
@@ -354,7 +355,7 @@ class PageAnalysis extends Component {
               // />
               <FoldPanelSlider
                 style={{ width: '100%' }}
-                mainComponents={<div style={{width: '400px', height: '50px', backgroundColor: 'red'}}>123</div>}
+                mainComponents={[Calendar, Clen]}
                 minorComponents={<div style={{width: '400px', height: '50px', backgroundColor: 'white'}}>123</div>}
               />
           }

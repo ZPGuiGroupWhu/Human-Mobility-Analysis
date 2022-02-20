@@ -1,0 +1,67 @@
+.deck-tooltip {
+  font-size: 0.8em;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.moudle {
+  display: inline-block;
+  width: auto;
+  position: relative;
+  border: 0px solid white;
+  border-radius: 10px;
+  margin: 1px 3px 1px 3px;
+  padding: 5px;
+  text-align: end;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  color: rgb(252, 250, 250);
+
+  .text-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px;
+
+    span {
+      margin-right: 10px;
+    }
+  }
+}
+
+.Switch {
+  position: absolute;
+  right: 7px;
+}
+
+.analysis-function-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  .moudle-white {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    width: 96%;
+    position: relative;
+    border-radius: 10px;
+    margin: 3px;
+    padding: 5px;
+    background-color: #fff;
+    z-index: 1;
+    color: #111;
+  
+    .text-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px;
+      width: 100%;
+  
+      span {
+        margin-right: 10px;
+      }
+    }
+  }
+}

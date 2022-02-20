@@ -17,7 +17,7 @@ import { eventEmitter } from '@/common/func/EventEmitter';
 import { copyText } from '@/common/func/copyText.js';
 import { getOneTraj, getUserTrajRegex } from '@/network';
 // 样式
-import './DeckGLMap.css';
+import './DeckGLMap.scss';
 import '@/project/border-style.scss';
 
 
@@ -607,7 +607,7 @@ class DeckGLMap extends Component {
   };
 
   sliderToolTipFormatter = (value) => {
-    return `${value}m`
+    return `格网宽度：${value}m`
   }
   _renderTooltip() {//TooTip的渲染
     const { hoveredMessage, pointerX, pointerY } = this.state || {};
@@ -619,12 +619,12 @@ class DeckGLMap extends Component {
   }
 
   // 存储输入文本框内的轨迹编号字符串
-  handleChange = _.debounce((value) => {this.setState({ trajIdForSearch: value });}, 500);
+  handleChange = _.debounce((value) => { this.setState({ trajIdForSearch: value }); }, 500);
   handleSearch = _.debounce(async (value) => {
     let res = await getUserTrajRegex(this.props.userId, value);
     this.setState({ trajIdForSelect: res });
-  }, 500); 
-  handleSelect = (value) => {this.setState({ trajIdForSearch: value }, () => {this.handleSearchTraj()});}
+  }, 500);
+  handleSelect = (value) => { this.setState({ trajIdForSearch: value }, () => { this.handleSearchTraj() }); }
   // 查找指定的轨迹编号，并保存数据
   handleSearchTraj = async () => {
     try {
@@ -645,7 +645,7 @@ class DeckGLMap extends Component {
     const options = this.state.trajIdForSelect.sort((a, b) => (a.split('_')[1] - b.split('_')[1]))
       .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
     return (
-      <div>
+      <>
         {/* 主地图 */}
         <DeckGL
           initialViewState={{
@@ -673,62 +673,82 @@ class DeckGLMap extends Component {
           <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />
           {this._renderTooltip()}
         </DeckGL>
-        <div className={`moudle`} style={{ 'textAlign': 'center' }}>
-          <Radio.Group size={"small"} style={{ width: 186, margin: 3 }} buttonStyle="solid" onChange={this.changeGridOrSpeed} defaultValue="Grid">
-            <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Grid" >点密度</Radio.Button>
-            <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Speed">速度</Radio.Button>
-            <Radio.Button style={{ width: '34%', textAlign: 'center' }} value="None">关闭</Radio.Button>
-          </Radio.Group><br />
-          <Radio.Group size={"small"} style={{ width: 186, margin: 3 }} buttonStyle="solid" onChange={this.change3D} defaultValue="3D">
-            <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="2D">二维</Radio.Button>
-            <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="3D">三维</Radio.Button>
-            <Radio.Button style={{ width: '33%', textAlign: 'center' }} value="Heat">热力图</Radio.Button>
-          </Radio.Group><br />
-          格网宽度   <Slider tipFormatter={this.sliderToolTipFormatter} style={{ width: '180px' }} max={500} min={100} step={50} defaultValue={300} onChange={(value) => this.changeGridWidth(value)} />
-        </div>
-        <div className={`moudle`}>
-          <div className='text-button'>
-            <span>轨迹图层</span>
-            <Switch defaultChecked={true} onChange={this.changeTripsLayerShow} />
-          </div>
-          <div className='text-button'>
-            <span>OD图层</span>
-            <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} />
-          </div>
-          {
-            Object.keys(this.props.selectedTraj).length ?
-              <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
-          }
-        </div><br />
-        <div className={`moudle`}>
-          <Input.Group compact>
-            <Select
-              showSearch
-              value={this.state.trajIdForSearch}
-              defaultActiveFirstOption={false}
-              showArrow={false}
-              filterOption={false}
-              onSearch={_.debounce(this.handleSearch, 500)}
-              onChange={_.debounce(this.handleChange, 500)}
-              onSelect={this.handleSelect}
-              notFoundContent={null}
-              listHeight={150}
-              style={{ width: '130px' }}
+
+        {/* 功能栏 */}
+        <section className='analysis-function-bar moudle' style={{ width: '175px' }}>
+          <div className='moudle-white'>
+            <Radio.Group
+              size='small'
+              buttonStyle="solid"
+              onChange={this.changeGridOrSpeed}
+              defaultValue="Grid"
+              style={{ marginBottom: '5px' }}
             >
-              {options}
-            </Select>
-            <Tooltip title="copy traj_id">
-              <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
-            </Tooltip>
-            <Tooltip title="search and select">
-              <Button
-                icon={<SearchOutlined />}
-                onClick={(e) => { this.handleSearchTraj() }}
-              />
-            </Tooltip>
-          </Input.Group>
-        </div>
-      </div>
+              <Radio.Button value="Grid" >点密度</Radio.Button>
+              <Radio.Button value="Speed">速度</Radio.Button>
+              <Radio.Button value="None">关闭</Radio.Button>
+            </Radio.Group>
+            <Radio.Group
+              size='small'
+              buttonStyle="solid"
+              onChange={this.change3D}
+              defaultValue="3D"
+              style={{ marginBottom: '5px' }}
+            >
+              <Radio.Button value="2D">二维</Radio.Button>
+              <Radio.Button value="3D">三维</Radio.Button>
+              <Radio.Button value="Heat">热力图</Radio.Button>
+            </Radio.Group>
+            <Slider
+              tipFormatter={this.sliderToolTipFormatter}
+              style={{ width: '93%' }}
+              max={500} min={100} step={50}
+              defaultValue={300}
+              onChange={(value) => this.changeGridWidth(value)}
+            />
+          </div>
+          <div className={`moudle-white`}>
+            <div className='text-button'>
+              <span>轨迹图层</span>
+              <Switch defaultChecked={true} onChange={this.changeTripsLayerShow} />
+            </div>
+            <div className='text-button'>
+              <span>OD图层</span>
+              <Switch onChange={this.changeIconLayerShow} disabled={this.iconDisabled} checked={this.iconChecked} />
+            </div>
+            {
+              Object.keys(this.props.selectedTraj).length ?
+                <Button type="primary" block onClick={() => { this.props.history.push('/select/predict') }}>目的地预测</Button> : null
+            }
+          </div>
+        </section>
+        <Input.Group compact>
+          <Select
+            showSearch
+            value={this.state.trajIdForSearch}
+            defaultActiveFirstOption={false}
+            showArrow={false}
+            filterOption={false}
+            onSearch={_.debounce(this.handleSearch, 500)}
+            onChange={_.debounce(this.handleChange, 500)}
+            onSelect={this.handleSelect}
+            notFoundContent={null}
+            listHeight={150}
+            style={{ width: '120px' }}
+          >
+            {options}
+          </Select>
+          <Tooltip title="拷贝编号">
+            <Button icon={<CopyOutlined />} onClick={(e) => { copyText(this.inputRef.current) }} />
+          </Tooltip>
+          <Tooltip title="查询并选择">
+            <Button
+              icon={<SearchOutlined />}
+              onClick={(e) => { this.handleSearchTraj() }}
+            />
+          </Tooltip>
+        </Input.Group>
+      </>
     )
   }
 }

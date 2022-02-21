@@ -1,23 +1,18 @@
 .bottom-calendar-ctn {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  height: 100%;
-  margin: 0 0 0 110px;
-  border: 0px solid white;
-  border-radius: 10px;
-  // padding: 5px 15px;
-  background-color: rgba(0, 0, 0, 0.4);
+  // align-items: center;
+  width: 100%;
+  height: 180px;
   z-index: 1;
-  color: rgb(252, 250, 250);
   .calendar {
     width: 100%;
     height: 100%;
   }
   .reload-button {
     margin-top: 10px;
-    margin-right: 10px;
+    margin-left: 10px;
     height: 100%;
     z-index: 2 
-}
+  }
 }

@@ -5,8 +5,8 @@ import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
 import { ArcLayer, IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
 import _ from 'lodash';
-import { Switch, Slider, Radio, Button, Input, Tooltip, Select } from 'antd';
-import { CopyOutlined, SearchOutlined } from '@ant-design/icons';
+import { Switch, Slider, Radio, Button, Input, Tooltip, Select, Spin, Space } from 'antd';
+import { CopyOutlined, SearchOutlined, ThunderboltFilled } from '@ant-design/icons';
 import { withRouter } from 'react-router';
 // react-redux
 import { connect } from 'react-redux';
@@ -656,21 +656,44 @@ class DeckGLMap extends Component {
             bearing: 0
           }}
           controller={true}
-          layers={[
-            this.gridLayerShow && !this.heatMapLayerShow ? this.state.gridLayer : null,
-            this.heatMapLayerShow && this.gridLayerShow ? this.state.heatMapLayer : null,
-            this.heatMapLayerShow && this.speedLayerShow ? this.state.heatMapLayerSPD : null,
-            this.speedLayerShow && !this.heatMapLayerShow ? this.state.speedLayer : null,
-            this.tripsLayerShow ? this.state.tripsLayer : null,
-            this.iconLayerOShow ? this.state.iconLayerO : null,
-            this.iconLayerDShow ? this.state.iconLayerD : null,
-            this.arcLayerOneShow ? this.state.arcLayerOne : null,
-            this.tripsLayerOneShow ? this.state.tripsLayerOne : null,
-            this.iconLayerOneOShow ? this.state.iconLayerOneO : null,
-            this.iconLayerOneDShow ? this.state.iconLayerOneD : null,
-            this.state.scatterPlotLayer,
-          ]}>
-          <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />
+          layers={
+            this.props.dataloadStatus ?
+              [
+                this.gridLayerShow && !this.heatMapLayerShow ? this.state.gridLayer : null,
+                this.heatMapLayerShow && this.gridLayerShow ? this.state.heatMapLayer : null,
+                this.heatMapLayerShow && this.speedLayerShow ? this.state.heatMapLayerSPD : null,
+                this.speedLayerShow && !this.heatMapLayerShow ? this.state.speedLayer : null,
+                this.tripsLayerShow ? this.state.tripsLayer : null,
+                this.iconLayerOShow ? this.state.iconLayerO : null,
+                this.iconLayerDShow ? this.state.iconLayerD : null,
+                this.arcLayerOneShow ? this.state.arcLayerOne : null,
+                this.tripsLayerOneShow ? this.state.tripsLayerOne : null,
+                this.iconLayerOneOShow ? this.state.iconLayerOneO : null,
+                this.iconLayerOneDShow ? this.state.iconLayerOneD : null,
+                this.state.scatterPlotLayer,
+              ] : []}>
+          {this.props.dataloadStatus ? null :
+          // <div className='mask'
+          // style={{
+          //   height: '100%',
+          //   width: '100%',
+          //   color: 'red',
+          // }}
+          // >
+            <Spin
+              tip="Loading..."
+              size='large'
+              delay={100}  // 如果小于100ms则不现实spin
+              style={{
+                position: 'absolute',
+                top: '40%',
+                left: '50%',
+                zIndex: 2,
+              }}
+            />
+            // </div>
+          }
+          {<StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />}
           {this._renderTooltip()}
         </DeckGL>
 

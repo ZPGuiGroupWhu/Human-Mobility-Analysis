@@ -82,8 +82,9 @@ export default function CalendarWindow(props) {
           />
         </Tooltip>
       </div>
-      <StatisticsBar {...options[0]} data={hourCount} isDay={true}/>
-      <StatisticsBar {...options[1]} data={weekdayCount} isDay={false}/>
+      {/* 统计图表 */}
+      {/* <StatisticsBar {...options[0]} data={hourCount} isDay={true}/>
+      <StatisticsBar {...options[1]} data={weekdayCount} isDay={false}/> */}
     </div>
   )
 }

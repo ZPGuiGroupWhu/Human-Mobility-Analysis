@@ -41,9 +41,10 @@ export default function WeekHourCalendar(props) {
         grid: {
             // height: '85%',
             show: true,
-            left: '7%',
-            top: '0%',
-            bottom: '12%',
+            top: '5%',
+            bottom: '10%',
+            left: '5%',
+            right: '7%',
             borderColor: '#fff',
             borderWidth: 1,
             zlevel: 2,
@@ -115,11 +116,11 @@ export default function WeekHourCalendar(props) {
         visualMap: {
             calculable: true,
             orient: 'vertical',
-            left: cellWidth * 26 + 50,
+            left: 'right',
             min: 0,
             max: 0,
-            top: -5,
-            itemHeight: 130,
+            top: 0,
+            itemHeight: 150,
             itemWidth: 5,
             textStyle: {
                 color: '#fff',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import '../foldContent/FoldContent.scss';
+import './CharacterWindow.scss';
 // ECharts
 import * as echarts from 'echarts';
 
@@ -20,8 +20,10 @@ export default function ParallelChart(props) {
   // 特征属性
   const characters = [
     { dim: 0, name: '移动总距离' },
-    { dim: 1, name: '速度均值' },
-    { dim: 2, name: '转向角均值' }
+    { dim: 1, name: '单次最大距离'},
+    { dim: 2, name: '平均速度' },
+    { dim: 3, name: '最大速度' },
+    { dim: 4, name: '最大转向角' }
   ];
 
   // 刷选时更新characterSelected数组
@@ -163,7 +165,7 @@ export default function ParallelChart(props) {
   }, [data])
 
   return (
-    <div className='character-select'
+    <div className='character-parallel'
       ref={ref}
     ></div>
   )

@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
 import { setCalendarSelected } from '@/app/slice/analysisSlice';
-import '../foldContent/FoldContent.scss';
+import './BottomCalendar.scss';
 
 
 export default function Calendar(props) {
@@ -63,9 +63,9 @@ export default function Calendar(props) {
   }
   // 基于网页宽度，动态计算cell的宽度
   const clientWidth = document.body.clientWidth;
-  const cellWidth = (clientWidth - 310) / 78;
+  const cellWidth = (clientWidth - 310) / 50;
   // drawer高度170，减去top padding 20, bottom padding 10, 月份数字高度10，
-  const cellHeight = (200 - 40) / 7;
+  const cellHeight = (200 - 30) / 7;
   const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
   const option = {
     // title: {
@@ -83,10 +83,10 @@ export default function Calendar(props) {
       max: 100,
       calculable: true,
       orient: 'vertical',
-      left: cellWidth * 52 + 50,
-      top: 10,
-      itemHeight: 130,
-      itemWidth: 15,
+      left: 'right',
+      // top: 20,
+      itemHeight: 150,
+      itemWidth: 12,
       textStyle: {
         color: '#fff',
       },
@@ -100,7 +100,7 @@ export default function Calendar(props) {
       top: 20,
       bottom: 10,
       left: 30,
-      // right: 80,
+      right: 50,
       cellSize: cellSize,
       range: year || +new Date().getFullYear(), // 日历图坐标范围(某一年)
       itemStyle: {
@@ -109,10 +109,14 @@ export default function Calendar(props) {
       dayLabel: {
         color: '#fff',
         nameMap: 'cn',
+        fontSize: 13,
+        fontWeight: 'normal'
       },
       monthLabel: {
         color: '#fff',
         nameMap: 'cn',
+        fontSize: 13,
+        fontWeight: 'normal'
       },
       yearLabel: { show: false }
     },

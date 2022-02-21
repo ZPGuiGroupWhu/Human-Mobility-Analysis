@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import '../foldContent/FoldContent.scss';
 import ParallelChart from './ParallelChart';
 import _ from 'lodash';
 // react-redux
@@ -31,10 +30,12 @@ export default function CharacterWindow(props) {
   function handleData(data) {
     const trajData = [];
     _.forEach(data, (item, index) => {
-      let avgSpeed = getAvg(item.spd);
-      let avgAzimuth = getAvg(item.azimuth);
-      let totalDis = item.disTotal;
-      trajData.push([totalDis, avgSpeed, avgAzimuth]);
+      let totalDis = item.disTotal; // 总距离
+      let avgSpeed = getAvg(item.spd); // 平均速度
+      let maxAzimuth = Math.max(...item.azimuth); // 最大转向角
+      let maxSpd = Math.max(...item.spd) // 最大速度
+      let maxDis = Math.max(...item.dis) // 最大距离
+      trajData.push([totalDis, maxDis, avgSpeed, maxSpd, maxAzimuth]);
     });
     return trajData;
   }
@@ -65,6 +66,8 @@ export default function CharacterWindow(props) {
   }, [])
 
   return (
+    <div className='character-window-ctn'>
       <ParallelChart returnSelectedResult={returnSelectedResult} data={data} characterReload={characterReload} userId={userId} />
+    </div>
   )
 }

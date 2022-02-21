@@ -86,7 +86,7 @@ class MyDrawer extends Component {
     if (type === 'left' || type === 'right') {
       return '5px 0 5px 0';
     } else if (type === 'top' || type === 'bottom') {
-      return '0px 5px';
+      return '0px 0px';
     }
   }
   // 根据类型不同，设置不同的按钮 icon

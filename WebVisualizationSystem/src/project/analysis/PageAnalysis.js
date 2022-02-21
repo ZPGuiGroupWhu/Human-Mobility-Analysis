@@ -16,9 +16,10 @@ import Radar from "./components/tableDrawer/radar/Radar";
 import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
 import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
 import { BlockOutlined, ReloadOutlined } from "@ant-design/icons";
-import BtmDrawer from './components/btmDrawer/BtmDrawer';
+import BottomCalendar from './components/calendar/BottomCalendar';
 import ShoppingDrawer from './components/shopping/ShoppingDrawer';
-import FunctionBar from './components/function-bar/FunctionBar';
+import CalendarWindow from './components/WeekAndHour/CalendarWindow';
+import CharacterWindow from './components/characterSelect/CharacterWindow'
 import { getSelectIdsByDate, initData, getInitTrajIds } from './components/dataHandleFunction/dataHandleFunction';
 import FoldPanelSlider from '@/components/fold-panel-slider/FoldPanelSlider'
 // 网络请求
@@ -68,7 +69,7 @@ class PageAnalysis extends Component {
       date: null,
       flag: true,
       option: initlabel,
-      curId: 2, // 当前激活抽屉id
+      // curId: 2, // 当前激活抽屉id
       userData: [], // 请求的数据
       dataloadStatus: false, // 数据是否加载完毕
       ShenZhen: null, // 深圳json边界
@@ -77,37 +78,37 @@ class PageAnalysis extends Component {
     }
   };
 
-  functionBarItems = [
-    {
-      id: 0,
-      text: '日历重置',
-      icon: <ReloadOutlined />,
-      onClick: () => {
-        let originTrajs = getSelectIdsByDate(this.state.userData, this.state.originDate.start, this.state.originDate.end);
-        this.props.setCalendarSelected(originTrajs);
-        this.setState({ calendarReload: {} })
-      },
-    }, {
-      id: 1,
-      text: '星期重置',
-      icon: <ReloadOutlined />,
-      onClick: () => {
-        let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
-        this.props.setCalendarSelected(originalTrajs);
-        this.setState({ calendarReload: {} })
-      },
-    },
-    {
-      id: 2,
-      text: '特征重置',
-      icon: <ReloadOutlined />,
-      onClick: () => {
-        let originalTrajs = initData(this.state.userData);
-        this.props.setCharacterSelected(originalTrajs);
-        this.setState({ characterReload: {} })
-      },
-    }
-  ]
+  // functionBarItems = [
+  //   {
+  //     id: 0,
+  //     text: '日历重置',
+  //     icon: <ReloadOutlined />,
+  //     onClick: () => {
+  //       let originTrajs = getSelectIdsByDate(this.state.userData, this.state.originDate.start, this.state.originDate.end);
+  //       this.props.setCalendarSelected(originTrajs);
+  //       this.setState({ calendarReload: {} })
+  //     },
+  //   }, {
+  //     id: 1,
+  //     text: '星期重置',
+  //     icon: <ReloadOutlined />,
+  //     onClick: () => {
+  //       let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
+  //       this.props.setCalendarSelected(originalTrajs);
+  //       this.setState({ calendarReload: {} })
+  //     },
+  //   },
+  //   {
+  //     id: 2,
+  //     text: '特征重置',
+  //     icon: <ReloadOutlined />,
+  //     onClick: () => {
+  //       let originalTrajs = initData(this.state.userData);
+  //       this.props.setCharacterSelected(originalTrajs);
+  //       this.setState({ characterReload: {} })
+  //     },
+  //   }
+  // ]
 
   getTrajCounts = (count) => {
     this.setState({
@@ -133,13 +134,6 @@ class PageAnalysis extends Component {
   setCurId = (id) => {
     this.setState({
       curId: id,
-    })
-  }
-
-  // 设置底部 Drawer 高度和按钮样式
-  setBottomStyle = (value) => {
-    this.setState({
-      bottomHeight: value
     })
   }
 
@@ -232,9 +226,16 @@ class PageAnalysis extends Component {
 
   render() {
     // Bottom Drawer Components
-    const Calendar = <div style={{width: '400px', height: '50px', backgroundColor: 'red'}}>123</div>
-    const Clen = <div style={{width: '200px', height: '50px', backgroundColor: 'blue'}}>123</div>
-
+    const bottomCalendar = (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
+      <BottomCalendar userData={this.state.userData} timeData={this.state.date} eventName={this.EVENTNAME}
+        calendarReload={this.state.calendarReload} setCalendarReload={this.setCalendarReload} /> : null;
+    const foldContent =
+      [<CalendarWindow userData={this.state.userData} isVisible={true}
+        setCalendarReload={this.state.setCalendarReload} calendarReload={this.state.calendarReload} />,
+      (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
+        <CharacterWindow userData={this.state.userData} characterReload={this.state.characterReload}
+          setCharacterReload={this.setCharacterReload} /> : null
+      ]
 
     return (
       <div className='analysis-page'>
@@ -243,6 +244,7 @@ class PageAnalysis extends Component {
           userId={399313}
           // userData={this.state.userData.length ? this.state.userData : userData}
           userData={this.state.userData}
+          dataloadStatus={this.state.dataloadStatus}
           getTrajCounts={this.getTrajCounts}
           eventName={this.EVENTNAME}
           setRoutes={this.props.setRoutes}
@@ -332,35 +334,11 @@ class PageAnalysis extends Component {
           rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
         />
         {/* <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/> */}
-
-        <Drawer
-          height={this.state.bottomHeight}
-          type='bottom'
-          initVisible={true}
-          render={
-            () =>
-              // <BtmDrawer // Bottom Calendar
-              //   dataloadStatus={this.state.dataloadStatus}
-              //   userData={this.state.userData}
-              //   date={this.state.date}
-              //   EVENTNAME={this.EVENTNAME}
-              //   bottomBtnType={this.state.bottomBtnType}
-              //   bottomHeight={this.state.bottomHeight}
-              //   setBottomStyle={this.setBottomStyle}
-              //   calendarReload={this.state.calendarReload}
-              //   characterReload={this.state.characterReload}
-              //   setCalendarReload={this.setCalendarReload}
-              //   setCharacterReload={this.setCharacterReload}
-              // />
-              <FoldPanelSlider
-                style={{ width: '100%' }}
-                mainComponents={[Calendar, Clen]}
-                minorComponents={<div style={{width: '400px', height: '50px', backgroundColor: 'white'}}>123</div>}
-              />
-          }
-          id={2}
-          curId={this.state.curId}
-          setCurId={this.setCurId}
+        <FoldPanelSlider
+          style={{ width: '100%' }}
+          mainComponents={bottomCalendar}
+          minorComponents={[...foldContent]}
+          setBottomDrawerHeight={this.setBottomDrawerHeight}
         />
         {/* 购物车列表 */}
         <ShoppingDrawer ShenZhen={this.state.ShenZhen} />

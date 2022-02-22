@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Select, Button, Descriptions } from 'antd';
+import { Select, Button, Descriptions, Spin, Progress } from 'antd';
 import { withRouter } from 'react-router';
 import _, { divide } from "lodash";
 // 样式
@@ -72,6 +72,7 @@ class PageAnalysis extends Component {
       // curId: 2, // 当前激活抽屉id
       userData: [], // 请求的数据
       dataloadStatus: false, // 数据是否加载完毕
+      progress: 0, // 数据加载进度条刻度
       ShenZhen: null, // 深圳json边界
       calendarReload: {}, // 日历筛选重置
       characterReload: {} // 特征筛选重置
@@ -190,12 +191,16 @@ class PageAnalysis extends Component {
         }
         this.setState({
           userData: data,
+          progress: (100 * data.length / userCount).toFixed(0) // 加载进度
         })
       }
       console.log(this.state.userData)
-      this.setState({
-        dataloadStatus: true,
-      })
+      // 延迟, 给进度条 渲染完成 的进度时间
+      setTimeout(() => {
+        this.setState({
+          dataloadStatus: true,
+        })
+      }, 2300)
       // 初始化数据
       this.initData(this.state.userData)
     }
@@ -239,16 +244,51 @@ class PageAnalysis extends Component {
 
     return (
       <div className='analysis-page'>
+        {/* 蒙版 */}
+        {this.state.dataloadStatus ? null :
+          <div className='mask'>
+            <Spin className=''
+              tip="Loading..."
+              size='large'
+              delay={300}  // 如果小于300ms则不现实spin
+              style={{
+                position: 'absolute',
+                top: '40%',
+                left: '50%',
+                zIndex: 2,
+              }}
+            />
+            {/* 进度条 */}
+            <Progress
+              strokeColor={{
+                from: '#108ee9',
+                to: '#87d068',
+              }}
+              showInfo={true}
+              size='small'
+              percent={this.state.progress}
+              style={{
+                fontSize: 15,
+                position: 'relative',
+                top: '50%',
+                left: '42.5%',
+                width: '20%',
+                zIndex: 2,
+              }}
+            />
+          </div>
+        }
         {/* 主地图 */}
-        <DeckGLMap
-          userId={399313}
-          // userData={this.state.userData.length ? this.state.userData : userData}
-          userData={this.state.userData}
-          dataloadStatus={this.state.dataloadStatus}
-          getTrajCounts={this.getTrajCounts}
-          eventName={this.EVENTNAME}
-          setRoutes={this.props.setRoutes}
-        />
+        <div className='deckgl'>
+          <DeckGLMap
+            userId={399313}
+            // userData={this.state.userData.length ? this.state.userData : userData}
+            userData={this.state.userData}
+            getTrajCounts={this.getTrajCounts}
+            eventName={this.EVENTNAME}
+            setRoutes={this.props.setRoutes}
+          />
+        </div>
         {/* 右侧边栏 */}
         <TableDrawer
           id={1}

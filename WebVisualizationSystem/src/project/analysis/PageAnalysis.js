@@ -27,8 +27,7 @@ import { getUserTraj, getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
-import { setFinalSelected } from '@/app/slice/analysisSlice';
-import { setCalendarSelected, setCharacterSelected } from '@/app/slice/analysisSlice';
+import { setCalendarSelected, setCharacterSelected, setFinalSelected } from '@/app/slice/analysisSlice';
 
 
 /**
@@ -75,7 +74,7 @@ class PageAnalysis extends Component {
       progress: 0, // 数据加载进度条刻度
       ShenZhen: null, // 深圳json边界
       calendarReload: {}, // 日历筛选重置
-      characterReload: {} // 特征筛选重置
+      updateParallel: {}, // 更新parallel的标记
     }
   };
 
@@ -144,8 +143,9 @@ class PageAnalysis extends Component {
     _.forEach(data, (item) => {
       selectedData.push(item.id)
     })
+    // 根据交集的计算逻辑 只需要填满calendarselected数组即可
     this.props.setCalendarSelected(selectedData);
-    this.props.setCharacterSelected(selectedData)
+    // this.props.setCharacterSelected(selectedData)
   }
 
 
@@ -156,8 +156,11 @@ class PageAnalysis extends Component {
     if (type) {
       throw new Error('param should be Array Type');
     }
-    // 返回交集数据
-    const result = Array.from(new Set(params[0].filter(item => params[1].includes(item))))
+    let result = params.reduce((prev, cur) => {
+      if (prev.length === 0) return [...cur];
+      if (cur.length === 0) return [...prev];
+      return Array.from(new Set(prev.filter(item => cur.includes(item))))
+    }, []);
     this.props.setFinalSelected(result);
   };
 
@@ -170,12 +173,12 @@ class PageAnalysis extends Component {
     })
   }
 
-  // 特征重置
-  setCharacterReload = () => {
-    let originalTrajs = initData(this.state.userData);
-    this.props.setCharacterSelected(originalTrajs);
-    this.setState({ characterReload: {} })
-  }
+  // // 特征重置
+  // setCharacterReload = () => {
+  //   let originalTrajs = initData(this.state.userData);
+  //   this.props.setCharacterSelected(originalTrajs);
+  //   this.setState({ characterReload: {} })
+  // }
 
   componentDidMount() {
     const reqUserData = async () => {
@@ -220,6 +223,13 @@ class PageAnalysis extends Component {
     ) {
       this.handleIntersection(this.props.calendarSelected, this.props.characterSelected);
     }
+    if (
+      !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected)
+    ) {
+      this.setState({
+        updateParallel: {}
+      })
+    }
     if (!_.isEqual(prevProps.monthRange, this.props.monthRange)) {
       let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
       this.props.setCalendarSelected(originalTrajs);
@@ -236,10 +246,9 @@ class PageAnalysis extends Component {
         calendarReload={this.state.calendarReload} setCalendarReload={this.setCalendarReload} /> : null;
     const foldContent =
       [<CalendarWindow userData={this.state.userData} isVisible={true}
-        setCalendarReload={this.state.setCalendarReload} calendarReload={this.state.calendarReload} />,
+        setCalendarReload={this.setCalendarReload} calendarReload={this.state.calendarReload} />,
       (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
-        <CharacterWindow userData={this.state.userData} characterReload={this.state.characterReload}
-          setCharacterReload={this.setCharacterReload} /> : null
+        <CharacterWindow userData={this.state.userData} updateParallel={this.state.updateParallel} /> : null
       ]
 
     return (

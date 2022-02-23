@@ -1,20 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
 import './CharacterWindow.scss';
+// react-redux
+import { setCharacterSelected } from '@/app/slice/analysisSlice';
+import { useDispatch, useSelector } from 'react-redux';
 // ECharts
 import * as echarts from 'echarts';
 
 let myChart = null;
 
 export default function ParallelChart(props) {
+ 
+  const state = useSelector(state => state.analysis)
+  const dispatch = useDispatch();
+
   // Echarts 容器实例
   const ref = useRef(null);
   // 获取chart数据
   const {
-    returnSelectedResult,
     data,
-    characterReload,
-    userId
+    userId,
+    updateParallel
   } = props;
 
   // 特征属性
@@ -34,8 +40,8 @@ export default function ParallelChart(props) {
       let trajId = [userId, item].join('_'); // 字符串拼接得到轨迹编号
       return trajId;
     });
-    // 针对api自带的清除工具 如果清空 则返回所有的轨迹编号求交集，反之返回选择的轨迹编号
-    returnSelectedResult(payload.length === 0? '' : payload)
+    // 更新 characterSelected数组
+    dispatch(setCharacterSelected(payload))
   };
 
   // 选框样式
@@ -154,14 +160,12 @@ export default function ParallelChart(props) {
 
   // 当 data改变或者 finalSelected改变时
   useEffect(() => {
-    setTimeout(() => {
       myChart?.setOption({
         series: [{
           name: '特征筛选',
           data: data
         }]
       })
-    }, 100)
   }, [data])
 
   return (

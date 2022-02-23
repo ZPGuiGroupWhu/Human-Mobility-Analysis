@@ -30,15 +30,15 @@ const analysisReducer = createSlice({
     },
     setCalendarSelected: (state, action) => {
       state.calendarSelected = action.payload;
-      // console.log('calendarSelected:', action.payload)
+      console.log('calendarSelected:', action.payload)
     },
     setCharacterSelected: (state, action) => {
       state.characterSelected = action.payload;
-      // console.log('characterSelected:', action.payload)
+      console.log('characterSelected:', action.payload)
     },
     setFinalSelected: (state, action) => {
       state.finalSelected = action.payload;
-      // console.log('finalSelected:', action.payload)
+      console.log('finalSelected:', action.payload)
     },
     addSelectTrajs: (state, action) => {
       const data = action.payload;

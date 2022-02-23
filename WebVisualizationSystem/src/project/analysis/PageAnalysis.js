@@ -232,14 +232,26 @@ class PageAnalysis extends Component {
   render() {
     // Bottom Drawer Components
     const bottomCalendar = (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
-      <BottomCalendar userData={this.state.userData} timeData={this.state.date} eventName={this.EVENTNAME}
-        calendarReload={this.state.calendarReload} setCalendarReload={this.setCalendarReload} /> : null;
+      <BottomCalendar
+        userData={this.state.userData}
+        timeData={this.state.date}
+        eventName={this.EVENTNAME}
+        calendarReload={this.state.calendarReload}
+        setCalendarReload={this.setCalendarReload}
+      /> : null;
     const foldContent =
-      [<CalendarWindow userData={this.state.userData} isVisible={true}
-        setCalendarReload={this.state.setCalendarReload} calendarReload={this.state.calendarReload} />,
+      [<CalendarWindow
+        userData={this.state.userData}
+        isVisible={true}
+        setCalendarReload={this.state.setCalendarReload}
+        calendarReload={this.state.calendarReload}
+      />,
       (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
-        <CharacterWindow userData={this.state.userData} characterReload={this.state.characterReload}
-          setCharacterReload={this.setCharacterReload} /> : null
+        <CharacterWindow
+          userData={this.state.userData}
+          characterReload={this.state.characterReload}
+          setCharacterReload={this.setCharacterReload}
+        /> : null
       ]
 
     return (
@@ -282,7 +294,6 @@ class PageAnalysis extends Component {
         <div className='deckgl'>
           <DeckGLMap
             userId={399313}
-            // userData={this.state.userData.length ? this.state.userData : userData}
             userData={this.state.userData}
             getTrajCounts={this.getTrajCounts}
             eventName={this.EVENTNAME}
@@ -377,7 +388,7 @@ class PageAnalysis extends Component {
         <FoldPanelSlider
           style={{ width: '100%' }}
           mainComponents={bottomCalendar}
-          minorComponents={[...foldContent]}
+          minorComponents={foldContent}
           setBottomDrawerHeight={this.setBottomDrawerHeight}
         />
         {/* 购物车列表 */}

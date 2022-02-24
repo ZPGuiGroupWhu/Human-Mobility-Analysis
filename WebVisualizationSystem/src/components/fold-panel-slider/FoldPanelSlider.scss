@@ -27,6 +27,11 @@
   }
 
   .icon-animation {
-    transition: bottom .5s ease-in;
+    color: #fff;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    transition: bottom 0.5s ease-in;
   }
 }

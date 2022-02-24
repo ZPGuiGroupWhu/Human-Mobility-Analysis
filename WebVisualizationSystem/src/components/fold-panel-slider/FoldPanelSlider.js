@@ -17,9 +17,10 @@ export default function FoldPanelSlider(props) {
 
   const [isIconShow, setIconShow] = useState(false); // 是否显示icon提示
 
-  const handleMouseLeave = useMemo(() => { return _.debounce(() => { setFold(true); setIconShow(false) }, 300) }, []);
-  const handleMouseEnter = () => { 
-    setIconShow(true); 
+  const handleMouseLeave = useMemo(() => { return _.debounce(() => { setFold(true) }, 300) }, []);
+  const handleMouseLeaveForIcon = () => { setIconShow(false) };
+  const handleMouseEnter = () => {
+    setIconShow(true);
     handleMouseLeave.cancel(); // 取消防抖注册的延迟回调 
   };
 
@@ -28,7 +29,7 @@ export default function FoldPanelSlider(props) {
     <div
       className='fold-panel-slider-ctn'
       style={{ ...style }}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={() => { handleMouseLeave(); handleMouseLeaveForIcon(); }}
       onMouseEnter={handleMouseEnter}
     >
       <div style={{ margin: footerHeight }}>
@@ -48,26 +49,12 @@ export default function FoldPanelSlider(props) {
           isFold ? (
             <CaretUpOutlined
               className='icon-animation'
-              style={{
-                color: '#fff',
-                position: 'absolute',
-                bottom: !isIconShow ? '-30px' : '-4px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                fontSize: '30px'
-              }}
+              style={{ bottom: !isIconShow ? '-30px' : '-4px' }}
             />
           ) : (
             <CaretDownOutlined
               className='icon-animation'
-              style={{
-                color: '#fff',
-                position: 'absolute',
-                bottom: !isIconShow ? '-30px' : '-4px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                fontSize: '30px'
-              }}
+              style={{ bottom: !isIconShow ? '-30px' : '-4px' }}
             />
           )
         }

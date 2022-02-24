@@ -35,7 +35,7 @@ class DeckGLMap extends Component {
     this.OdNodes = [];//OD点集合
     this.arcLayerShow = false;//是否显示OD弧段图层
     this.heatMapLayerShow = false;//是否显示热力图图层
-    this.gridLayerShow = true;//是否显示格网图层
+    this.gridLayerShow = false;//是否显示格网图层
     this.gridLayer3D = true;//格网图层是否为3D
     this.speedLayerShow = false;//是否显示速度图层
     this.speedLayer3D = true;//速度图层是否为3D
@@ -514,7 +514,7 @@ class DeckGLMap extends Component {
     });
   };
   changeGridOrSpeed = (event) => {//切换图层
-    if (event.target.value == "Grid") {
+    if (event.target.value === "Grid") {
       this.gridLayerShow = true;
       this.speedLayerShow = false;
       if (this.heatMapLayerShow) {
@@ -522,7 +522,7 @@ class DeckGLMap extends Component {
       } else {
         this.getGridLayer();
       }
-    } else if (event.target.value == "Speed") {
+    } else if (event.target.value === "Speed") {
       this.speedLayerShow = true;
       this.gridLayerShow = false;
       if (this.heatMapLayerShow) {
@@ -530,7 +530,7 @@ class DeckGLMap extends Component {
       } else {
         this.getSpeedLayer();
       }
-    } else if (event.target.value == "None") {
+    } else if (event.target.value === "None") {
       this.speedLayerShow = false;
       this.gridLayerShow = false;
       this.setState({ hoveredMessage: "" });
@@ -683,7 +683,7 @@ class DeckGLMap extends Component {
                 size='small'
                 buttonStyle="solid"
                 onChange={this.changeGridOrSpeed}
-                defaultValue="Grid"
+                defaultValue="None"
                 style={{ marginBottom: '5px' }}
               >
                 <Radio.Button value="Grid" >点密度</Radio.Button>

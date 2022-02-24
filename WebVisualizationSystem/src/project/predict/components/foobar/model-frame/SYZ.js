@@ -5,6 +5,7 @@ import RelationChart from '@/project/predict/components/charts/relation-chart/Re
 
 export default function SYZ(props) {
   const { chart, selectedTraj } = props;
+  const styleForRadioButton = { width: '100%', textAlign: 'center', fontSize: '10px', fontWeight: 'bold' } // Radio-Button样式
 
   // 图层可视状态管理
   const initGridLayerVisible = {
@@ -75,10 +76,16 @@ export default function SYZ(props) {
 
   return (
     <>
-      <Radio.Group size={"small"} style={{ width: '100%', display: 'flex' }} buttonStyle="solid" onChange={onGridLayerChange} defaultValue="none">
-        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="spd">速度</Radio.Button>
-        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="azm" >转向角</Radio.Button>
-        <Radio.Button style={{ width: '100%', textAlign: 'center' }} value="none">关闭</Radio.Button>
+      <Radio.Group
+        size={"small"}
+        style={{ width: '100%', display: 'flex', padding: '5px', backgroundColor: '#fff', borderRadius: '5px' }}
+        buttonStyle="solid"
+        onChange={onGridLayerChange}
+        defaultValue="none"
+      >
+        <Radio.Button style={styleForRadioButton} value="spd">速度</Radio.Button>
+        <Radio.Button style={styleForRadioButton} value="azm" >转向角</Radio.Button>
+        <Radio.Button style={styleForRadioButton} value="none">关闭</Radio.Button>
       </Radio.Group>
       {/* 速度/转向角关系图 */}
       <RelationChart

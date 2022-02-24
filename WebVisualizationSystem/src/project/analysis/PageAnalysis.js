@@ -259,8 +259,7 @@ class PageAnalysis extends Component {
       (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
         <CharacterWindow
           userData={this.state.userData}
-          characterReload={this.state.characterReload}
-          setCharacterReload={this.setCharacterReload}
+          updateParallel={this.state.updateParallel}
         /> : null
       ]
 

@@ -14,18 +14,19 @@
   }
 
   .minor {
-    transition: max-height .5s ease-in-out;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
   }
-  
+
   .fold-panel-slider-footer {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
     cursor: pointer;
-  
-    &:hover {
-      background-color: red;
-    }
+  }
+
+  .icon-animation {
+    transition: bottom .5s ease-in;
   }
 }

@@ -36,7 +36,7 @@ export default function FoldPanel(props) {
       <section className='fold-panel-entry' ref={entry}>
         {renderEntryComponent(setFold)}
       </section>
-      <section className={isFold ? 'fold-panel-expand' : `fold-panel-expand fold-panel-opacity-animation`} ref={expand}>
+      <section className='fold-panel-expand' ref={expand}>
         {renderExpandComponent()}
       </section>
     </div>

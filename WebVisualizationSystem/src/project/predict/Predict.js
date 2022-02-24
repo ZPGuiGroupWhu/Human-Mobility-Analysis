@@ -20,9 +20,10 @@ export default function Predict(props) {
         <PagePredict />
         {/* 弹窗 */}
         <Modal isVisible={modalVisible} setVisible={setModalVisible}>
-          <Skeleton active title={{width: '100px'}} paragraph={false} round loading />
+          {/* <Skeleton active title={{width: '100px'}} paragraph={false} round loading />
           <Skeleton.Image loading />
-          <Skeleton active paragraph={{rows: 4}} round loading />
+          <Skeleton active paragraph={{rows: 4}} round loading /> */}
+          <EvalChart />
         </Modal>
       </div>
     </PredictCtx.Provider>

@@ -50,14 +50,15 @@ export default function EvalChart(props) {
     } else {
       myChart = evalChart;
     }
+    const titles = ['模型精度评估 - MAE', '模型精度评估 - MRE', '模型精度评估 - RMSE',]
     //静态配置项
     const option = {
       title: [
         {
-          text: '模型精度评估 - MAE',
+          text: titles[index],
           left: 'center',
           textStyle: {
-            color: '#fff'
+            color: '#000000'
           }
         }
       ],
@@ -107,7 +108,7 @@ export default function EvalChart(props) {
           formatter: (value) => {
             return '模型' + (value * 1 + 1);
           },
-          color: '#fff'
+          color: '#000000'
         }
       },
       yAxis: {
@@ -126,10 +127,10 @@ export default function EvalChart(props) {
             }
             return value.toFixed(count + 1);
           },
-          color: '#fff'
+          color: '#000000'
         },
         nameTextStyle: {
-          color: '#fff'
+          color: '#000000'
         },
         min: function (value) {
           return value.min * 0.9;

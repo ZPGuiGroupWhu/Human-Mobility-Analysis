@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, InputNumber, Space } from 'antd';
+import { Button, InputNumber, Space, Select, Tooltip } from 'antd';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import './HistAndCur.scss';
 import eventBus, { HISTACTION } from '@/app/eventBus';
@@ -14,10 +14,10 @@ export default function HistAndCur(props) {
   const showOnOff = e => { setShow(prev => !prev) }
   const showOn = e => { setShow(true) }
 
-  // 展示的天数
-  const defaultDayValue = 1;
-  const [dayNum, setDayNum] = useState(defaultDayValue);
-  const onInputChange = val => { setDayNum(val || 0) }
+
+  const [num, setNum] = useState(1); // input框内数值
+  const [dayNum, setDayNum] = useState(num); // 需要展示的轨迹天数
+  const onInputChange = val => { setNum(val || 0) }
 
   // 数据请求
   const [data, setData] = useState([]);
@@ -47,7 +47,21 @@ export default function HistAndCur(props) {
     }
   }, [])
 
+  // 单位
+  const [type, setType] = useState('day');
+  const handleSelect = (value) => { setType(value) };
 
+  // 自动根据单位转换输入框内容
+  useEffect(() => {
+    if (type === 'day') { setNum(Math.ceil(dayNum / 1)); }
+    if (type === 'week') { setNum(Math.ceil(dayNum / 7)); }
+  }, [type]);
+
+  // 更新展示的轨迹天数
+  useEffect(() => {
+    if (type === 'day') { setDayNum(num); }
+    if (type === 'week') { setDayNum(num * 7); }
+  }, [type, num]);
 
   return (
     <div className="hist-cur-row">
@@ -56,24 +70,33 @@ export default function HistAndCur(props) {
           min={0}
           max={28}
           keyboard={true}
-          controls={false}
-          defaultValue={defaultDayValue}
-          formatter={value => `${value} 天`}
+          controls={true}
+          value={num}
           onChange={val => onInputChange(val)}
           onPressEnter={e => { showOn() }}
           style={{ width: '90%' }}
         />
-        <Button
-          type="primary"
-          shape="round"
-          icon={isShow ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-          size={'small'}
-          onClick={(e) => {
-            showOnOff(e);
-          }}
+        <Select
+          defaultValue='day'
+          bordered={false} showArrow={false} style={{ color: '#fff', width: '40px' }}
+          onSelect={handleSelect}
         >
-          {isShow ? '隐藏' : '展示'}
-        </Button>
+          <Select.Option value='day'>天</Select.Option>
+          <Select.Option value='week'>周</Select.Option>
+        </Select>
+        <Tooltip title={!isShow ? '展示' : '隐藏'}>
+          <Button
+            type="primary"
+            shape="round"
+            icon={isShow ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+            size={'small'}
+            style={{ width: '50px' }}
+            onClick={(e) => {
+              showOnOff(e);
+            }}
+          >
+          </Button>
+        </Tooltip>
       </Space>
     </div>
   )

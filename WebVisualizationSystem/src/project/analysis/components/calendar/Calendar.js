@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { debounce } from '@/common/func/debounce';
-import { eventEmitter } from '@/common/func/EventEmitter';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
@@ -14,7 +13,8 @@ export default function Calendar(props) {
   const {
     timeData, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     userData, // 轨迹数据
-    calendarReload // 清除标记
+    calendarReload, // 清除标记
+    AfterMouseUp, // 鼠标抬起后执行的操作
   } = props;
   const year = str2date(Object.keys(timeData)[0]).getFullYear(); // 数据年份
 
@@ -220,6 +220,7 @@ export default function Calendar(props) {
   const [action, setAction] = useState(() => ({ mousedown: false, mousemove: false }));
   // 确保函数只执行一次
   const isdown = useRef(false);
+  // 监听筛选是否结束(鼠标抬起)
   useEffect(() => {
     const wait = 100;
 
@@ -285,12 +286,14 @@ export default function Calendar(props) {
         (startDate.getDay() > endDate.getDay())
       ) && ([start, end] = [end, start])
 
-      // 触发 eventEmitter 中的注册事件，传递选择的日期范围
+      // 传递选择的日期范围
       // start: yyyy-MM-dd
       // end: yyyy-MM-dd
       const timeSelectedReuslt = getSelectIdsByDate(start, end);
       dispatch(setCalendarSelected(timeSelectedReuslt));
-      console.log(start, end);
+      // console.log(start, end);
+
+      AfterMouseUp?.(); // 数据筛选完毕后，鼠标抬起时执行
     }
     myChart.current.on('mouseup', mouseUp)
 
@@ -299,7 +302,6 @@ export default function Calendar(props) {
       myChart.current.off('mouseup', mouseUp);
     }
   }, [myChart.current, date, action])
-
 
   // 高亮筛选部分
   useEffect(() => {
@@ -332,7 +334,7 @@ export default function Calendar(props) {
         series: [{
           name: '高亮',
           data: [],
-        },{
+        }, {
           name: 'select',
           data: []
         }]

@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Tooltip, Button } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import Calendar from './Calendar';
+import { FoldPanelSliderContext } from '@/components/fold-panel-slider/FoldPanelSlider';
+
 
 export default function BottomCalendar(props) {
-
-  const { userData, timeData, eventName, calendarReload, setCalendarReload } = props;
-
+  const { userData, timeData, calendarReload, setCalendarReload } = props;
+  const setFold = useContext(FoldPanelSliderContext);
 
   return (
     <div className='bottom-calendar-ctn'>
-      <Calendar timeData={timeData} userData={userData} eventName={eventName} calendarReload={calendarReload} />
+      <Calendar
+        timeData={timeData}
+        userData={userData}
+        calendarReload={calendarReload}
+        AfterMouseUp={() => { setFold(false) }}
+      />
       <div className='reload-button'>
         <Tooltip title="还原">
           <Button

@@ -245,7 +245,6 @@ class PageAnalysis extends Component {
       <BottomCalendar
         userData={this.state.userData}
         timeData={this.state.date}
-        eventName={this.EVENTNAME}
         calendarReload={this.state.calendarReload}
         setCalendarReload={this.setCalendarReload}
       /> : null;

@@ -202,6 +202,10 @@ export const option = {
       },
       // 若存在多个点，请在 data 传参时传入 color
       data: [],
+      tooltip: {
+        position: 'top',
+        formatter: '第{c3}次预测结果<br />经度/纬度: {c0}/{c1}<br />预测误差: {c2}<br />'
+      }
     }, {
       // 历史预测点集合的路径
       name: '历史预测轨迹',

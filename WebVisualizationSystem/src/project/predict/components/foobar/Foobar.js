@@ -31,6 +31,7 @@ const Foobar = (props) => {
   const options = [
     {
       name: 'LSI-LSTM',
+      url: 'https://sunyunzeng.com/自己第一篇SCI文章-LSI-LSTM-个体出行目的地预测模型/',
       component: <SYZ selectedTraj={selectedTraj} chart={chart} />
     },
     {

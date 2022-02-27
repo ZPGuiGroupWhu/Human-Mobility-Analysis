@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Select, Button, Tooltip } from 'antd';
-import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
+import { MenuUnfoldOutlined, MenuFoldOutlined, TagOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import './ModelFolder.scss';
 import '../common.css';
@@ -15,7 +16,8 @@ const ModelFrame = (props) => {
   const { modalVisible, setModalVisible } = useContext(PredictCtx);
 
   const defaultOption = options[0];
-  const [model, setModel] = useState(defaultOption.name);
+  const [model, setModel] = useState(defaultOption.name); // 所选模型
+  const [iframeURL, setIframeURL] = useState(''); // 模型介绍的跳转地址
 
   const onChange = (value, setFold) => {
     setModel(value);
@@ -24,6 +26,11 @@ const ModelFrame = (props) => {
       setFold(false);
     }, 0);
   }
+  const getURL = (value) => {
+    let url = options.find(item => (item.name === value))?.url ?? '';
+    setIframeURL(url);
+  }
+  const openURL = () => {iframeURL && window.open(iframeURL, '_blank')};
 
   const showModal = () => { setModalVisible(true) };
   const hideModal = () => { setModalVisible(false) };
@@ -36,16 +43,23 @@ const ModelFrame = (props) => {
       renderEntryComponent={(setFold) => (
         <div id='model-folder-entry'>
           <div id="model-folder-model-selector">
-            <Select style={{ width: 130 }} onChange={(val) => onChange(val, setFold)} >
+            <Select style={{ width: 110 }} onChange={(val) => { onChange(val, setFold); getURL(val); }} >
               {
                 options.map(({ name }, key) => (
                   <Option value={name} key={key} >{name}</Option>
                 ))
               }
             </Select>
+            <Tooltip title='模型介绍'>
+              <Button icon={<TagOutlined />} size='small' onClick={openURL}>
+              </Button>
+            </Tooltip>
             {
               !modalVisible ?
-                (<Tooltip title='模型介绍'><Button icon={<MenuUnfoldOutlined />} size='small' onClick={showModal}></Button></Tooltip>) :
+                (<Tooltip title='统计特征'>
+                  <Button icon={<MenuUnfoldOutlined />} size='small' onClick={showModal}>
+                  </Button>
+                </Tooltip>) :
                 (<Button icon={<MenuFoldOutlined />} size='small' onClick={hideModal}></Button>)
             }
 

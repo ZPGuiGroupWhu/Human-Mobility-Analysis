@@ -90,20 +90,15 @@ export const usePredict = (chart, traj, { drawOD, drawTraj, drawCurpt }) => {
   // 距离误差展示
   function showDistanceError(des, pre) {
     chart.setOption({
-      series: [
-        {
-          name: '距离可视化',
-          data: [{
-            coords: [
-              pre,  // 起点
-              des,   // 终点
-            ],
-            // 统一的样式设置
-            lineStyle: {
-            }
-          }],
-        }
-      ]
+      series: [{
+        name: '距离可视化',
+        data: [{
+          coords: [
+            pre, // 起点
+            des, // 终点
+          ],
+        }],
+      }]
     })
   }
 

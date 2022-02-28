@@ -15,6 +15,8 @@ export default function Calendar(props) {
     data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     bottomHeight,
     bottomWidth,
+    allUsers,
+    calendarReload,
     // eventName, // 注册事件名
   } = props;
 
@@ -94,43 +96,32 @@ export default function Calendar(props) {
     return data;
   }
 
-  // 寻找不包括selectedByCharts中用户的日期，并对其绘制其他颜色。
+  // 寻找不包含用户的日期，并对其绘制其他颜色。
   function highlightSelectedUsersDates(obj) {
-    // 如果selectedByCharts为空的时候，不需要对日历进行筛选添加面罩，即显示所有日期
-    if (state.selectedByCharts.length === 0) {
-      return [];
-    } else { //反之则给不包含Charts选择用户的日期加上面罩，作为提示
-      /**
-       * 当前只是以高亮的形式提示用户这些日期不包含charts筛选出的用户出行轨迹
-       * */
-      const unselectedUsersDates = [];
-      const data = [];
-      const selectedUsers = state.selectedByCharts;
-      for (const date in obj) {
-        const dateUsers = obj[date].users.map(item => parseInt(item));
-        // 求交集，如果数组长度为0，则加入数组
-        const intersection = Array.from(new Set(selectedUsers.filter(item => dateUsers.includes(item))));
-        if (intersection.length === 0) {
-          unselectedUsersDates.push(date)
+    const initData = formatData(obj);
+    const unselectedUsersDates = [];
+    const maskData = [];
+    _.forEach(initData, function (item) {
+      if (item[1] === 0) {
+        unselectedUsersDates.push(item[0])
+      }
+    })
+    // 绘制面罩，以灰色的高亮图层的形式显示。
+    for (const time of unselectedUsersDates) {
+      dateFlag[time] = false; // 将不可选取的日子的flag设置为false,及不可选取
+      maskData.push({
+        value: [time, 0],
+        symbol: 'rect',
+        itemStyle: {
+          color: 'rgba(119, 136, 153, 5)',
+        },
+        cursor: 'not-allowed', // 显示不可选取
+        emphasis: {
+          scale: false
         }
-      }
-      // 绘制面罩，以灰色的高亮图层的形式显示。
-      for (const time of unselectedUsersDates) {
-        dateFlag[time] = false; // 将不可选取的日子的flag设置为false,及不可选取
-        data.push({
-          value: [time, Reflect.get(obj, time)?.count || 0],
-          symbol: 'rect',
-          itemStyle: {
-            color: 'rgba(119, 136, 153, 5)',
-          },
-          cursor: 'not-allowed', // 显示不可选取
-          emphasis: {
-            scale: false
-          }
-        });
-      }
-      return data;
+      });
     }
+    return maskData;
   }
 
   // 自适应计算格网长宽
@@ -287,9 +278,9 @@ export default function Calendar(props) {
       }
     }
     let finalUsers = users.reduce((prev, cur) => {
-      if(prev.length === 0) return [...cur]; // 解决初始数组为[]的情况
+      if (prev.length === 0) return [...cur]; // 解决初始数组为[]的情况
       return Array.from(new Set(prev.filter(item => cur.includes(item)))) // 对每一个日期下的用户集合求交集
-    },[])
+    }, [])
     return finalUsers;
   }
 
@@ -417,7 +408,7 @@ export default function Calendar(props) {
 
   // 日历重置
   useEffect(() => {
-    setTimeout (() =>{
+    setTimeout(() => {
       myChart?.setOption({
         series: [{
           name: '高亮',
@@ -426,9 +417,9 @@ export default function Calendar(props) {
       });
     }, 600)
     //清空setSelectedByCalendar数组
-    dispatch(setSelectedByCalendar([]));
+    dispatch(setSelectedByCalendar(allUsers));
     timePeriod = [];
-  }, [props.calendarReload])
+  }, [calendarReload])
 
   return (
     <div

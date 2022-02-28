@@ -16,24 +16,6 @@ import Drawer from '@/components/drawer/Drawer';
 
 
 class PageSelect extends Component {
-  functionBarItems = [
-    {
-      id: 0,
-      text: '图表重置',
-      icon: <ReloadOutlined />,
-      onClick: () => { this.setState({ chartsReload: {} }) },
-    },
-    {
-      id: 1,
-      text: '点击重置',
-      icon: <ReloadOutlined />,
-      onClick: () => {
-        this.props.setSelectedByMapClick([]);
-        this.setState({ mapClickReload: {} })
-      },
-    }
-  ]
-
   constructor(props) {
     super(props);
     this.state = {
@@ -43,8 +25,38 @@ class PageSelect extends Component {
       bottomWidth: 0, //底部内容宽度
       chartsReload: {}, // 图表重置
       mapClickReload: {}, // 地图bar3D点击重置
-      titleVisible: true // title 初始化 可见
+      titleVisible: true, // title 初始化 可见
+      functionBarItems: [], // 重置functionBar 按钮内容
     };
+  }
+
+  // 基于selectByMapClick数组内的数据，填充functionBar内容，从而实现控制 点击重置 的显示与否
+  getFunctionBarItems = () => {
+    const functionBarItems = [];
+    functionBarItems.push(
+      {
+        id: 0,
+        text: '图表重置',
+        icon: <ReloadOutlined />,
+        onClick: () => { this.setState({ chartsReload: {} }) },
+      }
+    );
+    if(this.props.selectedByMapClick.length !== 0){
+      functionBarItems.push(
+        {
+          id: 1,
+          text: '点击重置',
+          icon: <ReloadOutlined />,
+          onClick: () => {
+            this.props.setSelectedByMapClick([]);
+            this.setState({ mapClickReload: {} })
+          }
+        }
+      )
+    };
+    this.setState({
+      functionBarItems: functionBarItems
+    })
   }
 
   // 取交集
@@ -88,6 +100,9 @@ class PageSelect extends Component {
         titleVisible: false
       })
     }, 10000)
+
+    // 初始化 functionBar 中的按钮内容
+    this.getFunctionBarItems();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -114,6 +129,13 @@ class PageSelect extends Component {
         this.props.selectedByMapBrush, this.props.selectedByMapClick);
       this.props.setSelectedUsers(result);
     };
+
+    // 控制 点击重置 的显示与否
+    if(
+      !_.isEqual(prevProps.selectedByMapClick, this.props.selectedByMapClick)
+    ){
+      this.getFunctionBarItems();
+    }
 
     // 是否隐藏标题
     if (!_.isEqual(prevState.titleVisible, this.state.titleVisible)) {
@@ -151,7 +173,7 @@ class PageSelect extends Component {
             initVisible={true}
           />
         </div>
-        <FunctionBar functionBarItems={this.functionBarItems} left={this.state.leftWidth} />
+        <FunctionBar functionBarItems={this.state.functionBarItems} left={this.state.leftWidth} />
         <MapSelectBar right={this.state.rightWidth} bottom={this.state.bottomHeight} />
       </div>
     )
@@ -165,6 +187,7 @@ const mapStateToProps = (state) => {
     selectedByParallel: state.select.selectedByParallel,
     selectedByCharts: state.select.selectedByCharts,
     selectedByCalendar: state.select.selectedByCalendar,
+    selectedBySlider: state.select.selectedBySlider,
     selectedByMapBrush: state.select.selectedByMapBrush,
     selectedByMapClick: state.select.selectedByMapClick,
   }

@@ -45,6 +45,16 @@ class Parallel extends Component {
   };
 
   option = {
+    tooltip: {
+      trigger: 'item', // 触发类型
+      confine: true, // tooltip 限制在图表区域内
+      formatter: (params) => {
+        return `外向性：${(params.data[0]).toFixed(5)}<br/>
+        开放性：${(params.data[1]).toFixed(5)}<br/>
+        神经质性：${(params.data[2]).toFixed(5)}<br/>
+        尽责性：${(params.data[3]).toFixed(5)}<br/>`
+      }
+    },
     // 工具栏配置
     toolbox: {
       feature: {
@@ -108,8 +118,8 @@ class Parallel extends Component {
           fontSize: 12,
           color: '#fff',
         },
-        min: 'dataMin',
-        max: 'dataMax',
+        min: 0,
+        max: 8,
         axisLine: {
           lineStyle: {
             color: '#fff',
@@ -128,6 +138,9 @@ class Parallel extends Component {
         name: '值',
         type: 'parallel',
         lineStyle: this.lineStyle,
+        inactiveOpacity: 0.02,
+        activeOpacity: 1,
+        realtime: true,
         data: [],
       },
     ]

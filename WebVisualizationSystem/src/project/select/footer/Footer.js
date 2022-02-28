@@ -34,11 +34,8 @@ class Footer extends Component {
       }
     }
     if (
-      this.state.maxValue !== nextState.maxValue || 
-      this.props.selectedByCharts !== nextProps.selectedByCharts || 
-      this.props.selectedByCalendar !== nextProps.selectedByCalendar || 
-      this.props.selectedByMapBrush !== nextProps.selectedByMap ||
-      this.props.selectedByMapClick !== nextProps.selectedUsers ){
+      this.props.selectedUsers !== nextProps.selectedUsers ||
+      this.state.maxValue !== nextState.maxValue) {
       // console.log("clear canvas")
       this.changeTimes = this.changeTimes + 1;
       for (let i = 0; i < $("canvas[id='deckgl-overlay']").length; i++) {
@@ -48,11 +45,7 @@ class Footer extends Component {
     }
   }
   componentDidUpdate(prevProps, prevState) {
-    if (
-      this.props.selectedByCharts !== prevProps.selectedByCharts || 
-      this.props.selectedByCalendar !== prevProps.selectedByCalendar || 
-      this.props.selectedByMapBrush !== prevProps.selectedByMapBrush ||
-      this.props.selectedByMapClick !== prevProps.selectedByMapClick) {
+    if (this.props.selectedUsers !== prevProps.selectedUsers){
       this.setState({ currentPage: 1, minValue: 0, maxValue: this.pageSize })
     }
   }
@@ -197,10 +190,6 @@ class Footer extends Component {
 const mapStateToProps = (state) => (
   {
     selectedUsers: state.select.selectedUsers,
-    selectedByCharts: state.select.selectedByCharts,
-    selectedByCalendar: state.select.selectedByCalendar,
-    selectedByMapBrush: state.select.selectedByMapBrush,
-    selectedByMapClick: state.select.selectedByMapClick,
     data: state.select.data,
   }
 )

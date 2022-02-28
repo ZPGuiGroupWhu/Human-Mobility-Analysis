@@ -7,9 +7,9 @@ const initialState = {
   reqStatus: '',
   data: null, // chart 图表数据源
   selectedUsers: [], // 筛选得到的用户编号数组(交集)
-  selectedByHistogram: [],
-  selectedByScatter: [],
-  selectedByParallel: [],
+  selectedByHistogram: [], // 柱状图筛选结果
+  selectedByScatter: [], // 散点图筛选结果
+  selectedByParallel: [], // 平行坐标轴筛选结果
   selectedByCharts: [], // 图表筛选结果, 三个结果的交集
   selectedByCalendar: [], // 日历筛选结果
   selectedByMapBrush: [], // 地图筛选结果
@@ -35,21 +35,19 @@ const selectReducer = createSlice({
   reducers: {
     setSelectedUsers: (state, action) => {
       state.selectedUsers = action.payload;
+      console.log('selected users', action.payload)
     },
     setSelectedByHistogram: (state, action) => {
       state.selectedByHistogram = action.payload;
-      // console.log('histogram', state.selectedByHistogram, 'scatter:', state.selectedByScatter, 'charts:', state.selectedByCharts)
     },
     setSelectedByScatter: (state, action) => {
       state.selectedByScatter = action.payload;
     },
     setSelectedByParallel: (state, action) => {
       state.selectedByParallel = action.payload;
-      // console.log('parallel', state.selectedByParallel)
     },
     setSelectedByCharts: (state, action) => {
       state.selectedByCharts = action.payload;
-      // console.log('charts', state.selectedByCharts)
     },
     setSelectedByCalendar: (state, action) => {
       state.selectedByCalendar = action.payload;
@@ -60,6 +58,7 @@ const selectReducer = createSlice({
     setSelectedByMapClick: (state, action) => {
       state.selectedByMapClick = action.payload;
     },
+
     setCurId: (state, action) => {
       state.curId = action.payload;
     },
@@ -104,6 +103,7 @@ export const {
   setSelectedByParallel,
   setSelectedByCharts, 
   setSelectedByCalendar, 
+  setSelectedBySlider,
   setSelectedByMapBrush,
   setSelectedByMapClick, 
   setCurId,

@@ -62,6 +62,17 @@ export default function ParallelChart(props) {
   };
 
   const option = {
+    tooltip: {
+      trigger: 'item', // 触发类型
+      confine: true, // tooltip 限制在图表区域内
+      formatter: (params) => {
+        return `移动总距离：${(params.data[0]).toFixed(5)}<br/>
+        单词最大距离：${(params.data[1]).toFixed(5)}<br/>
+        平均速度：${(params.data[2]).toFixed(5)}<br/>
+        最大速度：${(params.data[3]).toFixed(5)}<br/>
+        最大转向角：${(params.data[4]).toFixed(5)}<br/>`
+      }
+    },
     // 工具栏配置
     toolbox: {
       feature: {
@@ -76,7 +87,7 @@ export default function ParallelChart(props) {
         }
       },
       iconStyle: {
-        color: '#fff', // icon 图形填充颜色
+        color: '#fff', // icon 图形填充颜色1
         borderColor: '#fff', // icon 图形描边颜色
       },
       emphasis: {

@@ -54,7 +54,6 @@ export const getUserHistoryTraj = (id, days) => {
   })
 }
 
-
 // 获取指定轨迹编号的轨迹
 export const getOneTraj = (trajId) => {
   return baseRequest({
@@ -62,11 +61,22 @@ export const getOneTraj = (trajId) => {
   })
 }
 
-
 // 轨迹编号模糊检索
 export const getUserTrajRegex = (userid, num) => {
-  console.log(userid, num);
   return baseRequest({
     url: `/getUserTrajRegex?id=${userid}&searchNum=${num}`
   })
+}
+
+/**
+ * 请求模型分段预测结果
+ * @param {string} trajid - 轨迹编号，例如 '399313_2'
+ * @param {number|string} curpt - 轨迹片段粒度，例如 '0.1' 表示请求轨迹 1/10 段时的预测结果
+ * @returns 模型分段预测结果 [Promise]
+ */
+export const getPredictResult = (trajid, curpt) => {
+  return baseRequest({
+    method: 'get',
+    url: `/getPredictResult?cutPoint=${curpt}&trajID=${trajid}`,
+  });
 }

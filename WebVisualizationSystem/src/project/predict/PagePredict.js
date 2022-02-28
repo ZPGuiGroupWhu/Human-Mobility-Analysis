@@ -1,23 +1,21 @@
 // 第三方库
-import React, { useRef, useEffect, useState, useReducer, useCallback } from 'react';
-import * as echarts from 'echarts'; // ECharts
-import 'echarts/extension/bmap/bmap';
-import _ from 'lodash'; // lodash
+import React, { useRef, useEffect, useState, useReducer } from 'react';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import eventBus, { HISTACTION } from '@/app/eventBus';
 // 通用函数
 import { setCenterAndZoom } from '@/common/func/setCenterAndZoom'; // 自主聚焦视野
 import transcoords from '@/common/func/transcoords'; // 坐标纠偏
 import { withMouse } from '@/components/drawer/withMouse'; // 高阶函数-监听鼠标位置
+import fetchDataForPredict from './function/fetchData'; // 请求预测结果
 // 逻辑分离
 import { useCreate } from '@/project/predict/function/useCreate';
 import { usePoiSearch } from '@/project/predict/function/usePoiSearch'; // poi 查询
-import { usePredict } from '@/project/predict/function/usePredict'; // 轨迹预测
+import { useShowPredict } from '@/project/predict/function/useShowPredict'; // 轨迹预测
 import { useFeatureLayer } from '@/project/predict/function/useFeatureLayer'; // 特征热力图层展示
 import { useSingleTraj } from '@/project/predict/function/useSingleTraj'; // 从候选轨迹中选择一条轨迹
-// 通用组件
-import Drawer from '@/components/drawer/Drawer'; // 抽屉
 // 自定义组件
+import Drawer from '@/components/drawer/Drawer'; // 抽屉
 import Foobar from './components/foobar/Foobar'; // 左侧功能栏
 import RelationChart from './components/charts/relation-chart/RelationChart'; // EChart关系折线图
 import Doughnut from './components/charts/doughnut-chart/Doughnut'; // Echarts 环形统计图
@@ -31,6 +29,7 @@ import '@/project/bmap.scss';
 function PagePredict(props) {
   const [ShenZhen, setShenZhen] = useState(null); // 存放 ShenZhen.json 数据
   const [histTrajs, setHistTrajs] = useState([]); // 存放历史轨迹数据
+  const { curShowTrajId } = useSelector(state => (state.analysis)) // 当前展示的轨迹编号
   useEffect(() => {
     axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => setShenZhen(data.data)); // 请求ShenZhen.json
     // 获取前N天历史轨迹数据：数据组织+坐标纠偏
@@ -57,8 +56,8 @@ function PagePredict(props) {
     })
   }, [])
 
-  // 当前展开的抽屉 id
-  const [drawerId, setDrawerId] = useState(1);
+
+  const [drawerId, setDrawerId] = useState(1); // 当前展开的抽屉 id
 
   const selectedTraj = useSingleTraj(true); // 从候选列表中选取一条轨迹(用于展示)
 
@@ -243,6 +242,8 @@ function PagePredict(props) {
       }]
     })
   }
+
+  // 绘制当前选中轨迹
   useEffect(() => {
     if (chart && selectedTraj) {
       const { data } = selectedTraj;
@@ -267,9 +268,30 @@ function PagePredict(props) {
     }
   }, [chart, histTrajs])
 
+  // ---------------------------------------------
   // 轨迹预测: 开始 / 暂停 / 清除
-  const { predictDispatch } = usePredict(chart, selectedTraj, { drawOD, drawTraj, drawCurpt });
+  const cuts = 0.1; // 粒度
+  const nums = Math.floor(1 / cuts); // 分段数
+  const [predicts, setPredicts] = useState([]); // 预测结果
+  // 获取预测结果
+  useEffect(() => {
+    async function fetchData() {
+      let data = await fetchDataForPredict(curShowTrajId, cuts);
+      data = data.map((item, idx) => {
+        let { des, pred, dis } = item;
+        return [idx, des, pred, dis] // [编号，目的地，预测点，误差距离]
+      })
+      // console.log(data);
+      setPredicts(data);
+    }
+    fetchData();
+  }, [curShowTrajId])
+  // 预测
+  // const { predictDispatch } = usePredict(chart, selectedTraj, nums, predicts, { drawOD, drawTraj, drawCurpt });
+  const { predictDispatch } = useShowPredict(chart, selectedTraj, nums, predicts, { drawOD, drawTraj, drawCurpt });
+  // ---------------------------------------------
 
+  // ---------------------------------------------
   // poi 查询
   const {
     poiDisabled,
@@ -278,6 +300,7 @@ function PagePredict(props) {
     poiDispatch,
     searchCompleteResult,
   } = usePoiSearch(bmap, selectedTraj);
+  // ---------------------------------------------
 
 
   // 当前轨迹(速度/转向角)图层展示

@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useState } from 'react';
+import { useReducer, useEffect, useState, useRef } from 'react';
 
 export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, drawCurpt }) => {
   /**
@@ -59,9 +59,7 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
         name: '当前预测点',
         data: [{
           value: pt,
-          itemStyle: {
-            color: '#F5F5F5'
-          }
+          itemStyle: { color: '#FF0000' },
         }]
       }]
     })
@@ -69,13 +67,22 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
 
   /**
    * 绘制历史预测点
-   * @param {number[][]} pts 轨迹经纬度坐标 [[lng, lat], ...]
+   * @param {number[][]} pts 轨迹数组
    */
   function drawHistPredicts(pts) {
+    const data = pts.map(item => {
+      const val = 1 - ((pts.length - 1 - item[0]) * (1 / pts.length)).toFixed(1)
+      return {
+        value: item[1],
+        itemStyle: {
+          color: `rgba(255,0,0,${val})`,
+        },
+      }
+    })
     chart.setOption({
       series: [{
         name: '历史预测点',
-        data: pts,
+        data,
       }]
     })
   }
@@ -138,21 +145,26 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
     setTrajParts(trajSeparation(traj.data, nums));
   }, [traj, nums])
 
-  const [curPart, setCurPart] = useState(0); // 暂停的轨迹片段索引
+  // 预测主要逻辑
+  const idx = useRef(0); // 当前轨迹片段索引
   const [timer, setTimer] = useState(null); // 动画计时器
   useEffect(() => {
     if (!chart || !traj) return () => { }; // 不存在 ECharts 实例时执行
-    let i = curPart; // 当前轨迹片段索引
     // 开始预测
     if (predict.startPredict) {
       let t = setInterval(() => {
-        if (i === trajParts.length) { i = 0 }; // 循环绘制
-        drawTraj(chart, trajParts[i]); // 绘制轨迹
-        drawCurpt(chart, trajParts[i]); // 绘制当前点
-        drawPredict(results[i][2]); // 绘制预测点
-        drawHistPredicts(results.slice(0, i).map(res => (res[2]))); // 绘制历史预测点
-        showDistanceError(traj.data.slice(-1)[0], results[i][2]); // 误差可视化
-        i++;
+        const lens = trajParts.length;
+        const histPredicts = results.slice(0, idx.current).map((res, idx) => ([idx, res[2], res[3]])) // [预测坐标，编号，误差]
+        if (idx.current === lens) { idx.current = 0 }; // 循环绘制
+        // 每次循环绘制将其放入宏任务队列：因为在主线程中同时触发多个chart.setOption会报错 (移动地图也会重新触发Chart.setOption)
+        setTimeout(() => {
+          drawTraj(chart, trajParts[idx.current]); // 绘制轨迹
+          drawCurpt(chart, trajParts[idx.current]); // 绘制当前点
+          drawPredict(results[idx.current][2]); // 绘制预测点
+          drawHistPredicts(histPredicts); // 绘制历史预测点
+          showDistanceError(traj.data.slice(-1)[0], results[idx.current][2]); // 误差可视化
+          idx.current++;
+        }, 0)
       }, 1000);
       setTimer(t);
     }
@@ -160,14 +172,13 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
     // 暂停执行
     if (predict.stopPredict) {
       clearInterval(timer); // 清除计时器
-      setCurPart(i); // 记录当前暂停的轨迹片段索引
     }
 
     // 结束执行
     if (predict.clearPredict) {
       clearSingleTraj(chart); // 清除绘制
       clearInterval(timer); // 清除计时器
-      setCurPart(0); // 重置索引
+      idx.current = 0; // 重置索引
       // 绘制原轨迹
       drawOD(chart, traj.data);
       drawTraj(chart, traj.data);

@@ -76,33 +76,42 @@ function PagePredict(props) {
   // tooltip - reducer
   function tooltipReducer(state, action) {
     const { type, payload } = action;
+    const params = payload ? {
+      top: payload.top,
+      left: payload.left,
+      display: payload.display,
+      data: payload.data || null,
+    } : {};
     switch (type) {
       case 'showOrg':
         return {
           ...state,
+          ...params,
           type: 'org', // 标记tooltip触发类型
-          top: payload.top,
-          left: payload.left,
-          display: payload.display,
-          data: payload.data || null,
         };
       case 'showDest':
         return {
           ...state,
+          ...params,
           type: 'dest',
-          top: payload.top,
-          left: payload.left,
-          display: payload.display,
-          data: payload.data || null,
         }
       case 'showCur':
         return {
           ...state,
+          ...params,
           type: 'cur',
-          top: payload.top,
-          left: payload.left,
-          display: payload.display,
-          data: payload.data || null,
+        }
+      case 'showCurPredict':
+        return {
+          ...state,
+          ...params,
+          type: 'curPredict',
+        }
+      case 'showHistPredicts':
+        return {
+          ...state,
+          ...params,
+          type: 'histPredicts',
         }
       case 'hidden':
         return {
@@ -125,15 +134,24 @@ function PagePredict(props) {
     'org': () => (<ScatterTooltip title="出发地" lng={tooltip.data.value[0].toFixed(3)} lat={tooltip.data.value[1].toFixed(3)} />),
     'dest': () => (<ScatterTooltip title="目的地" lng={tooltip.data.value[0].toFixed(3)} lat={tooltip.data.value[1].toFixed(3)} />),
     'cur': () => (<ScatterTooltip title="当前点" lng={tooltip.data.value[0].toFixed(3)} lat={tooltip.data.value[1].toFixed(3)} />),
+    'curPredict': () => (
+      <ScatterTooltip title="当前预测点" lng={tooltip.data.value[0].toFixed(3)} lat={tooltip.data.value[1].toFixed(3)}>
+        <div style={{ color: '#fff' }}><strong>预测误差:</strong> {tooltip.data.value[2].toFixed(3)}</div>
+      </ScatterTooltip>
+    ),
+    'histPredicts': () => (
+      <ScatterTooltip title="历史预测点" lng={tooltip.data.value[0].toFixed(3)} lat={tooltip.data.value[1].toFixed(3)}>
+        <div style={{ color: '#fff' }}><strong>预测误差:</strong> {tooltip.data.value[2].toFixed(3)}</div>
+      </ScatterTooltip>
+    ),
   }
-  // 添加 EChart 事件监听
-  useEffect(() => {
-    if (chart) {
-      chart.on('click', { seriesName: '出发地' }, function (params) {
+  const setExtraEChartsTooltip = (chart, seriesName, actionType, componentType) => {
+    try {
+      chart.on('click', { seriesName }, function (params) {
         tooltipDispatch({
-          type: 'showOrg',
+          type: actionType,
           payload: {
-            type: 'org',
+            type: componentType,
             top: newProps.current.position.top + 'px',
             left: newProps.current.position.left + 'px',
             display: '',
@@ -141,47 +159,24 @@ function PagePredict(props) {
           }
         })
         setTimeout(() => {
-          chart.on('mouseout', { seriesName: '出发地' }, function fn(params) {
+          chart.on('mouseout', { seriesName }, function fn(params) {
             tooltipDispatch({ type: 'hidden' });
             chart.off('mouseout', fn);
           });
         }, 0)
       });
-
-      chart.on('click', { seriesName: '目的地' }, function (params) {
-        tooltipDispatch({
-          type: 'showDest',
-          payload: {
-            type: 'dest',
-            top: newProps.current.position.top + 'px',
-            left: newProps.current.position.left + 'px',
-            display: '',
-            data: params.data,
-          }
-        })
-        setTimeout(() => {
-          chart.on('mouseout', { seriesName: '目的地' }, function fn(params) {
-            tooltipDispatch({ type: 'hidden' });
-            chart.off('mouseout', fn);
-          });
-        })
-      });
-
-      chart.on('click', { seriesName: '当前点' }, function (params) {
-        tooltipDispatch({
-          type: 'showCur',
-          payload: {
-            type: 'cur',
-            top: newProps.current.position.top + 'px',
-            left: newProps.current.position.left + 'px',
-            display: '',
-            data: params.data,
-          }
-        })
-      });
-      chart.on('mouseout', { seriesName: '当前点' }, function (params) {
-        tooltipDispatch({ type: 'hidden' });
-      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  // 添加 EChart 事件监听
+  useEffect(() => {
+    if (chart) {
+      setExtraEChartsTooltip(chart, '出发地', 'showOrg', 'org');
+      setExtraEChartsTooltip(chart, '目的地', 'showDest', 'dest');
+      setExtraEChartsTooltip(chart, '当前点', 'showCur', 'cur');
+      setExtraEChartsTooltip(chart, '当前预测点', 'showCurPredict', 'curPredict');
+      setExtraEChartsTooltip(chart, '历史预测点', 'showHistPredicts', 'histPredicts');
     }
   }, [chart])
 
@@ -287,7 +282,6 @@ function PagePredict(props) {
     fetchData();
   }, [curShowTrajId])
   // 预测
-  // const { predictDispatch } = usePredict(chart, selectedTraj, nums, predicts, { drawOD, drawTraj, drawCurpt });
   const { predictDispatch } = useShowPredict(chart, selectedTraj, nums, predicts, { drawOD, drawTraj, drawCurpt });
   // ---------------------------------------------
 

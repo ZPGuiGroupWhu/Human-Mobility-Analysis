@@ -51,14 +51,14 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
 
   /**
    * 绘制当前预测点
-   * @param {number[]} pt 轨迹经纬度坐标 [lng, lat]
+   * @param {number[]} pt 当前预测点数据 [id, [lng, lat], error]
    */
   function drawPredict(pt) {
     chart.setOption({
       series: [{
         name: '当前预测点',
         data: [{
-          value: pt,
+          value: [...pt[1], pt[2]],
           itemStyle: { color: '#FF0000' },
         }]
       }]
@@ -73,7 +73,7 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
     const data = pts.map(item => {
       const val = 1 - ((pts.length - 1 - item[0]) * (1 / pts.length)).toFixed(1)
       return {
-        value: item[1],
+        value: [...item[1], item[2]],
         itemStyle: {
           color: `rgba(255,0,0,${val})`,
         },
@@ -154,13 +154,14 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
     if (predict.startPredict) {
       let t = setInterval(() => {
         const lens = trajParts.length;
-        const histPredicts = results.slice(0, idx.current).map((res, idx) => ([idx, res[2], res[3]])) // [预测坐标，编号，误差]
+        const curPredict = [idx.current, results[idx.current][2], results[idx.current][3]];
+        const histPredicts = results.slice(0, idx.current).map((res, idx) => ([idx, res[2], res[3]])); // [编号，预测坐标，误差]
         if (idx.current === lens) { idx.current = 0 }; // 循环绘制
         // 每次循环绘制将其放入宏任务队列：因为在主线程中同时触发多个chart.setOption会报错 (移动地图也会重新触发Chart.setOption)
         setTimeout(() => {
           drawTraj(chart, trajParts[idx.current]); // 绘制轨迹
           drawCurpt(chart, trajParts[idx.current]); // 绘制当前点
-          drawPredict(results[idx.current][2]); // 绘制预测点
+          drawPredict(curPredict); // 绘制预测点
           drawHistPredicts(histPredicts); // 绘制历史预测点
           showDistanceError(traj.data.slice(-1)[0], results[idx.current][2]); // 误差可视化
           idx.current++;
@@ -183,7 +184,7 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
       drawOD(chart, traj.data);
       drawTraj(chart, traj.data);
     }
-  }, [traj, trajParts, predict])
+  }, [traj, trajParts, predict.startPredict, predict.stopPredict, predict.clearPredict])
 
   return {
     predictDispatch,

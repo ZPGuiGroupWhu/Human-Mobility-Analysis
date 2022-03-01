@@ -14,7 +14,7 @@ export default function ScatterTolltip(props) {
         if (result) {
           resolve({
             address: result.address,
-            poi: result.surroundingPois[0].title,
+            poi: result.surroundingPois[0]?.title ?? '无',
           })
         }
       })
@@ -25,7 +25,7 @@ export default function ScatterTolltip(props) {
     address: '解析中...',
     poi: '解析中...',
   }
-  function geoReducer (state, action) {
+  function geoReducer(state, action) {
     switch (action.type) {
       case 'address':
         return {
@@ -45,10 +45,10 @@ export default function ScatterTolltip(props) {
   }
   const [geoResult, geoResultDispatch] = useReducer(geoReducer, initialState);
   useEffect(() => {
-    async function getResult () {
+    async function getResult() {
       let obj = await geocoder(lng, lat);
-      geoResultDispatch({type: 'address', payload: obj.address});
-      geoResultDispatch({type: 'poi', payload: obj.poi});
+      geoResultDispatch({ type: 'address', payload: obj.address });
+      geoResultDispatch({ type: 'poi', payload: obj.poi });
     }
     getResult();
   }, [lng, lat])
@@ -57,22 +57,11 @@ export default function ScatterTolltip(props) {
   return (
     <>
       <div style={{ color: '#fff' }}>{title}</div>
-      <div
-        dangerouslySetInnerHTML={{ __html: `<strong>经度:</strong> ${lng}` }}
-        style={{ color: '#fff' }}
-      ></div>
-      <div
-        dangerouslySetInnerHTML={{ __html: `<strong>纬度:</strong> ${lat}` }}
-        style={{ color: '#fff' }}
-      ></div>
-      <div
-        dangerouslySetInnerHTML={{ __html: `<strong>地址:</strong> ${geoResult.address}` }}
-        style={{ color: '#fff' }}
-      ></div>
-      <div
-        dangerouslySetInnerHTML={{ __html: `<strong>POI:</strong> ${geoResult.poi}` }}
-        style={{ color: '#fff' }}
-      ></div>
+      <div style={{ color: '#fff' }}><strong>经度:</strong> {lng}</div>
+      <div style={{ color: '#fff' }}><strong>纬度:</strong> {lat}</div>
+      <div style={{ color: '#fff' }}><strong>地址:</strong> {geoResult.address}</div>
+      <div style={{ color: '#fff' }}><strong>POI:</strong> {geoResult.poi}</div>
+      {props.children}
     </>
   )
 }

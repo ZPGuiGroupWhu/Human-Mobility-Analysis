@@ -74,6 +74,7 @@ class PageAnalysis extends Component {
       progress: 0, // 数据加载进度条刻度
       ShenZhen: null, // 深圳json边界
       calendarReload: {}, // 日历筛选重置
+      heatmapReload: {}, // week-hour heatmap重置
       updateParallel: {}, // 更新parallel的标记
     }
   };
@@ -173,6 +174,17 @@ class PageAnalysis extends Component {
     })
   }
 
+  // week-hour heatmap 重置
+  setHeatmapReload = () => {
+    /**
+     * heatmap 初始 => 根据已筛选出的轨迹 统计获得heatmap数据
+     * ...代码...
+     */
+    this.setState({
+      heatmapReload: {}
+    })
+  }
+
   // // 特征重置
   // setCharacterReload = () => {
   //   let originalTrajs = initData(this.state.userData);
@@ -252,8 +264,8 @@ class PageAnalysis extends Component {
       [<CalendarWindow
         userData={this.state.userData}
         isVisible={true}
-        setCalendarReload={this.state.setCalendarReload}
-        calendarReload={this.state.calendarReload}
+        setCalendarReload={this.setCalendarReload}
+        heatmapReload={this.state.heatmapReload}
       />,
       (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
         <CharacterWindow

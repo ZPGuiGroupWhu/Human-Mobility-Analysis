@@ -27,7 +27,7 @@ import { getUserTraj, getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
-import { setCalendarSelected, setCharacterSelected, setFinalSelected } from '@/app/slice/analysisSlice';
+import { setHeatmapSelected, setHeatmapData, setCalendarSelected, setCharacterSelected, setFinalSelected } from '@/app/slice/analysisSlice';
 
 
 /**
@@ -65,6 +65,7 @@ class PageAnalysis extends Component {
         start: '2018-01-01',
         end: '2018-12-31',
       },
+      originMonth: [0, 11],
       date: null,
       flag: true,
       option: initlabel,
@@ -78,38 +79,6 @@ class PageAnalysis extends Component {
       updateParallel: {}, // 更新parallel的标记
     }
   };
-
-  // functionBarItems = [
-  //   {
-  //     id: 0,
-  //     text: '日历重置',
-  //     icon: <ReloadOutlined />,
-  //     onClick: () => {
-  //       let originTrajs = getSelectIdsByDate(this.state.userData, this.state.originDate.start, this.state.originDate.end);
-  //       this.props.setCalendarSelected(originTrajs);
-  //       this.setState({ calendarReload: {} })
-  //     },
-  //   }, {
-  //     id: 1,
-  //     text: '星期重置',
-  //     icon: <ReloadOutlined />,
-  //     onClick: () => {
-  //       let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
-  //       this.props.setCalendarSelected(originalTrajs);
-  //       this.setState({ calendarReload: {} })
-  //     },
-  //   },
-  //   {
-  //     id: 2,
-  //     text: '特征重置',
-  //     icon: <ReloadOutlined />,
-  //     onClick: () => {
-  //       let originalTrajs = initData(this.state.userData);
-  //       this.props.setCharacterSelected(originalTrajs);
-  //       this.setState({ characterReload: {} })
-  //     },
-  //   }
-  // ]
 
   getTrajCounts = (count) => {
     this.setState({
@@ -167,30 +136,23 @@ class PageAnalysis extends Component {
 
   // 日历重置
   setCalendarReload = () => {
-    let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
-    this.props.setCalendarSelected(originalTrajs);
+    let originalTrajs = getInitTrajIds(this.state.userData, this.state.originMonth[0], this.state.originMonth[1])
+    this.props.setCalendarSelected(originalTrajs);   
     this.setState({
-      calendarReload: {}
+      calendarReload: {},
     })
+    // 清除日历时也清除heatmap
+    this.setHeatmapReload();
+    this.props.setHeatmapData([]);
   }
 
   // week-hour heatmap 重置
   setHeatmapReload = () => {
-    /**
-     * heatmap 初始 => 根据已筛选出的轨迹 统计获得heatmap数据
-     * ...代码...
-     */
+    this.props.setHeatmapSelected([]);
     this.setState({
       heatmapReload: {}
     })
   }
-
-  // // 特征重置
-  // setCharacterReload = () => {
-  //   let originalTrajs = initData(this.state.userData);
-  //   this.props.setCharacterSelected(originalTrajs);
-  //   this.setState({ characterReload: {} })
-  // }
 
   componentDidMount() {
     const reqUserData = async () => {
@@ -231,24 +193,26 @@ class PageAnalysis extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (
       !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
-      !_.isEqual(prevProps.characterSelected, this.props.characterSelected)
+      !_.isEqual(prevProps.characterSelected, this.props.characterSelected) ||
+      !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
     ) {
-      this.handleIntersection(this.props.calendarSelected, this.props.characterSelected);
+      this.handleIntersection(this.props.calendarSelected, this.props.characterSelected, this.props.heatmapSelected);
     }
     if (
-      !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected)
+      !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
+      !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
     ) {
       this.setState({
         updateParallel: {}
       })
     }
-    if (!_.isEqual(prevProps.monthRange, this.props.monthRange)) {
-      let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
-      this.props.setCalendarSelected(originalTrajs);
-      this.setState({
-        calendarReload: {}
-      })
-    }
+    // if (!_.isEqual(prevProps.monthRange, this.props.monthRange)) {
+    //   let originalTrajs = getInitTrajIds(this.state.userData, this.props.monthRange[0], this.props.monthRange[1])
+    //   this.props.setCalendarSelected(originalTrajs);
+    //   this.setState({
+    //     calendarReload: {}
+    //   })
+    // }
   }
 
   render() {
@@ -264,7 +228,7 @@ class PageAnalysis extends Component {
       [<CalendarWindow
         userData={this.state.userData}
         isVisible={true}
-        setCalendarReload={this.setCalendarReload}
+        setHeatmapReload={this.setHeatmapReload}
         heatmapReload={this.state.heatmapReload}
       />,
       (this.state.dataloadStatus && Object.keys(this.state.date).length) ? // 判断数据是否加载完毕
@@ -420,13 +384,16 @@ class PageAnalysis extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    monthRange: state.analysis.monthRange,
     calendarSelected: state.analysis.calendarSelected,
     characterSelected: state.analysis.characterSelected,
+    heatmapSelected: state.analysis.heatmapSelected,
+    finalSelected: state.analysis.finalSelected
   }
 }
 const mapDispatchToProps = (dispatch) => {
   return {
+    setHeatmapSelected: (payload) => dispatch(setHeatmapSelected(payload)),
+    setHeatmapData: (payload) => dispatch(setHeatmapData(payload)),
     setCalendarSelected: (payload) => dispatch(setCalendarSelected(payload)),
     setCharacterSelected: (payload) => dispatch(setCharacterSelected(payload)),
     setFinalSelected: (payload) => dispatch(setFinalSelected(payload))

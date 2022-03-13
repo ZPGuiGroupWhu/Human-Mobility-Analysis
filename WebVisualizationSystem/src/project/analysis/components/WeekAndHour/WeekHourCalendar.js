@@ -4,7 +4,7 @@ import _ from 'lodash';
 import './CalendarWindow.scss';
 import { useSelector, useDispatch } from 'react-redux';
 import { debounce } from '@/common/func/debounce';
-import { setCalendarSelected } from '@/app/slice/analysisSlice';
+import { setHeatmapSelected } from '@/app/slice/analysisSlice';
 
 let myChart = null;
 const timeInterval = 24; // 一天24h, 作为间隔
@@ -12,12 +12,10 @@ const timeInterval = 24; // 一天24h, 作为间隔
 export default function WeekHourCalendar(props) {
     // heatmap 数据、 user轨迹数据, slider month数据， clear标记
     const {
-        calendarData,
         userData,
         xLabel,
         yLabel,
-        monthRange,
-        calendarReload } = props;
+        heatmapReload } = props;
 
     // 获取analysis公共状态
     const state = useSelector(state => state.analysis);
@@ -169,16 +167,18 @@ export default function WeekHourCalendar(props) {
 
     // 绘制 week-hour heatmap
     useEffect(() => {
+        // 获取最大值 
+        let dataMax = state.heatmapData.length === 0 ? 0 :Math.max(...state.heatmapData.map((item) => item[2]))
         myChart.setOption({
             visualMap: {
-                max: 70
+                max: dataMax
             },
             series: [{
                 name: 'week-hour',
-                data: calendarData
+                data: state.heatmapData
             }]
         })
-    }, [calendarData])
+    }, [state.heatmapData])
 
 
     // 根据筛选的起始日期与终止日期，高亮数据
@@ -239,8 +239,8 @@ export default function WeekHourCalendar(props) {
 
     // 获取筛选的轨迹ids
     function getSelectIdsByWeekAndHour(start, end) {
-        console.log('start:', start);
-        console.log('end:', end);
+        // console.log('start:', start);
+        // console.log('end:', end);
         const timeInterval = 24; // 一天24h, 作为间隔
         let selectTrajIds = [];
         let [startWeek, startHour] = [...Object.values(start)];
@@ -250,12 +250,16 @@ export default function WeekHourCalendar(props) {
         // 结束的week-hour时间
         let endTime = endWeek * timeInterval + endHour;
         // console.log(startTime, endTime)
+        console.log('userData is', userData)
+        // 时间转换
+        const [startDate, endDate] = [...state.dateRange].filter(item => +echarts.number.parseDate(item));
+        // 筛选在日期内和时间内的轨迹
         _.forEach(userData, (item) => {
-            let month = parseInt(item.date.split('-')[1]);
+            const date = echarts.format.formatTime('yyyy-MM-dd', item.date)
             let weekday = item.weekday;
             let hour = item.hour;
             let time = weekday * timeInterval + hour
-            if (startTime <= time && time <= endTime && monthRange[0] <= month && month <= monthRange[1]) {
+            if (startTime <= time && time <= endTime && startDate <= date && date <= endDate) {
                 // console.log(item)
                 selectTrajIds.push(item.id)
             }
@@ -347,9 +351,10 @@ export default function WeekHourCalendar(props) {
                 (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0])
             ) && ([start, end] = [end, start]);
             console.log(start, end);
-            // 将数据传递到calendarData数组中
-            const timeSelectedReuslt = getSelectIdsByWeekAndHour(...getSelectedPeriod(start, end));
-            dispatch(setCalendarSelected(timeSelectedReuslt));
+            // 将数据传递到heatmapSelected数组中
+            const heatmapSelectedReuslt = getSelectIdsByWeekAndHour(...getSelectedPeriod(start, end));
+            console.log('111 is', heatmapSelectedReuslt)
+            dispatch(setHeatmapSelected(heatmapSelectedReuslt));
         };
         const mouseUp = (params) => {
             if (isdown.current) { //如果点击的是不可选取的内容，则isdown不会变为true，也就不存在mouseUp功能
@@ -373,10 +378,10 @@ export default function WeekHourCalendar(props) {
         myChart?.setOption({
             series: [{
                 name: 'highLight',
-                data: highLightCalendar(calendarData, time.start, time.end)
+                data: highLightCalendar(state.heatmapData, time.start, time.end)
             }]
         });
-    }, [calendarData, time]);
+    }, [state.heatmapData, time]);
 
     // 日历重置
     useEffect(() => {
@@ -388,7 +393,7 @@ export default function WeekHourCalendar(props) {
                 }]
             })
         }, 800);
-    }, [calendarReload])
+    }, [heatmapReload])
 
     return (
         <div className='week-hour-calendar'

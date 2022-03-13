@@ -68,6 +68,12 @@ export const getUserTrajRegex = (userid, num) => {
   })
 }
 
+export const getUserTrajectoryCountBetweenDate = (id, startDate, endDate) => {
+  return baseRequest({
+    url: `/getUserTrajectoryCountBetweenDate?endDate=${endDate}&id=${id}&startDate=${startDate}`
+  })
+}
+
 /**
  * 请求模型分段预测结果
  * @param {string} trajid - 轨迹编号，例如 '399313_2'

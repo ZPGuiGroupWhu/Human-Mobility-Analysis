@@ -3,7 +3,7 @@ import { Slider } from 'antd';
 import './CalendarWindow.scss';
 import { getUserTrajByTime } from '@/network';
 import { useDispatch } from 'react-redux';
-import { setCalendarData, setMonthRange, setBarData } from '@/app/slice/analysisSlice';
+import { setHeatmapData, setMonthRange, setBarData } from '@/app/slice/analysisSlice';
 
 export default function SliderControl(props) {
     const dispatch = useDispatch()
@@ -41,6 +41,7 @@ export default function SliderControl(props) {
                     monthMax: month[1]
                 });
                 promises.push(data);
+                // console.log(data)
             }
             try {
                 return await Promise.all(promises) // 每个Promise对象间没有依赖关系，并行请求
@@ -59,11 +60,12 @@ export default function SliderControl(props) {
                     loadData.push([i, j, weekday_hours_data[weekday_hours_data.length - 1 - i][j]])
                 }
             }
+            // console.log('loadData',loadData)
             // 重新组织数据
             loadData = loadData.map(item => {
                 return [item[1], item[0], item[2]]
             })
-            dispatch(setCalendarData(loadData)); // 更新calendarData数据
+            dispatch(setHeatmapData(loadData)); // 更新calendarData数据
         }).catch(reason => {
             console.log(reason);
         })

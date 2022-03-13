@@ -4,7 +4,7 @@ import { debounce } from '@/common/func/debounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
 import _ from 'lodash';
-import { setCalendarSelected } from '@/app/slice/analysisSlice';
+import { setDateRange, setCalendarSelected } from '@/app/slice/analysisSlice';
 import './BottomCalendar.scss';
 
 
@@ -286,9 +286,12 @@ export default function Calendar(props) {
         (startDate.getDay() > endDate.getDay())
       ) && ([start, end] = [end, start])
 
-      // 传递选择的日期范围
+      // 传递选择的日期范围， 用于加载heatmap
       // start: yyyy-MM-dd
       // end: yyyy-MM-dd
+      dispatch(setDateRange([start, end]))
+
+      // 获取日期筛选的用户
       const timeSelectedReuslt = getSelectIdsByDate(start, end);
       dispatch(setCalendarSelected(timeSelectedReuslt));
       // console.log(start, end);

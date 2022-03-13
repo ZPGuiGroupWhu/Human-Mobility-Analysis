@@ -4,8 +4,9 @@ const initialState = {
   hourCount: [],
   monthCount: [],
   weekdayCount: [],
-  calendarData: [], // 存储 某几个月下的 week-hour 数据
+  heatmapData: [], // 存储筛选日期下的 week-hour 数据
   monthRange: [], // 存储 week-hour组件中slider选取的月份
+  dateRange: [] , // 存储 canlendar筛选的起止日期
   calendarSelected: [], // 存储 时间筛选的轨迹编号
   heatmapSelected: [], // 存储 week-hour筛选的轨迹编号
   characterSelected: [], // 存储 特征筛选的轨迹编号
@@ -26,8 +27,11 @@ const analysisReducer = createSlice({
     setMonthRange: (state, action) => {
       state.monthRange = action.payload;
     }, 
-    setCalendarData: (state, action) => {
-      state.calendarData = action.payload;
+    setDateRange: (state, action) => {
+      state.dateRange = action.payload
+    },
+    setHeatmapData: (state, action) => {
+      state.heatmapData = action.payload;
     },
     setCalendarSelected: (state, action) => {
       state.calendarSelected = action.payload;
@@ -77,8 +81,8 @@ const analysisReducer = createSlice({
 
 export const {
   setBarData,
-  setMonthRange,
-  setCalendarData,
+  setDateRange,
+  setHeatmapData,
   setCalendarSelected,
   setHeatmapSelected,
   setCharacterSelected,

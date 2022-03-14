@@ -16,7 +16,7 @@ import { getUserTrajectoryCountBetweenDate } from '@/network';
 
  // 天-小时label
  const hoursLabal = (function () {
-  let hours = [...Array(24)].map((item, index) => index + 1);
+  let hours = [...Array(24)].map((item, index) => index);
   return hours.map(item => { return `${item}时` })
 })()
 

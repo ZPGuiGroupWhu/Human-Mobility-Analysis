@@ -282,12 +282,10 @@ export default function WeekHourCalendar(props) {
 
     // 获取筛选的轨迹ids
     function getSelectIdsByWeekAndHour(start, end) {
-        // console.log('start:', start);
-        // console.log('end:', end);
         const timeInterval = 24; // 一天24h, 作为间隔
         let selectTrajIds = [];
         let [startWeek, startHour] = [...Object.values(start)];
-        let [endWeek, endHour] = [...Object.values(end)];
+        let [endWeek, endHour] = [...Object.values(end)]
         // 开始的week-hour时间
         let startTime = startWeek * timeInterval + startHour;
         // 结束的week-hour时间
@@ -295,18 +293,20 @@ export default function WeekHourCalendar(props) {
         // console.log(startTime, endTime)
         console.log('userData is', userData)
         // 时间转换
-        const [startDate, endDate] = [...state.dateRange].filter(item => +echarts.number.parseDate(item));
+        let [startDate, endDate] = [...state.dateRange].map((item) => +echarts.number.parseDate(item));
+        console.log(startDate, endDate)
         // 筛选在日期内和时间内的轨迹
         _.forEach(userData, (item) => {
-            const date = echarts.format.formatTime('yyyy-MM-dd', item.date)
+            const formatDate = +echarts.number.parseDate(item.date)
             let weekday = item.weekday;
-            let hour = item.hour;
+            let hour = item.hour - 1;
             let time = weekday * timeInterval + hour
-            if (startTime <= time && time <= endTime && startDate <= date && date <= endDate) {
-                // console.log(item)
+            if (startDate <= formatDate && formatDate <= endDate && startTime <= time && time <= endTime) {
+                console.log(item)
                 selectTrajIds.push(item.id)
             }
         })
+        console.log('selectedTrajIds is', selectTrajIds)
         return selectTrajIds;
     }
 
@@ -316,11 +316,11 @@ export default function WeekHourCalendar(props) {
     function getSelectedPeriod(start, end) { // start[hour,week,count],end[hour,week,count]
         let startObj = {
             weekday: 6 - start[1],
-            hour: start[0] + 1
+            hour: start[0] - 1  // 从1开始计数，因此hour要-1
         };
         let endObj = {
             weekday: 6 - start[1],
-            hour: end[0] + 1
+            hour: end[0] - 1
         }
         return [startObj, endObj]
     }
@@ -393,10 +393,9 @@ export default function WeekHourCalendar(props) {
             (
                 (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0])
             ) && ([start, end] = [end, start]);
-            console.log(start, end);
+            console.log('hhh', start, end);
             // 将数据传递到heatmapSelected数组中
             const heatmapSelectedReuslt = getSelectIdsByWeekAndHour(...getSelectedPeriod(start, end));
-            console.log('111 is', heatmapSelectedReuslt)
             dispatch(setHeatmapSelected(heatmapSelectedReuslt));
         };
         const mouseUp = (params) => {

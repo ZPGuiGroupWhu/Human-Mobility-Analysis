@@ -28,7 +28,7 @@ export default function FoldPanelSlider(props) {
 
 
   return (
-    <FoldPanelSliderContext.Provider value={setFold}>
+    <FoldPanelSliderContext.Provider value={[setFold, isFold]}>
       <div
         className='fold-panel-slider-ctn'
         style={{ ...style }}

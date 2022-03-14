@@ -7,7 +7,7 @@ import { FoldPanelSliderContext } from '@/components/fold-panel-slider/FoldPanel
 
 export default function BottomCalendar(props) {
   const { userData, timeData, calendarReload, setCalendarReload } = props;
-  const setFold = useContext(FoldPanelSliderContext);
+  const setFold = useContext(FoldPanelSliderContext)[0];
 
   return (
     <div className='bottom-calendar-ctn'>

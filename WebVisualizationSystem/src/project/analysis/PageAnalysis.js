@@ -141,9 +141,13 @@ class PageAnalysis extends Component {
     this.setState({
       calendarReload: {},
     })
+    
     // 清除日历时也清除heatmap
     this.setHeatmapReload();
-    this.props.setHeatmapData([]);
+
+    // heatmap数据初始化
+    const heatmapInitData = this.props.heatmapData.map(item => [item[0], item[1], 0])
+    this.props.setHeatmapData(heatmapInitData);
   }
 
   // week-hour heatmap 重置
@@ -384,6 +388,7 @@ class PageAnalysis extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    heatmapData: state.analysis.heatmapData,
     calendarSelected: state.analysis.calendarSelected,
     characterSelected: state.analysis.characterSelected,
     heatmapSelected: state.analysis.heatmapSelected,

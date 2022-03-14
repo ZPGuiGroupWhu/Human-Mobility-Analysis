@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import * as echarts from 'echarts';
 import _ from 'lodash';
 import './CalendarWindow.scss';
 import { useSelector, useDispatch } from 'react-redux';
 import { debounce } from '@/common/func/debounce';
 import { setHeatmapSelected } from '@/app/slice/analysisSlice';
+import { FoldPanelSliderContext } from '@/components/fold-panel-slider/FoldPanelSlider';
 
 let myChart = null;
 const timeInterval = 24; // 一天24h, 作为间隔
@@ -17,6 +18,7 @@ export default function WeekHourCalendar(props) {
         yLabel,
         heatmapReload } = props;
 
+    const isFold = useContext(FoldPanelSliderContext)[1];
     // 获取analysis公共状态
     const state = useSelector(state => state.analysis);
     const dispatch = useDispatch();
@@ -25,8 +27,10 @@ export default function WeekHourCalendar(props) {
     const ref = useRef(null);
 
     // 格网长宽
-    const cellHeight = 18; // 周1-7
-    const cellWidth = 16; // 1点-24点
+    const totalWidth = document.body.clientWidth * 0.5;
+    const totalHeight = 180;
+    const cellHeight = (totalHeight - 10) / 7; // 周1-7
+    const cellWidth = (totalWidth - 30) / 24; // 1点-24点
     const cellSize = [cellWidth, cellHeight]; // 日历单元格大小
 
     // 参数设置
@@ -124,6 +128,14 @@ export default function WeekHourCalendar(props) {
                 color: '#fff',
                 fontSize: 12,
             },
+            inRange: {
+                color: [
+                    '#ffffbf',
+                    '#fee090',
+                    '#fdae61',
+                    '#f46d43',
+                ]
+            },
             precision: 0,
             align: 'auto',
             formatter: function (value) {
@@ -153,6 +165,13 @@ export default function WeekHourCalendar(props) {
                 symbolSize: cellSize,
                 data: [],
                 zlevel: 1,
+            }, {
+                type: 'scatter',
+                name: 'mask',
+                coordinateSystem: 'cartesian2d',
+                symbolSize: cellSize,
+                data: [],
+                zlevel: 2,
             }]
     };
 
@@ -168,7 +187,7 @@ export default function WeekHourCalendar(props) {
     // 绘制 week-hour heatmap
     useEffect(() => {
         // 获取最大值 
-        let dataMax = state.heatmapData.length === 0 ? 0 :Math.max(...state.heatmapData.map((item) => item[2]))
+        let dataMax = state.heatmapData.length === 0 ? 0 : Math.max(...state.heatmapData.map((item) => item[2]))
         myChart.setOption({
             visualMap: {
                 max: dataMax
@@ -182,7 +201,7 @@ export default function WeekHourCalendar(props) {
 
 
     // 根据筛选的起始日期与终止日期，高亮数据
-    function highLightCalendar(obj, startLoc, endLoc) {
+    function highLightHeatmap(obj, startLoc, endLoc) {
         let highLightItem = (time) => {
             return {
                 value: obj[time],
@@ -235,6 +254,30 @@ export default function WeekHourCalendar(props) {
             [start, end] = [end, start]
         }
         return [start, end]
+    }
+
+    // 寻找不包含用户的日期，并对其绘制其他颜色。
+    function maskHeatmap(data) {
+        const maskData = [];
+        let maskItem = (item) => {
+            return {
+                value: item,
+                symbol: 'rect',
+                itemStyle: {
+                    color: 'rgba(119, 136, 153, 5)',
+                },
+                cursor: 'not-allowed', // 显示不可选取
+                emphasis: {
+                    scale: false
+                }
+            }
+        }
+        for (let value of data) {
+            if (value[2] === 0) {
+                maskData.push(maskItem(value))
+            }
+        }
+        return maskData;
     }
 
     // 获取筛选的轨迹ids
@@ -378,10 +421,20 @@ export default function WeekHourCalendar(props) {
         myChart?.setOption({
             series: [{
                 name: 'highLight',
-                data: highLightCalendar(state.heatmapData, time.start, time.end)
+                data: highLightHeatmap(state.heatmapData, time.start, time.end)
             }]
         });
     }, [state.heatmapData, time]);
+
+    // mask轨迹数为0的部分
+    useEffect(() => {
+        myChart?.setOption({
+            series: [{
+                name: 'mask',
+                data: maskHeatmap(state.heatmapData)
+            }]
+        });
+    }, [state.heatmapData]);
 
     // 日历重置
     useEffect(() => {

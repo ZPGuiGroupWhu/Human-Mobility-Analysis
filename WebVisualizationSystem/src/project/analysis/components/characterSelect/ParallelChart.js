@@ -107,11 +107,16 @@ export default function ParallelChart(props) {
     visualMap: [
       {
         type: 'continuous',
-        min: 0,
-        max: 30,
-        splitNumber: 10,
+        min: 2,
+        max: 25,
         show: false,
-        dimension: 1,
+        dimension: 2,
+        inRange: {
+          color: [
+            '#d94e5d', '#eac736', '#50a3ba'
+          ]
+          // colorAlpha: [0, 1]
+        }
       }
     ],
     parallelAxis: characters.map((item) => ({

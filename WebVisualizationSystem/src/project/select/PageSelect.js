@@ -13,6 +13,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { fetchData, fetchOceanScoreAll, setSelectedUsers, setSelectedByMapClick, setSelectedByCharts } from '@/app/slice/selectSlice';
 import Drawer from '@/components/drawer/Drawer';
+import MapSelectWindow from './map/mapSelect/MapSelectWindow';
 
 
 class PageSelect extends Component {
@@ -174,7 +175,7 @@ class PageSelect extends Component {
           />
         </div>
         <FunctionBar functionBarItems={this.state.functionBarItems} left={this.state.leftWidth} />
-        <MapSelectBar right={this.state.rightWidth} bottom={this.state.bottomHeight} />
+        <MapSelectWindow right={this.state.rightWidth} bottom={this.state.bottomHeight} />
       </div>
     )
   }

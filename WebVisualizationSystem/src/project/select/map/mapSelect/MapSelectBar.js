@@ -1,14 +1,7 @@
 import React, { Component, createRef } from 'react'
 import * as echarts from 'echarts'
 import _ from 'lodash';
-import './MapSelectBar.scss';
-import '@/project/border-style.scss';
-import {
-  CompressOutlined,
-  ExpandOutlined,
-} from '@ant-design/icons';
-import { Space } from 'antd';
-import Hover from '../../charts/common/Hover';
+import './MapSelectWindow.scss';
 //测试数据
 import regionJson from '../regionJson/Shenzhen';
 import userLocations from '@/project/select/charts/bottom/jsonData/userLoctionCounts';
@@ -26,7 +19,6 @@ class MapSelectBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isVisible: true,
       mapBrushReload: {}
     }
   }
@@ -100,13 +92,13 @@ class MapSelectBar extends Component {
         selectedMode: true, // 选中模式
         select: {
           itemStyle: {
-            areaColor: '#CFB53B'      
+            areaColor: '#CFB53B'
           }
         },
         emphasis: {
           itemStyle: {
             areaColor: '#CFB53B'
-            
+
           }
         },
       },
@@ -263,58 +255,13 @@ class MapSelectBar extends Component {
 
   render() {
     return (
-      <div
-        className="map-select-bar tech-border"
+      <div 
+        ref={this.mapRef}
         style={{
-          right: this.props.right + 5,
-          bottom: this.props.bottom + 20
-        }}>
-        <div className='title-bar'>
-          <div className='map-box-title'>
-            <span style={{ color: '#fff', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: 'bold' }}>{'中国深圳2D'}</span>
-          </div>
-
-          <div className='map-box-switch'>
-            {/* 地图框选界面内容的开关动画尚未完成 */}
-            <Space>
-              {
-                this.state.isVisible ?
-                  <Hover>
-                    {
-                      ({ isHovering }) => (
-                        <CompressOutlined
-                          style={{
-                            ...this.iconStyle,
-                            color: isHovering ? '#05f8d6' : '#fff'
-                          }}
-                          onClick={this.setChartVisible}
-                        />
-                      )
-                    }
-                  </Hover>
-                  :
-                  <Hover>
-                    {
-                      ({ isHovering }) => (
-                        <ExpandOutlined
-                          style={{
-                            ...this.iconStyle,
-                            color: isHovering ? '#05f8d6' : '#fff'
-                          }}
-                          onClick={this.setChartVisible}
-                        />
-                      )
-                    }
-                  </Hover>
-              }
-            </Space>
-          </div>
-        </div>
-
-        <div className='map-select-function' ref={this.mapRef}>
-        </div>
-      </div>
-
+          height: '100%',
+          width: '100%'
+        }}
+      />
     );
   }
 }

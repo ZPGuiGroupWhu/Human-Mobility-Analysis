@@ -1,9 +1,8 @@
-.map-select-bar {
+.map-select-ctn {
   position: absolute;
   display: flex;
   flex-direction: column;
   width: 250px;
-  height: 200px;
 
   .title-bar {
     float: left;
@@ -17,7 +16,7 @@
     z-index: 2;
     .map-box-title {
       width: 100%;
-      height: 20px;
+      height: 25px;
       margin-left: 5px;
       color: #fff;
       display: inline-block;
@@ -32,8 +31,31 @@
       cursor: pointer;
     }
   }
-  .map-select-function {
+  .chart-content {
     height: 100%;
     width: 100%;
+    overflow: hidden;
+    z-index: 1;
+  }
+  // 图表显示/隐藏动画
+  .chart-enter {
+    opacity: 0;
+  }
+  .chart-enter-active {
+    opacity: 1;
+    transition: all 300ms;
+  }
+  .chart-enter-done {
+    opacity: 1;
+  }
+  .chart-exit {
+    opacity: 1;
+  }
+  .chart-exit-active {
+    opacity: 0;
+    transition: all 300ms;
+  }
+  .chart-exit-done {
+    opacity: 0;
   }
 }

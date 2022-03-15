@@ -47,7 +47,7 @@ class Footer extends Component {
     }
   }
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.selectedUsers !== prevProps.selectedUsers){
+    if (this.props.selectedUsers !== prevProps.selectedUsers) {
       this.setState({ currentPage: 1, minValue: 0, maxValue: this.pageSize })
     }
   }

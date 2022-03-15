@@ -2,8 +2,8 @@ import axios from 'axios';
 
 export function baseRequest(config) {
   const instance = axios.create({
-    baseURL: 'http://192.168.61.60:8081/',
-    // baseURL: 'http://10.244.135.231:8081/',
+    // baseURL: 'http://192.168.61.60:8081/',
+    baseURL: 'http://10.244.135.231:8081/',
   })
 
   instance.interceptors.response.use(
@@ -17,8 +17,8 @@ export function baseRequest(config) {
 
 export function baseRequestWithCancel(config, id) {
   const instance = axios.create({
-    baseURL: 'http://192.168.61.60:8081/',
-    // baseURL: 'http://10.244.135.231:8081/',
+    // baseURL: 'http://192.168.61.60:8081/',
+    baseURL: 'http://10.244.135.231:8081/',
   })
 
   instance.interceptors.request.use(

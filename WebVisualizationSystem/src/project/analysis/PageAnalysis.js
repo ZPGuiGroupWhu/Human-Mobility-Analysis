@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Select, Button, Descriptions, Spin, Progress } from 'antd';
-import { withRouter } from 'react-router';
-import _, { divide } from "lodash";
+import _ from "lodash";
 // 样式
 import '../bmap.scss';
 import './PageAnalysis.scss'
@@ -67,7 +66,7 @@ class PageAnalysis extends Component {
       },
       originMonth: [0, 11],
       date: null,
-      flag: true,
+      flag: true, 
       option: initlabel,
       // curId: 2, // 当前激活抽屉id
       userData: [], // 请求的数据

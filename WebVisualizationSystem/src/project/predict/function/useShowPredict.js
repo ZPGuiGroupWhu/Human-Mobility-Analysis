@@ -154,9 +154,9 @@ export const useShowPredict = (chart, traj, nums, results, { drawOD, drawTraj, d
     if (predict.startPredict) {
       let t = setInterval(() => {
         const lens = trajParts.length;
+        if (idx.current === lens) { idx.current = 0 }; // 循环绘制
         const curPredict = [idx.current, results[idx.current][2], results[idx.current][3]];
         const histPredicts = results.slice(0, idx.current).map((res, idx) => ([idx, res[2], res[3]])); // [编号，预测坐标，误差]
-        if (idx.current === lens) { idx.current = 0 }; // 循环绘制
         // 每次循环绘制将其放入宏任务队列：因为在主线程中同时触发多个chart.setOption会报错 (移动地图也会重新触发Chart.setOption)
         setTimeout(() => {
           drawTraj(chart, trajParts[idx.current]); // 绘制轨迹

@@ -11,7 +11,7 @@
     .popup-top{
         display: flex;
         flex-direction: row;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
         z-index: 1;
         height: 40%;
@@ -20,13 +20,13 @@
         .radar{
             padding-right: 2px;
             height: 100%;
-            width: 100%;
+            width: 110%;
         }
 
         .wordcloud{
             padding-left: 2px;
             height: 100%;
-            width: 100%;
+            width: 90%;
         }
     }
 

@@ -19,7 +19,7 @@ export default class Radar extends Component{
             }
         };
         const option = {
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             // title: {
             //     text: '大五人格-雷达图',
             //     left: 'left',
@@ -33,7 +33,7 @@ export default class Radar extends Component{
                 data: ['当前用户', '平均水平'],
                 itemGap: 25,
                 textStyle: {
-                    color: '#fff',
+                    color: '#696969',
                     fontSize: 10,
                     // fontWeight:'bold',
                 },
@@ -71,8 +71,8 @@ export default class Radar extends Component{
                 nameGap: 5,
                 name: {
                     textStyle: {
-                        color: '#fff',
-                        fontSize: 8
+                        color: '#428BD4',
+                        fontSize: 10
                     }
                 },
                 splitLine: {
@@ -82,9 +82,9 @@ export default class Radar extends Component{
                 },
                 splitArea: {
                     areaStyle: {
-                        // color: ['#77EADF','#87CEFA', '#64AFE9','#428BD4'],
-                        // shadowColor: 'rgba(0, 0, 0, 0.2)',
-                        // shadowBlur: 10
+                        color: ['#77EADF','#87CEFA', '#64AFE9','#428BD4'],
+                        shadowColor: 'rgba(0, 0, 0, 0.2)',
+                        shadowBlur: 10
                     }
                 },
                 axisLine: {

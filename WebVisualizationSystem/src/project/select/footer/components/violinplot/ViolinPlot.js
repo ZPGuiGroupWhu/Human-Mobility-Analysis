@@ -66,8 +66,8 @@ export default class ViolinPlot extends Component{
         }];
 
         let layout = {
-            paper_bgcolor: 'rgba(250,235,215,0.1)',
-            plot_bgcolor: 'rgba(250,235,215,0.1)',
+            paper_bgcolor: 'white',
+            plot_bgcolor: 'white',
             xaxis: {
                 zeroline: false,
             },

@@ -13,16 +13,11 @@ export default function WordCloud(props){
 
     // 词云图属性
     const option = {
-        backgroundColor:'black',
+        backgroundColor: 'white',
         tooltip: { //tooltip属性
             show: true,
-            position: function (pos, params, dom, rect, size) {
-                // 鼠标在左侧时 tooltip 显示到右侧，鼠标在右侧时 tooltip 显示到左侧。
-                let obj = {};
-                obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 10;
-                obj[['bottom','top'][+(pos[1] < size.viewSize[1] / 2)]] = 5;
-                return obj;
-            },
+            trigger: 'item', // 触发类型
+            confine: true, // tooltip 限制在图表区域内
             textStyle: {
                 fontSize: 2,
                 fontFamily: 'Microsoft Yahei'
@@ -30,9 +25,7 @@ export default function WordCloud(props){
         },
         series: [ {
             type: 'wordCloud',
-            name: 'wordcloud',
-            shape: 'circle',
-            gridSize: 5,//字体分布的密集程度
+            shape: 'circle', // 形状
             // maskImage: maskImage, //掩膜形状
             left: 'center',
             top: 'center',
@@ -40,25 +33,11 @@ export default function WordCloud(props){
             bottom: 'center',
             width: '100%',
             height: '100%',
-            sizeRange: [5, 12],
-
-            // Text rotation range and step in degree. Text will be rotated randomly in range [-90, 90] by rotationStep 45
-
-            rotationRange: [-90, 90],
+            sizeRange: [5, 12], // 字体大小范围
+            rotationRange: [-90, 90], // 旋转角度
             rotationStep: 45,
-
-            // size of the grid in pixels for marking the availability of the canvas
-            // the larger the grid size, the bigger the gap between words.
-
-            gridSize: 1,
-
-            // set to true to allow word being draw partly outside of the canvas.
-            // Allow word bigger than the size of the canvas to be drawn
+            gridSize: 3, // 聚集程度
             drawOutOfBound: false,
-
-            // If perform layout animation.
-            // NOTE disable it will lead to UI blocking when there is lots of words.
-            layoutAnimation: true,
             textStyle: {
                 color: function () {
                     return 'rgb(' + [
@@ -90,7 +69,6 @@ export default function WordCloud(props){
     useEffect(() => {
         myChart?.setOption({
             series: [{
-                name: 'wordcloud',
                 data: wordData
             }]
         });

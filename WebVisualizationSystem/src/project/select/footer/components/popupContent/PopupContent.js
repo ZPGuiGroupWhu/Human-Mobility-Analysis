@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 // 样式
 import './PopupContent.scss';
-import { Select, Button, Descriptions } from 'antd';
-import { BlockOutlined } from "@ant-design/icons";
+import { Select } from 'antd';
 // 组件
 import Radar from '../radar/Radar'
 import WordCloud from '../wordcloud/WordCloud'
 import ViolinPlot from "../violinplot/ViolinPlot";
+import Description from "../description/Description";
 // 大五人格数据
 import personalityData from './ocean_score.json';
 // 库
@@ -31,8 +31,8 @@ export default function PopupContent(props) {
         let shenJingScore = 0;
         let jinZeScore = 0;
         let counts = 0;
-        _.forEach(personalityData, function(item){
-            if (item.人员编号.toString() === userID){
+        _.forEach(personalityData, function (item) {
+            if (item.人员编号.toString() === userID) {
                 Person.push(item.外向性.toFixed(3));
                 Person.push(item.开放性.toFixed(3));
                 Person.push(item.神经质性.toFixed(3));
@@ -69,10 +69,10 @@ export default function PopupContent(props) {
     // 获取wordcloud数据
     function getWordData(userID) {
         const wordData = [];
-        _.forEach(personalityData, function(item){
-            if (item.人员编号.toString() === userID){
-                for (let i = 1; i < Object.keys(item).length-4; i++){
-                    wordData.push({'name':Object.keys(item)[i], 'value':Object.values(item)[i]});
+        _.forEach(personalityData, function (item) {
+            if (item.人员编号.toString() === userID) {
+                for (let i = 1; i < Object.keys(item).length - 4; i++) {
+                    wordData.push({ 'name': Object.keys(item)[i], 'value': Object.values(item)[i] });
                 }
             }
         });
@@ -84,8 +84,8 @@ export default function PopupContent(props) {
         let count = 0;
         let number = 0;
         const violinData = []
-        _.forEach(personalityData, function(item){
-            if(item['人员编号'].toString() === userID){
+        _.forEach(personalityData, function (item) {
+            if (item['人员编号'].toString() === userID) {
                 number = count;
             }
             violinData.push(item);
@@ -122,7 +122,7 @@ export default function PopupContent(props) {
                     <WordCloud wordData={wordData} />
                 </>
             </div>
-            <div className="popup-bottom">
+            <div className="popup-middle">
                 <>
                     <div className="select">
                         <Select showSearch={true}
@@ -130,10 +130,10 @@ export default function PopupContent(props) {
                             optionFilterProp="children"
                             notFoundContent="无法找到"
                             onChange={optionChange}
-                            style={{ 
+                            style={{
                                 width: '400px',
                                 fontWeight: 'bold'
-                                 }}>
+                            }}>
                             {optionData.map(item => (
                                 <Select.Option key={item.option}>{item.option}</Select.Option>
                             ))}
@@ -142,6 +142,7 @@ export default function PopupContent(props) {
                     <ViolinPlot violinData={violinData} option={option} />
                 </>
             </div>
+            <Description optionData={optionData} ></Description>
         </div>
     )
 }

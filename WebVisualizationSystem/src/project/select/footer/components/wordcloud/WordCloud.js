@@ -3,7 +3,6 @@ import * as echarts from 'echarts';
 import 'echarts-wordcloud';
 import _ from "lodash";
 import '../popupContent/PopupContent.scss';
-import { use } from 'echarts';
 
 let myChart = null;
 
@@ -41,8 +40,6 @@ export default function WordCloud(props){
             bottom: 'center',
             width: '100%',
             height: '100%',
-            right: null,
-            bottom: null,
             sizeRange: [5, 12],
 
             // Text rotation range and step in degree. Text will be rotated randomly in range [-90, 90] by rotationStep 45

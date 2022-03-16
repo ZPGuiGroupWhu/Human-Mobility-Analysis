@@ -4,10 +4,6 @@ import _ from "lodash";
 import '../popupContent/PopupContent.scss';
 
 export default class ViolinPlot extends Component{
-    constructor(props) {
-        super(props);
-    };
-
     chartRef = createRef();
     unPack(rows, key) {
         return rows.map(function(row) { return row[key]; });

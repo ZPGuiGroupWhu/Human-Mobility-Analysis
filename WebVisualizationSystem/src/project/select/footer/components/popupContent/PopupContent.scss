@@ -4,7 +4,7 @@
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: center;
-    height: 600px;
+    height: 500px;
     width: 400px;
     z-index: 1;
 
@@ -14,7 +14,7 @@
         justify-content: space-around;
         align-items: center;
         z-index: 1;
-        height: 33%;
+        height: 40%;
         width: 100%;
 
         .radar{
@@ -36,12 +36,13 @@
         justify-content: space-around;
         align-items: center;
         z-index: 1;
-        height: 33%;
+        height: 40%;
         width: 100%;
+        padding-bottom: 5px;
 
         .select{
             text-align: center;
-            padding-top: 10px;
+            padding-top: 5px;
             height: 100%;
             width: 100%;
         }
@@ -54,5 +55,7 @@
 
     .popup-bottom{
         width: 100%;
+        height: auto;
+        overflow-y: auto;
     }
 }

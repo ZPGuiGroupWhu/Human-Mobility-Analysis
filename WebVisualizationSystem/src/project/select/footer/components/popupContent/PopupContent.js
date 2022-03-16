@@ -142,7 +142,10 @@ export default function PopupContent(props) {
                     <ViolinPlot violinData={violinData} option={option} />
                 </>
             </div>
-            <Description optionData={optionData} ></Description>
+            <div className="popup-bottom">
+                <Description optionData={optionData} ></Description>
+            </div>
+            
         </div>
     )
 }

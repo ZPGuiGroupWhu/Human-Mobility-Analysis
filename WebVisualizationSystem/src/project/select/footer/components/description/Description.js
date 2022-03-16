@@ -13,11 +13,8 @@ export default function Description(props) {
             {optionData.map(item => (
                 <Descriptions.Item
                     label={item.option}
-                    labelStyle={{ textAlign: 'center' }}
-                    contextStyle={{ textAlign: 'center' }}
                 >{item.value.toFixed(5)}</Descriptions.Item>
             ))}
         </Descriptions>
-
-    );
+    )
 }

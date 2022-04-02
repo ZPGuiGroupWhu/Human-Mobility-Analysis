@@ -166,7 +166,7 @@ class PageSelect extends Component {
         <div className="left">
           <Left width={this.state.leftWidth} chartsReload={this.state.chartsReload} />
         </div>
-        <div className="footer-bar" style={{ float: "right" }} >
+        <div className="footer-bar" >
           <Drawer
             render={() => (<Footer setRoutes={this.props.setRoutes} />)}
             type="right"

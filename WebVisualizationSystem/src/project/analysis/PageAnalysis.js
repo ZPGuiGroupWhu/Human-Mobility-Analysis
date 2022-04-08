@@ -76,6 +76,7 @@ class PageAnalysis extends Component {
       calendarReload: {}, // 日历筛选重置
       heatmapReload: {}, // week-hour heatmap重置
       updateParallel: {}, // 更新parallel的标记
+      brushEnd: false,
     }
   };
 
@@ -120,6 +121,7 @@ class PageAnalysis extends Component {
 
   // 取不同筛选结果的交集
   handleIntersection = (...params) => {
+    console.log(...params)
     // 若存在元素不为数组类型，则报错
     let type = params.some(item => !Array.isArray(item));
     if (type) {
@@ -130,7 +132,7 @@ class PageAnalysis extends Component {
       if (cur.length === 0) return [...prev];
       return Array.from(new Set(prev.filter(item => cur.includes(item))))
     }, []);
-    this.props.setFinalSelected(result);
+    return result;
   };
 
   // 日历重置
@@ -199,7 +201,12 @@ class PageAnalysis extends Component {
       !_.isEqual(prevProps.characterSelected, this.props.characterSelected) ||
       !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
     ) {
-      this.handleIntersection(this.props.calendarSelected, this.props.characterSelected, this.props.heatmapSelected);
+      const result = this.handleIntersection(
+        this.props.heatmapSelected,
+        this.props.calendarSelected, 
+        this.props.characterSelected, 
+        );
+        this.props.setFinalSelected(result);
     }
     if (
       !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||

@@ -20,7 +20,6 @@ export default function ParallelChart(props) {
   const {
     data,
     userId,
-    updateParallel
   } = props;
 
   // 特征属性
@@ -176,12 +175,14 @@ export default function ParallelChart(props) {
 
   // 当 data改变或者 finalSelected改变时
   useEffect(() => {
+    setTimeout(() => {
       myChart?.setOption({
         series: [{
           name: '特征筛选',
           data: data
         }]
       })
+    },500)
   }, [data])
 
   return (

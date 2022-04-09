@@ -66,7 +66,7 @@ class PageAnalysis extends Component {
       },
       originMonth: [0, 11],
       date: null,
-      flag: true, 
+      flag: true,
       option: initlabel,
       // curId: 2, // 当前激活抽屉id
       userData: [], // 请求的数据
@@ -121,7 +121,6 @@ class PageAnalysis extends Component {
 
   // 取不同筛选结果的交集
   handleIntersection = (...params) => {
-    console.log(...params)
     // 若存在元素不为数组类型，则报错
     let type = params.some(item => !Array.isArray(item));
     if (type) {
@@ -138,11 +137,11 @@ class PageAnalysis extends Component {
   // 日历重置
   setCalendarReload = () => {
     let originalTrajs = getInitTrajIds(this.state.userData, this.state.originMonth[0], this.state.originMonth[1])
-    this.props.setCalendarSelected(originalTrajs);   
+    this.props.setCalendarSelected(originalTrajs);
     this.setState({
       calendarReload: {},
     })
-    
+
     // 清除日历时也清除heatmap
     this.setHeatmapReload();
 
@@ -203,14 +202,13 @@ class PageAnalysis extends Component {
     ) {
       const result = this.handleIntersection(
         this.props.heatmapSelected,
-        this.props.calendarSelected, 
-        this.props.characterSelected, 
-        );
-        this.props.setFinalSelected(result);
+        this.props.calendarSelected,
+        this.props.characterSelected,
+      );
+      this.props.setFinalSelected(result);
     }
     if (
-      !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
-      !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
+      !_.isEqual(prevProps.finalSelected, this.props.finalSelected)
     ) {
       this.setState({
         updateParallel: {}

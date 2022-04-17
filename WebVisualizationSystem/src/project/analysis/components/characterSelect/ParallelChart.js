@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 import './CharacterWindow.scss';
 // react-redux
 import { setCharacterSelected } from '@/app/slice/analysisSlice';
 import { useDispatch, useSelector } from 'react-redux';
 // ECharts
 import * as echarts from 'echarts';
+
 
 let myChart = null;
 
@@ -18,27 +19,25 @@ export default function ParallelChart(props) {
   const ref = useRef(null);
   // 获取chart数据
   const {
-    data,
-    userId,
-    updateParallel
+    data
   } = props;
 
   // 特征属性
   const characters = [
-    { dim: 0, name: '移动总距离' },
-    { dim: 1, name: '单次最大距离'},
-    { dim: 2, name: '平均速度' },
-    { dim: 3, name: '最大速度' },
-    { dim: 4, name: '最大转向角' }
+    { dim: 1, name: '移动总距离' },
+    { dim: 2, name: '单次最大距离'},
+    { dim: 3, name: '平均速度' },
+    { dim: 4, name: '最大速度' },
+    { dim: 5, name: '最大转向角' }
   ];
 
   // 刷选时更新characterSelected数组
-  function onAxisAreaSelected(params) {
+  const onAxisAreaSelected = (params)  => {
     let series0 = myChart.getModel().getSeries()[0];
+    let chartData = series0.option.data;
     let indices0 = series0.getRawIndicesByActiveState('active');
     const payload = indices0.map(item => {
-      let trajId = [userId, item].join('_'); // 字符串拼接得到轨迹编号
-      return trajId;
+      return chartData[item][0];  //得到轨迹编号
     });
     // 更新 characterSelected数组
     dispatch(setCharacterSelected(payload))
@@ -66,11 +65,12 @@ export default function ParallelChart(props) {
       trigger: 'item', // 触发类型
       confine: true, // tooltip 限制在图表区域内
       formatter: (params) => {
-        return `移动总距离：${(params.data[0]).toFixed(5)}<br/>
-        单词最大距离：${(params.data[1]).toFixed(5)}<br/>
-        平均速度：${(params.data[2]).toFixed(5)}<br/>
-        最大速度：${(params.data[3]).toFixed(5)}<br/>
-        最大转向角：${(params.data[4]).toFixed(5)}<br/>`
+        return `轨迹编号：${params.data[0]}<br/>
+        移动总距离：${(params.data[1]).toFixed(5)}<br/>
+        单次最大距离：${(params.data[2]).toFixed(5)}<br/>
+        平均速度：${(params.data[3]).toFixed(5)}<br/>
+        最大速度：${(params.data[4]).toFixed(5)}<br/>
+        最大转向角：${(params.data[5]).toFixed(5)}<br/>`
       }
     },
     // 工具栏配置
@@ -110,7 +110,7 @@ export default function ParallelChart(props) {
         min: 2,
         max: 25,
         show: false,
-        dimension: 2,
+        dimension: 3,
         inRange: {
           color: [
             '#d94e5d', '#eac736', '#50a3ba'
@@ -176,12 +176,14 @@ export default function ParallelChart(props) {
 
   // 当 data改变或者 finalSelected改变时
   useEffect(() => {
+    setTimeout(() => { // 延迟缓冲, 避免坐标轴刷新问题
       myChart?.setOption({
         series: [{
           name: '特征筛选',
           data: data
         }]
       })
+    },800)
   }, [data])
 
   return (

@@ -51,15 +51,13 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
     width: $auto-width;
     height: 100%;
     float: left;
-    margin-left: -100%;
   }
 
   .footer-bar {
     //width: $auto-width;
     width: 200px;
     height: 100%;
-    float: left;
-    margin-left: -200px;
+    float: right;
   }
 }
 

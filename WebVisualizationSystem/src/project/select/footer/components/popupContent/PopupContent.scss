@@ -1,0 +1,61 @@
+.popup-content-ctn{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+    height: 500px;
+    width: 400px;
+    z-index: 1;
+
+    .popup-top{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1;
+        height: 40%;
+        width: 100%;
+
+        .radar{
+            padding-right: 2px;
+            height: 100%;
+            width: 110%;
+        }
+
+        .wordcloud{
+            padding-left: 2px;
+            height: 100%;
+            width: 90%;
+        }
+    }
+
+    .popup-middle{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1;
+        height: 40%;
+        width: 100%;
+        padding-bottom: 5px;
+
+        .select{
+            text-align: center;
+            padding-top: 5px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .violinplot{
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .popup-bottom{
+        width: 100%;
+        height: auto;
+        overflow-y: auto;
+    }
+}

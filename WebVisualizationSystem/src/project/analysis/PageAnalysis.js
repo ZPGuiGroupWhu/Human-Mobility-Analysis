@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Select, Button, Descriptions, Spin, Progress } from 'antd';
-import { withRouter } from 'react-router';
-import _, { divide } from "lodash";
+import _ from "lodash";
 // 样式
 import '../bmap.scss';
 import './PageAnalysis.scss'
@@ -77,6 +76,7 @@ class PageAnalysis extends Component {
       calendarReload: {}, // 日历筛选重置
       heatmapReload: {}, // week-hour heatmap重置
       updateParallel: {}, // 更新parallel的标记
+      brushEnd: false,
     }
   };
 
@@ -131,17 +131,17 @@ class PageAnalysis extends Component {
       if (cur.length === 0) return [...prev];
       return Array.from(new Set(prev.filter(item => cur.includes(item))))
     }, []);
-    this.props.setFinalSelected(result);
+    return result;
   };
 
   // 日历重置
   setCalendarReload = () => {
     let originalTrajs = getInitTrajIds(this.state.userData, this.state.originMonth[0], this.state.originMonth[1])
-    this.props.setCalendarSelected(originalTrajs);   
+    this.props.setCalendarSelected(originalTrajs);
     this.setState({
       calendarReload: {},
     })
-    
+
     // 清除日历时也清除heatmap
     this.setHeatmapReload();
 
@@ -200,11 +200,15 @@ class PageAnalysis extends Component {
       !_.isEqual(prevProps.characterSelected, this.props.characterSelected) ||
       !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
     ) {
-      this.handleIntersection(this.props.calendarSelected, this.props.characterSelected, this.props.heatmapSelected);
+      const result = this.handleIntersection(
+        this.props.heatmapSelected,
+        this.props.calendarSelected,
+        this.props.characterSelected,
+      );
+      this.props.setFinalSelected(result);
     }
     if (
-      !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
-      !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
+      !_.isEqual(prevProps.finalSelected, this.props.finalSelected)
     ) {
       this.setState({
         updateParallel: {}

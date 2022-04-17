@@ -11,9 +11,6 @@ export default function CharacterWindow(props) {
 
   const [data, setData] = useState([]);
 
-  // 被选择的用户编号
-  const userId = userData[0].userid;
-
   // 计算平均值
   function getAvg(arr) {
     let sum = 0.0;
@@ -28,12 +25,13 @@ export default function CharacterWindow(props) {
     const trajData = [];
     _.forEach(data, (item, index) => {
       if (state.finalSelected.includes(item.id)) {
+        let trajId = item.id; // 轨迹编号
         let totalDis = item.disTotal; // 总距离
         let avgSpeed = getAvg(item.spd); // 平均速度
         let maxAzimuth = Math.max(...item.azimuth); // 最大转向角
         let maxSpd = Math.max(...item.spd) // 最大速度
         let maxDis = Math.max(...item.dis) // 最大距离
-        trajData.push([totalDis, maxDis, avgSpeed, maxSpd, maxAzimuth]);
+        trajData.push([trajId, totalDis, maxDis, avgSpeed, maxSpd, maxAzimuth]);
       }
     });
     return trajData;
@@ -47,7 +45,7 @@ export default function CharacterWindow(props) {
 
   return (
     <div className='character-window-ctn'>
-      <ParallelChart data={data} userId={userId} updateParalel={updateParallel}/>
+      <ParallelChart data={data} updateParalel={updateParallel}/>
     </div>
   )
 }

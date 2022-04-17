@@ -291,7 +291,6 @@ export default function WeekHourCalendar(props) {
         // 结束的week-hour时间
         let endTime = endWeek * timeInterval + endHour;
         // console.log(startTime, endTime)
-        console.log('userData is', userData)
         // 时间转换
         let [startDate, endDate] = [...state.dateRange].map((item) => +echarts.number.parseDate(item));
         console.log(startDate, endDate)
@@ -306,7 +305,6 @@ export default function WeekHourCalendar(props) {
                 selectTrajIds.push(item.id)
             }
         })
-        console.log('selectedTrajIds is', selectTrajIds)
         return selectTrajIds;
     }
 
@@ -393,7 +391,6 @@ export default function WeekHourCalendar(props) {
             (
                 (start[1] * timeInterval + start[0] < end[1] * timeInterval + end[0])
             ) && ([start, end] = [end, start]);
-            console.log('hhh', start, end);
             // 将数据传递到heatmapSelected数组中
             const heatmapSelectedReuslt = getSelectIdsByWeekAndHour(...getSelectedPeriod(start, end));
             dispatch(setHeatmapSelected(heatmapSelectedReuslt));

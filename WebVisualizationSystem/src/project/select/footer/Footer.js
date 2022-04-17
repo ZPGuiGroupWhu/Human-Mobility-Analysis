@@ -11,6 +11,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
+// 组建
+import PopupContent from './components/popupContent/PopupContent';
 
 
 class Footer extends Component {
@@ -129,9 +131,10 @@ class Footer extends Component {
                     </div>
                     } trigger="click" placement="left"
                     content={
-                      <div style={{ width: "500px" }}>
-                        {this.getPopInfo(val.id)}
-                      </div>
+                      <PopupContent id = {val.id}/>
+                      // <div style={{ width: "500px" }}>
+                      //   {this.getPopInfo(val.id)}
+                      // </div>
                     } >
                     <Card
                       title={val.id}

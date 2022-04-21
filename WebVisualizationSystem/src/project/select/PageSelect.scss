@@ -8,18 +8,41 @@ $reverse-auto-width: clamp(-400px, -22rem, -250px);
   height: calc(100vh - 50px); // header 40px + padding 10px
 
   .center-title {
-    width: 100%;
-    height: 30px;
-    color: rgb(152, 243, 243);
-    text-align: center;
-    padding-top: 10px;
-    display: inline-block;
-    align-items: center;
-    position: absolute;
     z-index: 2;
+    position: absolute;
+    // absolute元素居中
+    left: 0; 
+    right: 0; 
+    top: 0; 
+    bottom: 0;
+    margin: auto;
+    // 边距
+    padding-top: 10px;
+    // 字体设置
     font-family: 'Times New Roman', 'Microsoft YaHei';
     font-size: 25px;
     font-weight: bolder;
+    color: rgb(152, 243, 243);
+    // 子元素居中
+    text-align: center;
+    .title{
+      position: relative;
+      display: inline-block;
+      .button{
+        visibility: visible;
+        position: absolute;
+        background: transparent !important;
+        border-width: 0px !important;
+        color: transparent !important;
+        top: -5px;
+        right: -25px;
+        transition: color 1s ease 0s; // 过渡动画
+      }
+    }
+    // 控制button显示与否, 颜色控制
+    .title:hover .button{
+      color: white !important;
+    }
   }
 
   .center {

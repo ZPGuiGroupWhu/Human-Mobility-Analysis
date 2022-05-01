@@ -106,7 +106,7 @@ class PageSelect extends Component {
       bottomHeight: bottomHeight,
       bottomWidth: bottomWidth,
     })
- 
+
     // 初始化 functionBar 中的按钮内容
     this.getFunctionBarItems();
   }
@@ -146,7 +146,7 @@ class PageSelect extends Component {
 
     // 是否隐藏标题
     if (!_.isEqual(prevState.titleVisible, this.state.titleVisible)) {
-      document.querySelector('.center-title').style.display = 'none' // 隐藏标题
+      document.querySelector('.title').style.display = 'none' // 隐藏标题
       this.setState({}) // 重新渲染
     }
   }
@@ -154,18 +154,17 @@ class PageSelect extends Component {
   render() {
     return (
       <div className="select-page-ctn">
-        <div className='center-title'>
+        <div className="center">
           <span className='title'>
-            {'2019年深圳市私家车用户出行位置Top5地图'}
+            2019年深圳市私家车用户出行位置Top5地图
             <Button className='button'
               type="primary"
               icon={<CloseCircleOutlined />}
               shape='circle'
               size='small'
               onClick={this.closeTitle}
-            /></span>
-        </div>
-        <div className="center">
+            />
+          </span>
           <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight} rightWidth={this.state.rightWidth} />
           <div className="inner">
             <div className="top-bracket"></div>

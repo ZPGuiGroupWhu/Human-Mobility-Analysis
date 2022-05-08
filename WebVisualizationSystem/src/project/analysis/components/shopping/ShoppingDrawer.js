@@ -27,12 +27,22 @@ export default function ShoppingDrawer(props) {
   const [glbChecked, setGlbChecked] = useState(false);  // 全选
 
   // 标记数组为空时，重置全选功能
-  useEffect(() => {
-    if (!checks.length) {
-      setGlbChecked(false)
+  // useEffect(() => {
+  //   if (!checks.length) {
+  //     setGlbChecked(false)
+  //   }
+  // }, [checks.length])
+
+
+  useEffect(()=>{
+    if(checks.length===0 || checks.length !== selectTrajs.length){
+      // 非全选
+      setGlbChecked(false);
+    }else{
+      // 全选
+      setGlbChecked(true);
     }
   }, [checks.length])
-
 
   // 候选列表发生变动，自动定位到末尾
   useLayoutEffect(() => {
@@ -53,7 +63,8 @@ export default function ShoppingDrawer(props) {
       className={`common-box-style shopping-drawer-ctn`}
       style={{
         padding: drawerPadding,
-        width: drawerWidth,
+        // 限制width会出问题，例如当购物车内容过多时，会出现纵向滚动条，滚动条有固定宽度。但是width固定，会导致横向滚动条出现
+        minWidth: drawerWidth,
         maxHeight: drawerHeight,
         display: selectTrajs.length ? '' : 'none'
       }}
@@ -125,6 +136,7 @@ export default function ShoppingDrawer(props) {
                 ShenZhen={ShenZhen}
                 setChecks={setChecks}
                 glbChecked={glbChecked}
+                checksNumber={checks.length}
               />
             )
           })

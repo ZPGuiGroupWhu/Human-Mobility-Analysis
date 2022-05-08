@@ -14,6 +14,7 @@ export default function SingleCard(props) {
     width,
     setChecks,
     glbChecked,
+    checksNumber,
   } = props;
   const [year, month, day] = data.date.split('-'); // 年、月、日
   const trajId = data.id.split('_')[1]; // 轨迹 ID
@@ -42,7 +43,17 @@ export default function SingleCard(props) {
   const [checked, setChecked] = useState(false);
   // 监听全选操作
   useEffect(() => {
-    setChecked(glbChecked);
+    if (glbChecked) {// 表示从未全选到全选
+      setChecked(true);
+    }
+    // 表示从全选到未全选
+    else if (checksNumber === 0) {// 1. 因为点击取消按钮导致的未全选
+      setChecked(false)
+    }
+    else {
+      // 2. 因为单点某一个导致的未全选, 由Checkbox的onChange回调自行处理
+    }
+
   }, [glbChecked])
   // 标记操作 - 将id添加到标记数组
   const onCheckBoxChange = (status, id) => {
@@ -54,9 +65,9 @@ export default function SingleCard(props) {
   }
 
   return (
-    <div style={{width: width, height: width}} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
+    <div style={{ width: width, height: width }} className={`single-card-ctn${isActive ? ' single-card-ctn-active' : ''}`}>
       <div className="button-group">
-        <span style={isActive ? {fontWeight: 'bold', color: 'rgb(0, 247, 255)'} : {}}>{`${year}/${month}/${day} ${trajId}`}</span>
+        <span style={isActive ? { fontWeight: 'bold', color: 'rgb(0, 247, 255)' } : {}}>{`${year}/${month}/${day} ${trajId}`}</span>
         <Checkbox
           checked={checked}
           onChange={(e) => {

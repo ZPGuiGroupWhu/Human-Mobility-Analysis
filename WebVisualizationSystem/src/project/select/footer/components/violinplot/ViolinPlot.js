@@ -75,7 +75,7 @@ export default class ViolinPlot extends Component{
                 showline: true
             },
             height: 150,
-            width: 400,
+            width: this.props.width,
             margin:{
                 b:0,
                 l:0,

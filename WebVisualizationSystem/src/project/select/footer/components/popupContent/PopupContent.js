@@ -120,6 +120,7 @@ export default function PopupContent(props) {
                 <>
                     <Radar radarData={radarData} />
                     <WordCloud wordData={wordData} />
+                    <div className="clear" />
                 </>
             </div>
             <div className="popup-middle">
@@ -131,7 +132,7 @@ export default function PopupContent(props) {
                             notFoundContent="无法找到"
                             onChange={optionChange}
                             style={{
-                                width: '400px',
+                                width: '100%',
                                 fontWeight: 'bold'
                             }}>
                             {optionData.map(item => (
@@ -139,7 +140,7 @@ export default function PopupContent(props) {
                             ))}
                         </Select>
                     </div>
-                    <ViolinPlot violinData={violinData} option={option} />
+                    <ViolinPlot violinData={violinData} option={option}  width={395}/>
                 </>
             </div>
             <div className="popup-bottom">

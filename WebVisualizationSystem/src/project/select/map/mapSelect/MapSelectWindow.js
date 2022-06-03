@@ -5,7 +5,6 @@ import '@/project/border-style.scss';
 import {
     CompressOutlined,
     ExpandOutlined,
-    HeartFilled,
 } from '@ant-design/icons';
 import { Space } from 'antd';
 import Hover from '../../charts/common/Hover';

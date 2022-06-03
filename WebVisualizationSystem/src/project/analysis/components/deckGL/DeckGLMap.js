@@ -242,7 +242,7 @@ class DeckGLMap extends Component {
         elevationScale: 4,
         elevationAggregation: 'MEAN',//选用速度均值作为权重
         colorAggregation: 'MEAN',
-        colorRange: [[219, 251, 255], [0, 161, 179], [82, 157, 255], [0, 80, 184], [173, 66, 255], [95, 0, 168]],
+        // colorRange: [[219, 251, 255], [0, 161, 179], [82, 157, 255], [0, 80, 184], [173, 66, 255], [95, 0, 168]],
         getPosition: d => d.COORDINATES,
         getElevationWeight: d => d.SPD,
         getColorWeight: d => d.SPD,

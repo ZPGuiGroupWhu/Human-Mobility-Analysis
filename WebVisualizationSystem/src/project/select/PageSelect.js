@@ -39,7 +39,7 @@ class PageSelect extends Component {
     if (this.props.selectedByCharts.length !== 0) {
       functionBarItems.push(
         {
-          id: 0,
+          // id: 0,
           text: '图表重置',
           icon: <BarChartOutlined />,
           onClick: () => { this.setState({ chartsReload: {} }) },
@@ -49,7 +49,7 @@ class PageSelect extends Component {
     if (this.props.selectedByMapClick.length !== 0) {
       functionBarItems.push(
         {
-          id: 1,
+          // id: 1,
           text: '点击重置',
           icon: <ReloadOutlined />,
           onClick: () => {

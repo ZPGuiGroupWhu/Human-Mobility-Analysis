@@ -194,7 +194,7 @@ class DeckGLMap extends Component {
       }),
       heatMapLayerSPD: new HeatmapLayer({
         id: 'heatmapLayerSPD',
-        radiusPixels: 15,
+        radiusPixels: 3,  // 速度图层带宽
         data: this.trajNodes,
         getPosition: d => d.COORDINATES,
         getWeight: d => d.SPD,

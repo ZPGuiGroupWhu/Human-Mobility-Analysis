@@ -20,28 +20,32 @@
 // popover content style
 .popover {
   .ant-popover-inner {
-     // 边框样式
-     border: 5px solid rgb(187, 255, 255);
-     border-radius: 5px;
+    // 边框样式
+    border: 2px solid rgb(187, 255, 255);
+    border-radius: 5px;
 
-     // 边框动画
-     animation: popover-animated-border 1.5s infinite;
-     @keyframes popover-animated-border {
-       0% {
-         box-shadow: 0 0 0 0 white;
-       }
-       100% {
-         box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.1);
-       }
-     }
+    // 边框动画
+    animation: popover-animated-border 1.5s infinite;
+
+    @keyframes popover-animated-border {
+      0% {
+        box-shadow: 0 0 0 0 white;
+      }
+
+      100% {
+        box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.1);
+      }
+    }
   }
+
   .ant-popover-title {
-    background-color: rgb(187, 255, 255);
+    background-color: #74ebd5;
   }
+
   .ant-popover-inner-content {
     opacity: 100%;
-    background-color: white;
-    border: 2px dashed rgb(136, 216, 247);
+    // 背景色渐变
+    background-image: linear-gradient(60deg, #161b20 0%, #485563 100%);
     border-radius: 5px;
   }
 }

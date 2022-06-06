@@ -35,30 +35,74 @@ class PageSelect extends Component {
   // 基于selectedByCharts 和 selectByMapClick 数组内的数据，
   // 填充functionBar内容，从而实现控制 图标重置 和 点击重置 的显示与否
   getFunctionBarItems = () => {
-    const functionBarItems = [];
-    if (this.props.selectedByCharts.length !== 0) {
-      functionBarItems.push(
-        {
-          // id: 0,
+    const functionBarItems = _.cloneDeep(this.state.functionBarItems);
+    // 获取index
+    let chartIndex = -1; let clickIndex = -1;
+    functionBarItems.forEach((item) => {
+      if(item.text === '图表重置'){
+        chartIndex = functionBarItems.indexOf(item)
+      }
+      if(item.text === '点击重置'){
+        clickIndex = functionBarItems.indexOf(item)
+      }
+    });
+
+    // 根据 charts 数组中数据变化 => 处理 functionBarItems内对应的object
+    if(this.props.selectedByCharts.length === 0){ // 如果长度为0
+      if(chartIndex !== -1){ // 如果有，则删除
+        functionBarItems.splice(chartIndex, 1);
+      }
+    }else{ // 如果长度不为0
+      if(chartIndex === -1){ // 如果没有，则添加
+        functionBarItems.push({
           text: '图表重置',
           icon: <BarChartOutlined />,
           onClick: () => { this.setState({ chartsReload: {} }) },
-        }
-      )
-    };
-    if (this.props.selectedByMapClick.length !== 0) {
-      functionBarItems.push(
-        {
-          // id: 1,
+        })
+      }
+    }
+
+    if(this.props.selectedByMapClick.length === 0){
+      if(clickIndex !== -1){
+        functionBarItems.splice(clickIndex, 1);
+      }
+    }else{
+      if(clickIndex === -1){
+        functionBarItems.push({
           text: '点击重置',
           icon: <ReloadOutlined />,
           onClick: () => {
             this.props.setSelectedByMapClick([]);
             this.setState({ mapClickReload: {} })
           }
-        }
-      )
-    };
+        })
+      }
+    }
+    console.log(functionBarItems)
+    // const functionBarItems = [];
+    // if (this.props.selectedByCharts.length !== 0) {
+    //   functionBarItems.push(
+    //     {
+    //       // id: 0,
+    //       text: '图表重置',
+    //       icon: <BarChartOutlined />,
+    //       onClick: () => { this.setState({ chartsReload: {} }) },
+    //     }
+    //   )
+    // };
+    // if (this.props.selectedByMapClick.length !== 0) {
+    //   functionBarItems.push(
+    //     {
+    //       // id: 1,
+    //       text: '点击重置',
+    //       icon: <ReloadOutlined />,
+    //       onClick: () => {
+    //         this.props.setSelectedByMapClick([]);
+    //         this.setState({ mapClickReload: {} })
+    //       }
+    //     }
+    //   )
+    // };
     this.setState({
       functionBarItems: functionBarItems
     })

@@ -117,7 +117,7 @@ class Footer extends Component {
                       <div>
                         <span className="user-id">{'用户ID：' + val.id}</span>
                         <NavLink
-                          style={{ color: '#8e44ad', float: "right", fontWeight: 'bold' }}
+                          style={{ color: '#F2994A', float: "right", fontWeight: 'bold' }}
                           activeStyle={{ color: '#15FBF1', fontWeight: 'bold', }}
                           to={location => {
                             return {

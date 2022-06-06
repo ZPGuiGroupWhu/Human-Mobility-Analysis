@@ -13,7 +13,7 @@ export default function WordCloud(props){
 
     // 词云图属性
     const option = {
-        backgroundColor: 'white',
+        backgroundColor: 'transparent',
         tooltip: { //tooltip属性
             show: true,
             trigger: 'item', // 触发类型
@@ -41,16 +41,16 @@ export default function WordCloud(props){
             textStyle: {
                 color: function () {
                     return 'rgb(' + [
-                        Math.round(Math.random() * 160),
-                        Math.round(Math.random() * 160),
-                        Math.round(Math.random() * 160)
+                        Math.round(Math.random() * 255),
+                        Math.round(Math.random() * 200),
+                        Math.round(Math.random() * 255)
                     ].join(',') + ')';
                 }
             },
             emphasis: {
                 textStyle: {
                     shadowBlur: 10,
-                    shadowColor: '#333'
+                    shadowColor: '#fff'
                 }
             },
             // Data is an array. Each array item must have name and value property.

@@ -5,21 +5,10 @@
   top: 10px;
   padding: 4px 4px;
   z-index: 2;
-  // transition: display 10s linear 10s;
-  // animation:changeWidth 1s ease 0s;
-
-  // @keyframes changeWidth{
-  //   0% {width: 0px;}
-  //   100% {width: 50px;}
-  // }
 
   .btn-ctn {
-    // 边框动画
-    animation: bounceIn 1s ease-in 0s;
     padding: 4px;
     .ant-btn-primary {
-      // height: 25px;
-      // width: 10px;
       border-color: #fff;
       background-color: #1E3945;
     }

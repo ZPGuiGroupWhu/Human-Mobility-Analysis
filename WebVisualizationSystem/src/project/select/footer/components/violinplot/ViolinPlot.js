@@ -20,13 +20,13 @@ export default class ViolinPlot extends Component{
                 font:{
                     family:'Microsoft Yahei',
                     size: 10,
-                    color: 'black'
+                    color: '#fff'
                 }
             },
             hoveron: 'violins+kde',
             meanline:{
                 visable: true,
-                width: 3,
+                width: 5,
                 color:'#FF8C00'
             },
             box: {
@@ -41,10 +41,10 @@ export default class ViolinPlot extends Component{
             spanmode: 'soft',
             line: {
                 color: 'black',
-                width: 1.5
+                width: 1
             },
             fillcolor: '#87CEEB',
-            opacity: 0.6,
+            opacity: 1,
             marker:{
                 symbol:'diamond',
             },
@@ -54,7 +54,8 @@ export default class ViolinPlot extends Component{
             selected:{
                 marker:{
                     color: '#FF0000',
-                    size: 6,
+                    size: 5,
+                    opacity:1,
                 }
             },
             unselected:{
@@ -66,22 +67,30 @@ export default class ViolinPlot extends Component{
         }];
 
         let layout = {
-            paper_bgcolor: 'white',
-            plot_bgcolor: 'white',
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
             xaxis: {
                 zeroline: false,
             },
             yaxis: {
-                showline: true
+                showline: true,
+                showgrid: true,
             },
-            height: 150,
+            height: 165,
             width: this.props.width,
             margin:{
-                b:0,
+                b:22,
                 l:0,
                 r:0,
                 t:0
-            }
+            },
+            font:{
+                family:'Microsoft Yahei',
+                size: 12,
+                color: '#ccc',
+            },
+            hovermode: "x",
+
         };
 
         //加载图表
@@ -107,7 +116,7 @@ export default class ViolinPlot extends Component{
                 ref={this.chartRef}
                 style={{
                     height: '100%',
-                    width: '100%'
+                    width: '100%',
                 }}
             ></div>
         );

@@ -6,11 +6,6 @@ import 'animate.css';
 
 export default function FunctionBar(props) {
   const { functionBarItems, left } = props;
-  // if(functionBarItems.length === 0){
-  //   document.querySelector('.function-bar-ctn').style.display = 'none';
-  // }else{
-  //   document.querySelector('.function-bar-ctn').style.display = 'flex';
-  // }
   return (
     functionBarItems.length !== 0 ?  // functionBar中有内容则加载，无内容不加载
       <div

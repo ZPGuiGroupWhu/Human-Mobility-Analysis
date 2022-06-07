@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import 'echarts-wordcloud';
-import _ from "lodash";
 import '../popupContent/PopupContent.scss';
 
 let myChart = null;

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import './Histogram.scss';
-import { use } from 'echarts';
 
 let myChart = null;
 

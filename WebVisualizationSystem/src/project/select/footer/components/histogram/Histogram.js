@@ -7,7 +7,7 @@ let myChart = null;
 export default function Histogram(props) {
     const ref = useRef(null);
 
-    const { optionData } = props;
+    const { optionData, characterId } = props;
 
     // 横轴-坐标名称
     const xData = optionData.map(element => Reflect.get(element, 'name'))

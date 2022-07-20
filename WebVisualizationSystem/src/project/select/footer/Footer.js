@@ -25,6 +25,7 @@ class Footer extends Component {
       currentPage: 1,
       minValue: 0,
       maxValue: this.pageSize,
+      Popover: null,
     }
   }
   componentWillUpdate(nextProps, nextState) {//当界面更新时删除对应canvas的上下文，防止Oldest context will be lost
@@ -132,8 +133,9 @@ class Footer extends Component {
                         </NavLink>
                       </div>
                     } trigger="click" placement="left"
+                    destroyTooltipOnHide // 打开后销毁，之后点击将重新打开（解决数据残留bug）
                     content={
-                      <PopupContent id={val.id} />
+                      <PopupContent id={val.id}/>
                       // <div style={{ width: "500px" }}>
                       //   {this.getPopInfo(val.id)}
                       // </div>
@@ -146,7 +148,9 @@ class Footer extends Component {
                       id="deckgl-card"
                       // className="card"
                       // tabindex={val.id}
-                      onClick={(e) => this.cardClick(val.id, e)}
+                      onClick={(e) => {
+                        this.cardClick(val.id, e);
+                      }}
                     >
                       <div style={{ height: "70px", position: "relative" }} >
                         {/* 出现了新的问题，当使用Deck.gl时，会导致WARNING: Too many active WebGL contexts. Oldest context will be lost，从而使底图消失 */}

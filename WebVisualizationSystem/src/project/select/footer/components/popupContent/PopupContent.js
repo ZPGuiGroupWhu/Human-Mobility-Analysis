@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 // 样式
 import './PopupContent.scss';
 import { Button, Select } from 'antd';
@@ -33,6 +33,8 @@ export default function PopupContent(props) {
     const [violinData, setViolinData] = useState([[], 1]) // 获取violinplot数据和用户在数据中的序号
     const [optionData, setOptionData] = useState([]) // 初始化optionData，用于表示属性表和select
     const [IsHistogram, setHistogram] = useState(true) // 初始化 popover-bottom放什么数据
+    const [,updateState]=useState();
+    const forceUpdate=useCallback(()=>updateState({}),[]);
 
     function getRadarData(userID) {
         const Average = [];
@@ -126,6 +128,7 @@ export default function PopupContent(props) {
 
     // 组织数据
     useEffect(() => {
+        console.log('id is:', id)
         const radarData = getRadarData(id)
         const optionData = getOptionData(id)
         const wordData = getWordData(id)
@@ -135,7 +138,8 @@ export default function PopupContent(props) {
         setOptionData(optionData)
         setWordData(wordData[0])
         setViolinData(violinData)
-        setCharacterId(0) // 初始化charaterId
+        setCharacterId(0) // 初始化 charaterId
+        forceUpdate()
     }, [id])
 
     // 更新 wordcloud 数据
@@ -184,7 +188,7 @@ export default function PopupContent(props) {
                     <Radar radarData={radarData} />
                     <div className="wordcloud">
                         {/* <WordCloud wordData={wordData} characterId={characterId} /> */}
-                        <Histogram optionData={wordData} ></Histogram>
+                        <Histogram optionData={wordData} characterId={characterId}></Histogram>
                     </div>
                     
                     <div className="clear" />

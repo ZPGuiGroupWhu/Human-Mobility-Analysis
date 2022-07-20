@@ -19,6 +19,14 @@ export default function PopupContent(props) {
     // 接收传来的用户id
     const { id } = props;
 
+    const characterIdMap = {
+        '外向': 0,
+        '开放': 1,
+        '神经质': 2,
+        '尽责': 3
+    }
+
+    const [characterId, setCharacterId] = useState(0); // 人格属性：外向，开放, 神经质, 尽责
     const [option, setOption] = useState('总出行次数') // 初始化select下拉框内的值，后续用于更新
     const [radarData, setRadarData] = useState([]) // 初始化radar数据
     const [wordData, setWordData] = useState([]) // 获取wordcloud数据
@@ -74,8 +82,12 @@ export default function PopupContent(props) {
         const wordData = [];
         _.forEach(personalityData, function (item) {
             if (item.人员编号.toString() === userID) {
-                for (let i = 1; i < Object.keys(item).length - 4; i++) {
-                    wordData.push({ 'name': Object.keys(item)[i], 'value': Object.values(item)[i] });
+                for (let groupId = 0; groupId < 4; groupId++) {
+                    const groupItem = [];
+                    for (let i = groupId * 8 + 1; i <= (groupId + 1) * 8; i++) {
+                        groupItem.push({ 'name': Object.keys(item)[i], 'value': Object.values(item)[i] })
+                    }
+                    wordData.push(groupItem);
                 }
             }
         });
@@ -103,9 +115,13 @@ export default function PopupContent(props) {
         setOption(value)
     }
 
-    function changeBottom(){
+    function changeBottom() {
         const flag = !IsHistogram;
         setHistogram(flag);
+    }
+
+    function characterChange(value) {
+        setCharacterId(characterIdMap[value]);
     }
 
     // 组织数据
@@ -117,16 +133,60 @@ export default function PopupContent(props) {
         // 更新state
         setRadarData(radarData)
         setOptionData(optionData)
-        setWordData(wordData)
+        setWordData(wordData[0])
         setViolinData(violinData)
+        setCharacterId(0) // 初始化charaterId
     }, [id])
+
+    // 更新 wordcloud 数据
+    useEffect(() => {
+        const wordData = getWordData(id);
+        setWordData(wordData[characterId])
+    }, [characterId])
 
     return (
         <div className="popup-content-ctn">
             <div className="popup-top">
                 <>
+                    <div className="title-bar">
+                        <div className="character-title">{'大五人格'}</div>
+                        <div className="character-select">
+                            <Select
+                                defaultValue={'外向'}
+                                optionFilterProp="children"
+                                size="small"
+                                onChange={characterChange}
+                                style={{
+                                    width: '75px',
+                                    fontSize: '10px',
+                                    marginTop: '5px',
+                                    marginRight: '5px',
+                                    padding: '0px',
+                                    border: '1.5px solid rgb(187, 255, 255)',
+                                    borderRadius: '5px',
+                                }}
+                            >
+                                <Select.Option value="外向" style={{
+                                    fontSize: '10px',
+                                }}>外向</Select.Option>
+                                <Select.Option value="开放" style={{
+                                    fontSize: '10px',
+                                }}>开放</Select.Option>
+                                <Select.Option value="神经质" style={{
+                                    fontSize: '10px',
+                                }}>神经质</Select.Option>
+                                <Select.Option value="尽责" style={{
+                                    fontSize: '10px',
+                                }}>尽责</Select.Option>
+                            </Select>
+                        </div>
+                    </div>
                     <Radar radarData={radarData} />
-                    <WordCloud wordData={wordData} />
+                    <div className="wordcloud">
+                        {/* <WordCloud wordData={wordData} characterId={characterId} /> */}
+                        <Histogram optionData={wordData} ></Histogram>
+                    </div>
+                    
                     <div className="clear" />
                 </>
             </div>
@@ -152,21 +212,21 @@ export default function PopupContent(props) {
                 </>
             </div>
             <div className="popup-bottom">
-                {IsHistogram ? 
-                <Histogram optionData={optionData} ></Histogram> : 
-                <Description optionData={optionData}></Description>
-                }
+                {/* {IsHistogram ?
+                    <Histogram optionData={wordData} ></Histogram> :
+                    <Description optionData={wordData}></Description>
+                } */}
             </div>
             <Button className="switch"
-                    type='ghost'
-                    icon={<UserSwitchOutlined />}
-                    shape='default'
-                    style={{
-                        height: '15px',
-                        width: '15px'
-                    }}
-                    onClick={changeBottom}
-                />
+                type='ghost'
+                icon={<UserSwitchOutlined />}
+                shape='default'
+                style={{
+                    height: '15px',
+                    width: '15px'
+                }}
+                onClick={changeBottom}
+            />
         </div>
     )
 }

@@ -5,8 +5,8 @@ import '../popupContent/PopupContent.scss';
 
 let myChart = null;
 
-export default function WordCloud(props){
-    const { wordData } = props;
+export default function WordCloud(props) {
+    const { wordData, characterId } = props;
     // ECharts 容器实例
     const ref = useRef(null);
 
@@ -22,7 +22,7 @@ export default function WordCloud(props){
                 fontFamily: 'Microsoft Yahei'
             }
         },
-        series: [ {
+        series: [{
             type: 'wordCloud',
             shape: 'circle', // 形状
             // maskImage: maskImage, //掩膜形状
@@ -38,12 +38,19 @@ export default function WordCloud(props){
             gridSize: 3, // 聚集程度
             drawOutOfBound: false,
             textStyle: {
-                color: function () {
-                    return 'rgb(' + [
-                        Math.round(Math.random() * 255),
-                        Math.round(Math.random() * 200),
-                        Math.round(Math.random() * 255)
-                    ].join(',') + ')';
+                color: function () {  // 词条颜色根据 人格 来改变
+                    switch (characterId) {
+                        case 0:
+                            return 'yellow'
+                        case 1:
+                            return 'red'
+                        case 2:
+                            return 'blue'
+                        case 3:
+                            return 'green'
+                        default:
+                            return 'black'
+                    }
                 }
             },
             emphasis: {
@@ -59,7 +66,7 @@ export default function WordCloud(props){
 
     // 初始化 ECharts 实例对象
     useEffect(() => {
-        if (!ref.current) return () => {};
+        if (!ref.current) return () => { };
         myChart = echarts.init(ref.current);
         myChart.setOption(option);
         window.onresize = myChart.resize;
@@ -73,8 +80,34 @@ export default function WordCloud(props){
         });
     }, [wordData])
 
-    return(
-        <div className='wordcloud'
+
+    // 更新词条颜色
+    useEffect(() => {
+        let color = function(){
+            switch (characterId) {
+                case 0:
+                    return 'yellow'
+                case 1:
+                    return 'red'
+                case 2:
+                    return 'blue'
+                case 3:
+                    return 'green'
+                default:
+                    return 'black'
+            }
+        };
+        myChart?.setOption({
+            series: [{
+                textStyle: {
+                    color: color
+                }
+            }]
+        })
+    }, [characterId])
+
+    return (
+        <div style={{width: '100%', height: '100%'}}
             ref={ref}
         ></div>
     )

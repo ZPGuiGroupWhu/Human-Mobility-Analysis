@@ -9,8 +9,32 @@
     z-index: 1;
 
     .popup-top{
+        position: relative;
         height: 40%;
         width: 100%;
+
+        .title-bar {
+            position: absolute;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            left: 220px;
+            color: #fff;
+            width: 45%;
+            // z-index: 2;
+            .character-title {
+                display: inline-block;
+                color: #fff;
+                margin-left: 5px;
+                font-size: 15px;
+                font-family: 'sans-serif';
+                font-weight: bold;
+            }
+            .character-select {
+                display: inline-block;
+                z-index: 1;
+            }
+          }
 
         .radar{
             float: left;

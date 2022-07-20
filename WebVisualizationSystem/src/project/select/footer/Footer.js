@@ -112,26 +112,28 @@ class Footer extends Component {
               this.data.slice(this.state.minValue, this.state.maxValue).map(val => (
                 <Col span={24} key={this.changeTimes + '-' + val.id}>
                   <Popover
-                    title={<div>
-                      {val.id}
-                      <NavLink
-                        style={{ color: '#5ca5ff', float: "right" }}
-                        activeStyle={{ color: '#15FBF1', fontWeight: 'bold', }}
-                        to={location => {
-                          return {
-                            ...location,
-                            pathname: '/select/analysis',
+                    overlayClassName='popover'
+                    title={
+                      <div>
+                        <span className="user-id">{'用户ID：' + val.id}</span>
+                        <NavLink
+                          style={{ color: '#F2994A', float: "right", fontWeight: 'bold' }}
+                          activeStyle={{ color: '#15FBF1', fontWeight: 'bold', }}
+                          to={location => {
+                            return {
+                              ...location,
+                              pathname: '/select/analysis',
+                            }
                           }
-                        }
-                        }
-                        exact
-                      >
-                        轨迹筛选
-                      </NavLink>
-                    </div>
+                          }
+                          exact
+                        >
+                          轨迹筛选
+                        </NavLink>
+                      </div>
                     } trigger="click" placement="left"
                     content={
-                      <PopupContent id = {val.id}/>
+                      <PopupContent id={val.id} />
                       // <div style={{ width: "500px" }}>
                       //   {this.getPopInfo(val.id)}
                       // </div>

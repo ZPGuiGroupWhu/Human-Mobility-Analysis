@@ -27,3 +27,8 @@ body, html {
 html {
   font-size: 1vw;
 }
+
+// 设置浏览器滚动条 
+::-webkit-scrollbar {width:5px;height:5px; position:absolute;}
+::-webkit-scrollbar-thumb {background-coLor:#8afbfe}
+::-webkit-scrollbar-track {background-coLor:#ddd}

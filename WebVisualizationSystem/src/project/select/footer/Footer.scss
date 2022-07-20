@@ -3,22 +3,65 @@
   height: 100%;
   overflow: hidden;
 }
+
 .select-footer-ctn {
   width: 100%;
   height: 94%;
   overflow-y: scroll;
 }
 
-.select-footer-ctn::-webkit-scrollbar{
+// popover card title
+.user-id {
+  color: black;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+// popover content style
+.popover {
+  .ant-popover-inner {
+    // 边框样式
+    border: 2px solid rgb(187, 255, 255);
+    border-radius: 5px;
+
+    // 边框动画
+    animation: popover-animated-border 1.5s infinite;
+
+    @keyframes popover-animated-border {
+      0% {
+        box-shadow: 0 0 0 0 white;
+      }
+
+      100% {
+        box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  .ant-popover-title {
+    background-color: #74ebd5;
+  }
+
+  .ant-popover-inner-content {
+    opacity: 100%;
+    // 背景色渐变
+    background-image: linear-gradient(60deg, #161b20 0%, #485563 100%);
+    border-radius: 5px;
+  }
+}
+
+.select-footer-ctn::-webkit-scrollbar {
   display: none;
 }
-.left{ float:left;}
-.clear{ clear:both} 
 
-.card:focus{
-  background: red;
+.left {
+  float: left;
 }
-.ant-popover-content{
-  opacity: 80%;
-  background-color: azure;
+
+.clear {
+  clear: both
+}
+
+.card:focus {
+  background: red;
 }

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 // 样式
 import './PopupContent.scss';
-import { Select } from 'antd';
+import { Button, Select } from 'antd';
+import { UserSwitchOutlined } from '@ant-design/icons';
 // 组件
 import Radar from '../radar/Radar'
 import WordCloud from '../wordcloud/WordCloud'
 import ViolinPlot from "../violinplot/ViolinPlot";
 import Description from "../description/Description";
+import Histogram from "../histogram/Histogram";
 // 大五人格数据
 import personalityData from './ocean_score.json';
 // 库
@@ -22,6 +24,7 @@ export default function PopupContent(props) {
     const [wordData, setWordData] = useState([]) // 获取wordcloud数据
     const [violinData, setViolinData] = useState([[], 1]) // 获取violinplot数据和用户在数据中的序号
     const [optionData, setOptionData] = useState([]) // 初始化optionData，用于表示属性表和select
+    const [IsHistogram, setHistogram] = useState(true) // 初始化 popover-bottom放什么数据
 
     function getRadarData(userID) {
         const Average = [];
@@ -100,13 +103,17 @@ export default function PopupContent(props) {
         setOption(value)
     }
 
+    function changeBottom(){
+        const flag = !IsHistogram;
+        setHistogram(flag);
+    }
+
     // 组织数据
     useEffect(() => {
         const radarData = getRadarData(id)
         const optionData = getOptionData(id)
         const wordData = getWordData(id)
         const violinData = getViolinData(id)
-        console.log(violinData)
         // 更新state
         setRadarData(radarData)
         setOptionData(optionData)
@@ -120,6 +127,7 @@ export default function PopupContent(props) {
                 <>
                     <Radar radarData={radarData} />
                     <WordCloud wordData={wordData} />
+                    <div className="clear" />
                 </>
             </div>
             <div className="popup-middle">
@@ -131,21 +139,34 @@ export default function PopupContent(props) {
                             notFoundContent="无法找到"
                             onChange={optionChange}
                             style={{
-                                width: '400px',
-                                fontWeight: 'bold'
+                                width: '100%',
+                                fontWeight: 'bold',
+                                backgroundColor: 'black'
                             }}>
                             {optionData.map(item => (
                                 <Select.Option key={item.option}>{item.option}</Select.Option>
                             ))}
                         </Select>
                     </div>
-                    <ViolinPlot violinData={violinData} option={option} />
+                    <ViolinPlot violinData={violinData} option={option} width={395} />
                 </>
             </div>
             <div className="popup-bottom">
-                <Description optionData={optionData} ></Description>
+                {IsHistogram ? 
+                <Histogram optionData={optionData} ></Histogram> : 
+                <Description optionData={optionData}></Description>
+                }
             </div>
-            
+            <Button className="switch"
+                    type='ghost'
+                    icon={<UserSwitchOutlined />}
+                    shape='default'
+                    style={{
+                        height: '15px',
+                        width: '15px'
+                    }}
+                    onClick={changeBottom}
+                />
         </div>
     )
 }

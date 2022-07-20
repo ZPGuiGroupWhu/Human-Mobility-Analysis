@@ -8,12 +8,13 @@ import Bottom from './charts/bottom/Bottom';
 import MapSelectBar from './map/mapSelect/MapSelectBar';
 // 第三方
 import _ from 'lodash';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, BarChartOutlined, CloseCircleOutlined } from '@ant-design/icons';
 // react-redux
 import { connect } from 'react-redux';
 import { fetchData, fetchOceanScoreAll, setSelectedUsers, setSelectedByMapClick, setSelectedByCharts } from '@/app/slice/selectSlice';
 import Drawer from '@/components/drawer/Drawer';
 import MapSelectWindow from './map/mapSelect/MapSelectWindow';
+import { Button } from 'antd';
 
 
 class PageSelect extends Component {
@@ -31,30 +32,77 @@ class PageSelect extends Component {
     };
   }
 
-  // 基于selectByMapClick数组内的数据，填充functionBar内容，从而实现控制 点击重置 的显示与否
+  // 基于selectedByCharts 和 selectByMapClick 数组内的数据，
+  // 填充functionBar内容，从而实现控制 图标重置 和 点击重置 的显示与否
   getFunctionBarItems = () => {
-    const functionBarItems = [];
-    functionBarItems.push(
-      {
-        id: 0,
-        text: '图表重置',
-        icon: <ReloadOutlined />,
-        onClick: () => { this.setState({ chartsReload: {} }) },
+    const functionBarItems = _.cloneDeep(this.state.functionBarItems);
+    // 获取index
+    let chartIndex = -1; let clickIndex = -1;
+    functionBarItems.forEach((item) => {
+      if(item.text === '图表重置'){
+        chartIndex = functionBarItems.indexOf(item)
       }
-    );
-    if(this.props.selectedByMapClick.length !== 0){
-      functionBarItems.push(
-        {
-          id: 1,
+      if(item.text === '点击重置'){
+        clickIndex = functionBarItems.indexOf(item)
+      }
+    });
+
+    // 根据 charts 数组中数据变化 => 处理 functionBarItems内对应的object
+    if(this.props.selectedByCharts.length === 0){ // 如果长度为0
+      if(chartIndex !== -1){ // 如果有，则删除
+        functionBarItems.splice(chartIndex, 1);
+      }
+    }else{ // 如果长度不为0
+      if(chartIndex === -1){ // 如果没有，则添加
+        functionBarItems.push({
+          text: '图表重置',
+          icon: <BarChartOutlined />,
+          onClick: () => { this.setState({ chartsReload: {} }) },
+        })
+      }
+    }
+
+    if(this.props.selectedByMapClick.length === 0){
+      if(clickIndex !== -1){
+        functionBarItems.splice(clickIndex, 1);
+      }
+    }else{
+      if(clickIndex === -1){
+        functionBarItems.push({
           text: '点击重置',
           icon: <ReloadOutlined />,
           onClick: () => {
             this.props.setSelectedByMapClick([]);
             this.setState({ mapClickReload: {} })
           }
-        }
-      )
-    };
+        })
+      }
+    }
+    console.log(functionBarItems)
+    // const functionBarItems = [];
+    // if (this.props.selectedByCharts.length !== 0) {
+    //   functionBarItems.push(
+    //     {
+    //       // id: 0,
+    //       text: '图表重置',
+    //       icon: <BarChartOutlined />,
+    //       onClick: () => { this.setState({ chartsReload: {} }) },
+    //     }
+    //   )
+    // };
+    // if (this.props.selectedByMapClick.length !== 0) {
+    //   functionBarItems.push(
+    //     {
+    //       // id: 1,
+    //       text: '点击重置',
+    //       icon: <ReloadOutlined />,
+    //       onClick: () => {
+    //         this.props.setSelectedByMapClick([]);
+    //         this.setState({ mapClickReload: {} })
+    //       }
+    //     }
+    //   )
+    // };
     this.setState({
       functionBarItems: functionBarItems
     })
@@ -76,6 +124,14 @@ class PageSelect extends Component {
     return result;
   };
 
+  // 关闭标题
+  closeTitle = () => {
+    // 后标题消失
+    this.setState({
+      titleVisible: false
+    })
+  }
+
   componentDidMount() {
     // 请求数据(伪)
     this.props.fetchData(`${process.env.PUBLIC_URL}/mock/ocean_score.json`);
@@ -95,13 +151,6 @@ class PageSelect extends Component {
       bottomWidth: bottomWidth,
     })
 
-    // 10s后标题消失
-    setTimeout(() => {
-      this.setState({
-        titleVisible: false
-      })
-    }, 10000)
-
     // 初始化 functionBar 中的按钮内容
     this.getFunctionBarItems();
   }
@@ -113,7 +162,7 @@ class PageSelect extends Component {
       !_.isEqual(prevProps.selectedByParallel, this.props.selectedByParallel)
     ) {
       const result = this.handleIntersection(
-        this.props.selectedByHistogram, 
+        this.props.selectedByHistogram,
         this.props.selectedByScatter,
         this.props.selectedByParallel);
       this.props.setSelectedByCharts(result);
@@ -131,16 +180,17 @@ class PageSelect extends Component {
       this.props.setSelectedUsers(result);
     };
 
-    // 控制 点击重置 的显示与否
-    if(
+    // 控制 图标重置 和 点击重置 的显示与否
+    if (
+      !_.isEqual(prevProps.selectedByCharts, this.props.selectedByCharts) ||
       !_.isEqual(prevProps.selectedByMapClick, this.props.selectedByMapClick)
-    ){
+    ) {
       this.getFunctionBarItems();
     }
 
     // 是否隐藏标题
     if (!_.isEqual(prevState.titleVisible, this.state.titleVisible)) {
-      document.querySelector('.center-title').style.display = 'none' // 隐藏标题
+      document.querySelector('.title').style.display = 'none' // 隐藏标题
       this.setState({}) // 重新渲染
     }
   }
@@ -148,10 +198,17 @@ class PageSelect extends Component {
   render() {
     return (
       <div className="select-page-ctn">
-        <div className='center-title'>
-          <span>{'2019年深圳市私家车用户出行位置Top5地图'}</span>
-        </div>
         <div className="center">
+          <span className='title'>
+            2019年深圳市私家车用户出行位置Top5地图
+            <Button className='button'
+              type="primary"
+              icon={<CloseCircleOutlined />}
+              shape='circle'
+              size='small'
+              onClick={this.closeTitle}
+            />
+          </span>
           <Map leftWidth={this.state.leftWidth} bottomHeight={this.state.bottomHeight} rightWidth={this.state.rightWidth} />
           <div className="inner">
             <div className="top-bracket"></div>

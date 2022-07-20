@@ -1,13 +1,13 @@
 .function-bar-ctn {
   position: absolute;
   display: flex;
-  flex-direction: column;
-  width: 140px;
+  flex-direction: row;
   top: 10px;
+  padding: 4px 4px;
+  z-index: 2;
 
   .btn-ctn {
-    padding: 5px;
-
+    padding: 4px;
     .ant-btn-primary {
       border-color: #fff;
       background-color: #1E3945;

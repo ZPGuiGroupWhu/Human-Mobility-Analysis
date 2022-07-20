@@ -5,7 +5,7 @@ import './Description.scss';
 export default function Description(props) {
 
     const { optionData } = props;
-
+    
     return (
         <Descriptions
             bordered

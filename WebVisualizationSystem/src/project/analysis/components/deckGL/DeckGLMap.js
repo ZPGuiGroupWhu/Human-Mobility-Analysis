@@ -194,7 +194,7 @@ class DeckGLMap extends Component {
       }),
       heatMapLayerSPD: new HeatmapLayer({
         id: 'heatmapLayerSPD',
-        radiusPixels: 15,
+        radiusPixels: 3,  // 速度图层带宽
         data: this.trajNodes,
         getPosition: d => d.COORDINATES,
         getWeight: d => d.SPD,
@@ -212,6 +212,7 @@ class DeckGLMap extends Component {
         extruded: this.gridLayer3D,//是否显示为3D效果
         cellSize: this.gridWidth,//格网宽度，默认为100m
         elevationScale: 4,
+        colorRange: [[171, 217, 233], [224, 243, 248], [255, 255, 191], [254, 224, 144], [253, 174, 97], [244, 109, 67]],
         getPosition: d => d.COORDINATES,
         onHover: ({ object, x, y }) => {//构建悬浮框信息
           var str = "";
@@ -242,7 +243,7 @@ class DeckGLMap extends Component {
         elevationScale: 4,
         elevationAggregation: 'MEAN',//选用速度均值作为权重
         colorAggregation: 'MEAN',
-        colorRange: [[219, 251, 255], [0, 161, 179], [82, 157, 255], [0, 80, 184], [173, 66, 255], [95, 0, 168]],
+        colorRange: [[171, 217, 233], [224, 243, 248], [255, 255, 191], [254, 224, 144], [253, 174, 97], [244, 109, 67]],
         getPosition: d => d.COORDINATES,
         getElevationWeight: d => d.SPD,
         getColorWeight: d => d.SPD,

@@ -276,7 +276,6 @@ function PagePredict(props) {
         let { des, pred, dis } = item;
         return [idx, des, pred, dis] // [编号，目的地，预测点，误差距离]
       })
-      // console.log(data);
       setPredicts(data);
     }
     fetchData();

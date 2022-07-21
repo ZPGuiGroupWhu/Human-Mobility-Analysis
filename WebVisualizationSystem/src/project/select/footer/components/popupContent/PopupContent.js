@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 // 样式
 import './PopupContent.scss';
-import { Button, Select } from 'antd';
+import { Button, Select, Tooltip } from 'antd';
 import { UserSwitchOutlined } from '@ant-design/icons';
 // 组件
 import Radar from '../radar/Radar'
@@ -27,15 +27,16 @@ export default function PopupContent(props) {
         '尽责': 3
     }
 
+    const ref = useRef(null);
+
     const [characterId, setCharacterId] = useState(0); // 人格属性：外向，开放, 神经质, 尽责
     const [option, setOption] = useState('总出行次数') // 初始化select下拉框内的值，后续用于更新
     const [radarData, setRadarData] = useState([]) // 初始化radar数据
     const [wordData, setWordData] = useState([]) // 获取wordcloud数据
     const [violinData, setViolinData] = useState([[], 1]) // 获取violinplot数据和用户在数据中的序号
     const [optionData, setOptionData] = useState([]) // 初始化optionData，用于表示属性表和select
-    const [IsWordCloud, setWordCloud] = useState(false) // 初始化 右上角是放词云还是玫瑰图
-    const [, updateState] = useState();
-    const forceUpdate = useCallback(() => updateState({}), []);
+    const [isWordCloud, setWordCloud] = useState(false) // 初始化 右上角是放词云还是玫瑰图
+    const [isFold, setFold] = useState(true) // 属性表是否折叠
 
     function getRadarData(userID) {
         const Average = [];
@@ -73,7 +74,7 @@ export default function PopupContent(props) {
         _.forEach(personalityData, function (item) {
             if (item.人员编号.toString() === userID) {
                 for (let i = 1; i < Object.keys(item).length - 4; i++) {
-                    optionData.push({ 'option': Object.keys(item)[i], 'value': Object.values(item)[i], 'disbale': false })
+                    optionData.push({ 'name': Object.keys(item)[i], 'value': Object.values(item)[i], 'disbale': false })
                 }
             }
         });
@@ -118,18 +119,24 @@ export default function PopupContent(props) {
         setOption(value)
     }
 
-    function changeTopRight() {
-        const flag = !IsWordCloud;
+    // 切换词云 / 玫瑰图
+    function changeTopRightPart() {
+        const flag = !isWordCloud;
         setWordCloud(flag);
     }
 
+    // 切换大五人格
     function characterChange(value) {
         setCharacterId(characterIdMap[value]);
     }
 
+    // 点击展开/收起
+    function footerClick(e) {
+        setFold(prev => (!prev));
+    }
+
     // 组织数据
     useEffect(() => {
-        console.log('id is:', id)
         const radarData = getRadarData(id)
         const optionData = getOptionData(id)
         const wordData = getWordData(id)
@@ -154,16 +161,20 @@ export default function PopupContent(props) {
                 <>
                     <div className="title-bar">
                         <div className="character-title">{'大五人格'}</div>
-                        <Button className="switch"
-                            type='ghost'
-                            icon={<UserSwitchOutlined />}
-                            shape='default'
-                            style={{
-                                height: '15px',
-                                width: '15px'
-                            }}
-                            onClick={changeTopRight}
-                        />
+                        <Tooltip placement="topRight"
+                            title={isWordCloud ? '切换玫瑰图' : '切换词云图'}
+                            color="#ffc0cb"
+                        >
+                            <Button className="switch"
+                                type='ghost'
+                                icon={<UserSwitchOutlined />}
+                                shape='default'
+                                style={{
+                                    height: '15px',
+                                    width: '15px'
+                                }}
+                                onClick={changeTopRightPart}
+                            /></Tooltip>
                         <div className="character-select">
                             <Select
                                 defaultValue={'外向'}
@@ -198,43 +209,47 @@ export default function PopupContent(props) {
                     <Radar radarData={radarData} />
                     <div className="wordcloud">
                         {
-                            IsWordCloud ?
+                            isWordCloud ?
                                 <WordCloud wordData={wordData} characterId={characterId} /> :
                                 <Pie wordData={wordData}></Pie>
                         }
                     </div>
-
                     <div className="clear" />
                 </>
             </div>
             <div className="popup-middle">
-                <>
-                    <div className="select">
-                        <Select showSearch={true}
-                            defaultValue={'总出行次数'}
-                            optionFilterProp="children"
-                            notFoundContent="无法找到"
-                            onChange={optionChange}
-                            style={{
-                                width: '100%',
-                                fontWeight: 'bold',
-                                backgroundColor: 'black'
-                            }}>
-                            {optionData.map(item => (
-                                <Select.Option key={item.option}>{item.option}</Select.Option>
-                            ))}
-                        </Select>
-                    </div>
-                    <ViolinPlot violinData={violinData} option={option} width={395} />
-                </>
+                <div className="select">
+                    <Select showSearch={true}
+                        defaultValue={'总出行次数'}
+                        optionFilterProp="children"
+                        notFoundContent="无法找到"
+                        onChange={optionChange}
+                        style={{
+                            width: '100%',
+                            fontWeight: 'bold',
+                            backgroundColor: 'black'
+                        }}>
+                        {optionData.map(item => (
+                            <Select.Option key={item.option}>{item.option}</Select.Option>
+                        ))}
+                    </Select>
+                </div>
+                <ViolinPlot violinData={violinData} option={option} width={395} />
             </div>
-            <div className="popup-bottom">
-                <Histogram optionData={optionData} ></Histogram>
+            <div className="popup-bottom"
+                style={{
+                    maxHeight: isFold ? '0px' : '125px',
+                    opacity: isFold ? '0' : '1',
+                    borderWidth: isFold ? '0px' : '1px'
+                }}
+            >
+                <Description optionData={optionData}></Description>
                 {/* {IsHistogram ?
                     <Histogram optionData={wordData} ></Histogram> :
                     <Description optionData={wordData}></Description>
                 } */}
             </div>
+            <footer className="popup-fold" onClick={footerClick}>点击展开</footer>
         </div>
     )
 }

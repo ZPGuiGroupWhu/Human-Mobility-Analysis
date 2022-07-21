@@ -24,18 +24,17 @@ export default function WordCloud(props) {
         },
         series: [{
             type: 'wordCloud',
-            shape: 'circle', // 形状
+            shape: 'square', // 形状
             // maskImage: maskImage, //掩膜形状
             left: 'center',
-            top: 'center',
-            right: 'center',
-            bottom: 'center',
+            top: '15%',
+            bottom: '5%',
             width: '100%',
-            height: '100%',
-            sizeRange: [5, 12], // 字体大小范围
-            rotationRange: [-90, 90], // 旋转角度
-            rotationStep: 45,
-            gridSize: 3, // 聚集程度
+            height: '80%',
+            sizeRange: [10, 20], // 字体大小范围
+            rotationRange: [0, 0], // 旋转角度
+            rotationStep: 0.1,
+            gridSize: 10, // 聚集程度
             drawOutOfBound: false,
             textStyle: {
                 color: function () {  // 词条颜色根据 人格 来改变

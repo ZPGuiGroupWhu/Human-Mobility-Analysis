@@ -21,7 +21,7 @@ export default function Histogram(props) {
         grid: {
             show: true, // 是否显示直角坐标系网格
             left: '20', // 距离容器左侧距离
-            top: '40', // 距离容器上侧距离
+            top: '0', // 距离容器上侧距离
             right: '0',
             bottom: '0',
         },

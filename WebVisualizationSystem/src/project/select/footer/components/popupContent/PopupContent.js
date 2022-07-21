@@ -9,6 +9,7 @@ import WordCloud from '../wordcloud/WordCloud'
 import ViolinPlot from "../violinplot/ViolinPlot";
 import Description from "../description/Description";
 import Histogram from "../histogram/Histogram";
+import Pie from "../pie/Pie";
 // 大五人格数据
 import personalityData from './ocean_score.json';
 // 库
@@ -32,9 +33,9 @@ export default function PopupContent(props) {
     const [wordData, setWordData] = useState([]) // 获取wordcloud数据
     const [violinData, setViolinData] = useState([[], 1]) // 获取violinplot数据和用户在数据中的序号
     const [optionData, setOptionData] = useState([]) // 初始化optionData，用于表示属性表和select
-    const [IsHistogram, setHistogram] = useState(true) // 初始化 popover-bottom放什么数据
-    const [,updateState]=useState();
-    const forceUpdate=useCallback(()=>updateState({}),[]);
+    const [IsWordCloud, setWordCloud] = useState(false) // 初始化 右上角是放词云还是玫瑰图
+    const [, updateState] = useState();
+    const forceUpdate = useCallback(() => updateState({}), []);
 
     function getRadarData(userID) {
         const Average = [];
@@ -117,9 +118,9 @@ export default function PopupContent(props) {
         setOption(value)
     }
 
-    function changeBottom() {
-        const flag = !IsHistogram;
-        setHistogram(flag);
+    function changeTopRight() {
+        const flag = !IsWordCloud;
+        setWordCloud(flag);
     }
 
     function characterChange(value) {
@@ -139,7 +140,6 @@ export default function PopupContent(props) {
         setWordData(wordData[0])
         setViolinData(violinData)
         setCharacterId(0) // 初始化 charaterId
-        forceUpdate()
     }, [id])
 
     // 更新 wordcloud 数据
@@ -154,6 +154,16 @@ export default function PopupContent(props) {
                 <>
                     <div className="title-bar">
                         <div className="character-title">{'大五人格'}</div>
+                        <Button className="switch"
+                            type='ghost'
+                            icon={<UserSwitchOutlined />}
+                            shape='default'
+                            style={{
+                                height: '15px',
+                                width: '15px'
+                            }}
+                            onClick={changeTopRight}
+                        />
                         <div className="character-select">
                             <Select
                                 defaultValue={'外向'}
@@ -161,10 +171,10 @@ export default function PopupContent(props) {
                                 size="small"
                                 onChange={characterChange}
                                 style={{
-                                    width: '75px',
-                                    fontSize: '10px',
-                                    marginTop: '5px',
-                                    marginRight: '5px',
+                                    width: '65px',
+                                    fontSize: '5px',
+                                    marginTop: '4px',
+                                    marginRight: '3px',
                                     padding: '0px',
                                     border: '1.5px solid rgb(187, 255, 255)',
                                     borderRadius: '5px',
@@ -187,10 +197,13 @@ export default function PopupContent(props) {
                     </div>
                     <Radar radarData={radarData} />
                     <div className="wordcloud">
-                        {/* <WordCloud wordData={wordData} characterId={characterId} /> */}
-                        <Histogram optionData={wordData} characterId={characterId}></Histogram>
+                        {
+                            IsWordCloud ?
+                                <WordCloud wordData={wordData} characterId={characterId} /> :
+                                <Pie wordData={wordData}></Pie>
+                        }
                     </div>
-                    
+
                     <div className="clear" />
                 </>
             </div>
@@ -216,21 +229,12 @@ export default function PopupContent(props) {
                 </>
             </div>
             <div className="popup-bottom">
+                <Histogram optionData={optionData} ></Histogram>
                 {/* {IsHistogram ?
                     <Histogram optionData={wordData} ></Histogram> :
                     <Description optionData={wordData}></Description>
                 } */}
             </div>
-            <Button className="switch"
-                type='ghost'
-                icon={<UserSwitchOutlined />}
-                shape='default'
-                style={{
-                    height: '15px',
-                    width: '15px'
-                }}
-                onClick={changeBottom}
-            />
         </div>
     )
 }

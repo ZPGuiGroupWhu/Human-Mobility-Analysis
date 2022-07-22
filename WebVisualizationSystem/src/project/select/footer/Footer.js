@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import "./Footer.scss";
 import '@/project/border-style.scss'
 import { Card, Col, Row, Pagination, Popover } from 'antd';
+import { UserSwitchOutlined } from '@ant-design/icons';
 import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 import ODs from './ODs.json'
 import ShenZhen from './ShenZhen.json'
@@ -79,16 +80,24 @@ class Footer extends Component {
   }
   cardClick = (id, e) => {
     for (let i = 0; i < $("div[id='deckgl-card']").length; i++) {
-      $("div[id='deckgl-card']")[i].style.backgroundColor = "";
+      let cardStyle = $("div[id='deckgl-card']")[i].parentElement.style;
+      cardStyle.backgroundColor = 'transparent';
+      cardStyle.transform = 'scale(1)';
     }
     if (e.target.className == "ant-card-head-title") {
-      e.target.parentElement.parentElement.parentElement.style.backgroundColor = "#c7f0ff"
+      let cardStyle = e.target.parentElement.parentElement.parentElement.parentElement.style;
+      cardStyle.transform = 'scale(1.05)';
+      cardStyle.backgroundColor = "#c7f0ff";
     }
     else if (e.target.className == "ant-card-body") {
-      e.target.parentElement.style.backgroundColor = "#c7f0ff"
+      let cardStyle = e.target.parentElement.parentElement.style;
+      cardStyle.transform = 'scale(1.05)';
+      cardStyle.backgroundColor = "#c7f0ff";
     }
     else if (e.target.id == "deckgl-overlay") {
-      e.target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor = "#c7f0ff"
+      let cardStyle = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.style;
+      cardStyle.transform = 'scale(1.05)';
+      cardStyle.backgroundColor = "#c7f0ff";
     }
     this.props.setRoutes(prev => {
       const newRoutes = _.cloneDeep(prev);
@@ -100,18 +109,20 @@ class Footer extends Component {
     return (
       <div className="outer-container tech-border">
         <Row gutter={[8, 8]} style={{ width: "100%", marginLeft: "0" }}>
-          <Col span={24} key={"Pagination"} style={{ marginBottom: "10px" }}>
+          <Col span={24} key={"Pagination"} style={{ marginBottom: "5px" }}>
             <Pagination style={{ fontSize: 12, position: "relative", left: "0%", top: "2%", transform: "translate(0%, 0)", width: "100%", textAlign: "center", backgroundColor: "white" }}
               simple size='small' current={this.state.currentPage} onChange={this.onChange} total={this.data.length} showSizeChanger={false}
               defaultPageSize={this.pageSize} />
           </Col>
         </Row>
         <div className="select-footer-ctn">
-          <Row gutter={[8, 8]} style={{ width: "100%", marginLeft: "0" }}>
+          <Row gutter={[8, 8]} style={{ width: "100%", marginLeft: "0", marginTop: '5px' }}>
             {this.data &&
               this.data.length > 0 &&
               this.data.slice(this.state.minValue, this.state.maxValue).map(val => (
-                <Col span={24} key={this.changeTimes + '-' + val.id}>
+                <Col span={24} key={this.changeTimes + '-' + val.id}
+                  style={{ padding: '5px', borderRadius: '5px' }}
+                >
                   <Popover
                     overlayClassName='popover'
                     title={
@@ -134,58 +145,61 @@ class Footer extends Component {
                       </div>
                     } trigger="click" placement="left"
                     destroyTooltipOnHide // 打开后销毁，之后点击将重新打开（解决数据残留bug）
+                    autoAdjustOverflow={true}
                     content={
-                      <PopupContent id={val.id}/>
+                      <PopupContent id={val.id} />
                       // <div style={{ width: "500px" }}>
                       //   {this.getPopInfo(val.id)}
                       // </div>
                     } >
-                    <Card
-                      title={val.id}
-                      hoverable={false}
-                      size="small"
-                      bodyStyle={{ padding: 1 }}
-                      id="deckgl-card"
-                      // className="card"
-                      // tabindex={val.id}
-                      onClick={(e) => {
-                        this.cardClick(val.id, e);
-                      }}
-                    >
-                      <div style={{ height: "70px", position: "relative" }} >
-                        {/* 出现了新的问题，当使用Deck.gl时，会导致WARNING: Too many active WebGL contexts. Oldest context will be lost，从而使底图消失 */}
-                        {/* 问题已解决，在更新前删除对应canvas的上下文即可，保留备注以备不时之需*/}
-                        <DeckGL
-                          initialViewState={{
-                            longitude: 114.18,
-                            latitude: 22.7,
-                            zoom: 6.5,
-                            pitch: 45,
-                            bearing: 0
-                          }}
-                          controller={false}
-                          getCursor={({ isDragging }) => 'default'}
-                          layers={[
-                            new ArcLayer({
-                              id: 'arc-layer',
-                              data: val.ODs,
-                              pickable: false,
-                              getWidth: 2,
-                              getSourcePosition: d => d.O,
-                              getTargetPosition: d => d.D,
-                              getSourceColor: [255, 250, 97],
-                              getTargetColor: [30, 20, 255],
-                            }),
-                            new GeoJsonLayer({
-                              id: 'ShenZHen',
-                              data: ShenZhen,
-                              lineWidthMinPixels: 1,
-                              getFillColor: [255, 255, 255]
-                            })
-                          ]}>
-                        </DeckGL>
-                      </div>
-                    </Card>
+                    <div className='card'>
+                      <Card
+                        id="deckgl-card"
+                        title={'司机: ' + val.id}
+                        hoverable={false}
+                        size="small"
+                        bodyStyle={{ padding: '0 2px 5px 2px' }}
+                        // tabindex={val.id}
+                        onClick={(e) => {
+                          this.cardClick(val.id, e);
+                        }}
+                      >
+                        <div style={{ height: "80px", position: "relative" }} >
+                          {/* 出现了新的问题，当使用Deck.gl时，会导致WARNING: Too many active WebGL contexts. Oldest context will be lost，从而使底图消失 */}
+                          {/* 问题已解决，在更新前删除对应canvas的上下文即可，保留备注以备不时之需*/}
+                          <DeckGL
+                            initialViewState={{
+                              longitude: 114.18,
+                              latitude: 22.7,
+                              zoom: 6.5,
+                              pitch: 45,
+                              bearing: 0
+                            }}
+                            controller={false}
+                            getCursor={({ isDragging }) => 'default'}
+                            layers={[
+                              new ArcLayer({
+                                id: 'arc-layer',
+                                data: val.ODs,
+                                pickable: true,
+                                getWidth: 1,
+                                getSourcePosition: d => d.O,
+                                getTargetPosition: d => d.D,
+                                getSourceColor: [146, 254, 157],
+                                getTargetColor: [0, 201, 255]
+                              }),
+                              new GeoJsonLayer({
+                                id: 'ShenZHen',
+                                data: ShenZhen,
+                                lineWidthMinPixels: 1,
+                                getFillColor: [215, 210, 204], // 填充颜色
+                                getLineColor: [46, 252, 252], // 轮廓线颜色
+                              })
+                            ]}>
+                          </DeckGL>
+                        </div>
+                      </Card>
+                    </div>
                   </Popover>
                 </Col>
               ))}

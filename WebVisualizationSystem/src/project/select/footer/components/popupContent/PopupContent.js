@@ -227,10 +227,9 @@ export default function PopupContent(props) {
                         style={{
                             width: '100%',
                             fontWeight: 'bold',
-                            backgroundColor: 'black'
                         }}>
                         {optionData.map(item => (
-                            <Select.Option key={item.option}>{item.option}</Select.Option>
+                            <Select.Option key={item.name}>{item.option}</Select.Option>
                         ))}
                     </Select>
                 </div>

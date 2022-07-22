@@ -1,32 +1,38 @@
-.ant-descriptions-title{
-    background-color: transparent !important;
-    font-size: 10px !important;
-    line-height: 10px !important;
-    align-items: center;
-    position: relative !important;
-    top:-50% !important;
-    transform:translateY(50%) !important;
-}
-.ant-descriptions-item-label{
-    background-color: transparent !important;
-    width: auto !important;
-    font-family:'Microsoft Yahei' !important;
-    border-width: 1px !important;
-    text-align: center !important;
-    color: white !important;
-    border-color: #ccc !important;
-}
-
-.ant-descriptions-item-content{
-    background-color: transparent !important;
-    width:60px !important;
-    font-family:'Microsoft Yahei' !important;
-    border-width: 1px !important;
-    text-align: center !important;
-    color: #ccc !important;
-    border-color: #ccc !important;
-}
-
-.ant-descriptions{
-    overflow: auto !important;
+.description-ctn{
+    .ant-descriptions-title{
+        background-color: transparent !important;
+        font-size: 10px !important;
+        line-height: 10px !important;
+        align-items: center !important;
+        position: relative !important;
+        top:-50% !important;
+        transform:translateY(50%) !important;
+    }
+    .ant-descriptions-item-label{
+        background-color: transparent !important;
+        color: #ccc !important;
+        border-color: #ccc !important;
+        font-size: 5px !important;
+        font-weight: bolder!important;
+        font-family:'Microsoft Yahei' !important;
+        border-width: 2px !important;
+        text-align: center !important;
+        padding: 10px 0px 10px 0px !important;
+    }
+    
+    .ant-descriptions-item-content{
+        background-color: transparent !important;
+        color: #ccc !important;
+        border-color: #ccc !important;
+        font-size: 5px !important;
+        text-align: center !important;
+        font-weight: bolder!important;
+        font-family:'Microsoft Yahei' !important;
+        border-width: 2px !important;
+        padding: 10px 0px 10px 5px !important;
+    }
+    
+    .ant-descriptions{
+        overflow: auto !important;
+    }
 }

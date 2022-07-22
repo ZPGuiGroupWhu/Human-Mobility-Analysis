@@ -6,23 +6,17 @@ import '../bmap.scss';
 import './PageAnalysis.scss'
 // 伪数据
 // import userData from './components/deckGL/399313.json'
-import personalityData from './components/tableDrawer/radar/ocean_score.json'
+import personalityData from '../select/footer/components/popupContent/ocean_score.json'
 // 自定义组件
 import DeckGLMap from './components/deckGL/DeckGLMap';
-import Drawer from '@/components/drawer/Drawer';
-import TableDrawer from "./components/tableDrawer/TableDrawer";
-import Radar from "./components/tableDrawer/radar/Radar";
-import WordCloud from "./components/tableDrawer/wordcloud/WordCloud";
-import ViolinPlot from "./components/tableDrawer/violinplot/ViolinPlot";
-import { BlockOutlined, ReloadOutlined } from "@ant-design/icons";
 import BottomCalendar from './components/calendar/BottomCalendar';
 import ShoppingDrawer from './components/shopping/ShoppingDrawer';
 import CalendarWindow from './components/WeekAndHour/CalendarWindow';
 import CharacterWindow from './components/characterSelect/CharacterWindow'
-import { getSelectIdsByDate, initData, getInitTrajIds } from './components/dataHandleFunction/dataHandleFunction';
+import { getInitTrajIds } from './components/dataHandleFunction/dataHandleFunction';
 import FoldPanelSlider from '@/components/fold-panel-slider/FoldPanelSlider'
 // 网络请求
-import { getUserTraj, getUserTrajInChunk, getUserTrajCount } from '@/network';
+import { getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
@@ -292,90 +286,6 @@ class PageAnalysis extends Component {
             setRoutes={this.props.setRoutes}
           />
         </div>
-        {/* 右侧边栏 */}
-        <TableDrawer
-          id={1}
-          curId={this.state.curId}
-          setCurId={this.setCurId}
-          radar={() => (
-            <div>
-              <Radar data={personalityData} eventName={this.EVENTNAME} id={100045440} rightWidth={this.state.rightWidth} />
-            </div>
-          )}
-          wordcloud={() => (
-            //根据flag判断，切换为词云图还是数据表格
-            this.state.flag ?
-              <div>
-                {/*按钮属性*/}
-                <Button shape="square"
-                  ghost
-                  size='small'
-                  style={{
-                    position: 'absolute',
-                    top: 5,
-                    right: 2,
-                    zIndex: 1,
-                    borderWidth: 1.5,
-                    color: '#D2691E',
-                    borderColor: '#D2691E',
-                  }}
-                  icon={
-                    <BlockOutlined />
-                  }
-                  onClick={this.switchData} />
-                <WordCloud data={personalityData} eventName={this.EVENTNAME} id={100045440}
-                  maskImage={this.maskImage} rightWidth={this.state.rightWidth} />
-              </div> :
-              <div>
-                <Button shape="square"
-                  ghost
-                  size='small'
-                  style={{
-                    position: 'absolute',
-                    top: 5,
-                    right: 2,
-                    zIndex: 1,
-                    borderWidth: 1.5,
-                    color: '#D2691E',
-                    borderColor: '#D2691E',
-                  }}
-                  icon={
-                    <BlockOutlined />
-                  }
-                  onClick={this.switchData} />
-                <Descriptions
-                  title='用户属性表'
-                  column={{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }}
-                  bordered>
-                  {optionData.map(item => (
-                    <Descriptions.Item
-                      label={item.option}
-                      labelStyle={{ textAlign: 'center' }}
-                      contextStyle={{ textAlign: 'center' }}
-                    >{item.value.toFixed(5)}</Descriptions.Item>
-                  ))}
-                </Descriptions>
-              </div>
-          )}
-          violinplot={() => (
-            <div>
-              <p></p>
-              <Select showSearch={true}
-                style={{ width: this.state.rightWidth - 30 }}
-                defaultValue={initlabel}
-                optionFilterProp="children"
-                notFoundContent="无法找到"
-                onChange={this.optionChange}>
-                {optionData.map(item => (
-                  <Select.Option key={item.option}>{item.option}</Select.Option>
-                ))}
-              </Select>
-              <ViolinPlot data={personalityData} eventName={this.EVENTNAME} id={100045440}
-                option={this.state.option} rightWidth={this.state.rightWidth} />
-            </div>
-          )}
-          rightWidth={this.state.rightWidth} data={optionData} eventName={this.EVENTNAME}
-        />
         {/* <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/> */}
         <FoldPanelSlider
           style={{ width: '100%' }}

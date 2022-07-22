@@ -248,7 +248,7 @@ export default function PopupContent(props) {
                     <Description optionData={wordData}></Description>
                 } */}
             </div>
-            <footer className="popup-fold" onClick={footerClick}>点击展开</footer>
+            <footer className="popup-fold" onClick={footerClick}>{isFold ? '点击展开⬇' : '点击收起⬆'}</footer>
         </div>
     )
 }

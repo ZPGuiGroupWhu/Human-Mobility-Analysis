@@ -4,7 +4,6 @@ import { NavLink } from 'react-router-dom';
 import "./Footer.scss";
 import '@/project/border-style.scss'
 import { Card, Col, Row, Pagination, Popover } from 'antd';
-import { UserSwitchOutlined } from '@ant-design/icons';
 import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 import ODs from './ODs.json'
 import ShenZhen from './ShenZhen.json'
@@ -14,6 +13,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 // 组建
 import PopupContent from './components/popupContent/PopupContent';
+import { ConsoleSqlOutlined } from '@ant-design/icons';
 
 
 class Footer extends Component {
@@ -22,6 +22,8 @@ class Footer extends Component {
     this.changeTimes = 0;
     this.pageSize = 8;
     this.data = ODs;
+    this.cardId = -1; // 点击的card用户编号
+    this.popoverShow = false;
     this.state = {
       currentPage: 1,
       minValue: 0,
@@ -29,30 +31,7 @@ class Footer extends Component {
       Popover: null,
     }
   }
-  componentWillUpdate(nextProps, nextState) {//当界面更新时删除对应canvas的上下文，防止Oldest context will be lost
-    this.data = ODs
-    if (this.props.selectedUsers.length > 0) {
-      this.data = []
-      for (let i = 0; i < this.props.selectedUsers.length; i = i + 1) {
-        this.data.push(ODs.find(item => item.id == this.props.selectedUsers[i]))
-      }
-    }
-    if (
-      this.props.selectedUsers !== nextProps.selectedUsers ||
-      this.state.maxValue !== nextState.maxValue) {
-      // console.log("clear canvas")
-      this.changeTimes = this.changeTimes + 1;
-      for (let i = 0; i < $("canvas[id='deckgl-overlay']").length; i++) {
-        let gl = $("canvas[id='deckgl-overlay']")[i].getContext('webgl2');
-        gl.getExtension('WEBGL_lose_context').loseContext();
-      }
-    }
-  }
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.selectedUsers !== prevProps.selectedUsers) {
-      this.setState({ currentPage: 1, minValue: 0, maxValue: this.pageSize })
-    }
-  }
+
   onChange = (page) => {
     if (page <= 1) {
       this.setState({
@@ -78,39 +57,115 @@ class Footer extends Component {
     info.push(<div className="clear"></div>)
     return info
   }
+
+  // 点击card触发的样式变化
+  clickStyle = (e) => {
+    // 初始化dom节点style
+    let cardStyle = null;
+    // 获取dom节点style
+    if (e.target.className === "ant-card-head-title") {
+      cardStyle = e.target.parentElement.parentElement.parentElement.parentElement.style;
+    }
+    else if (e.target.className === "ant-card-body") {
+      cardStyle = e.target.parentElement.parentElement.style;
+    }
+    else if (e.target.id === "deckgl-overlay") {
+      cardStyle = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.style;
+    }
+    // 创建动画等样式
+    cardStyle.transform = 'scale(1.05)';
+    cardStyle.animation = 'card-animated-border 1.5s infinite';
+  }
+
+  // 卡片点击事件
   cardClick = (id, e) => {
+    /**
+     * 逻辑：
+     * 1. 先清空所有card的样式，初始化popoverShow标记
+     * 2. 如果点击的不是同一个card，则给对应id的card加上动画效果，并记录 cardId 和标记 popoverShow
+     * 3. 否则就是点击的是同一个card，那么就不需要做其他事情，只需要继续将 cardId 初始化即可。
+     */
+    this.popoverShow = false;
+    // 每次点击后，先清除所有动画，根据点击是否为同一个卡片决定是否要触发 clickStyle()
     for (let i = 0; i < $("div[id='deckgl-card']").length; i++) {
       let cardStyle = $("div[id='deckgl-card']")[i].parentElement.style;
-      cardStyle.backgroundColor = 'transparent';
+      cardStyle.animation = ''
       cardStyle.transform = 'scale(1)';
     }
-    if (e.target.className == "ant-card-head-title") {
-      let cardStyle = e.target.parentElement.parentElement.parentElement.parentElement.style;
-      cardStyle.transform = 'scale(1.05)';
-      cardStyle.backgroundColor = "#c7f0ff";
+
+    // 如果点击的是不同card
+    if (this.cardId !== id) {
+      this.clickStyle(e);
+      this.cardId = id;
+      this.popoverShow = true;
+    }else{
+      this.cardId = -1;
     }
-    else if (e.target.className == "ant-card-body") {
-      let cardStyle = e.target.parentElement.parentElement.style;
-      cardStyle.transform = 'scale(1.05)';
-      cardStyle.backgroundColor = "#c7f0ff";
-    }
-    else if (e.target.id == "deckgl-overlay") {
-      let cardStyle = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.style;
-      cardStyle.transform = 'scale(1.05)';
-      cardStyle.backgroundColor = "#c7f0ff";
-    }
+    // 路由
     this.props.setRoutes(prev => {
       const newRoutes = _.cloneDeep(prev);
       newRoutes[1].status = true;
       return newRoutes;
     })
   }
+
+
+  componentDidMount() {
+    /*
+     * 鼠标点击监听函数，用于判断：如果鼠标点击了其他地方，
+     * antd的popover会默认消失，但我们的card动画样式不会消失，因此需要一个逻辑让card的动画样式也消失
+     * */
+    window.addEventListener('click', (e) => {
+      // 异步延时，不然会获取到popover 的dom节点还存在
+      setTimeout(() => {
+        let el = document.querySelector('.popover');
+        // 如果popover的节点不存在，并且 popoverShow标记为true，则说明是点击了其他地方，而不是用户列表
+        if (!el && (this.popoverShow === true)) {
+          // 清除所有card的样式
+          for (let i = 0; i < $("div[id='deckgl-card']").length; i++) {
+            let cardStyle = $("div[id='deckgl-card']")[i].parentElement.style;
+            cardStyle.animation = ''
+            cardStyle.transform = 'scale(1)';
+            // 并让各标记参数回到初始值
+            this.popoverShow = false;
+            this.cardId = -1;
+          }
+        }
+      }, 300)
+    })
+  }
+
+  componentWillUpdate(nextProps, nextState) {//当界面更新时删除对应canvas的上下文，防止Oldest context will be lost
+    this.data = ODs
+    if (this.props.selectedUsers.length > 0) {
+      this.data = []
+      for (let i = 0; i < this.props.selectedUsers.length; i = i + 1) {
+        this.data.push(ODs.find(item => item.id == this.props.selectedUsers[i]))
+      }
+    }
+    if (
+      this.props.selectedUsers !== nextProps.selectedUsers ||
+      this.state.maxValue !== nextState.maxValue) {
+      // console.log("clear canvas")
+      this.changeTimes = this.changeTimes + 1;
+      for (let i = 0; i < $("canvas[id='deckgl-overlay']").length; i++) {
+        let gl = $("canvas[id='deckgl-overlay']")[i].getContext('webgl2');
+        gl.getExtension('WEBGL_lose_context').loseContext();
+      }
+    }
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.selectedUsers !== prevProps.selectedUsers) {
+      this.setState({ currentPage: 1, minValue: 0, maxValue: this.pageSize })
+    }
+  }
+
   render() {
     return (
       <div className="outer-container tech-border">
         <Row gutter={[8, 8]} style={{ width: "100%", marginLeft: "0" }}>
           <Col span={24} key={"Pagination"} style={{ marginBottom: "5px" }}>
-            <Pagination style={{ fontSize: 12, position: "relative", left: "0%", top: "2%", transform: "translate(0%, 0)", width: "100%", textAlign: "center", backgroundColor: "white" }}
+            <Pagination
               simple size='small' current={this.state.currentPage} onChange={this.onChange} total={this.data.length} showSizeChanger={false}
               defaultPageSize={this.pageSize} />
           </Col>
@@ -121,7 +176,7 @@ class Footer extends Component {
               this.data.length > 0 &&
               this.data.slice(this.state.minValue, this.state.maxValue).map(val => (
                 <Col span={24} key={this.changeTimes + '-' + val.id}
-                  style={{ padding: '5px', borderRadius: '5px' }}
+                  style={{ padding: '0px 6px', borderRadius: '5px' }}
                 >
                   <Popover
                     overlayClassName='popover'
@@ -182,18 +237,18 @@ class Footer extends Component {
                                 id: 'arc-layer',
                                 data: val.ODs,
                                 pickable: true,
-                                getWidth: 1,
+                                getWidth: 0.3,
                                 getSourcePosition: d => d.O,
                                 getTargetPosition: d => d.D,
-                                getSourceColor: [146, 254, 157],
-                                getTargetColor: [0, 201, 255]
+                                getSourceColor: [252, 252, 46],
+                                getTargetColor: [255, 77, 41],
                               }),
                               new GeoJsonLayer({
                                 id: 'ShenZHen',
                                 data: ShenZhen,
                                 lineWidthMinPixels: 1,
                                 getFillColor: [215, 210, 204], // 填充颜色
-                                getLineColor: [46, 252, 252], // 轮廓线颜色
+                                getLineColor: [101, 252, 252], // 轮廓线颜色
                               })
                             ]}>
                           </DeckGL>

@@ -242,8 +242,7 @@ class PageAnalysis extends Component {
 
     return (
       <div className='analysis-page'>
-        {/* 蒙版 */}
-        {this.state.dataloadStatus ? null :
+        { this.state.dataloadStatus ? null :
           <div className='mask'>
             <Spin className=''
               tip="Loading..."
@@ -256,8 +255,7 @@ class PageAnalysis extends Component {
                 zIndex: 2,
               }}
             />
-            {/* 进度条 */}
-            <Progress
+            <Progress  // 进度条
               strokeColor={{
                 from: '#108ee9',
                 to: '#87d068',

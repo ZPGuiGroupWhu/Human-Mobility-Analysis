@@ -46,8 +46,8 @@ function DeckGLMap(props) {
   // 视角操作逻辑
   const { prevViewState, flyToFocusPoint } = useView(INITIAL_VIEW_STATE);
 
-  let trajNodes = [];//轨迹点集合
-  let trajCounts = {};//每天的轨迹数目
+  // let trajNodes = [];//轨迹点集合
+  // let trajCounts = {};//每天的轨迹数目
   let OdNodes = [];//OD点集合
   // let heatMapLayerShow = false;//是否显示热力图图层
   // let gridLayerShow = false;//是否显示格网图层
@@ -65,6 +65,8 @@ function DeckGLMap(props) {
   // let iconDisabled = false;//icon图层开关的disabled属性
   // let iconChecked = false;//icon图层开关属性
 
+  const [trajNodes, setTrajNodes] = useState([]);
+  const [trajCounts, setTrajCounts] = useState({});
   const [heatMapLayerShow, setHeatMapLayerShow] = useState(false); // 是否显示热力图图层
   const [gridLayerShow, setGridLayerShow] = useState(false); // 是否显示格网图层
   const [gridLayer3D, setGridLayer3D] = useState(true); // 格网图层是否为3D
@@ -103,10 +105,7 @@ function DeckGLMap(props) {
   const [trajIdForSelect, setTrajIdForSelect] = useState([]); // 轨迹编号字符串的模糊检索结果
 
 
-  // 初始化
-  useEffect(() => {
-    getLayers();
-  }, [])
+
 
   // 数据改变，重新渲染
   useEffect(() => {
@@ -156,8 +155,8 @@ function DeckGLMap(props) {
         Nodes.push({ COORDINATES: [userData[i].lngs[j], userData[i].lats[j]], WEIGHT: 1, SPD: userData[i].spd[j] });//将所有轨迹点放入同一个数组内，权重均设置为1
       }
     }
-    trajNodes = Nodes;
-    trajCounts = Count;
+    setTrajCounts(Count);
+    setTrajNodes(Nodes);
     getTrajCounts(trajCounts) //将每天的轨迹数目统计结果反馈给父组件
   };
 
@@ -212,7 +211,7 @@ function DeckGLMap(props) {
   // };
 
   //构建热力图图层
-  const getHeatMapLayer = () => {
+  function getHeatMapLayer() {
     setHeatMapLayer(new HeatmapLayer({
       id: 'heatmapLayer',
       data: trajNodes,
@@ -394,7 +393,7 @@ function DeckGLMap(props) {
   }
 
   // 绘制轨迹图层
-  const getTripsLayer = (selectData) => {
+  function getTripsLayer(selectData) {
     setTripsLayer(new TripsLayer({
       id: 'trips-layer',
       data: selectData,
@@ -434,7 +433,7 @@ function DeckGLMap(props) {
         iconMapping: ICON_MAPPING,
         getIcon: d => 'marker',
         sizeScale: 20,
-        onClick: info => clickInfo(info),
+        onClick: info => clickEvents(info),
         getPosition: d => d.data[0],  // 轨迹第一个点坐标
         getSize: d => 1,
         getColor: d => [175, 238, 238, iconOpacity],
@@ -451,7 +450,7 @@ function DeckGLMap(props) {
         iconMapping: ICON_MAPPING,
         getIcon: d => 'marker',
         sizeScale: 20,
-        onClick: info => clickInfo(info),
+        onClick: info => clickEvents(info),
         getPosition: d => d.data[d.data.length - 1],  // 轨迹最后一个点坐标
         getSize: d => 1,
         getColor: d => [255, 69, 0, this.state.iconOpacity],
@@ -501,26 +500,20 @@ function DeckGLMap(props) {
   // 可视化筛选的轨迹
   const showSelectTraj = (selectTrajIds) => {
     const selectTrajs = returnSelectTrajs(selectTrajIds);
-    new Promise((resolve) => { // 利用 promise 实现 hook setstate 的回调，也可以用 useEffect 实现
       setTripsOpacity(tripInitOpacity);
       // 清除单条高亮轨迹
       setArcLayerOne(null);
       setTripsLayerOne(null);
       setIconLayerOneO(null);
       setIconLayerOneD(null);
-    }).then(res => {
       getTripsLayer(selectTrajs);
-    });
   };
   // 可视化筛选轨迹的OD点
   const showSelectOD = (selectTrajIds) => {
     const selectTrajs = returnSelectTrajs(selectTrajIds);
-    new Promise((resolve) => { // 利用 promise 实现 hook setstate 的回调，也可以用 useEffect 实现
       setIconOpacity(iconInitOpacity)
-    }).then(res => {
       getIconLayer(true, selectTrajs);  // O 点
       getIconLayer(false, selectTrajs);  // D 点
-    });
   };
   const changeGridOrSpeed = (event) => {//切换图层
     if (event.target.value === "Grid") {
@@ -575,18 +568,18 @@ function DeckGLMap(props) {
   };
 
   const changeTripsLayerShow = () => { // 与开关联动，切换轨迹图层和icon图层的显示与否
-    setIconDisabled((prev) => !prev); //和icon图层间的联动
+    setIconDisabled(!iconDisabled); //和icon图层间的联动
     if (iconChecked === true) {//关闭trips图层时，如果icon图层开着的话，需要一起关闭
       setIconChecked(false);
-      setIconLayerOShow((prev) => !prev);
-      setIconLayerDShow((prev) => !prev);
+      setIconLayerOShow(!iconLayerOShow);
+      setIconLayerDShow(!iconLayerDShow);
     }
     // 显示和关闭各图层，轨迹、单条轨迹、单条OD弧段、OD点icon图标
-    setTripsLayerShow((prev) => !prev);
-    setTripsLayerOneShow((prev) => !prev);
-    setArcLayerOneShow((prev) => !prev);
-    setIconLayerOneOShow((prev) => !prev);
-    setIconLayerOneDShow((prev) => !prev);
+    setTripsLayerShow(!tripsLayerShow);
+    setTripsLayerOneShow(!tripsLayerOneShow);
+    setArcLayerOneShow(!arcLayerOneShow);
+    setIconLayerOneOShow(!iconLayerOneOShow);
+    setIconLayerOneDShow(!iconLayerOneDShow);
     // 初始化图层
     getTripsLayerOne();
     getArcLayerOne();
@@ -596,9 +589,9 @@ function DeckGLMap(props) {
 
   //显示和关闭OD点icon图层
   const changeIconLayerShow = () => {
-    setIconChecked((prev) => !prev);;
-    setIconLayerOShow((prev) => !prev);;
-    setIconLayerDShow((prev) => !prev);;
+    setIconChecked(!iconChecked);;
+    setIconLayerOShow(!iconLayerOShow);;
+    setIconLayerDShow(!iconLayerDShow);;
     showSelectOD(analysis.finalSelected);
   };
 
@@ -658,27 +651,26 @@ function DeckGLMap(props) {
   const options = trajIdForSelect.sort((a, b) => (a.split('_')[1] - b.split('_')[1]))
     .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
 
+    const layers = [gridLayerShow && !heatMapLayerShow ? gridLayer : null,
+      heatMapLayerShow && gridLayerShow ? heatMapLayer : null,
+      heatMapLayerShow && speedLayerShow ? heatMapLayerSPD : null,
+      speedLayerShow && !heatMapLayerShow ? speedLayer : null,
+      tripsLayerShow ? tripsLayer : null,
+      iconLayerOShow ? iconLayerO : null,
+      iconLayerDShow ? iconLayerD : null,
+      arcLayerOneShow ? arcLayerOne : null,
+      tripsLayerOneShow ? tripsLayerOne : null,
+      iconLayerOneOShow ? iconLayerOneO : null,
+      iconLayerOneDShow ? iconLayerOneD : null,
+      scatterPlotLayer]
+
   return (
     <>
       {/* 主地图 */}
       <DeckGL
         initialViewState={prevViewState}
         controller={true}
-        layers={
-          [
-            gridLayerShow && !heatMapLayerShow ? gridLayer : null,
-            heatMapLayerShow && gridLayerShow ? heatMapLayer : null,
-            heatMapLayerShow && speedLayerShow ? heatMapLayerSPD : null,
-            speedLayerShow && !heatMapLayerShow ? speedLayer : null,
-            tripsLayerShow ? tripsLayer : null,
-            iconLayerOShow ? iconLayerO : null,
-            iconLayerDShow ? iconLayerD : null,
-            arcLayerOneShow ? arcLayerOne : null,
-            tripsLayerOneShow ? tripsLayerOne : null,
-            iconLayerOneOShow ? iconLayerOneO : null,
-            iconLayerOneDShow ? iconLayerOneD : null,
-            scatterPlotLayer,
-          ]}>
+        layers={layers}>
         {<StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />}
         {_renderTooltip()}
       </DeckGL>

@@ -20,6 +20,7 @@ import { getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setHeatmapSelected, setHeatmapData, setCalendarSelected, setCharacterSelected, setFinalSelected } from '@/app/slice/analysisSlice';
 
 
@@ -63,7 +64,8 @@ class PageAnalysis extends Component {
       flag: true,
       option: initlabel,
       // curId: 2, // 当前激活抽屉id
-      userData: [], // 请求的数据
+      userData: [], // 请求的轨迹数据
+      pois: [], // 请求的poi数据
       dataloadStatus: false, // 数据是否加载完毕
       progress: 0, // 数据加载进度条刻度
       ShenZhen: null, // 深圳json边界
@@ -112,7 +114,6 @@ class PageAnalysis extends Component {
     // this.props.setCharacterSelected(selectedData)
   }
 
-
   // 取不同筛选结果的交集
   handleIntersection = (...params) => {
     // 若存在元素不为数组类型，则报错
@@ -152,6 +153,27 @@ class PageAnalysis extends Component {
     })
   }
 
+  // 请求poi数据
+  fetchPOI = () => {
+    // 请求数据 （前端json）
+    const reqPoiData = async () => {
+      const { data } = await axios.get(`${process.env.PUBLIC_URL}/mock/shenzhen-poi.json`);
+      const result = data.map(item => {
+        const { typeId, location, ...subItem } = item;
+        return {
+          ...subItem,
+          count: 1,
+          typeId: +typeId,
+          location: location?.split(",").map(item => +parseFloat(item).toFixed(4)),
+        };
+      });
+      this.setState({
+        pois: result
+      }, () => { console.log(this.state.pois) })
+    }
+    reqPoiData();
+  }
+
   componentDidMount() {
     const reqUserData = async () => {
       let user = '399313'
@@ -185,6 +207,9 @@ class PageAnalysis extends Component {
     axios.get(process.env.PUBLIC_URL + '/ShenZhen.json').then(data => {
       this.setState({ ShenZhen: data.data })
     })
+
+    // poi 数据
+    this.fetchPOI();
   }
 
   // 更新筛选交集的轨迹编号
@@ -242,7 +267,7 @@ class PageAnalysis extends Component {
 
     return (
       <div className='analysis-page'>
-        { this.state.dataloadStatus ? null :
+        {this.state.dataloadStatus ? null :
           <div className='mask'>
             <Spin className=''
               tip="Loading..."
@@ -279,9 +304,11 @@ class PageAnalysis extends Component {
           <DeckGLMap
             userId={399313}
             userData={this.state.userData}
+            pois={this.state.pois}
             getTrajCounts={this.getTrajCounts}
             eventName={this.EVENTNAME}
             setRoutes={this.props.setRoutes}
+
           />
         </div>
         {/* <FunctionBar functionBarItems={this.functionBarItems} bottom={170}/> */}

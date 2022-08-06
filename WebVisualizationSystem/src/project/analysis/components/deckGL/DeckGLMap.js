@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { StaticMap } from 'react-map-gl';
-import { HeatmapLayer, GPUGridLayer } from '@deck.gl/aggregation-layers';
+import { HeatmapLayer, GPUGridLayer, CPUGridLayer } from '@deck.gl/aggregation-layers';
 import { ArcLayer, IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
 import _ from 'lodash';
@@ -15,16 +15,15 @@ import { addSelectTrajs, setCurShowTrajId } from '@/app/slice/analysisSlice';
 // 函数
 import { copyText } from '@/common/func/copyText.js';
 import { getOneTraj, getUserTrajRegex } from '@/network';
+import { getUniqueByKey } from './configs/poiMap/getUniqueByKey';
 // 样式
 import './DeckGLMap.scss';
 import '@/project/border-style.scss';
-// 组件
-
 // hooks
 import { useView } from './hooks/useView';
 import { useHistory } from 'react-router-dom';
 // 配置
-import { INITIAL_VIEW_STATE, MAPBOX_ACCESS_TOKEN } from './components/poiMap/config';
+import { INITIAL_VIEW_STATE, MAPBOX_ACCESS_TOKEN, POI_COLOR_RANGE } from './configs/poiMap/Config';
 
 
 const tripInitOpacity = 0.8;
@@ -38,50 +37,13 @@ function DeckGLMap(props) {
   const analysis = useSelector(state => state.analysis);
   const predict = useSelector(state => state.predict);
 
-  const { userId, userData, getTrajCounts, setRoutes } = props;
+  const { userId, userData, getTrajCounts, setRoutes, pois } = props;
 
   const history = useHistory(); // hooks 路由传参数方法
   const inputRef = useRef(); // 文本框ref对象
 
   // 视角操作逻辑
   const { prevViewState, flyToFocusPoint } = useView(INITIAL_VIEW_STATE);
-
-  // let trajNodes = [];//轨迹点集合
-  // let trajCounts = {};//每天的轨迹数目
-  let OdNodes = [];//OD点集合
-  // let heatMapLayerShow = false;//是否显示热力图图层
-  // let gridLayerShow = false;//是否显示格网图层
-  // let gridLayer3D = true;//格网图层是否为3D
-  // let speedLayerShow = false;//是否显示速度图层
-  // let speedLayer3D = true;//速度图层是否为3D
-  // let gridWidth = 100;//格网图层的宽度
-  // let tripsLayerShow = true;//是否显示轨迹图层
-  // let iconLayerOShow = false;//是否显示O点的icon图层
-  // let iconLayerDShow = false;//是否显示D点的icon图层
-  // let tripsLayerOneShow = true;//是否显示选中的单条轨迹图层
-  // let arcLayerOneShow = true;//是否显示选中轨迹的OD弧线
-  // let iconLayerOneOShow = true;//是否显示选中轨迹的O点icon图标
-  // let iconLayerOneDShow = true;//是否显示选中轨迹的D点icon图标
-  // let iconDisabled = false;//icon图层开关的disabled属性
-  // let iconChecked = false;//icon图层开关属性
-
-  const [trajNodes, setTrajNodes] = useState([]);
-  const [trajCounts, setTrajCounts] = useState({});
-  const [heatMapLayerShow, setHeatMapLayerShow] = useState(false); // 是否显示热力图图层
-  const [gridLayerShow, setGridLayerShow] = useState(false); // 是否显示格网图层
-  const [gridLayer3D, setGridLayer3D] = useState(true); // 格网图层是否为3D
-  const [speedLayerShow, setSpeedLayerShow] = useState(false); // 是否显示速度图层
-  const [speedLayer3D, setSpeedLayer3D] = useState(true); // 速度图层是否为3D
-  const [gridWidth, setGridWidth] = useState(100); // 格网图层的宽度
-  const [tripsLayerShow, setTripsLayerShow] = useState(true); // 是否显示轨迹图层
-  const [iconLayerOShow, setIconLayerOShow] = useState(false); // 是否显示O点的icon图层
-  const [iconLayerDShow, setIconLayerDShow] = useState(false); // 是否显示D点的icon图层
-  const [tripsLayerOneShow, setTripsLayerOneShow] = useState(true); // 是否显示选中的单条轨迹图层
-  const [arcLayerOneShow, setArcLayerOneShow] = useState(true); // 是否显示选中轨迹的OD弧线
-  const [iconLayerOneOShow, setIconLayerOneOShow] = useState(true); // 是否显示选中轨迹的O点icon图标
-  const [iconLayerOneDShow, setIconLayerOneDShow] = useState(true); // 是否显示选中轨迹的D点icon图标
-  const [iconDisabled, setIconDisabled] = useState(false); // icon图层开关的disabled属性
-  const [iconChecked, setIconChecked] = useState(false); // icon图层开关属性
 
   const [heatMapLayer, setHeatMapLayer] = useState(null); // 轨迹热力图图层
   const [heatMapLayerSPD, setHeatMapLayerSPD] = useState(null); // 速度热力图图层
@@ -95,34 +57,39 @@ function DeckGLMap(props) {
   const [iconLayerOneO, setIconLayerOneO] = useState(null); // 选中轨迹O点的icon图层
   const [iconLayerOneD, setIconLayerOneD] = useState(null); // 选中轨迹D点的icon图层
   const [scatterPlotLayer, setScatterPlotLayer] = useState(null); // 点图层
+  const [poiMapLayer, setPoiMapLayer] = useState(null); // poimap图层
   const [hoveredMessage, setHoverMessage] = useState(null);  // 悬浮框信息
   const [pointerX, setPointerX] = useState(null); // 悬浮框的位置
   const [pointerY, setPointerY] = useState(null); // 悬浮框的位置
   const [tripsOpacity, setTripsOpacity] = useState(tripInitOpacity); // 轨迹初始透明度
   const [iconOpacity, setIconOpacity] = useState(iconInitOpacity); // icon图标图层初始化透明度
-  const [clickInfo, setClickInfo] = useState(null); // 点击事件的对象
+  const [clickInfo, setClickInfo] = useState({}); // 点击事件的对象
   const [trajIdForSearch, setTrajIdForSearch] = useState(''); // 定向查找输入的轨迹编号字符串
   const [trajIdForSelect, setTrajIdForSelect] = useState([]); // 轨迹编号字符串的模糊检索结果
+  const [tripsFlag, setTripsFlag] = useState({}); // tripslayer 渲染标记
+  const [iconsFlag, setIconsFlag] = useState({}); // iconslayer 渲染标记
 
 
-
-
-  // 数据改变，重新渲染
-  useEffect(() => {
-    getLayers();
-  }, [userData])
-
-
-  // 渲染筛选轨迹及其od图层
-  useEffect(() => {
-    showSelectTraj(analysis.finalSelected);
-    showSelectOD(analysis.finalSelected);
-  }, [analysis.finalSelected])
-
-
-  useEffect(() => {
-    handleCurTrajId(analysis.selectTrajs, analysis.curShowTrajId)
-  }, [analysis.curShowTrajId])
+  const record = useRef({
+    trajNodes: [], // 
+    trajCounts: {}, // 每天的轨迹数目
+    heatMapLayerShow: false,// 是否显示热力图图层
+    gridLayerShow: false,  // 是否显示格网图层
+    gridLayer3D: true,  // 格网图层是否为3D
+    speedLayerShow: false,  // 是否显示速度图层
+    speedLayer3D: true,  // 速度图层是否为3D
+    gridWidth: 100,  // 格网图层的宽度
+    tripsLayerShow: true,  // 是否显示轨迹图层
+    iconLayerOShow: false,  // 是否显示O点的icon图层
+    iconLayerDShow: false,  // 是否显示D点的icon图层
+    tripsLayerOneShow: true,  // 是否显示选中的单条轨迹图层
+    arcLayerOneShow: true,  // 是否显示选中轨迹的OD弧线
+    iconLayerOneOShow: true,  // 是否显示选中轨迹的O点icon图标
+    iconLayerOneDShow: true, // 是否显示选中轨迹的D点icon图标
+    iconDisabled: false, // icon图层开关的disabled属性
+    iconChecked: false, // icon图层开关属性
+    poiMapsShow: false, // poimap图层开关
+  })
 
   // 依据当前轨迹 id 展示
   const handleCurTrajId = (selectTrajs, curShowTrajId) => {
@@ -137,7 +104,6 @@ function DeckGLMap(props) {
       ];
       layerRenderAfterSelect(...params);
     }
-
   }
 
   const getTrajNodes = () => {
@@ -155,9 +121,9 @@ function DeckGLMap(props) {
         Nodes.push({ COORDINATES: [userData[i].lngs[j], userData[i].lats[j]], WEIGHT: 1, SPD: userData[i].spd[j] });//将所有轨迹点放入同一个数组内，权重均设置为1
       }
     }
-    setTrajCounts(Count);
-    setTrajNodes(Nodes);
-    getTrajCounts(trajCounts) //将每天的轨迹数目统计结果反馈给父组件
+    record.current.trajCounts = Count;
+    record.current.trajNodes = Nodes;
+    getTrajCounts(Count) //将每天的轨迹数目统计结果反馈给父组件
   };
 
   const dataFormat = (traj) => {
@@ -196,33 +162,68 @@ function DeckGLMap(props) {
     return selectTrajs; // 返回选择的轨迹信息
   }
 
-  // //构建OD弧段图层
-  // const getArcLayer = () => {
-  //   setArcLayer(new ArcLayer({
-  //     id: 'arc-layer',
-  //     data: userData,
-  //     pickable: true,
-  //     getWidth: 3,
-  //     getSourcePosition: d => d.O,
-  //     getTargetPosition: d => d.D,
-  //     getSourceColor: [255, 250, 97],
-  //     getTargetColor: [30, 20, 255],
-  //   }))
-  // };
+
+  // poi 类别
+  const poiTypes = useMemo(
+    () =>
+      getUniqueByKey(pois, function (poi) {
+        return poi?.typeId;
+      }),
+    [pois]
+  );
+
+  // 筛选 cell 单元格内占比最大的 type 类别 对应的 序号，返回颜色值
+  const getColorValueByPoiGridLayer = (points) => {
+    const map = _.countBy(points, (item) => item.typeId);
+    const idx = Object.values(map).findIndex(
+      (item, idx, arr) => item === Math.max(...arr)
+    );
+    const value = poiTypes.findIndex((type) => {
+      return +Object.keys(map)[idx] === type;
+    });
+    return value;
+  };
+
+  // 基于 cell 单元格内聚合的 POI 点数返回对应的 bar height
+  const getElevationValueByPoiGridLayer = (points) => points.length;
+
+  // PoiMap 三维柱状图
+  const getPoiMapLayer = () => {
+    setPoiMapLayer(
+      new CPUGridLayer({
+        id: "poi-map",
+        visible: record.current.poiMapsShow,
+        colorDomain: [0, 11],
+        colorRange: POI_COLOR_RANGE,
+        data: pois,
+        pickable: true,
+        extruded: true,
+        cellSize: 400,
+        elevationScale: 4,
+        getPosition: (d) => d.location,
+        getColorValue: getColorValueByPoiGridLayer,
+        getElevationValue: getElevationValueByPoiGridLayer,
+        onClick: (info) => {
+          flyToFocusPoint(info?.object?.position);
+        }
+      }))
+  }
 
   //构建热力图图层
-  function getHeatMapLayer() {
+  const getHeatMapLayer = () => {
     setHeatMapLayer(new HeatmapLayer({
       id: 'heatmapLayer',
-      data: trajNodes,
+      visible: record.current.heatMapLayerShow && record.current.gridLayerShow,
+      data: record.current.trajNodes,
       getPosition: d => d.COORDINATES,
       getWeight: d => d.WEIGHT,
       aggregation: 'SUM'
     }))
     setHeatMapLayerSPD(new HeatmapLayer({
       id: 'heatmapLayerSPD',
+      visible: record.current.heatMapLayerShow && record.current.speedLayerShow,
       radiusPixels: 3,  // 速度图层带宽
-      data: trajNodes,
+      data: record.current.trajNodes,
       getPosition: d => d.COORDINATES,
       getWeight: d => d.SPD,
       aggregation: 'MEAN'
@@ -232,10 +233,11 @@ function DeckGLMap(props) {
   const getGridLayer = () => {//构建轨迹格网图层
     setGirdLayer(new GPUGridLayer({
       id: 'gpu-grid-layer',
-      data: trajNodes,
+      visible: record.current.gridLayerShow && !record.current.heatMapLayerShow,
+      data: record.current.trajNodes,
       pickable: true,
-      extruded: gridLayer3D,//是否显示为3D效果
-      cellSize: gridWidth,//格网宽度，默认为100m
+      extruded: record.current.gridLayer3D,//是否显示为3D效果
+      cellSize: record.current.gridWidth,//格网宽度，默认为100m
       elevationScale: 4,
       colorRange: [[171, 217, 233], [224, 243, 248], [255, 255, 191], [254, 224, 144], [253, 174, 97], [244, 109, 67]],
       getPosition: d => d.COORDINATES,
@@ -257,10 +259,11 @@ function DeckGLMap(props) {
   const getSpeedLayer = () => {
     setSpeedLayer(new GPUGridLayer({
       id: 'gpu-grid-layer-speed',
-      data: trajNodes,
+      visible: record.current.speedLayerShow && !record.current.heatMapLayerShow,
+      data: record.current.trajNodes,
       pickable: true,
-      extruded: speedLayer3D,//是否显示为3D效果
-      cellSize: gridWidth,//格网宽度，默认为100m
+      extruded: record.current.speedLayer3D,//是否显示为3D效果
+      cellSize: record.current.gridWidth,//格网宽度，默认为100m
       elevationScale: 4,
       elevationAggregation: 'MEAN',//选用速度均值作为权重
       colorAggregation: 'MEAN',
@@ -283,9 +286,11 @@ function DeckGLMap(props) {
     }))
   };
 
+  // 渲染点击的轨迹
   const layerRenderAfterSelect = (O, D, OD, path) => {
     setIconLayerOneO(new IconLayer({
       id: 'icon-layer-one-O',
+      visible: record.current.iconLayerOneOShow,
       data: O,
       pickable: true,
       // iconAtlas和iconMapping必须，iconAtlas=>base64形式
@@ -300,6 +305,7 @@ function DeckGLMap(props) {
     }));
     setIconLayerOneD(new IconLayer({
       id: 'icon-layer-one-D',
+      visible: record.current.iconLayerOneDShow,
       data: D,
       pickable: true,
       // iconAtlas和iconMapping必须，iconAtlas=>base64形式
@@ -314,6 +320,7 @@ function DeckGLMap(props) {
     }));
     setArcLayerOne(new ArcLayer({
       id: 'arc-layer-one',
+      visible: record.current.arcLayerOneShow,
       data: OD,
       pickable: true,
       getWidth: 1,
@@ -324,6 +331,7 @@ function DeckGLMap(props) {
     }))
     setTripsLayerOne(new TripsLayer({
       id: 'trips-layer-one',
+      visible: record.current.tripsLayerOneShow,
       data: path,
       getPath: d => d.path,
       // deduct start timestamp from each data point to avoid overflow
@@ -343,59 +351,61 @@ function DeckGLMap(props) {
 
   //对应新json格式：轨迹点击事件
   const clickEvents = (info) => {
-    new Promise((resolve) => { // 利用 promise 实现 hook setstate 的回调，也可以用 useEffect 实现
-      setTripsOpacity(0.05);
-      setIconOpacity(0);
-    }).then(res => {
-      let id = info.object ? info.object.id : null;
-      // 绘制OD弧线
-      if (id === null) {
-        console.log('no trajectory!')
-      } else {
-        //存储点击的OD点信息和轨迹信息
-        const tempOD = [];
-        const tempO = [];
-        const tempD = [];
-        const tempTraj = [];
-        for (let i = 0; i < userData.length; i++) {
-          if (userData[i].id === id) {
-            tempOD.push({ O: userData[i].origin, D: userData[i].destination });
-            tempO.push({ COORDINATES: [userData[i].origin[0], userData[i].origin[1]] });
-            tempD.push({ COORDINATES: [userData[i].destination[0], userData[i].destination[1]] });
-            for (let j = 0; j < userData[i].lngs.length; j++) {
-              tempTraj.push([userData[i].lngs[j], userData[i].lats[j]]);
-            }
-            break
-          }
-        }
-        const tempPath = [{ path: tempTraj }];
-        // 地图渲染
-        layerRenderAfterSelect(tempO, tempD, tempOD, tempPath);
-        // 激活“目的地预测”跳转导航
-        setRoutes(prev => {
-          const newRoutes = _.cloneDeep(prev);
-          newRoutes[2].status = true;
-          return newRoutes;
-        })
-
-        /**
-         * redux-trajs存储
-         * info.object = [id:XX, date:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
-         */
-        // 1.传递点击选择的轨迹数据
-        dispatch(addSelectTrajs(info.object));
-        // 2.存储轨迹
-        dispatch(setSelectedTraj(info.object));
-        // 3.更新当前展示轨迹的 id
-        dispatch(setCurShowTrajId(info.object.id));
-      }
-    });
+    setTripsOpacity(0.05);
+    setIconOpacity(0);
+    setClickInfo(info);
   }
+
+  useEffect(() => {
+    let id = clickInfo.object ? clickInfo.object.id : null;
+    // 绘制OD弧线
+    if (id === null) {
+      console.log('no trajectory!')
+    } else {
+      //存储点击的OD点信息和轨迹信息
+      const tempOD = [];
+      const tempO = [];
+      const tempD = [];
+      const tempTraj = [];
+      for (let i = 0; i < userData.length; i++) {
+        if (userData[i].id === id) {
+          tempOD.push({ O: userData[i].origin, D: userData[i].destination });
+          tempO.push({ COORDINATES: [userData[i].origin[0], userData[i].origin[1]] });
+          tempD.push({ COORDINATES: [userData[i].destination[0], userData[i].destination[1]] });
+          for (let j = 0; j < userData[i].lngs.length; j++) {
+            tempTraj.push([userData[i].lngs[j], userData[i].lats[j]]);
+          }
+          break
+        }
+      }
+      const tempPath = [{ path: tempTraj }];
+      // 地图渲染
+      layerRenderAfterSelect(tempO, tempD, tempOD, tempPath);
+      // 激活“目的地预测”跳转导航
+      setRoutes(prev => {
+        const newRoutes = _.cloneDeep(prev);
+        newRoutes[2].status = true;
+        return newRoutes;
+      })
+      /**
+       * redux-trajs存储
+       * info.object = [id:XX, date:XX, data:[[lat1,lng1],[lat2,lng2],....], spd:[spd1,spd2,...], azimuth:[azi1,azi2,...], importance:[imp1,imp2,...]]
+       */
+      // 1.传递点击选择的轨迹数据
+      dispatch(addSelectTrajs(clickInfo.object));
+      // 2.存储轨迹
+      dispatch(setSelectedTraj(clickInfo.object));
+      // 3.更新当前展示轨迹的 id
+      dispatch(setCurShowTrajId(clickInfo.object.id));
+    }
+  }, [clickInfo])
+
 
   // 绘制轨迹图层
   function getTripsLayer(selectData) {
     setTripsLayer(new TripsLayer({
       id: 'trips-layer',
+      visible: record.current.tripsLayerShow,
       data: selectData,
       getPath: d => d.data,
       // deduct start timestamp from each data point to avoid overflow
@@ -425,6 +435,7 @@ function DeckGLMap(props) {
       //O点icon图层
       setIconLayerO(new IconLayer({
         id: 'icon-layer-O',
+        visible: record.current.iconLayerOShow,
         data: selectData,
         pickable: true,
         // iconAtlas和iconMapping必须，iconAtlas=>base64形式
@@ -442,6 +453,7 @@ function DeckGLMap(props) {
       //D点icon图层
       setIconLayerD(new IconLayer({
         id: 'icon-layer-D',
+        visible: record.current.iconLayerDShow,
         data: selectData,
         pickable: true,
         // iconAtlas和iconMapping必须，iconAtlas=>base64形式
@@ -453,8 +465,9 @@ function DeckGLMap(props) {
         onClick: info => clickEvents(info),
         getPosition: d => d.data[d.data.length - 1],  // 轨迹最后一个点坐标
         getSize: d => 1,
-        getColor: d => [255, 69, 0, this.state.iconOpacity],
+        getColor: d => [255, 69, 0, iconOpacity],
       }))
+
   };
   // 初始化单条OD图层
   const getArcLayerOne = () => {
@@ -467,133 +480,139 @@ function DeckGLMap(props) {
   };
 
   //初始化单条轨迹OD点的icon图层
-  const geticonLayerOneOD = () => {
+  const getIconLayerOneOD = () => {
     setIconLayerOneO(null);
     setIconLayerOneD(null);
   };
 
-  const getScatterPlotLayer = (data) => {
-    let isEmpty = (!data || data.length === 0)
-    let scatterPlotLayer = isEmpty ? null : (
-      new ScatterplotLayer({
-        id: 'scatterplot-layer',
-        data,
-        pickable: true,
-        opacity: 0.8,
-        stroked: true,
-        filled: true,
-        radiusScale: 6,
-        radiusMinPixels: 1,
-        radiusMaxPixels: 100,
-        lineWidthMinPixels: 1,
-        getPosition: d => d?.COORDINATES,
-        // getRadius: d => Math.sqrt(d.exits),
-        getRadius: d => 10,
-        getFillColor: d => [249, 231, 159],
-        getLineColor: d => [0, 0, 0]
-      })
-    )
-    setScatterPlotLayer(scatterPlotLayer);
-  }
-
-
   // 可视化筛选的轨迹
-  const showSelectTraj = (selectTrajIds) => {
-    const selectTrajs = returnSelectTrajs(selectTrajIds);
-      setTripsOpacity(tripInitOpacity);
-      // 清除单条高亮轨迹
-      setArcLayerOne(null);
-      setTripsLayerOne(null);
-      setIconLayerOneO(null);
-      setIconLayerOneD(null);
-      getTripsLayer(selectTrajs);
+  const showSelectTraj = () => {
+    setTripsOpacity(tripInitOpacity);
+    // 清除单条高亮轨迹
+    setArcLayerOne(null);
+    setTripsLayerOne(null);
+    setIconLayerOneO(null);
+    setIconLayerOneD(null);
+    setTripsFlag({}); // 触发 tripsOpacity 改变后再渲染 trips图层
   };
+
+  useEffect(() => {
+    const selectTrajs = returnSelectTrajs(analysis.finalSelected);
+    getTripsLayer(selectTrajs);
+  }, [tripsFlag])
+
   // 可视化筛选轨迹的OD点
-  const showSelectOD = (selectTrajIds) => {
-    const selectTrajs = returnSelectTrajs(selectTrajIds);
-      setIconOpacity(iconInitOpacity)
-      getIconLayer(true, selectTrajs);  // O 点
-      getIconLayer(false, selectTrajs);  // D 点
+  const showSelectOD = () => {
+    setIconOpacity(iconInitOpacity);
+    setIconsFlag({}); // 触发 iconOpacity 改变后再渲染 icon图层
   };
+
+  useEffect(() => {
+    const selectTrajs = returnSelectTrajs(analysis.finalSelected);
+    getIconLayer(true, selectTrajs);  // O 点
+    getIconLayer(false, selectTrajs);  // D 点
+  }, [iconsFlag])
+
   const changeGridOrSpeed = (event) => {//切换图层
     if (event.target.value === "Grid") {
-      setGridLayerShow(true);
-      setSpeedLayerShow(false);
-      if (heatMapLayerShow) {
-        getHeatMapLayer();
-      } else {
-        getGridLayer();
+      record.current = {
+        ...record.current,
+        gridLayerShow: true,
+        speedLayerShow: false,
       }
     } else if (event.target.value === "Speed") {
-      setSpeedLayerShow(true);
-      setGridLayerShow(false);
-      if (heatMapLayerShow) {
-        getHeatMapLayer();
-      } else {
-        getSpeedLayer();
+      record.current = {
+        ...record.current,
+        speedLayerShow: true,
+        gridLayerShow: false,
       }
     } else if (event.target.value === "None") {
-      setSpeedLayerShow(false);
-      setGridLayerShow(false);
-      setHoverMessage('')
+      record.current = {
+        ...record.current,
+        speedLayerShow: false,
+        gridLayerShow: false,
+      }
+      setHoverMessage('');
     }
+    // 重新渲染图层
+    getGridLayer();
+    getSpeedLayer();
+    getHeatMapLayer();
   }
-  const change3D = (event) => {//切换图层三维显示
+  const change3D = (event) => { // 切换图层三维显示
     if (event.target.value == "2D") {
-      setGridLayer3D(false);
-      setSpeedLayer3D(false);
-      setHeatMapLayerShow(false);
+      record.current = {
+        ...record.current,
+        gridLayer3D: false,
+        speedLayer3D: false,
+        heatMapLayerShow: false,
+      }
     }
     else if (event.target.value == "3D") {
-      setGridLayer3D(true);
-      setSpeedLayer3D(true);
-      setHeatMapLayerShow(false);
+      record.current = {
+        ...record.current,
+        gridLayer3D: true,
+        speedLayer3D: true,
+        heatMapLayerShow: false,
+      }
     }
     else if (event.target.value == "Heat") {
-      setHeatMapLayerShow(true);
-      getHeatMapLayer();
-      return;
+      record.current.heatMapLayerShow = true;
     }
-    if (gridLayerShow) {
-      getGridLayer();
-    }
-    else if (speedLayerShow) {
-      getSpeedLayer();
-    }
+    // 重新渲染图层
+    getGridLayer();
+    getSpeedLayer();
+    getHeatMapLayer();
   };
   const changeGridWidth = (value) => { // 与滑动条联动，切换格网的网格宽度
-    setGridWidth(value);
+    record.current.gridWidth = value;
     getGridLayer();
     getSpeedLayer();
   };
 
   const changeTripsLayerShow = () => { // 与开关联动，切换轨迹图层和icon图层的显示与否
-    setIconDisabled(!iconDisabled); //和icon图层间的联动
-    if (iconChecked === true) {//关闭trips图层时，如果icon图层开着的话，需要一起关闭
-      setIconChecked(false);
-      setIconLayerOShow(!iconLayerOShow);
-      setIconLayerDShow(!iconLayerDShow);
+    record.current.iconDisabled = !record.current.iconDisabled; //和icon图层间的联动
+    if (record.current.iconChecked === true) {//关闭trips图层时，如果icon图层开着的话，需要一起关闭
+      record.current = {
+        ...record.current,
+        iconChecked: false,
+        iconLayerOShow: !record.current.iconLayerOShow,
+        iconLayerDShow: !record.current.iconLayerDShow,
+      }
     }
     // 显示和关闭各图层，轨迹、单条轨迹、单条OD弧段、OD点icon图标
-    setTripsLayerShow(!tripsLayerShow);
-    setTripsLayerOneShow(!tripsLayerOneShow);
-    setArcLayerOneShow(!arcLayerOneShow);
-    setIconLayerOneOShow(!iconLayerOneOShow);
-    setIconLayerOneDShow(!iconLayerOneDShow);
+    record.current = {
+      ...record.current,
+      tripsLayerShow: !record.current.tripsLayerShow,
+      tripsLayerOneShow: !record.current.tripsLayerOneShow,
+      arcLayerOneShow: !record.current.arcLayerOneShow,
+      iconLayerOneOShow: !record.current.iconLayerOneOShow,
+      iconLayerOneDShow: !record.current.iconLayerOneDShow,
+    }
     // 初始化图层
     getTripsLayerOne();
     getArcLayerOne();
-    geticonLayerOneOD();
+    getIconLayerOneOD();
     showSelectTraj(analysis.finalSelected);
   };
 
   //显示和关闭OD点icon图层
   const changeIconLayerShow = () => {
-    setIconChecked(!iconChecked);;
-    setIconLayerOShow(!iconLayerOShow);;
-    setIconLayerDShow(!iconLayerDShow);;
+    record.current = {
+      ...record.current,
+      iconChecked: !record.current.iconChecked,
+      iconLayerOShow: !record.current.iconLayerOShow,
+      iconLayerDShow: !record.current.iconLayerDShow,
+    }
     showSelectOD(analysis.finalSelected);
   };
+
+  const changePoiMapLayerShow = () => {
+    record.current.poiMapsShow = !record.current.poiMapsShow;
+    console.log(record.current.poiMapsShow)
+    getPoiMapLayer();
+  }
+
 
   const getLayers = () => {//获取所有图层
     getTrajNodes();//获取所有轨迹点的集合
@@ -602,9 +621,9 @@ function DeckGLMap(props) {
     getSpeedLayer();//构建速度图层
     getTripsLayerOne();//初始化单条高亮轨迹图层
     getArcLayerOne();//初始化单条OD图层
-    geticonLayerOneOD();//初始化单条OD的icon图层
+    getIconLayerOneOD();//初始化单条OD的icon图层
     showSelectTraj(analysis.finalSelected);
-    getScatterPlotLayer();
+    getPoiMapLayer();  // 初始化poimap
   };
 
   const sliderToolTipFormatter = (value) => {
@@ -648,21 +667,43 @@ function DeckGLMap(props) {
     }
   }
 
+
+  // 数据改变，重新渲染
+  useEffect(() => {
+    getLayers();
+  }, [userData, pois])
+
+
+  // 渲染筛选轨迹及其od图层
+  useEffect(() => {
+    showSelectTraj();
+    showSelectOD();
+  }, [analysis.finalSelected])
+
+
+  useEffect(() => {
+    handleCurTrajId(analysis.selectTrajs, analysis.curShowTrajId)
+  }, [analysis.curShowTrajId])
+
+
   const options = trajIdForSelect.sort((a, b) => (a.split('_')[1] - b.split('_')[1]))
     .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
 
-    const layers = [gridLayerShow && !heatMapLayerShow ? gridLayer : null,
-      heatMapLayerShow && gridLayerShow ? heatMapLayer : null,
-      heatMapLayerShow && speedLayerShow ? heatMapLayerSPD : null,
-      speedLayerShow && !heatMapLayerShow ? speedLayer : null,
-      tripsLayerShow ? tripsLayer : null,
-      iconLayerOShow ? iconLayerO : null,
-      iconLayerDShow ? iconLayerD : null,
-      arcLayerOneShow ? arcLayerOne : null,
-      tripsLayerOneShow ? tripsLayerOne : null,
-      iconLayerOneOShow ? iconLayerOneO : null,
-      iconLayerOneDShow ? iconLayerOneD : null,
-      scatterPlotLayer]
+  // 图层
+  const layers = [
+    gridLayer,
+    heatMapLayer,
+    heatMapLayerSPD,
+    speedLayer,
+    tripsLayer,
+    iconLayerO,
+    iconLayerD,
+    arcLayerOne,
+    tripsLayerOne,
+    iconLayerOneO,
+    iconLayerOneD,
+    poiMapLayer,
+  ]
 
   return (
     <>
@@ -716,7 +757,11 @@ function DeckGLMap(props) {
             </div>
             <div className='text-button'>
               <span>OD图层</span>
-              <Switch onChange={changeIconLayerShow} disabled={iconDisabled} checked={iconChecked} />
+              <Switch onChange={changeIconLayerShow} disabled={record.current.iconDisabled} checked={record.current.iconChecked} />
+            </div>
+            <div className='text-button'>
+              <span>POI图层</span>
+              <Switch defaultChecked={false} onChange={changePoiMapLayerShow} />
             </div>
             {
               Object.keys(predict.selectedTraj).length ?

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { INITIAL_VIEW_STATE } from "../components/poiMap/config";
+import { INITIAL_VIEW_STATE } from "../configs/poiMap/Config";
 
 /**
  * 地图视角操作逻辑

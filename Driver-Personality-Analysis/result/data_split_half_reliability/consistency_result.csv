@@ -1,5 +1,0 @@
-label,extroversion_t,openness_t,neuroticism_t,conscientiousness_t,extroversion_p,openness_p,neuroticism_p,conscientiousness_p,extroversion,openness,neuroticism,conscientiousness,extroversion_stand_cons,openness_stand_cons,neuroticism_stand_cons,conscientiousness_stand_cons
-high,no data,1.331,no data,1.012,no data,0.410,no data,0.496,no data,0.053,no data,0.041,no data,0.582,no data,1.431
-medium,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data,no data
-low,1.353,no data,2.761,no data,0.405,no data,0.221,no data,0.111,no data,0.142,no data,1.914,no data,1.414,no data
-all,1.353,1.331,2.761,1.012,0.405,0.410,0.221,0.496,0.111,0.053,0.142,0.041,1.914,0.582,1.414,1.431

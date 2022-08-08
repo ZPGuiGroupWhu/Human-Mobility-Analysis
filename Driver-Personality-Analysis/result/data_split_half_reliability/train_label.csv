@@ -1,3 +1,0 @@
-user_id,experiment_name,extroversion,openness,neuroticism,conscientiousness,extroversion_label,openness_label,neuroticism_label,conscientiousness_label
-20.0,random_sampling_0.5_1,3.594560189004465,4.275265161223935,2.609100673616675,4.967148943456953,low,high,low,high
-20.0,random_sampling_0.5_2,3.540603030644027,4.456222310089614,2.7806115050724927,4.955893714088339,low,high,low,high

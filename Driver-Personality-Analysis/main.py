@@ -1,5 +1,5 @@
 from model.preprocessing.trips import generate_trips
-from model.preprocessing.L import generate_L
+from model.preprocessing.stay_points_sequence import generate_L
 from model.feature.driving_behavior import driving_behavior
 from model.trait.features_in_TTS import features_in_TTS
 from model.trait.scoring import scoring

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ant-design/charts": "^1.4.2",
     "@ant-design/icons": "^4.6.2",
     "@babel/core": "7.12.3",
     "@deck.gl/core": "^8.8.6",
@@ -76,7 +77,7 @@
     "react-map-gl": "^6.1.16",
     "react-redux": "^7.2.5",
     "react-refresh": "^0.8.3",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "5.2.0",
     "react-transition-group": "^4.4.2",
     "resolve": "1.18.1",
     "resolve-url-loader": "^3.1.2",

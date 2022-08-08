@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+// libs
+import { limitMemberCounts } from './libs/limitMemberCounts';
 
 const initialState = {
   hourCount: [],
@@ -14,6 +16,7 @@ const initialState = {
   finalSelected: [], // 存储 各种筛选后的轨迹编号，并集  
   selectTrajs: [],  // 添加到“轨迹列表”中的轨迹数据集合
   curShowTrajId: -1, // 当前展示的轨迹id
+  poisForPie: [], // 存储格网中poi数据
 }
 
 const analysisReducer = createSlice({
@@ -73,6 +76,17 @@ const analysisReducer = createSlice({
     setCurShowTrajId: (state, action) => {
       state.curShowTrajId = action.payload;
     },
+    singleSelectPoisForPie: (state, action) => {
+      limitMemberCounts(state.poisForPie, action.payload, 1);
+      console.log('single', state.poisForPie)
+    },
+    doubleSelectPoisForPie: (state, action) => {
+      limitMemberCounts(state.poisForPie, action.payload, 2);
+      console.log('double', state.poisForPie)
+    },
+    clearPoisForPie: (state) => {
+      state.poisForPie.length = 0;
+    },
   }
 })
 
@@ -89,6 +103,9 @@ export const {
   clearSelectTraj,
   addImgUrl2SelectTraj,
   setCurShowTrajId,
+  singleSelectPoisForPie,
+  doubleSelectPoisForPie,
+  clearPoisForPie,
 } = analysisReducer.actions;
 
 export default analysisReducer.reducer;

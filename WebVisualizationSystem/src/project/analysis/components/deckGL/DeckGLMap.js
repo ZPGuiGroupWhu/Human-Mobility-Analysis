@@ -136,7 +136,7 @@ function DeckGLMap(props) {
         Path: [{ path: trajs.data }],
       };
       return trajObj;
-    }else{
+    } else {
       return {}
     }
   }
@@ -158,16 +158,16 @@ function DeckGLMap(props) {
 
   // 根据图层显示与否，决定 tooltips 的格式
   const getTooltips = () => {
-    if(gridLayerShow){
+    if (gridLayerShow) {
       return gridTooltip.getTooltip;
     }
-    else if(speedLayerShow){
+    else if (speedLayerShow) {
       return speedTooltip.getTooltip;
     }
-    else if(poiMapShow){
+    else if (poiMapShow) {
       return poiMapTooltip.getTooltip;
     }
-    
+
   };
 
   // 是否开启双选
@@ -208,10 +208,10 @@ function DeckGLMap(props) {
   }, [analysis.finalSelected])
 
 
-    // 展示的当前选择的轨迹
-    const curShowTraj = useMemo(() => {
-      return handleCurTrajId(analysis.selectTrajs, analysis.curShowTrajId)
-    }, [analysis.curShowTrajId])
+  // 展示的当前选择的轨迹
+  const curShowTraj = useMemo(() => {
+    return handleCurTrajId(analysis.selectTrajs, analysis.curShowTrajId)
+  }, [analysis.curShowTrajId])
 
   // poi 类别
   const poiTypes = useMemo(
@@ -489,11 +489,11 @@ function DeckGLMap(props) {
     if (event.target.value === "Grid") {
       setGirdLayerShow(true);
       setSpeedLayerShow(false);
-     
+
     } else if (event.target.value === "Speed") {
       setGirdLayerShow(false);
       setSpeedLayerShow(true);
-     
+
     } else if (event.target.value === "None") {
       setGirdLayerShow(false);
       setSpeedLayerShow(false);
@@ -546,12 +546,12 @@ function DeckGLMap(props) {
 
   //显示和关闭OD点icon图层
   const changeIconLayerShow = (event) => {
-    if(event){ // 点击打开
+    if (event) { // 点击打开
       record.current.iconChecked = true;
       setIconLayerOShow(true);
       setIconLayerDShow(true);
       setIconOpacity(iconInitOpacity);
-    }else{ // 点击关闭
+    } else { // 点击关闭
       record.current.iconChecked = false;
       setIconLayerOShow(false);
       setIconLayerDShow(false);
@@ -559,9 +559,9 @@ function DeckGLMap(props) {
   }
 
   const changePoiMapLayerShow = (event) => {
-    if(event){ // 点击打开
+    if (event) { // 点击打开
       setPoiMapShow(true);
-    }else{
+    } else {
       setPoiMapShow(false);
       // 清除数据，并关闭双选
       dispatch(clearPoisForPie());
@@ -616,16 +616,22 @@ function DeckGLMap(props) {
     setIconOpacity(iconInitOpacity);
   }, [analysis.finalSelected])
 
+  // 返回 poiPie sider 右边定位
+  useLayoutEffect(() => {
+    const right = analysis.selectTrajs.length ? '170px' : '0px';
+    document.querySelector('.sider').style.right = right;
+  }, [analysis.selectTrajs])
+
   const selectOptions = trajIdForSelect.sort((a, b) => (a.split('_')[1] - b.split('_')[1]))
     .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
 
-    const _renderTooltip = () => {//TooTip的渲染
-      return record.current.gridTooltips && (
-        <div style={{ position: 'absolute', zIndex: 999, pointerEvents: 'none', left: record.current.gridPointX, top: record.current.gridPointX, color: '#fff', backgroundColor: 'rgba(100,100,100,0.5)', "whiteSpace": "pre" }}>
-          {record.current.gridTooltips}
-        </div>
-      );
-    }
+  const _renderTooltip = () => {//TooTip的渲染
+    return record.current.gridTooltips && (
+      <div style={{ position: 'absolute', zIndex: 999, pointerEvents: 'none', left: record.current.gridPointX, top: record.current.gridPointX, color: '#fff', backgroundColor: 'rgba(100,100,100,0.5)', "whiteSpace": "pre" }}>
+        {record.current.gridTooltips}
+      </div>
+    );
+  }
   // 图层
   const layers = [
     gridLayer,
@@ -651,7 +657,7 @@ function DeckGLMap(props) {
         controller={true}
         layers={layers}
         getTooltip={getTooltips()}
-        >
+      >
         {<StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={'mapbox://styles/2017302590157/cksbi52rm50pk17npkgfxiwni'} />}
       </DeckGL>
 

@@ -2,9 +2,8 @@ import React, { Component, createRef } from 'react'
 import * as echarts from 'echarts'
 import _ from 'lodash';
 import './MapSelectWindow.scss';
-//测试数据
+// 边界数据
 import regionJson from '../regionJson/Shenzhen';
-import userLocations from '@/project/select/charts/bottom/jsonData/userLoctionCounts';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedByMapBrush } from '@/app/slice/selectSlice';
@@ -19,7 +18,8 @@ class MapSelectBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mapBrushReload: {}
+      mapBrushReload: {},
+      isFirst: false, // 获取数据后初次渲染 标记
     }
   }
   mapRef = createRef();
@@ -35,7 +35,7 @@ class MapSelectBar extends Component {
   getUserData = (selectedUsers) => {
     //重新组织数据形式，便于后续筛选
     let data = {};
-    _.forEach(userLocations, function (item) {
+    _.forEach(this.props.UsersTopFive, function (item) {
       data[item.id] = item.data
     });
     //存储筛选的用户数据: [{id:xx, locations: [{lnglat:[], count:xx}, {lnglat:[], count:xx},...]},...]
@@ -241,8 +241,19 @@ class MapSelectBar extends Component {
     if (!_.isEqual(prevProps.rightWidth, this.props.rightWidth)) {
       this.initMap();
     }
+
+    // 没获取到数据
+    if(this.props.LocationsReqStatus !== 'succeeded') return
+    // 获取到数据，初次渲染
+    if(this.props.LocationsReqStatus === 'succeeded' && !this.state.isFirst){
+      let usersData = this.getUserData(this.props.selectedUsers);
+      this.updateMap(usersData);
+      this.setState({
+        isFirst: true
+      })
+    }
     //只要this.props.selectedUsers中的值改变，就会在地图上重新渲染
-    if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers)) {
+    if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers) && this.props.LocationsReqStatus === 'succeeded') {
       let usersData = this.getUserData(this.props.selectedUsers);
       this.updateMap(usersData);
     }
@@ -267,6 +278,8 @@ class MapSelectBar extends Component {
 }
 
 const mapStateToProps = (state) => ({
+  LocationsReqStatus: state.select.LocationsReqStatus,
+  UsersTopFive: state.select.UsersTopFive,
   selectedUsers: state.select.selectedUsers,
 })
 

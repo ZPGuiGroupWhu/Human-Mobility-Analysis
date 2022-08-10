@@ -35,6 +35,20 @@ export const getOceanScoreAll = () => {
   })
 }
 
+// 获取用户 top5 位置数据
+export const getUsersTopFive = () => {
+  return baseRequest({
+    url: `/getUsersTopFive`,
+  })
+}
+
+// 获取各天各用户出行次数
+export const getUserTrajNumsByDay = () => {
+  return baseRequest({
+    url: `/getUserTrajNumsByDayFake`,
+  })
+}
+
 // 获取个体轨迹集的时间统计特征
 export const getUserTrajByTime = (params) => {
   if (window.cancelList.hasOwnProperty('getUserTrajByTime')) {
@@ -85,4 +99,6 @@ export const getPredictResult = (trajid, curpt) => {
     method: 'get',
     url: `/getPredictResult?cutPoint=${curpt}&trajID=${trajid}`,
   });
+
+
 }

@@ -1,20 +1,27 @@
 import React, { Component } from 'react';
+// style
 import "./PageSelect.scss";
+// components
 import Map from './map/Map';
 import Footer from './footer/Footer';
 import Left from './charts/left/Left';
 import FunctionBar from './function-bar/FunctionBar';
 import Bottom from './charts/bottom/Bottom';
-import MapSelectBar from './map/mapSelect/MapSelectBar';
+import MapSelectWindow from './map/mapSelect/MapSelectWindow';
 // 第三方
 import _ from 'lodash';
 import { ReloadOutlined, BarChartOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import Drawer from '@/components/drawer/Drawer';
+import { Button } from 'antd';
 // react-redux
 import { connect } from 'react-redux';
-import { fetchData, fetchOceanScoreAll, setSelectedUsers, setSelectedByMapClick, setSelectedByCharts } from '@/app/slice/selectSlice';
-import Drawer from '@/components/drawer/Drawer';
-import MapSelectWindow from './map/mapSelect/MapSelectWindow';
-import { Button } from 'antd';
+// 共享数据获取与处理
+import {
+  fetchData, fetchOceanScoreAll, fetchUsersTopFive, fetchUserTrajNumsByDay,
+  setSelectedUsers, setSelectedByMapClick, setSelectedByCharts
+} from '@/app/slice/selectSlice';
+// fake data
+import personality from './ocean_score.json';
 
 
 class PageSelect extends Component {
@@ -29,6 +36,7 @@ class PageSelect extends Component {
       mapClickReload: {}, // 地图bar3D点击重置
       titleVisible: true, // title 初始化 可见
       functionBarItems: [], // 重置functionBar 按钮内容
+      allUsers: [],
     };
   }
 
@@ -39,21 +47,21 @@ class PageSelect extends Component {
     // 获取index
     let chartIndex = -1; let clickIndex = -1;
     functionBarItems.forEach((item) => {
-      if(item.text === '图表重置'){
+      if (item.text === '图表重置') {
         chartIndex = functionBarItems.indexOf(item)
       }
-      if(item.text === '点击重置'){
+      if (item.text === '点击重置') {
         clickIndex = functionBarItems.indexOf(item)
       }
     });
 
     // 根据 charts 数组中数据变化 => 处理 functionBarItems内对应的object
-    if(this.props.selectedByCharts.length === 0){ // 如果长度为0
-      if(chartIndex !== -1){ // 如果有，则删除
+    if (this.props.selectedByCharts.length === 0) { // 如果长度为0
+      if (chartIndex !== -1) { // 如果有，则删除
         functionBarItems.splice(chartIndex, 1);
       }
-    }else{ // 如果长度不为0
-      if(chartIndex === -1){ // 如果没有，则添加
+    } else { // 如果长度不为0
+      if (chartIndex === -1) { // 如果没有，则添加
         functionBarItems.push({
           text: '图表重置',
           icon: <BarChartOutlined />,
@@ -62,12 +70,12 @@ class PageSelect extends Component {
       }
     }
 
-    if(this.props.selectedByMapClick.length === 0){
-      if(clickIndex !== -1){
+    if (this.props.selectedByMapClick.length === 0) {
+      if (clickIndex !== -1) {
         functionBarItems.splice(clickIndex, 1);
       }
-    }else{
-      if(clickIndex === -1){
+    } else {
+      if (clickIndex === -1) {
         functionBarItems.push({
           text: '点击重置',
           icon: <ReloadOutlined />,
@@ -78,31 +86,6 @@ class PageSelect extends Component {
         })
       }
     }
-    console.log(functionBarItems)
-    // const functionBarItems = [];
-    // if (this.props.selectedByCharts.length !== 0) {
-    //   functionBarItems.push(
-    //     {
-    //       // id: 0,
-    //       text: '图表重置',
-    //       icon: <BarChartOutlined />,
-    //       onClick: () => { this.setState({ chartsReload: {} }) },
-    //     }
-    //   )
-    // };
-    // if (this.props.selectedByMapClick.length !== 0) {
-    //   functionBarItems.push(
-    //     {
-    //       // id: 1,
-    //       text: '点击重置',
-    //       icon: <ReloadOutlined />,
-    //       onClick: () => {
-    //         this.props.setSelectedByMapClick([]);
-    //         this.setState({ mapClickReload: {} })
-    //       }
-    //     }
-    //   )
-    // };
     this.setState({
       functionBarItems: functionBarItems
     })
@@ -132,30 +115,54 @@ class PageSelect extends Component {
     })
   }
 
+  // 获取所有人员编号，用于初始和清空所有选择时在地图上展示所有用户
+  initSelected = (OceanScoreAll) => {
+    const allUsers = Object.values(OceanScoreAll).reduce((prev, cur) => {
+      const id = parseInt(cur.人员编号);
+      if (!prev.includes(id)) {
+        prev.push(id);
+      }
+      return prev;
+    }, [])
+    return allUsers;
+  }
+
   componentDidMount() {
     // 请求数据(伪)
     this.props.fetchData(`${process.env.PUBLIC_URL}/mock/ocean_score.json`);
 
     // 请求数据(真)
     // this.props.fetchOceanScoreAll();
+    this.props.fetchUsersTopFive();
+    this.props.fetchUserTrajNumsByDay();
 
     //返回各组件的边界位置，用于日历、map等组件的布局
     const leftWidth = document.querySelector('.left').getBoundingClientRect().right;
     const rightWidth = document.querySelector('.footer-bar').getBoundingClientRect().right - document.querySelector('.footer-bar').getBoundingClientRect().left;
     const bottomHeight = document.querySelector('.bottom').getBoundingClientRect().height;
     const bottomWidth = document.querySelector('.bottom').getBoundingClientRect().width;
+
     this.setState({
       leftWidth: leftWidth,
       rightWidth: rightWidth,
       bottomHeight: bottomHeight,
       bottomWidth: bottomWidth,
     })
-
     // 初始化 functionBar 中的按钮内容
     this.getFunctionBarItems();
   }
 
   componentDidUpdate(prevProps, prevState) {
+    // 如果大五人格数据获取成功，则前后 OceanScoreAll 不同
+    if (!_.isEqual(this.props.OceanScoreAll, prevProps.OceanScoreAll)) {
+      // 获取所有人员的编号，初始化 selectedUsers 数组
+      const allUsers = this.initSelected(this.props.OceanScoreAll);
+      this.props.setSelectedUsers(allUsers);
+      this.setState({
+        allUsers: allUsers
+      })
+    }
+
     if ( // 求出三个列表最终筛选的用户
       !_.isEqual(prevProps.selectedByHistogram, this.props.selectedByHistogram) ||
       !_.isEqual(prevProps.selectedByScatter, this.props.selectedByScatter) ||
@@ -177,7 +184,9 @@ class PageSelect extends Component {
       const result = this.handleIntersection(
         this.props.selectedByCharts, this.props.selectedByCalendar,
         this.props.selectedByMapBrush, this.props.selectedByMapClick);
-      this.props.setSelectedUsers(result);
+      // 如果全都清空了，则设置为所有用户，以便在 map 上展示
+      const users = result.length === 0 ? this.state.allUsers : result
+      this.props.setSelectedUsers(users);
     };
 
     // 控制 图标重置 和 点击重置 的显示与否
@@ -221,7 +230,9 @@ class PageSelect extends Component {
           </div>
         </div>
         <div className="left">
-          <Left width={this.state.leftWidth} chartsReload={this.state.chartsReload} />
+          <Left
+            width={this.state.leftWidth}
+            chartsReload={this.state.chartsReload} />
         </div>
         <div className="footer-bar" >
           <Drawer
@@ -240,6 +251,9 @@ class PageSelect extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    OceanScoreAll: state.select.OceanScoreAll,
+    UsersTopFive: state.select.UsersTopFive,
+    UserTrajNumsByDay: state.select.UserTrajNumsByDay,
     selectedByHistogram: state.select.selectedByHistogram,
     selectedByScatter: state.select.selectedByScatter,
     selectedByParallel: state.select.selectedByParallel,
@@ -255,6 +269,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchData: (url) => dispatch(fetchData(url)),
     fetchOceanScoreAll: () => dispatch(fetchOceanScoreAll()),
+    fetchUsersTopFive: () => dispatch(fetchUsersTopFive()),
+    fetchUserTrajNumsByDay: () => dispatch(fetchUserTrajNumsByDay()),
     setSelectedByCharts: (payload) => dispatch(setSelectedByCharts(payload)),
     setSelectedUsers: (payload) => dispatch(setSelectedUsers(payload)),
     setSelectedByMapClick: (payload) => dispatch(setSelectedByMapClick(payload))

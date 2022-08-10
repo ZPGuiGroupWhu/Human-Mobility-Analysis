@@ -11,9 +11,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 // react-redux
 import { connect } from 'react-redux';
-// 组建
+// components
 import PopupContent from './components/popupContent/PopupContent';
-import { ConsoleSqlOutlined } from '@ant-design/icons';
 
 
 class Footer extends Component {
@@ -51,8 +50,8 @@ class Footer extends Component {
 
   getPopInfo = (id) => {
     let info = []
-    this.props.data && Object.keys(Object.values(this.props.data).find(item => item['人员编号'] == id)).forEach(key => (
-      info.push(<li style={{ float: "left", width: "50%" }}>{key}:{Object.values(this.props.data).find(item => item['人员编号'] == id)[key]}</li>)
+    this.props.OceanScoreAll && Object.keys(Object.values(this.props.OceanScoreAll).find(item => item['人员编号'] == id)).forEach(key => (
+      info.push(<li style={{ float: "left", width: "50%" }}>{key}:{Object.values(this.props.OceanScoreAll).find(item => item['人员编号'] == id)[key]}</li>)
     ))
     info.push(<div className="clear"></div>)
     return info
@@ -268,7 +267,6 @@ class Footer extends Component {
 const mapStateToProps = (state) => (
   {
     selectedUsers: state.select.selectedUsers,
-    data: state.select.data,
   }
 )
 

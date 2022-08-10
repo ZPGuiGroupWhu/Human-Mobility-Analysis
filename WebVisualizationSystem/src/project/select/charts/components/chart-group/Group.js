@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import "./Group.scss";
-import FuncBar from '../func-bar/FuncBar';
 
 class Group extends Component {
   constructor(props) {

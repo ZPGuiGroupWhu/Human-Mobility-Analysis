@@ -3,9 +3,8 @@ import * as echarts from 'echarts'
 import 'echarts-gl'
 import _ from 'lodash';
 import "./Map.scss";
-//测试数据
+// 边界数据
 import regionJson from './regionJson/Shenzhen';
-import userLocations from '../charts/bottom/jsonData/userLoctionCounts';
 // react-redux
 import { connect } from 'react-redux';
 import { setSelectedByMapClick } from '@/app/slice/selectSlice';
@@ -15,7 +14,7 @@ class Map extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      visualMap: false, // 图例插件是否展示
+      isFirst: false, // 是否初次渲染
     };
   }
   mapRef = createRef();
@@ -24,7 +23,7 @@ class Map extends Component {
   getUserData = (selectedUsers) => {
     //重新组织数据形式，便于后续筛选
     let data = {};
-    _.forEach(userLocations, function (item) {
+    _.forEach(this.props.UsersTopFive, function (item) {
       data[item.id] = item.data
     });
     //存储筛选的用户数据: [{id:xx, locations: [{lnglat:[], count:xx}, {lnglat:[], count:xx},...]},...]
@@ -56,9 +55,7 @@ class Map extends Component {
       },
       //visualMap图例
       visualMap: {
-        show: this.state.visualMap,
-        left: this.props.leftWidth,
-        bottom: this.props.bottomHeight,
+        show: false, // 不显示
         dimension: 4, // 使用第5个纬度: id_num, 实现不同用户的颜色不同
         itemWidth: 15, // 颜色条宽度
         itemHeight: 100, // 颜色条高度
@@ -222,45 +219,28 @@ class Map extends Component {
     }
   };
 
-  // 筛选之后 显示visualmap
-  showVisualMap = () => {
-    this.setState({
-      visualMap: true,
-    })
-  }
-
-  hiddenVisualMap = () => {
-    this.setState({
-      visualMap: false,
-    })
-  }
-
   componentDidMount() {
     this.initMap();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.LocationsReqStatus !== 'succeeded') return;
+    // 初次渲染
+    if (this.props.LocationsReqStatus === 'succeeded' && !this.state.isFirst) {
+      let usersData = this.getUserData(this.props.selectedUsers);
+      this.updateMap(usersData);
+      this.setState({
+        isFirst: true
+      })
+    }
     //prevProps获取到的leftWidth是0，在PageSelect页面componentDidMount获取到leftWidth值后，重新初始化
     if (!_.isEqual(prevProps.leftWidth, this.props.leftWidth) || !_.isEqual(prevProps.bottomHeight, this.props.bottomHeight) || !_.isEqual(prevProps.rightWidth, this.props.rightWidth)) {
       this.initMap();
     }
     //只要this.props.selectedUsers中的值改变，就会在地图上重新渲染
-    if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers)) {
+    if (!_.isEqual(prevProps.selectedUsers, this.props.selectedUsers) && this.props.LocationsReqStatus === 'succeeded') {
       let usersData = this.getUserData(this.props.selectedUsers);
       this.updateMap(usersData);
-      // 展示图例
-      if (this.props.selectedUsers.length !== 0) {
-        this.showVisualMap();
-      } else {
-        this.hiddenVisualMap();
-      }
-    }
-    if (prevState.visualMap !== this.state.visualMap) {
-      myMap.setOption({
-        visualMap: {
-          show: this.state.visualMap
-        }
-      })
     }
   }
 
@@ -279,6 +259,8 @@ class Map extends Component {
 }
 
 const mapStateToProps = (state) => ({
+  LocationsReqStatus: state.select.LocationsReqStatus,
+  UsersTopFive: state.select.UsersTopFive,
   selectedUsers: state.select.selectedUsers,
 })
 

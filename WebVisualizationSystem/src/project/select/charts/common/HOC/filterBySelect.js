@@ -97,9 +97,9 @@ export const filterBySelect = (...params) => WrappedComponent => {
   const mapStateToProps = (state) => {
     return {
       curId: state.select.curId,
-      data: state.select.data,
+      data: state.select.OceanScoreAll, // 图标数据源
       selectedUsers: state.select.selectedUsers,
-      reqStatus: state.select.reqStatus,
+      reqStatus: state.select.OceanReqStatus,
     }
   }
 

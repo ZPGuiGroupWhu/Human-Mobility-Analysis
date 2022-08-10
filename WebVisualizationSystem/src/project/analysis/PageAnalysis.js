@@ -20,7 +20,6 @@ import { getUserTrajInChunk, getUserTrajCount } from '@/network';
 import axios from 'axios';
 // react-redux
 import { connect } from 'react-redux';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setHeatmapSelected, setHeatmapData, setCalendarSelected, setCharacterSelected, setFinalSelected } from '@/app/slice/analysisSlice';
 
 

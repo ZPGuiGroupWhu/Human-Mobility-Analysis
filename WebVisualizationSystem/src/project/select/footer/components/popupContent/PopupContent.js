@@ -10,11 +10,10 @@ import ViolinPlot from "../violinplot/ViolinPlot";
 import Description from "../description/Description";
 import Histogram from "../histogram/Histogram";
 import Pie from "../pie/Pie";
-// 大五人格数据
-import personalityData from './ocean_score.json';
 // 库
 import _ from 'lodash';
-
+// react redux
+import { useSelector } from "react-redux";
 
 export default function PopupContent(props) {
     // 接收传来的用户id
@@ -27,7 +26,7 @@ export default function PopupContent(props) {
         '尽责': 3
     }
 
-    const ref = useRef(null);
+    const select = useSelector(state => state.select);
 
     const [characterId, setCharacterId] = useState(0); // 人格属性：外向，开放, 神经质, 尽责
     const [option, setOption] = useState('总出行次数') // 初始化select下拉框内的值，后续用于更新
@@ -37,6 +36,7 @@ export default function PopupContent(props) {
     const [optionData, setOptionData] = useState([]) // 初始化optionData，用于表示属性表和select
     const [isWordCloud, setWordCloud] = useState(false) // 初始化 右上角是放词云还是玫瑰图
     const [isFold, setFold] = useState(true) // 属性表是否折叠
+    const [isFirst, setIsFirst] = useState(false) // 第一次渲染标记
 
     function getRadarData(userID) {
         const Average = [];
@@ -46,7 +46,7 @@ export default function PopupContent(props) {
         let shenJingScore = 0;
         let jinZeScore = 0;
         let counts = 0;
-        _.forEach(personalityData, function (item) {
+        _.forEach(select.OceanScoreAll, function (item) {
             if (item.人员编号.toString() === userID) {
                 Person.push(item.外向性.toFixed(3));
                 Person.push(item.开放性.toFixed(3));
@@ -71,7 +71,7 @@ export default function PopupContent(props) {
     function getOptionData(userID) {
         // 小提琴图，用户数据
         const optionData = [];
-        _.forEach(personalityData, function (item) {
+        _.forEach(select.OceanScoreAll, function (item) {
             if (item.人员编号.toString() === userID) {
                 for (let i = 1; i < Object.keys(item).length - 4; i++) {
                     optionData.push({ 'name': Object.keys(item)[i], 'value': Object.values(item)[i], 'disbale': false })
@@ -84,7 +84,7 @@ export default function PopupContent(props) {
     // 获取wordcloud数据
     function getWordData(userID) {
         const wordData = [];
-        _.forEach(personalityData, function (item) {
+        _.forEach(select.OceanScoreAll, function (item) {
             if (item.人员编号.toString() === userID) {
                 for (let groupId = 0; groupId < 4; groupId++) {
                     const groupItem = [];
@@ -103,7 +103,7 @@ export default function PopupContent(props) {
         let count = 0;
         let number = 0;
         const violinData = []
-        _.forEach(personalityData, function (item) {
+        _.forEach(select.OceanScoreAll, function (item) {
             if (item['人员编号'].toString() === userID) {
                 number = count;
             }
@@ -135,17 +135,37 @@ export default function PopupContent(props) {
         setFold(prev => (!prev));
     }
 
+    // 请求数据后重新渲染
+    useEffect(() => {
+        // 数据未请求成功
+        if (select.OceanReqStatus !== 'succeeded') return;
+        // 初次渲染
+        if (select.OceanReqStatus === 'succeeded' && !isFirst) {
+            setIsFirst(true);
+            const radar = getRadarData(id)
+            const option = getOptionData(id)
+            const word = getWordData(id)
+            const violin = getViolinData(id)
+            // 更新state
+            setRadarData(radar)
+            setOptionData(option)
+            setWordData(word[0])
+            setViolinData(violin)
+            setCharacterId(0) // 初始化 charaterId
+        }
+    }, [select.OceanReqStatus])
+
     // 组织数据
     useEffect(() => {
-        const radarData = getRadarData(id)
-        const optionData = getOptionData(id)
-        const wordData = getWordData(id)
-        const violinData = getViolinData(id)
+        const radar = getRadarData(id)
+        const option = getOptionData(id)
+        const word = getWordData(id)
+        const violin = getViolinData(id)
         // 更新state
-        setRadarData(radarData)
-        setOptionData(optionData)
-        setWordData(wordData[0])
-        setViolinData(violinData)
+        setRadarData(radar)
+        setOptionData(option)
+        setWordData(word[0])
+        setViolinData(violin)
         setCharacterId(0) // 初始化 charaterId
     }, [id])
 

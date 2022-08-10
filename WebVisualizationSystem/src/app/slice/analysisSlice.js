@@ -78,11 +78,9 @@ const analysisReducer = createSlice({
     },
     singleSelectPoisForPie: (state, action) => {
       limitMemberCounts(state.poisForPie, action.payload, 1);
-      console.log('single', state.poisForPie)
     },
     doubleSelectPoisForPie: (state, action) => {
       limitMemberCounts(state.poisForPie, action.payload, 2);
-      console.log('double', state.poisForPie)
     },
     clearPoisForPie: (state) => {
       state.poisForPie.length = 0;

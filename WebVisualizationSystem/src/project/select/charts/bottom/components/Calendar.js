@@ -9,24 +9,20 @@ import { setSelectedByCalendar } from '@/app/slice/selectSlice';
 
 let myChart = null;
 let timePeriod = [];//存储需要高亮的时间段
+const dateFlag = {} //日期是否可选取的标记flag
 
 export default function Calendar(props) {
   const {
     data, // 数据(年) - {'yyyy-MM-dd': {count: 2, ...}, ...}
     bottomHeight,
     bottomWidth,
-    allUsers,
     calendarReload,
-    // eventName, // 注册事件名
   } = props;
 
   const state = useSelector(state => state.select);
   const dispatch = useDispatch();
 
-
-  const year = str2date(Object.keys(data)[0]).getFullYear(); // 数据年份
-
-  const dateFlag = {}; //日期是否可选取的标记flag
+  const year = Object.values(data).length ? str2date(Object.keys(data)[0]).getFullYear() : 2019;  // 数据年份
 
   // 初始化每个日期的flag
   function initDateFlag() {
@@ -38,9 +34,6 @@ export default function Calendar(props) {
       dateFlag[date] = true;
     }
   }
-  useEffect(() => {
-    initDateFlag()
-  });
 
   // ECharts 容器实例
   const ref = useRef(null);
@@ -97,7 +90,7 @@ export default function Calendar(props) {
   }
 
   // 寻找不包含用户的日期，并对其绘制其他颜色。
-  function highlightSelectedUsersDates(obj) {
+  function highlightUnSelectedUsersDates(obj) {
     const initData = formatData(obj);
     const unselectedUsersDates = [];
     const maskData = [];
@@ -203,8 +196,7 @@ export default function Calendar(props) {
 
   // 初始化 ECharts 实例对象
   useEffect(() => {
-    if (!ref.current) return () => {
-    };
+    if (!ref.current) return () => {};
     myChart = echarts.init(ref.current);
     myChart.setOption(option);
     window.onresize = myChart.resize;
@@ -290,6 +282,7 @@ export default function Calendar(props) {
   const [action, setAction] = useState(() => ({ mousedown: false, mousemove: false }));
   // 确保函数只执行一次
   const isdown = useRef(false);
+
   useEffect(() => {
     const wait = 50;
     if (!myChart) return () => {
@@ -356,16 +349,14 @@ export default function Calendar(props) {
         (startDate.getDay() > endDate.getDay())
       ) && ([start, end] = [end, start]);
 
-      // 触发 eventEmitter 中的注册事件，传递选择的日期范围
+      // 选择的日期范围
       // start: yyyy-MM-dd
       // end: yyyy-MM-dd
-      eventEmitter.emit('addUsersData', { start, end });
-      console.log(start, end);
-      //每次选择完则向timePeriod中添加本次筛选的日期，提供给下一次渲染。
+      // console.log(start, end);
+      // 每次选择完则向timePeriod中添加本次筛选的日期，提供给下一次渲染。
       timePeriod.push({ start: start, end: end });
-      //返回筛选后符合要求的所有用户id信息，传递给其他页面。
+      // 返回筛选后符合要求的所有用户id信息，传递给其他页面。
       let userIDs = getUsers(data, timePeriod);
-      // eventEmitter.emit('getUsers', {userIDs});
       //将数据传递到setSelectedByCalendar数组中
       dispatch(setSelectedByCalendar(userIDs));
     };
@@ -383,7 +374,6 @@ export default function Calendar(props) {
     }
   }, [myChart, date, action]);
 
-
   // 高亮筛选部分
   useEffect(() => {
     if (!date.start || !date.end) return () => {
@@ -396,15 +386,16 @@ export default function Calendar(props) {
     });
   }, [data, date]);
 
-  // 如果selectedByCharts变化了，则需要对不包含筛选用户的日期添加面罩作为提示
+  // 如果 data 改变，需要对不包含筛选用户的日期添加面罩作为提示
   useEffect(() => {
+    initDateFlag();
     myChart?.setOption({
       series: [{
         name: '面罩',
-        data: highlightSelectedUsersDates(data),
+        data: highlightUnSelectedUsersDates(data),
       }]
     })
-  }, [data, state.selectedByCharts]);
+  }, [data]);
 
   // 日历重置
   useEffect(() => {
@@ -417,7 +408,7 @@ export default function Calendar(props) {
       });
     }, 600)
     //清空setSelectedByCalendar数组
-    dispatch(setSelectedByCalendar(allUsers));
+    dispatch(setSelectedByCalendar([]));
     timePeriod = [];
   }, [calendarReload])
 

@@ -1,11 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { getOceanScoreAll } from '@/network';
+import { getOceanScoreAll, getUsersTopFive, getUserTrajNumsByDay } from '@/network';
 
 const initialState = {
   curId: -1, // box-chart 实例唯一标识
-  reqStatus: '',
-  data: null, // chart 图表数据源
+  OceanReqStatus: '',
+  LocationsReqStatus: '',
+  CountsReqStatus: '',
+  data: null,
+  OceanScoreAll: null, // chart 图表数据源 -- 大五人格
+  UsersTopFive: null, // 地图数据源 -- top5 位置
+  UserTrajNumsByDay: null, // 日历 数据源
   selectedUsers: [], // 筛选得到的用户编号数组(交集)
   selectedByHistogram: [], // 柱状图筛选结果
   selectedByScatter: [], // 散点图筛选结果
@@ -22,10 +27,19 @@ const fetchData = createAsyncThunk('select/fetchData', async function (url) {
   return resObj.data;
 });
 
+// 获取用户 top 5 位置数据
+const fetchUsersTopFive = createAsyncThunk('select/fetchUsersTopFive', async function(){
+  const { data } = await getUsersTopFive();
+  return data;
+})
+// 获取各天各用户出行次数
+const fetchUserTrajNumsByDay = createAsyncThunk('select/fetchUserTrajNumsByDay', async function(){
+  const { data } = await getUserTrajNumsByDay();
+  return data;
+})
 // 获取全部大五人格数据
 const fetchOceanScoreAll = createAsyncThunk('select/fetchOceanScoreAll', async function () {
-  const data = await getOceanScoreAll();
-  console.log(data);
+  const { data }= await getOceanScoreAll();
   return data;
 })
 
@@ -66,26 +80,56 @@ const selectReducer = createSlice({
   extraReducers: {
     // fetchData
     [fetchData.pending]: (state) => {
-      state.reqStatus = 'loading';
+      state.OceanReqStatus = 'loading';
+      console.log('ocean loading...')
     },
     [fetchData.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.reqStatus = 'succeeded';
+      state.OceanScoreAll = action.payload;
+      state.OceanReqStatus = 'succeeded';
+      console.log('ocean success...')
     },
     [fetchData.rejected]: (state, action) => {
-      state.reqStatus = 'failed';
+      state.OceanReqStatus = 'failed';
       throw new Error(action.error.message);
     },
     // fetchOceanScoreAll
     [fetchOceanScoreAll.pending]: (state) => {
-      state.reqStatus = 'loading';
+      state.OceanReqStatus = 'loading';
     },
     [fetchOceanScoreAll.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.reqStatus = 'succeeded';
+      state.OceanScoreAll = action.payload;
+      state.OceanReqStatus = 'succeeded';
     },
     [fetchOceanScoreAll.rejected]: (state, action) => {
-      state.reqStatus = 'failed';
+      state.OceanReqStatus = 'failed';
+      throw new Error(action.error.message);
+    },
+     // fetchUsersTopFive
+     [fetchUsersTopFive.pending]: (state) => {
+      console.log('topFive loading...')
+      state.LocationsReqStatus = 'loading';
+    },
+    [fetchUsersTopFive.fulfilled]: (state, action) => {
+      state.UsersTopFive = action.payload;
+      state.LocationsReqStatus = 'succeeded';
+      console.log('topFive success...')
+    },
+    [fetchUsersTopFive.rejected]: (state, action) => {
+      state.LocationsReqStatus = 'failed';
+      throw new Error(action.error.message);
+    },
+     // fetchUserTrajNumsByDay
+     [fetchUserTrajNumsByDay.pending]: (state) => {
+      state.CountsReqStatus = 'loading';
+      console.log('dateCounts loading...')
+    },
+    [fetchUserTrajNumsByDay.fulfilled]: (state, action) => {
+      state.UserTrajNumsByDay = action.payload;
+      state.CountsReqStatus = 'succeeded';
+      console.log('dateCounts success...')
+    },
+    [fetchUserTrajNumsByDay.rejected]: (state, action) => {
+      state.CountsReqStatus = 'failed';
       throw new Error(action.error.message);
     },
   }
@@ -94,6 +138,8 @@ const selectReducer = createSlice({
 export {
   fetchData,
   fetchOceanScoreAll,
+  fetchUsersTopFive,
+  fetchUserTrajNumsByDay,
 };
 
 export const { 

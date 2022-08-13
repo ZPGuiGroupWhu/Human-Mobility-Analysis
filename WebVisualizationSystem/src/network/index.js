@@ -31,7 +31,7 @@ export const getUserODs = () => {
 // 获取个体大五人格信息
 export const getOceanScoreAll = () => {
   return baseRequest({
-    url: `/ocean_score_all`,
+    url: `/oceanScoreAll`,
   })
 }
 

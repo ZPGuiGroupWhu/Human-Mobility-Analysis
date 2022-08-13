@@ -13,6 +13,7 @@ const initialState = {
   calendarSelected: [], // 存储 时间筛选的轨迹编号
   heatmapSelected: [], // 存储 week-hour筛选的轨迹编号
   characterSelected: [], // 存储 特征筛选的轨迹编号
+  poiSelected: [], // 存储 poiMap 筛选的轨迹编号
   finalSelected: [], // 存储 各种筛选后的轨迹编号，并集  
   selectTrajs: [],  // 添加到“轨迹列表”中的轨迹数据集合
   curShowTrajId: -1, // 当前展示的轨迹id
@@ -39,12 +40,17 @@ const analysisReducer = createSlice({
     },
     setCalendarSelected: (state, action) => {
       state.calendarSelected = action.payload;
+      console.log(state.calendarSelected)
     },
     setHeatmapSelected: (state, action) => {
       state.heatmapSelected = action.payload;
     },
     setCharacterSelected: (state, action) => {
       state.characterSelected = action.payload;
+    },
+    setPoiSelected: (state, action) => {
+      state.poiSelected = action.payload;
+      console.log(state.poiSelected)
     },
     setFinalSelected: (state, action) => {
       state.finalSelected = action.payload;
@@ -95,6 +101,7 @@ export const {
   setCalendarSelected,
   setHeatmapSelected,
   setCharacterSelected,
+  setPoiSelected,
   setFinalSelected,
   addSelectTrajs,
   delSelectTraj,

@@ -216,12 +216,14 @@ class PageAnalysis extends Component {
     if (
       !_.isEqual(prevProps.calendarSelected, this.props.calendarSelected) ||
       !_.isEqual(prevProps.characterSelected, this.props.characterSelected) ||
-      !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected)
+      !_.isEqual(prevProps.heatmapSelected, this.props.heatmapSelected) || 
+      !_.isEqual(prevProps.poiSelected, this.props.poiSelected)
     ) {
       const result = this.handleIntersection(
         this.props.heatmapSelected,
         this.props.calendarSelected,
         this.props.characterSelected,
+        this.props.poiSelected,
       );
       this.props.setFinalSelected(result);
     }
@@ -330,6 +332,7 @@ const mapStateToProps = (state) => {
     calendarSelected: state.analysis.calendarSelected,
     characterSelected: state.analysis.characterSelected,
     heatmapSelected: state.analysis.heatmapSelected,
+    poiSelected: state.analysis.poiSelected,
     finalSelected: state.analysis.finalSelected
   }
 }

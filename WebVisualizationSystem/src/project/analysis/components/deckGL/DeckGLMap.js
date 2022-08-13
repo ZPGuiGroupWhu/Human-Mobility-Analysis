@@ -11,12 +11,13 @@ import { withRouter } from 'react-router';
 // react-redux
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
-import { addSelectTrajs, setCurShowTrajId, singleSelectPoisForPie, doubleSelectPoisForPie, clearPoisForPie } from '@/app/slice/analysisSlice';
+import { addSelectTrajs, setCurShowTrajId, setPoiSelected, singleSelectPoisForPie, doubleSelectPoisForPie, clearPoisForPie } from '@/app/slice/analysisSlice';
 // 函数
 import { copyText } from '@/common/func/copyText.js';
 import { getOneTraj, getUserTrajRegex } from '@/network';
 import { getUniqueByKey } from './libs/getUniqueByKey';
 import { getPieData } from './libs/gePieData';
+import { getGridODs } from './libs/getGridODs';
 // 样式
 import './DeckGLMap.scss';
 import '@/project/border-style.scss';
@@ -259,7 +260,7 @@ function DeckGLMap(props) {
     getColorValue: getColorValueByPoiGridLayer,
     getElevationValue: getElevationValueByPoiGridLayer,
     onClick: (info) => {
-      console.log(isDoubleSelected)
+      // console.log(info)
       const data = getPieData(info);
       if (!isDoubleSelected) {
         dispatch(singleSelectPoisForPie(Object.values(data)));
@@ -605,6 +606,16 @@ function DeckGLMap(props) {
     }
   }
 
+  const poiSelect = () => {
+    console.log(analysis.poisForPie)
+    if(!isDoubleSelected){
+      dispatch(setPoiSelected(getGridODs(userData, analysis.poisForPie[0]?.[0]?.cellCenter, 400)));
+    }else{
+      console.log('hahha')
+    }
+
+  }
+
   // 双选功能【触发/取消】均重制数据
   useLayoutEffect(() => {
     dispatch(clearPoisForPie());
@@ -625,13 +636,6 @@ function DeckGLMap(props) {
   const selectOptions = trajIdForSelect.sort((a, b) => (a.split('_')[1] - b.split('_')[1]))
     .map(id => <Select.Option key={id}>{id}</Select.Option>); // Select 列表候选项
 
-  const _renderTooltip = () => {//TooTip的渲染
-    return record.current.gridTooltips && (
-      <div style={{ position: 'absolute', zIndex: 999, pointerEvents: 'none', left: record.current.gridPointX, top: record.current.gridPointX, color: '#fff', backgroundColor: 'rgba(100,100,100,0.5)', "whiteSpace": "pre" }}>
-        {record.current.gridTooltips}
-      </div>
-    );
-  }
   // 图层
   const layers = [
     gridLayer,
@@ -759,6 +763,10 @@ function DeckGLMap(props) {
               </Col>
             ))}
           </Row>
+         {analysis.poisForPie.length ? 
+         <Button
+         onClick={(e) => { poiSelect() }}
+         >筛选轨迹</Button> : null}
         </Sider>
       </Layout>
     </>

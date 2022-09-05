@@ -40,13 +40,13 @@ export default function WordCloud(props) {
                 color: function () {  // 词条颜色根据 人格 来改变
                     switch (characterId) {
                         case 0:
-                            return 'yellow'
+                            return '#FBD786'
                         case 1:
-                            return 'red'
+                            return '#f7797d'
                         case 2:
-                            return 'blue'
+                            return '#6dd5ed'
                         case 3:
-                            return 'green'
+                            return '#C6FFDD'
                         default:
                             return 'black'
                     }
@@ -82,16 +82,16 @@ export default function WordCloud(props) {
 
     // 更新词条颜色
     useEffect(() => {
-        let color = function(){
+        let color = function () {
             switch (characterId) {
                 case 0:
-                    return 'yellow'
+                    return '#FBD786'
                 case 1:
-                    return 'red'
+                    return '#f7797d'
                 case 2:
-                    return 'blue'
+                    return '#6dd5ed'
                 case 3:
-                    return 'green'
+                    return '#C6FFDD'
                 default:
                     return 'black'
             }
@@ -106,7 +106,7 @@ export default function WordCloud(props) {
     }, [characterId])
 
     return (
-        <div style={{width: '100%', height: '100%'}}
+        <div style={{ width: '100%', height: '100%' }}
             ref={ref}
         ></div>
     )

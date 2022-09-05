@@ -135,7 +135,7 @@ class Footer extends Component {
   }
 
   componentWillUpdate(nextProps, nextState) {//当界面更新时删除对应canvas的上下文，防止Oldest context will be lost
-    this.data = ODs
+    this.data = ODs;
     if (this.props.selectedUsers.length > 0) {
       this.data = []
       for (let i = 0; i < this.props.selectedUsers.length; i = i + 1) {
@@ -147,7 +147,7 @@ class Footer extends Component {
       this.state.maxValue !== nextState.maxValue) {
       // console.log("clear canvas")
       this.changeTimes = this.changeTimes + 1;
-      for (let i = 0; i < $("canvas[id='deckgl-overlay']").length; i++) {
+      for (let i = 0; i < $("canvas[id ='deckgl-overlay']").length; i++) {
         let gl = $("canvas[id='deckgl-overlay']")[i].getContext('webgl2');
         gl.getExtension('WEBGL_lose_context').loseContext();
       }

@@ -524,7 +524,7 @@ function DeckGLMap(props) {
   const changeTripsLayerShow = (event) => { // 与开关联动，切换轨迹图层和icon图层的显示与否
     if (event) { // 点击打开
       record.current.iconDisabled = false; // 取消 icon switch 按钮失效
-      setTripsOpacity(tripInitOpacity);
+      // setTripsOpacity(tripInitOpacity);
       // 打开 trips 图层 和 单条轨迹展示图层
       setTripsLayerShow(true);
       setIconLayerOneOShow(true);
@@ -601,6 +601,10 @@ function DeckGLMap(props) {
       dispatch(setSelectedTraj(data));
       // 3.更新当前展示轨迹的 id
       dispatch(setCurShowTrajId(data.id));
+
+      // 设置透明度
+      setTripsOpacity(0.05);
+      setIconOpacity(0);
     } catch (err) {
       console.log(err);
     }
@@ -608,15 +612,15 @@ function DeckGLMap(props) {
 
   const poiSelect = () => {
     console.log(analysis.poisForPie)
-    if(!isDoubleSelected){
+    if (!isDoubleSelected) {
       dispatch(setPoiSelected(getGridODs(userData, analysis.poisForPie[0]?.[0]?.cellCenter, 400)));
-    }else{
-      console.log('hahha')
+    } else {
+      console.log('1') // 双选更改
     }
 
   }
 
-  // 双选功能【触发/取消】均重制数据
+  // 双选功能【触发/取消】均重置数据
   useLayoutEffect(() => {
     dispatch(clearPoisForPie());
   }, [isDoubleSelected]);
@@ -763,10 +767,10 @@ function DeckGLMap(props) {
               </Col>
             ))}
           </Row>
-         {analysis.poisForPie.length ? 
-         <Button
-         onClick={(e) => { poiSelect() }}
-         >筛选轨迹</Button> : null}
+          {analysis.poisForPie.length ?
+            <Button
+              onClick={(e) => { poiSelect() }}
+            >筛选轨迹</Button> : null}
         </Sider>
       </Layout>
     </>

@@ -20,8 +20,6 @@ import {
   fetchData, fetchOceanScoreAll, fetchUsersTopFive, fetchUserTrajNumsByDay,
   setSelectedUsers, setSelectedByMapClick, setSelectedByCharts
 } from '@/app/slice/selectSlice';
-// fake data
-import personality from './ocean_score.json';
 
 
 class PageSelect extends Component {
@@ -36,7 +34,7 @@ class PageSelect extends Component {
       mapClickReload: {}, // 地图bar3D点击重置
       titleVisible: true, // title 初始化 可见
       functionBarItems: [], // 重置functionBar 按钮内容
-      allUsers: [],
+      allUsers: [], // 所有用户编号
     };
   }
 

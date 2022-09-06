@@ -74,6 +74,14 @@
   width: 400px;
 }
 
+.poi-function-bar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 2px;
+}
+
 .ant-spin-dot-spin{
   color:rgba(255,255,255,0.8) !important;
 }

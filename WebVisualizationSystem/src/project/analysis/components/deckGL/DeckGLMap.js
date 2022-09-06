@@ -6,12 +6,12 @@ import { ArcLayer, IconLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
 import _ from 'lodash';
 import { Layout, Switch, Slider, Radio, Button, Input, Tooltip, Select, Checkbox, Row, Col, notification } from 'antd';
-import { CopyOutlined, SearchOutlined, FrownOutlined } from '@ant-design/icons';
+import { CopyOutlined, SearchOutlined, FrownOutlined, RedoOutlined } from '@ant-design/icons';
 import { withRouter } from 'react-router';
 // react-redux
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTraj } from '@/app/slice/predictSlice';
-import { addSelectTrajs, setCurShowTrajId, setPoiSelected, singleSelectPoisForPie, doubleSelectPoisForPie, clearPoisForPie } from '@/app/slice/analysisSlice';
+import { addSelectTrajs, setCurShowTrajId, setPoiSelected, singleSelectPoisForPie, doubleSelectPoisForPie, clearPoisForPie, clearPoiSelected } from '@/app/slice/analysisSlice';
 // 函数
 import { copyText } from '@/common/func/copyText.js';
 import { getOneTraj, getUserTrajRegex } from '@/network';
@@ -218,7 +218,7 @@ function DeckGLMap(props) {
   // 展示的当前选择的轨迹
   const curShowTraj = useMemo(() => {
     // 如果清空购物车，恢复原始 opacity
-    if(!analysis.selectTrajs.length){
+    if (!analysis.selectTrajs.length) {
       setTripsOpacity(tripInitOpacity);
       setIconOpacity(iconInitOpacity);
     }
@@ -623,16 +623,6 @@ function DeckGLMap(props) {
     }
   }
 
-  // poi 筛选
-  const poiSelect = () => {
-    console.log(analysis.poisForPie)
-    if (!isDoubleSelected) {
-      dispatch(setPoiSelected(getGridODsSingle(userData, analysis.poisForPie[0]?.[0]?.cellCenter, 400)));
-    } else {
-      dispatch(setPoiSelected(getGridODsDouble(userData, analysis.poisForPie[0]?.[0]?.cellCenter, analysis.poisForPie[1]?.[0].cellCenter, 400)));
-    }
-  }
-
   // poi 筛选结果为空 的通知提醒框
   const openNotification = () => {
     notification.info({
@@ -650,6 +640,22 @@ function DeckGLMap(props) {
       icon: <FrownOutlined style={{ color: '#f7797d' }} />,
     });
   };
+
+  // poi 筛选
+  const poiSelect = () => {
+    console.log(analysis.poisForPie);
+    let result = [];
+    if (!isDoubleSelected) {
+      result = getGridODsSingle(userData, analysis.poisForPie[0]?.[0]?.cellCenter, 400)
+      dispatch(setPoiSelected(result));
+    } else {
+      result = getGridODsSingle(userData, analysis.poisForPie[0]?.[0]?.cellCenter, 400)
+      dispatch(setPoiSelected(result));
+    }
+    if (!result.length) { // 如果筛选结果为空，则弹出提示框
+      openNotification();
+    }
+  }
 
   // 双选功能【触发/取消】均重置数据
   useLayoutEffect(() => {
@@ -749,11 +755,23 @@ function DeckGLMap(props) {
               <span>POI图层</span>
               <Switch defaultChecked={false} onChange={changePoiMapLayerShow} />
             </div>
-            <Checkbox.Group
-              options={checkedOptions}
-              value={checkedValue}
-              onChange={onCheckboxValueChange}
-            />
+            <div className='poi-function-bar'>
+              <Checkbox.Group
+                options={checkedOptions}
+                value={checkedValue}
+                onChange={onCheckboxValueChange}
+              />
+              <Button
+              size='small'
+              // ghost
+              shape='round'
+              icon={<RedoOutlined />}
+                onClick={() => {
+                  dispatch(clearPoiSelected())
+                }}
+              > 清除 </Button>
+
+            </div>
           </div>
           {
             Object.keys(predict.selectedTraj).length ?
@@ -800,11 +818,8 @@ function DeckGLMap(props) {
           </Row>
           {analysis.poisForPie.length ?
             <Button
-              onClick={(e) => { 
+              onClick={() => {
                 poiSelect();
-                if(!analysis.poiSelected.length){ // 如果没找到数据则弹出消息通知框
-                  openNotification();
-                }
               }}
             >筛选轨迹</Button> : null}
         </Sider>

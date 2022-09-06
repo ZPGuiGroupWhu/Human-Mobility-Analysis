@@ -91,6 +91,9 @@ const analysisReducer = createSlice({
     clearPoisForPie: (state) => {
       state.poisForPie.length = 0;
     },
+    clearPoiSelected: (state) => {
+      state.poiSelected = [];
+    }
   }
 })
 
@@ -111,6 +114,7 @@ export const {
   singleSelectPoisForPie,
   doubleSelectPoisForPie,
   clearPoisForPie,
+  clearPoiSelected,
 } = analysisReducer.actions;
 
 export default analysisReducer.reducer;

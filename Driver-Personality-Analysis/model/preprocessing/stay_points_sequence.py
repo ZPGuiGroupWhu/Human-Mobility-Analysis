@@ -45,7 +45,7 @@ def get_OD(path, file_name):
     return od_df
 
 
-def get_FP(od, stay_time=pd.Timedelta('0 days 00:20:00')):
+def get_SP(od, stay_time=pd.Timedelta('0 days 00:20:00')):
     try:
         sp = pd.DataFrame()
         sp["userid"] = od["userid"]
@@ -78,9 +78,9 @@ def cluster(df, method="DBSCAN"):
         cluster_labels = db.labels_
         # -1 in cluster_label represents noise point
         df["cluster_label"] = cluster_labels
-        # number of clusters, noise points are considered to be a cluster
-        num = len(set(cluster_labels))
-        clusters = pd.Series([coords[cluster_labels == n] for n in range(num - 1)])
+        # number of clusters, noise points are not considered to be a cluster
+        num = len(set([n for n in cluster_labels if n >= 0]))
+        clusters = pd.Series([coords[cluster_labels == n] for n in range(num)], dtype='object')
         center_points = clusters[:].map(get_centermost_point)
         return df, num - 1, center_points
 
@@ -121,7 +121,7 @@ def generate_L(INPUT_PATH=r'./result/trips', OUTPUT_PATH=r'./result/L'):
             userid = files[0].split(" ")[0]
             print(userid)
             od_df = get_OD(root, files)
-            sp_df = get_FP(od_df)
+            sp_df = get_SP(od_df)
             if len(sp_df) < 1:
                 print('This individual has no stay point')
                 continue

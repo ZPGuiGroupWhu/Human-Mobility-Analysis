@@ -30,7 +30,7 @@ def logistic_scores(features, parameter):
     features.set_index("user_id", inplace=True)
 
     items_scores = pd.DataFrame(index=features.index)
-    for column, data in features.iteritems():
+    for column, data in features.items():
         if column in REVERSE_SCORING_LIST:
             bi = parameter[column][0]
             ai = 1 / parameter[column][1]
@@ -101,7 +101,7 @@ def scorer_group(item_score, method='predefined_parameters'):
         parameters = read(r'./model/trait/auxiliary_data/label_parameters.csv')
         data = item_score.copy()
         data.set_index("user_id", inplace=True)
-        for index, column in data.iteritems():
+        for index, column in data.items():
             column_name = str(index) + "_label"
             quantile0 = parameters[index][0]
             quantile27 = parameters[index][1]
@@ -121,7 +121,7 @@ def scorer_group(item_score, method='predefined_parameters'):
                 "itself. Please try setting method='predefined_parameters' to use predefined parameters.")
             return pd.DataFrame()
         data.set_index("user_id", inplace=True)
-        for index, column in data.iteritems():
+        for index, column in data.items():
             column_name = str(index) + "_label"
             quantile0 = column.quantile(0) - 0.01
             quantile27 = column.quantile(0.27)
@@ -132,14 +132,6 @@ def scorer_group(item_score, method='predefined_parameters'):
         data = data[[x for x in data.columns if '_label' in x]]
         data = data.reset_index()
         return data
-
-
-def cut_trait_scores_and_label(features):
-    items_scores = cut_scores(features)
-    sum_ocean_score = trait_scores(items_scores, method='sum')
-    item_and_ocean_score = pd.merge(items_scores, sum_ocean_score, on='user_id')
-    item_and_ocean_label = scorer_group(item_and_ocean_score)
-    return item_and_ocean_score, item_and_ocean_label
 
 
 def logistic_trait_scores_and_label(features, scoring_parameters, grouping_method):
@@ -206,13 +198,17 @@ def scoring_sampling_half(INPUT_PATH=r'./result/data_split_half_reliability/spli
 
     for root, dirs, files in os.walk(INPUT_PATH):
         if files:
-            features_df_train = read(os.path.join(root, root.split('\\')[-1] + '_train_features_group.csv'))
-            score_train = logistic_trait_scores(features_df_train, parameters)
-            write(os.path.join(root, root.split('\\')[-1] + '_train_item_and_trait_scores.csv'), score_train)
+            # features_df_train = read(os.path.join(root, root.split('\\')[-1] + '_train_features_group.csv'))
+            # score_train = logistic_trait_scores(features_df_train, parameters)
+            # write(os.path.join(root, root.split('\\')[-1] + '_train_item_and_trait_scores.csv'), score_train)
 
             features_df_test = read(os.path.join(root, root.split('\\')[-1] + '_test_features_group.csv'))
             score_test = logistic_trait_scores(features_df_test, parameters)
             write(os.path.join(root, root.split('\\')[-1] + '_test_item_and_trait_scores.csv'), score_test)
+
+            features_df_train = read(os.path.join(root, root.split('\\')[-1] + '_train_features_group.csv'))
+            score_train = logistic_trait_scores(features_df_train, parameters)
+            write(os.path.join(root, root.split('\\')[-1] + '_train_item_and_trait_scores.csv'), score_train)
 
 
 def scoring_sampling(INPUT_PATH=r'./result/trajectory_profiles', method='predefined_parameters'):

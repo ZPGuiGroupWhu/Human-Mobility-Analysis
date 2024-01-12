@@ -649,7 +649,7 @@ def _df2shp(L, lon, lat):
 
 
 def _extract_values_to_points(polygons, points):
-    poly_pt_sjoin = gpd.sjoin(points, polygons, op='within', how='left')
+    poly_pt_sjoin = gpd.sjoin(points, polygons, predicate='within', how='left')
     poly_pt_sjoin.drop(columns=['geometry', 'grid_id', 'index_right'], inplace=True)
     return poly_pt_sjoin
 
@@ -669,7 +669,7 @@ def POI_features(L, semantic_map):
     POI_importance_list = ['shop', 'play', 'eat']
     POI_importance = semantic_L[POI_importance_list]
     average_POI_importance = []
-    for column, val in POI_importance.iteritems():
+    for column, val in POI_importance.items():
         average_POI_importance.append(val.mean())
     return average_POI_importance
 

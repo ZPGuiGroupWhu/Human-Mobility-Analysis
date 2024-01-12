@@ -34,11 +34,11 @@ if __name__ == '__main__':
 
     # evaluate the item discrimination and reliability of TTS
     # item discrimination. If you want to use the trajectory profiles in our paper for item discrimination analysis, please set the parameter INPUT_PATH='./data/trajectory_profiles'
-    item_discrimination(INPUT_PATH='./data/trajectory_profiles')
+    item_discrimination(INPUT_PATH='./data/trajectory_profiles/trajectory dataset D1')
     print('evaluating the item discrimination is done. \n ____________________________________')
 
     # internal consistency. If you want to use the trajectory profiles in our paper for calculating internal consistency, please set the parameter INPUT_PATH='./data/trajectory_profiles'
-    internal_consistency(INPUT_PATH='./data/trajectory_profiles')
+    internal_consistency(INPUT_PATH='./data/trajectory_profiles/trajectory dataset D1')
     print('evaluating the internal consistency is done. \n ____________________________________')
 
     # data split_half_reliability

@@ -45,7 +45,7 @@ def get_OD(path, file_name):
     return od_df
 
 
-def get_SP(od, stay_time=pd.Timedelta('0 days 00:20:00')):
+def get_FP(od, stay_time=pd.Timedelta('0 days 00:20:00')):
     try:
         sp = pd.DataFrame()
         sp["userid"] = od["userid"]
@@ -121,7 +121,7 @@ def generate_L(INPUT_PATH=r'./result/trips', OUTPUT_PATH=r'./result/L'):
             userid = files[0].split(" ")[0]
             print(userid)
             od_df = get_OD(root, files)
-            sp_df = get_SP(od_df)
+            sp_df = get_FP(od_df)
             if len(sp_df) < 1:
                 print('This individual has no stay point')
                 continue

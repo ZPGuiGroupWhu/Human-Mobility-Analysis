@@ -1,4 +1,3 @@
-#
 import os
 import shutil
 import pandas as pd
@@ -8,13 +7,12 @@ from model.utils.io import write
 
 def read_traj(file_name):
     data = pd.read_csv(file_name)
-    data["checkin_time"] = pd.to_datetime(data["checkin_time"])
+    data["checkin_time"] = pd.to_datetime(data["checkin_time"],format='%Y-%m-%d %H:%M:%S')
     return data
 
 
 def need_concat(traj, traj_next, time_threshold=datetime.timedelta(minutes=20)):
     """
-
     :param traj:
     :param traj_next:
     :param time_threshold:
@@ -41,7 +39,7 @@ def concat_traj(input_root, output_root):
             traj = read_traj(os.path.join(root, output_filename))
             files.pop(0)
             for filename in files:
-                print(filename)
+                # print(filename)
                 traj_next = read_traj(os.path.join(root, filename))
                 if need_concat(traj, traj_next):
                     traj = pd.concat([traj, traj_next], ignore_index=True)

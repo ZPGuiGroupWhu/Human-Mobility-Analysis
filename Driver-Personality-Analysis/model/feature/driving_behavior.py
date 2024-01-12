@@ -1,12 +1,14 @@
 import os
 import shutil
-
+import time
+from multiprocessing import Pool
 import pandas as pd
 from math import pi
 import geopandas as gpd
 import datetime
 from model.utils.io import write
 from model.feature.feature import read_L
+from itertools import repeat
 
 
 def csv2shp(csv_fname, lon, lat):
@@ -117,6 +119,9 @@ def _create_junction_buffer(junction, distance=10):
     junction['geometry'] = junction['geometry'].to_crs(32649)
     junction_buffer = junction['geometry'].buffer(distance).to_crs(4326)
     junction_buffer = gpd.GeoDataFrame(junction_buffer, columns=['geometry'])
+    entry_directory = os.path.dirname(os.path.abspath(__file__))
+    # junction_buffer.to_file(r'./auxiliary_data/buffer_junction.geojson', driver='GeoJSON')
+    junction_buffer.to_file(r'./model/feature/auxiliary_data/buffer_junction.geojson', driver='GeoJSON')
     # print('create_junction_buffer is ok')
     return junction_buffer
 
@@ -132,7 +137,7 @@ def junction_speed(junction_buffer, traj):
         Intersection’s average ratio of speeding points and intersection’s average speed
     """
     threshold = 30 / 3.6  # m/s
-    junction_sjoin_traj = gpd.sjoin(traj, junction_buffer, op='within')
+    junction_sjoin_traj = gpd.sjoin(traj, junction_buffer, predicate='within')
     if len(junction_sjoin_traj) > 0:
         over_speed = len(junction_sjoin_traj[junction_sjoin_traj['speed'] > threshold]) / len(junction_sjoin_traj)
         mean_speed = junction_sjoin_traj['speed'].mean()
@@ -192,37 +197,48 @@ def driving_behavior_trip(intersection_buffer, traj):
     return a_traj_feature
 
 
-def driving_behavior_individual(root, file_names, intersection_buffer):
+def driving_behavior_individual(files_path, intersection_buffer, L_PATH, OUTPUT_PATH):
     """
-    Tthe driving behavior features of an individual with many trips.
-    :param intersection_buffer: GeoDataFrame
-        the buffer of intersection.
-    :param root: str
-         The root storing the trips of the individual.
-    :param file_names: list
-        The file names of the trips of the individual.
-    :return: DataFrame
-        The driving behavior features of the individual.
+    calculate individual driving behavior on each trip
+    :param file_path: the path of individual trips
+    :param L_PATH:  the path of Ls
+    :param OUTPUT_PATH: the path of output
+    :return: none
     """
+    files = os.listdir(files_path)
+    userid = files[0].split(" ")[0]
+    output_file_name = userid + "_L_with_driving_behavior.csv"
+    if os.path.exists(os.path.join(OUTPUT_PATH, output_file_name)):
+        print('The driving behavior features of the individual have been calculated')
+        return None
+
+    # calculate driving behavior on each trip
     harsh_all_traj = []
-    for file_name in file_names:
-        print(file_name)
-        file_path = os.path.join(root, file_name)
-        traj = csv2shp(file_path, 'lon', 'lat')
-        traj['checkin_time'] = pd.to_datetime(traj['checkin_time'])
+    for file_name in files:
+        file_name = os.path.join(files_path, file_name)
+        traj = csv2shp(file_name, 'lon', 'lat')
+        traj['checkin_time'] = pd.to_datetime(traj['checkin_time'], format='%Y-%m-%d %H:%M:%S')
         harsh = driving_behavior_trip(intersection_buffer, traj)
         harsh_all_traj.append(harsh)
-    od_df = pd.DataFrame(data=harsh_all_traj,
-                         columns=["userid", "checkout_time", "checkin_time", "speed_mean", "speed_std",
-                                  "speed_max",
-                                  "acceleration_std", "harsh_acceleration",
-                                  "harsh_breaking",
-                                  "harsh_steering", "harsh_acceleration_ratio",
-                                  "harsh_breaking_ratio",
-                                  "harsh_steering_ratio", "over_speed", "over_speed_ratio",
-                                  "junction_over_speed", "junction_speed_mean",
-                                  "fatigue_driving"])
-    return od_df
+    OD_with_driving_behavior = pd.DataFrame(data=harsh_all_traj,
+                                            columns=["userid", "checkout_time", "checkin_time", "speed_mean",
+                                                     "speed_std",
+                                                     "speed_max",
+                                                     "acceleration_std", "harsh_acceleration",
+                                                     "harsh_breaking",
+                                                     "harsh_steering", "harsh_acceleration_ratio",
+                                                     "harsh_breaking_ratio",
+                                                     "harsh_steering_ratio", "over_speed", "over_speed_ratio",
+                                                     "junction_over_speed", "junction_speed_mean",
+                                                     "fatigue_driving"])
+
+    # merging driving behavior features onto L
+    L = read_L(os.path.join(L_PATH, "L_" + str(userid) + ".csv"))
+    OD_with_driving_behavior.drop(columns=['userid', 'checkout_time'], inplace=True)
+    L_with_driving_behavior = pd.merge(L, OD_with_driving_behavior, on='checkin_time')
+
+    output_file_path = os.path.join(OUTPUT_PATH, output_file_name)
+    write(output_file_path, L_with_driving_behavior)
 
 
 def driving_behavior(TRIPS_PATH=r"./result/trips", ROAD_PATH=r'./model/feature/auxiliary_data', L_PATH=r'./result/L',
@@ -243,25 +259,17 @@ def driving_behavior(TRIPS_PATH=r"./result/trips", ROAD_PATH=r'./model/feature/a
     os.makedirs(OUTPUT_PATH)
 
     junction = csv2shp(os.path.join(ROAD_PATH, 'selected_node.csv'), 'x_coord', 'y_coord')
-    JUNCTION_BUFFER = _create_junction_buffer(junction)
-
+    intersection_buffer = _create_junction_buffer(junction)
     # Read the trajectory data, and judge the harsh acceleration, harsh deceleration, and harsh steering
-    for root, dirs, files in os.walk(TRIPS_PATH):
-        if files:
-            userid = files[0].split(" ")[0]
-            output_file_name = userid + "_L_with_driving_behavior.csv"
-            if os.path.exists(os.path.join(OUTPUT_PATH, output_file_name)):
-                print('The driving behavior features of the individual have been calculated')
-                continue
-            OD_with_driving_behavior = driving_behavior_individual(root, files, JUNCTION_BUFFER)
-
-            # merging driving behavior features onto L
-            L = read_L(os.path.join(L_PATH, "L_" + str(userid) + ".csv"))
-            OD_with_driving_behavior.drop(columns=['userid', 'checkout_time'], inplace=True)
-            L_with_driving_behavior = pd.merge(L, OD_with_driving_behavior, on='checkin_time')
-
-            output_file_path = os.path.join(OUTPUT_PATH, output_file_name)
-            write(output_file_path, L_with_driving_behavior)
+    # (use multiprocessing to speed up)
+    individual_dirs = os.listdir(TRIPS_PATH)
+    individual_paths = [os.path.join(TRIPS_PATH, individual_dir) for individual_dir in individual_dirs]
+    with Pool(processes=os.cpu_count()) as pool:
+        for individual_path in individual_paths:
+            pool.apply_async(driving_behavior_individual,
+                             args=(individual_path, intersection_buffer, L_PATH, OUTPUT_PATH))
+        pool.close()
+        pool.join()
 
 
 if __name__ == '__main__':
@@ -269,4 +277,7 @@ if __name__ == '__main__':
     l_path = r'../../result/L'
     output_path = r"../../result/L_with_driving_behavior"
     road_path = r'./auxiliary_data'
+    start_time = time.time()
     driving_behavior(trips_path, road_path, l_path, output_path)
+    end_time = time.time()
+    print('execution time:{}'.format(end_time - start_time))

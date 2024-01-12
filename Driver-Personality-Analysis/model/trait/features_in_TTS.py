@@ -1,6 +1,7 @@
 import os
 import shutil
-
+import time
+from multiprocessing import Pool
 from model.feature.feature import read_L, time_of_day_entropy, datetime_entropy, radius_of_gyration, \
     ratio_of_k_radius_of_gyration, K, random_entropy, location_entropy, sequence_entropy, od_entropy, trips_per_month, \
     trip_length, ratio_of_uninterested_trips, distance_from_home_entropy, ratio_stay_home_time, POI_features, \
@@ -9,9 +10,10 @@ import pandas as pd
 from model.utils import constants
 from model.utils.io import write
 import geopandas as gpd
+from itertools import repeat
 
 
-def calculate_features_individual(L, MAP_PATH):
+def calculate_features_individual(L_path, semantic_map):
     """
     calculate the features used as items in Trajectory Trait Scale of a single individual given their L.
     :param L: dataframe
@@ -28,6 +30,7 @@ def calculate_features_individual(L, MAP_PATH):
     shopping_nbh,recreation_nbh,restaurant_nbh,
     ratio_stay_time_in_home
     '''
+    L = read_L(L_path)
     userid = L[constants.USER][0]
     # trips per month
     average_trip_count = trips_per_month(L)
@@ -38,7 +41,6 @@ def calculate_features_individual(L, MAP_PATH):
     rg_time = radius_of_gyration(L, method='time')
     # POI features
 
-    semantic_map = gpd.read_file(os.path.join(MAP_PATH, 'fishnet_500.geojson'))
     semantics = POI_features(L, semantic_map)
     time_in_home = ratio_stay_home_time(L, start_night='01:00', end_night='06:00')
     '''
@@ -116,12 +118,31 @@ def calculate_features_individual(L, MAP_PATH):
                         'junction_speed_mean': user_opra[13],
                         'day_entropy': te,
                         'datetime_entropy': dte}
-    print('the features of an individual are ok')
+    print('the features of individual are ok: ', str(userid))
     return scale_individual
 
 
-def features_in_TTS_sampling_half(INPUT_PATH=r"./result/L_with_driving_behavior",
-                                  MAP_PATH='./model/feature/auxiliary_data', OUTPUT_PATH=r'./result/trajectory_profiles'):
+def features_in_TTS_sampling_half_li(sampling_path, semantic_map, OUTPUT_PATH):
+    for root, dirs, files in os.walk(sampling_path):
+        if files:
+            output_dir = OUTPUT_PATH + './' + root.split('\\')[-2]
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+
+            features = pd.DataFrame(columns=constants.SCALE_ORDER)
+            for fname in files:
+                # print(fname)
+                filename_input = os.path.join(root, fname)
+                # sp_df = read_L(filename_input)
+                scale_individual = calculate_features_individual(filename_input, semantic_map)
+                features.loc[len(features)] = scale_individual
+            features_filename_output = root.split('\\')[-2] + '_' + root.split('\\')[-1] + '_features_group.csv'
+            write(os.path.join(output_dir, features_filename_output), features)
+
+
+def features_in_TTS_sampling_half(INPUT_PATH=r"./result/data_split_half_reliability/split_data",
+                                  MAP_PATH='./model/feature/auxiliary_data',
+                                  OUTPUT_PATH=r'./result/trajectory_profiles'):
     """
      calculate the features used as items in Trajectory Trait Scale of group given their sampled L (sampling ratio is 0.5).
     :param INPUT_PATH: str
@@ -131,21 +152,18 @@ def features_in_TTS_sampling_half(INPUT_PATH=r"./result/L_with_driving_behavior"
     :param OUTPUT_PATH: str
         the dir path used for output the features file (.csv).
     """
-    for root, dirs, files in os.walk(INPUT_PATH):
-        if files:
-            output_dir = OUTPUT_PATH + './' + root.split('\\')[-2]
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
 
-            features = pd.DataFrame(columns=constants.SCALE_ORDER)
-            for fname in files:
-                print(fname)
-                filename_input = os.path.join(root, fname)
-                sp_df = read_L(filename_input)
-                scale_individual = calculate_features_individual(sp_df, MAP_PATH)
-                features = features.append(scale_individual, ignore_index=True)
-            features_filename_output = root.split('\\')[-2] + '_' + root.split('\\')[-1] + '_features_group.csv'
-            write(os.path.join(output_dir, features_filename_output), features)
+    #
+    # Multi-process acceleration, each process corresponds to one sample
+    files = os.listdir(INPUT_PATH)
+    file_paths = [os.path.join(INPUT_PATH, file) for file in files]
+    semantic_map_gdf = gpd.read_file(os.path.join(MAP_PATH, 'fishnet_500.geojson'))
+
+    with Pool(processes=os.cpu_count()) as pool:
+        for file_path in file_paths:
+            pool.apply_async(features_in_TTS_sampling_half_li, args=(file_path, semantic_map_gdf, OUTPUT_PATH))
+        pool.close()
+        pool.join()
 
 
 def features_in_TTS_sampling(INPUT_PATH=r"./result/L_with_driving_behavior",
@@ -193,25 +211,30 @@ def features_in_TTS(INPUT_PATH=r"./result/L_with_driving_behavior", MAP_PATH='./
     :param OUTPUT_PATH: str
         The dir path used for output the features file (.csv).
     """
+
     if os.path.exists(OUTPUT_PATH):
         shutil.rmtree(OUTPUT_PATH)
     os.makedirs(OUTPUT_PATH)
 
-    for root, dirs, files in os.walk(INPUT_PATH):
-        if files:
-            features = pd.DataFrame(columns=constants.SCALE_ORDER)
-            for fname in files:
-                print(fname)
-                filename_input = os.path.join(root, fname)
-                sp_df = read_L(filename_input)
-                features_individual = calculate_features_individual(sp_df, MAP_PATH)
-                features = features.append(features_individual, ignore_index=True)
-            features_filename_output = 'features_group.csv'
-            write(os.path.join(OUTPUT_PATH, features_filename_output), features)
+    files = os.listdir(INPUT_PATH)
+    file_paths = [os.path.join(INPUT_PATH, file) for file in files]
+    semantic_map = gpd.read_file(os.path.join(MAP_PATH, 'fishnet_500.geojson'))
+    zip_args = zip(file_paths, repeat(semantic_map))
+
+    with Pool(processes=os.cpu_count()) as pool:
+        features_list = pool.starmap_async(calculate_features_individual, zip_args).get()
+        pool.close()
+        pool.join()
+    features = pd.DataFrame(data=features_list, columns=constants.SCALE_ORDER)
+    features_filename_output = 'features_group.csv'
+    write(os.path.join(OUTPUT_PATH, features_filename_output), features)
 
 
 if __name__ == '__main__':
     input_path = r"../../result/L_with_driving_behavior"
     output_path = r'../../result/trajectory_profiles'
     map_path = r'../feature/auxiliary_data'
+    start_time = time.time()
     features_in_TTS(input_path, map_path, output_path)
+    end_time = time.time()
+    print('execution time:{}'.format(end_time - start_time))

@@ -153,7 +153,8 @@ def kdeplot_difference(output_dir):
 
     difference_label = read(os.path.join(output_dir, 'difference_label.csv'))
     if len(difference_label) < 2:
-        print('The experimental data is less than 2, cannot draw the density distribution of the absolute difference between two sets of scores. Please try increasing subjects or sampling times.')
+        print(
+            'The experimental data is less than 2, cannot draw the density distribution of the absolute difference between two sets of scores. Please try increasing subjects or sampling times.')
         return False
     fig, axs = plt.subplots(1, 4, figsize=(8, 2), sharex=True)
     _kdeplot_difference_trait(difference_label, 'extroversion', axs[0])
@@ -201,7 +202,8 @@ def _calculate_by_label(data, method):
 def calculate_consistence(output_dir):
     dif = read(os.path.join(output_dir, 'difference_label.csv'))
     if len(dif) < 2:
-        print('The experimental data is less than 2, cannot calculate the standardized β. Please try increasing subjects or sampling times.')
+        print(
+            'The experimental data is less than 2, cannot calculate the standardized β. Please try increasing subjects or sampling times.')
         return False
     train = read(os.path.join(output_dir, 'train_label.csv'))
     test = read(os.path.join(output_dir, 'test_label.csv'))
@@ -249,13 +251,13 @@ def data_split_half_reliability(INPUT_PATH=r"./result/L_with_driving_behavior",
     os.makedirs(OUTPUT_PATH)
 
     # split_data
-    split_data_path = OUTPUT_PATH + './split_data'
+    split_data_path = os.path.join(OUTPUT_PATH, 'split_data')
     if not os.path.exists(split_data_path):
         os.makedirs(split_data_path)
     split_random(INPUT_PATH, split_data_path, **kwargs)
 
     # calculate features in TTS
-    features_path = OUTPUT_PATH + './split_data_features_and_trait_scores'
+    features_path = os.path.join(OUTPUT_PATH, 'split_data_features_and_trait_scores')
     if not os.path.exists(features_path):
         os.makedirs(features_path)
     features_in_TTS_sampling_half(INPUT_PATH=split_data_path, MAP_PATH=r'./model/feature/auxiliary_data',

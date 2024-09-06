@@ -5,6 +5,6 @@ code
   |--HTS_LDAVEC_PRED             contains four sripts, each of which is a module of our model.
     |--Input_Module.py           processes input features, including current traveling features and historical activity chain.
     |--Spatial_Temporal_Module.py  implements the current movement mode learning module.
-    |--History_Module.py
+    |--History_Module.py         implements the historical movement mode learning module.
     |--AttentionNet.py
-    |--Destination_Prediction_Module.py
+    |--Destination_Prediction_Module.py    outputs the coordinates of destination in the form of longitude and latitude.

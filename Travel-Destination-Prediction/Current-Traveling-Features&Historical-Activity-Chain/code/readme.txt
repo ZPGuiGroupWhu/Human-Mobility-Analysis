@@ -3,8 +3,8 @@ code
   |--HTS_LDAVEC_PRED_model.py    is the overall structure of our model;
   |--data_Loader.py              contains the steps of sub-trajectory generation and dataset partitioning;
   |--HTS_LDAVEC_PRED             contains four sripts, each of which is a module of our model.
-    |--Input_Module.py      
-    |--Spatial_Temporal_Module.py
+    |--Input_Module.py           process input features, including current traveling features and historical activity chain.
+    |--Spatial_Temporal_Module.py  is the current movement mode learning module.
     |--History_Module.py
     |--AttentionNet.py
     |--Destination_Prediction_Module.py

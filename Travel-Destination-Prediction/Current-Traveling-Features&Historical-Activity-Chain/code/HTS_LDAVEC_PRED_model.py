@@ -78,7 +78,6 @@ class DeepSTC(nn.Module):
         # 增加判断类簇编号的代码
         cluster_id = attr['cluster_id']
         traj_id = attr['id']
-        cut_length = attr['cut_length']
         dis_total = attr['dis_total']
         # cluster_num = None
         # 结构不需要大改
@@ -121,7 +120,6 @@ class DeepSTC(nn.Module):
         total_dis_list = delta_dis_total.detach().cpu().numpy().tolist()
         cluster_id_list = cluster_id.detach().cpu().numpy().tolist()
         traj_id_list = traj_id.detach().cpu().numpy().tolist()
-        cut_length_list = cut_length.detach().cpu().numpy().tolist()
         RSE_list = RSE.detach().cpu().numpy().tolist()
         RE_list = RE.detach().cpu().numpy().tolist()
         dis_total_list = dis_total.detach().cpu().numpy().tolist()
@@ -136,17 +134,16 @@ class DeepSTC(nn.Module):
         else:
             truth = torch.zeros([32, 5], dtype=torch.float).view(-1, 5).cuda()
         semantic_dis_total = Destination_Prediction_Module.get_similarity(pred, truth)
-        semantic_list = semantic_dis_total.detach().cpu().numpy().tolist()
+        # semantic_list = semantic_dis_total.detach().cpu().numpy().tolist()
         each_traj_result = []
         for i in range(len(total_dis_list)):
             result_dict = {"id": traj_id_list[i],
                            "cluster_id": cluster_id_list[i],
-                           "cut_length": cut_length_list[i],
                            "dis_total": dis_total_list[i],
                            "AE": total_dis_list[i],
                            "RE": RE_list[i],
                            "RSE": RSE_list[i],
-                           "semE": semantic_list[i]
+                           # "semE": semantic_list[i]
                            }
             each_traj_result.append(result_dict)
         '''
@@ -175,7 +172,7 @@ class DeepSTC(nn.Module):
         RMSE_Loss_rep = torch.pow(delta_dis_total, 2).mean()
         # MRE_Loss_rep = (delta_dis / (attr['dis_total'] - traj['travel_dis'][:, -1])).mean()
         #  delta_dis m  dis_total km
-        MRE_Loss_rep = (delta_dis_total / attr['dis_total']).mean()
+        MRE_Loss_rep = (delta_dis_total / (attr['dis_total'])).mean()
         Semantic_Loss_rep = semantic_dis_total.mean()
         # 返回值增加一个所有轨迹预测结果
         return Loss, MRE_Loss_rep, MAE_Loss_rep, RMSE_Loss_rep, Semantic_Loss_rep, accuracy, each_traj_result, self_attn

@@ -41,11 +41,18 @@ def write2file(config, path, info):
     f.close()
 
 
-def write_each_trajectory(config, path, traj_result, augmented):
-    if not augmented:
-        f = open(path + str(config['ID']) + '-each_trajectory-Original.txt', 'a')
+def write_each_trajectory(config, path, traj_result, augType, expMode):
+    if augType == 'Original':
+        if expMode == "grids":
+            f = open(path + str(config['ID']) + '-each_trajectory-Grids.txt', 'w')
+        elif expMode == "cp_lens":
+            f = open(path + str(config['ID']) + '-each_trajectory-Cp_lens.txt', 'w')
+        else:
+            f = open(path + str(config['ID']) + '-each_trajectory-Original.txt', 'w')
+    elif augType == 'Duplicated_Edges':
+        f = open(path + str(config['ID']) + '-each_trajectory-Duplicated_Edges.txt', 'a')
     else:
-        f = open(path + str(config['ID']) + '-each_trajectory-Augmentation_neighbor_Duplicated_cluster.txt', 'w')
+        f = open(path + str(config['ID']) + '-each_trajectory-Plus.txt', 'a')
     for i in range(len(traj_result)):
         json_str = json.dumps(traj_result[i])
         f.write(json_str)
@@ -119,7 +126,7 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
     for epoch in range(1, epochs + 1):
         # L2 regularization --weight_decay  权重衰减（weight decay）与L2正则化
         print(lr)
-        optimiter = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+        optimiter = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-8)
         step = 1
         MAE, MRE, RMSE, Accuracy = [], [], [], []
         for attr, traj, semantic, history in train_loader:
@@ -147,6 +154,7 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
             MAE.append(float(MAE_loss.data))
             RMSE.append(float(RMSE_loss.data))
             MRE.append(float(MRE_loss.data))
+            Accuracy.append(float(semantic_loss.data))
             # Accuracy.append(float(accuracy))
             # print('Training batch:', step, " loss_mean(meters): ", float(Loss.data), float(MRE_loss.data))
             step += 1
@@ -198,6 +206,7 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
                 MAE.append(float(MAE_loss.data))
                 RMSE.append(float(RMSE_loss.data))
                 MRE.append(float(MRE_loss.data))
+                Accuracy.append(float(semantic_loss.data))
                 # 达到迭代次数时再装填数组，不到迭代次数不写文件
                 if epoch == epochs:
                     for i in range(len(each_traj_result)):
@@ -238,6 +247,8 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
                 # result["RMSE"].append(float(dis_loss["eval_RMSE"][-1]))
                 result["RMSE"].append(RMSE)
 
+                result["MSemanticE"].append(Accuracy)
+
             # 输出验证精度等信息
 
             if epoch % 10 == 0:
@@ -264,15 +275,17 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
                              'state_dict': model.state_dict()}
                 if not os.path.exists(model_save_path):
                     os.makedirs(model_save_path)
-                torch.save(model_set, model_save_path + config['ID'] + '_cp(' +
-                           str(round(float(np.mean(MAE)), 1)) + ', ' + str(round(float(np.mean(MRE)), 3))
-                           + ')DeepSTC_' + str(epoch) + '.pth')
+                torch.save(model_set, model_save_path + config['ID'] + '_DeepSTC_' + str(epoch) + '.pth')
             if epoch == epochs:  # 达到迭代次数后绘图
                 plt_line(config, dis_loss['train_MAE'], dis_loss['eval_MAE'], 'MAE', epoch)
                 plt_line(config, dis_loss['train_MRE'], dis_loss['eval_MRE'], 'MRE', epoch)
                 plt_line(config, dis_loss['train_RMSE'], dis_loss['eval_RMSE'], 'RMSE', epoch)
                 # 要实现一个把所有轨迹信息预测精度信息写入文件的功能
-                write_each_trajectory(config, config['logfile_path'], total_each_traj_result, augmented=False)
+                write_each_trajectory(config,
+                                      config['logfile_path'],
+                                      total_each_traj_result,
+                                      augType='Original',
+                                      expMode="grids")
                 # 要实现一个把自注意力权重写入文件的功能
                 '''write_self_attention(config=config, path=config['logfile_path'],
                                      self_attn_sum=self_attn_sum, traj_id=traj_id, Kfold=K_fold)'''
@@ -281,6 +294,50 @@ def train(model, train_loader, eval_loader, config, K_fold=False, result=None):
 
     if not K_fold:
         write2file_loss(config, dis_loss)
+
+
+def test(model, model_save_dict, eval_loader, config, result=None):
+    device = config['device']  # 设备
+    lr = config['lr']  # 学习率
+    epochs = config['epochs']  # 迭代数
+    model = model.to(device)
+    model_save_path = config['model_save_path']
+    state_dict = torch.load(model_save_path + model_save_dict)['state_dict']
+    model.load_state_dict(state_dict)
+    dis_loss = {"train_MAE": [], "train_MRE": [], "train_RMSE": [], "train_ACC": [],
+                "eval_MAE": [], "eval_MRE": [], "eval_RMSE": [], "eval_ACC": []}
+    with torch.no_grad():
+        model.eval()  # 将模型转换为测试模式
+        step = 1
+        MAE, MRE, RMSE, Accuracy = [], [], [], []
+        total_each_traj_result = []
+        for attr, traj, semantic, history in eval_loader:
+            attr, traj, semantic, history = to_var(attr, device), to_var(traj, device), to_var(
+                semantic, device), to_var(history, device)
+            Loss, MRE_loss, MAE_loss, RMSE_loss, semantic_loss, accuracy, each_traj_result, self_attn = model. \
+                eval_on_batch(attr, traj, semantic, history)
+            # Append arrays
+            MAE.append(float(MAE_loss.data))
+            RMSE.append(float(RMSE_loss.data))
+            MRE.append(float(MRE_loss.data))
+            # 达到迭代次数时再装填数组，不到迭代次数不写文件
+            for i in range(len(each_traj_result)):
+                total_each_traj_result.append(each_traj_result[i])
+            step += 1
+        dis_loss["eval_MAE"].append(str(np.mean(MAE)))
+        dis_loss["eval_MRE"].append(str(np.mean(MRE)))
+        dis_loss["eval_RMSE"].append(str(np.sqrt(np.mean(RMSE))))
+
+        if result is not None:
+            result["MAE"].append(MAE)
+            result["MRE"].append(MRE)
+            result["RMSE"].append(RMSE)
+
+        write_each_trajectory(config,
+                              config['logfile_path'],
+                              total_each_traj_result,
+                              augType='Original',
+                              expMode="grids")
 
 
 # store all data with one class
@@ -335,7 +392,7 @@ def collate_fn(batch_data):
     """
     traj_key = ["lng", "lat", "travel_dis", "spd", "v_mean", "v_std", "angle", "time_consume", "start_time_s",
                 "time_stamp_s", "weekday_s", "start_time_c", "time_stamp_c", "weekday_c", "c_entropy", "d_entropy"]
-    attr_key = ["cur_pt", "id", "cluster_id", "cut_length", "destination", "dis_total", "normlization_list", "normlization_list_xy"]
+    attr_key = ["cur_pt", "id", "cluster_id", "destination", "dis_total", "normlization_list", "normlization_list_xy"]
 
     semantic_key = ["lng", "lat", "semantic_0", "semantic_1", "semantic_2", "semantic_3", "semantic_4", "dest_semantic"]
 
@@ -457,11 +514,11 @@ def train_test_split_byCuttingRatio(dataset):
     train_set = []
     eval_set = []
     for traj in dataset:
-        if traj["traj_id"] % 5 != 0 and traj["traj_id"] % 5 != 1:
+        if traj["traj_id"] % 5 != 0 and traj["traj_id"] % 5 != 1 and traj["dis_total"] > 0:
             train_set.append(traj)
-        elif traj["cut_length"] < 18 and (traj["traj_id"] % 5 == 0 or traj["traj_id"] % 5 == 1):
+        elif traj["cut_length"] < 18 and (traj["traj_id"] % 5 == 0 or traj["traj_id"] % 5 == 1) and traj["dis_total"] > 0:
             train_set.append(traj)
-        elif 18 <= traj["cut_length"] < 30 and (traj["traj_id"] % 5 == 0 or traj["traj_id"] % 5 == 1):
+        elif 18 <= traj["cut_length"] < 30 and (traj["traj_id"] % 5 == 0 or traj["traj_id"] % 5 == 1) and traj["dis_total"] > 0:
             eval_set.append(traj)
         else:
             continue

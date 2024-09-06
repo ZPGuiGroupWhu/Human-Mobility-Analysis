@@ -3,7 +3,7 @@ code
   |--HTS_LDAVEC_PRED_model.py    is the overall structure of our model;
   |--data_Loader.py              contains the steps of sub-trajectory generation and dataset partitioning;
   |--HTS_LDAVEC_PRED             contains four sripts, each of which is a module of our model.
-      |--Input_Module.py      
-      |--
-      |--
-      |--
+    |--Input_Module.py      
+    |--
+    |--
+    |--

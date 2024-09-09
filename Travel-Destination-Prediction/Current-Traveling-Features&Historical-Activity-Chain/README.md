@@ -1,5 +1,5 @@
-# ***This directory contains code and statistical data of our study***
-## ***code***
+# This directory contains code and statistical data of our study
+## ***structure of code***
 ```
 |--HTS_LDAVEC_PRED_model.py    is the overall structure of our model;
   |--data_Loader.py              contains the steps of sub-trajectory generation and dataset partitioning;
@@ -10,7 +10,7 @@
     |--AttentionNet.py           incorporates spatiotemporal scoring mechanism.
     |--Destination_Prediction_Module.py    outputs the coordinates of destination in the form of longitude and latitude.
 ```
-## ***statistical data***
+## ***structure of statistical data***
 ```
 |--ablation_20.xls     shows effectiveness of constructed features
   |--baselines_20.xls    shows Comparison of overall prediction accuracy
